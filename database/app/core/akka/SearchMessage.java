@@ -1,8 +1,6 @@
 package core.akka;
 
-import core.query.OlchingQuery;
-
-import java.io.DataOutputStream;
+import core.query.DumboQuery;
 
 /**
  * User: carsten
@@ -11,9 +9,9 @@ import java.io.DataOutputStream;
  */
 public class SearchMessage {
     private String collectionName;
-    private OlchingQuery searchQuery;
+    private DumboQuery searchQuery;
 
-    public SearchMessage(String collectionName, OlchingQuery searchQuery) {
+    public SearchMessage(String collectionName, DumboQuery searchQuery) {
         this.collectionName = collectionName;
         this.searchQuery = searchQuery;
     }
@@ -22,7 +20,7 @@ public class SearchMessage {
         return collectionName;
     }
 
-    public OlchingQuery getSearchQuery() {
+    public DumboQuery getSearchQuery() {
         return searchQuery;
     }
 }

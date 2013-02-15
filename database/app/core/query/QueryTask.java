@@ -2,7 +2,6 @@ package core.query;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.xerial.snappy.SnappyOutputStream;
 import play.Logger;
 
 import java.io.*;
@@ -14,14 +13,14 @@ public class QueryTask implements Runnable {
 
     private Socket clientSocket;
     private int clientID = -1;
-    private OlchingDbSearcher olchingDbSearcher;
+    private DumboSearcher dumboSearcher;
     private final ObjectMapper jsonMapper;
     private DatabaseQuerySession databaseQuerySession;
 
-    public QueryTask(Socket s, int clientID, OlchingDbSearcher olchingDbSearcher, ObjectMapper jsonMapper) {
+    public QueryTask(Socket s, int clientID, DumboSearcher dumboSearcher, ObjectMapper jsonMapper) {
         clientSocket = s;
         this.clientID = clientID;
-        this.olchingDbSearcher = olchingDbSearcher;
+        this.dumboSearcher = dumboSearcher;
         this.jsonMapper = jsonMapper;
     }
 
@@ -35,8 +34,8 @@ public class QueryTask implements Runnable {
                 @Override
                 public int onQuery(String collection, String query, final DatabaseQuerySession.ResultWriter resultWriter) {
                     try {
-                        OlchingQuery searchQuery = jsonMapper.readValue(query, OlchingQuery.class);
-                        return olchingDbSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {
+                        DumboQuery searchQuery = jsonMapper.readValue(query, DumboQuery.class);
+                        return dumboSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {
                             @Override
                             public void writeResult(String result) throws IOException {
                                 resultWriter.writeResult(result);

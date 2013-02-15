@@ -4,8 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.actor.UntypedActorFactory;
-import core.query.OlchingDbSearcher;
-import core.query.OlchingQuery;
+import core.query.DumboQuery;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.xerial.snappy.SnappyOutputStream;
@@ -36,7 +35,7 @@ public class DatabaseQueryActor extends UntypedActor {
     DataOutputStream dataOutputStream = null;
     BufferedOutputStream bufferedOutputStream = null;
     SnappyOutputStream snappyOutputStream = null;
-    private OlchingQuery searchQuery;
+    private DumboQuery searchQuery;
 
     public DatabaseQueryActor(Socket s, int i, ObjectMapper jsonMapper, ActorRef searchIndexFileActor, Map<String, DataCollection> dataCollections) {
         clientSocket = s;
@@ -77,7 +76,7 @@ public class DatabaseQueryActor extends UntypedActor {
                         String collection = dataInputStream.readUTF();
                         Logger.info("Collection: " + collection);
                         String jsonQueryString = dataInputStream.readUTF();
-                        searchQuery = jsonMapper.readValue(jsonQueryString, OlchingQuery.class);
+                        searchQuery = jsonMapper.readValue(jsonQueryString, DumboQuery.class);
                         Logger.info("Query: " + searchQuery.toString());
                         long start = System.currentTimeMillis();
                         ActorRef actor = context().actorOf(new Props(new UntypedActorFactory() {
@@ -86,8 +85,8 @@ public class DatabaseQueryActor extends UntypedActor {
                             }
                         }));
 
-                        List<OlchingQuery.IndexComparision> indexComparision = searchQuery.getIndexComparision();
-                        for (OlchingQuery.IndexComparision comparision : indexComparision) {
+                        List<DumboQuery.IndexComparision> indexComparision = searchQuery.getIndexComparision();
+                        for (DumboQuery.IndexComparision comparision : indexComparision) {
                             SearchIndexQueryMessage m = new SearchIndexQueryMessage(dataCollections.get(collection), comparision);
                             actor.tell(m);
                         }

@@ -1,7 +1,6 @@
 package core.query;
 
 import com.google.common.collect.HashMultimap;
-import core.query.OlchingQuery;
 import play.Logger;
 
 import java.io.File;
@@ -12,10 +11,10 @@ import java.util.concurrent.Future;
 
 public class SearchIndexTask implements Callable<Set<FileOffset>> {
     private final DataCollection dataCollection;
-    private OlchingQuery.IndexComparision query;
+    private DumboQuery.IndexComparision query;
     private ExecutorService indexFileExecutor;
 
-    public SearchIndexTask(DataCollection dataCollection, OlchingQuery.IndexComparision query, ExecutorService indexFileExecutor) {
+    public SearchIndexTask(DataCollection dataCollection, DumboQuery.IndexComparision query, ExecutorService indexFileExecutor) {
         this.dataCollection = dataCollection;
         this.query = query;
         this.indexFileExecutor = indexFileExecutor;

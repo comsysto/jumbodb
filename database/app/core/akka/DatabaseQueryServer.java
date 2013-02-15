@@ -2,14 +2,11 @@ package core.akka;
 
 import akka.actor.*;
 import akka.routing.RoundRobinRouter;
-import core.query.OlchingDbSearcher;
-import core.query.OlchingQuery;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.xerial.snappy.SnappyOutputStream;
 import play.Logger;
 import play.libs.Akka;
 
@@ -18,8 +15,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Date: 2/5/13

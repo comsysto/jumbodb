@@ -1,7 +1,5 @@
 package core.akka;
 
-import core.query.OlchingQuery;
-
 /**
  * User: carsten
  * Date: 2/5/13

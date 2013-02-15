@@ -4,7 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index
-POST     /upload                     controllers.Application.upload
+#POST     /upload                     controllers.Application.upload
 
 # Signup
 GET     /signup                     controllers.SignUp.form

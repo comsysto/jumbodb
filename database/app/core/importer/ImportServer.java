@@ -1,11 +1,7 @@
 package core.importer;
 
 
-import core.query.OlchingDbSearcher;
 import core.query.QueryServer;
-import org.apache.commons.io.IOUtils;
-import org.xerial.snappy.SnappyInputStream;
-import org.xerial.snappy.SnappyOutputStream;
 import play.Logger;
 
 import java.io.*;
@@ -13,7 +9,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.GZIPInputStream;
 
 /**
  * User: carsten

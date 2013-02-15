@@ -1,7 +1,5 @@
 package core.importer;
 
-import core.query.IndexLoader;
-import core.query.OlchingDbSearcher;
 import core.query.QueryServer;
 import org.apache.commons.io.IOUtils;
 import org.xerial.snappy.SnappyOutputStream;

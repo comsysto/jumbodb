@@ -1,7 +1,6 @@
 package core.query;
 
 import com.google.common.collect.HashMultimap;
-import core.query.OlchingQuery;
 import org.apache.commons.io.IOUtils;
 import play.Logger;
 
@@ -93,7 +92,7 @@ public class SearchIndexUtils {
     }
 
 
-    public static HashMultimap<File, Integer> groupByIndexFile(DataCollection dataCollection, OlchingQuery.IndexComparision query) {
+    public static HashMultimap<File, Integer> groupByIndexFile(DataCollection dataCollection, DumboQuery.IndexComparision query) {
         Collection<IndexFile> indexFiles = dataCollection.getIndexFiles().get(query.getName());
         // CARSTEN this map one is very slow
         HashMultimap<File, Integer> groupByIndexFile = HashMultimap.create();

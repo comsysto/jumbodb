@@ -9,7 +9,7 @@ import java.util.*;
  * Date: 11/23/12
  * Time: 1:05 PM
  */
-public class OlchingQuery {
+public class DumboQuery {
     private List<IndexComparision> indexComparision;
     private List<JsonValueComparision> jsonComparision;
 
@@ -31,7 +31,7 @@ public class OlchingQuery {
 
     @Override
     public String toString() {
-        return "OlchingQuery{" +
+        return "DumboQuery{" +
                 "indexComparision=" + indexComparision +
                 ", jsonComparision=" + jsonComparision +
                 '}';

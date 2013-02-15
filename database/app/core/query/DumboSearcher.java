@@ -1,8 +1,6 @@
 package core.query;
 
 import com.google.common.collect.HashMultimap;
-import core.query.OlchingQuery;
-import core.query.*;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import play.Logger;
@@ -16,7 +14,7 @@ import java.util.concurrent.*;
  * Date: 11/23/12
  * Time: 10:53 AM
  */
-public class OlchingDbSearcher {
+public class DumboSearcher {
 
     private final File dataPath;
     private final File indexPath;
@@ -26,7 +24,7 @@ public class OlchingDbSearcher {
     private ExecutorService indexFileExecutor;
     private ObjectMapper jsonMapper;
 
-    public OlchingDbSearcher(File dataPath, File indexPath) {
+    public DumboSearcher(File dataPath, File indexPath) {
         this.dataPath = dataPath;
         this.indexPath = indexPath;
         retrieveDataSetsExecutor = Executors.newScheduledThreadPool(20);
@@ -51,7 +49,7 @@ public class OlchingDbSearcher {
         indexFileExecutor.shutdown();
     }
 
-    public int findResultAndWriteIntoCallback(String collectionName, OlchingQuery searchQuery, ResultCallback resultCallback) {
+    public int findResultAndWriteIntoCallback(String collectionName, DumboQuery searchQuery, ResultCallback resultCallback) {
         DataCollection dataCollection = dataCollections.get(collectionName);
         if(dataCollection != null) {
             Collection<FileOffset> fileOffsets = findFileOffsets(dataCollection, searchQuery);
@@ -60,7 +58,7 @@ public class OlchingDbSearcher {
         return 0;
     }
 
-    private int findDataSetsByFileOffsets(DataCollection dataCollection, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, OlchingQuery searchQuery) {
+    private int findDataSetsByFileOffsets(DataCollection dataCollection, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, DumboQuery searchQuery) {
         int numberOfResults = 0;
         long startTime = System.currentTimeMillis();
         HashMultimap<Integer, Long> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
@@ -108,12 +106,12 @@ public class OlchingDbSearcher {
         return result;
     }
 
-    private Collection<FileOffset> findFileOffsets(DataCollection dataCollection, OlchingQuery searchQuery) {
+    private Collection<FileOffset> findFileOffsets(DataCollection dataCollection, DumboQuery searchQuery) {
         if(searchQuery.getIndexComparision().size() == 0) {
             return Collections.emptyList();
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
-        for (OlchingQuery.IndexComparision indexQuery : searchQuery.getIndexComparision()) {
+        for (DumboQuery.IndexComparision indexQuery : searchQuery.getIndexComparision()) {
             tasks.add(indexExecutor.submit(new SearchIndexTask(dataCollection, indexQuery, indexFileExecutor)));
         }
 

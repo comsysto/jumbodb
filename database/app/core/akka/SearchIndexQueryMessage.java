@@ -1,6 +1,6 @@
 package core.akka;
 
-import core.query.OlchingQuery;
+import core.query.DumboQuery;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,9 +11,9 @@ import core.query.OlchingQuery;
  */
 public class SearchIndexQueryMessage {
     private final DataCollection dataCollection;
-    private OlchingQuery.IndexComparision query;
+    private DumboQuery.IndexComparision query;
 
-    public SearchIndexQueryMessage(DataCollection dataCollection, OlchingQuery.IndexComparision query) {
+    public SearchIndexQueryMessage(DataCollection dataCollection, DumboQuery.IndexComparision query) {
         this.dataCollection = dataCollection;
         this.query = query;
     }
@@ -22,7 +22,7 @@ public class SearchIndexQueryMessage {
         return dataCollection;
     }
 
-    public OlchingQuery.IndexComparision getQuery() {
+    public DumboQuery.IndexComparision getQuery() {
         return query;
     }
 }

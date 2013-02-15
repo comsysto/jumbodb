@@ -9,7 +9,7 @@ the efficient store for your analytical application?
 dumboDB allows you to store, index and query large amounts of
 data using Apache Hadoop core features
 
-## dumboDB: Big Data for the masses!
+## Big Data for the masses!
 
 ### Balancing performance and cost efficiency
 

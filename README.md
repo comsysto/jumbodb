@@ -1,7 +1,7 @@
 dumboDB
 =======
 
-Data Store for low-latency Big Data Apps
+## Data Store for low-latency Big Data Apps
 
 Already using Apache Hadoop for batch data deliveries? Need
 the efficient store for your analytical application?
@@ -9,9 +9,9 @@ the efficient store for your analytical application?
 dumboDB allows you to store, index and query large amounts of
 data using Apache Hadoop core features
 
-dumboDB: Big Data for the masses!
+## dumboDB: Big Data for the masses!
 
-Balancing performance and cost efficiency
+### Balancing performance and cost efficiency
 
 1. Affordable Big Data
 Low IO requirements, efficient usage of disk space, low
@@ -22,7 +22,7 @@ Snappy achieves compression rates up to 10 times
 increasing disk IO efficiency and saving storage cost
 
 3. Batch processing - delivery driven approach
-‚Write once ‚ read many‚, one batch of data is an atomic
+"Write once - read many" one batch of data is an atomic
 write with the rollback possibility
 
 4. Supports JSON documents

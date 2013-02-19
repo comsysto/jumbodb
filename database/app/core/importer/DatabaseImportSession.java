@@ -13,7 +13,7 @@ import java.net.Socket;
  * Time: 11:06 AM
  */
 public class DatabaseImportSession implements Closeable {
-    private static final int PROTOCOL_VERSION = 2;
+    private static final int PROTOCOL_VERSION = 3;
     private Socket clientSocket;
     private int clientID;
     private InputStream inputStream;
@@ -76,7 +76,8 @@ public class DatabaseImportSession implements Closeable {
                 importHandler.onActivateDelivery(meta);
             }
         } else if(":cmd:import:finished".equals(cmd)) {
-            importHandler.onFinished();
+            Logger.info(":cmd:import:finished");
+            importHandler.onFinished(dataInputStream.readUTF(), dataInputStream.readUTF());
         } else {
             throw new UnsupportedOperationException("Unsupported command: " + cmd);
         }

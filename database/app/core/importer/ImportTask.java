@@ -1,7 +1,9 @@
 package core.importer;
 
 import core.query.QueryServer;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.xerial.snappy.SnappyOutputStream;
 import play.Logger;
 
@@ -37,7 +39,7 @@ public class ImportTask implements Runnable {
                     OutputStream fos = null;
                     DataOutputStream dos = null;
                     try {
-                        String absoluteImportPath = getImportAbsolutePathByType(information);
+                        String absoluteImportPath = getTemporaryImportAbsolutePathByType(information);
                         // CARSTEN abstract store format for index and data in own classes
                         // CARSTEN or single managing class
 
@@ -54,8 +56,6 @@ public class ImportTask implements Runnable {
 
 
                         if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
-                            // CARSTEN close cleanly
-//                            fos = new SnappyOutputStream(new FileOutputStream(filePlacePathFile));
                             fos = new SnappyOutputStream(new BufferedOutputStream(new FileOutputStream(filePlacePathFile)));
                             dos = new DataOutputStream(fos);
                             dos.writeLong(information.getFileLength());
@@ -76,22 +76,19 @@ public class ImportTask implements Runnable {
                 @Override
                 public void onCollectionMetaInformation(ImportMetaInformation information) {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    String deliveryKeyPath = dataPath.getAbsolutePath() + "/" + information.getCollection() + "/" + information.getDeliveryKey();
+                    String deliveryKeyPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/";
                     Properties deliveryInfo = new Properties();
-//                    deliveryInfo.setProperty("collection", information.getCollection());
-//                    deliveryInfo.setProperty("deliveryKey", information.getDeliveryKey());
                     deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
                     deliveryInfo.setProperty("sourcePath", information.getSourcePath());
                     deliveryInfo.setProperty("date", sdf.format(new Date()));
                     deliveryInfo.setProperty("info", information.getInfo());
 
 
-                    String deliveryVersionPath = deliveryKeyPath + "/" + information.getDeliveryVersion();
-                    File deliveryVersionFilePath = new File(deliveryVersionPath);
+                    File deliveryVersionFilePath = new File(deliveryKeyPath);
                     if(!deliveryVersionFilePath.exists()) {
                         deliveryVersionFilePath.mkdirs();
                     }
-                    File deliveryInfoFile = new File(deliveryVersionPath + "/delivery.properties");
+                    File deliveryInfoFile = new File(deliveryKeyPath + "/delivery.properties");
                     FileOutputStream deliveryInfoFos = null;
                     try {
                         deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
@@ -101,7 +98,7 @@ public class ImportTask implements Runnable {
                     } finally {
                         IOUtils.closeQuietly(deliveryInfoFos);
                     }
-
+                    // pfad sollte der richtige sein ...
                     File activeDeliveryFile = new File(deliveryKeyPath + "/active.properties");
                     if(!activeDeliveryFile.exists()) {
                         onActivateDelivery(information);
@@ -110,13 +107,14 @@ public class ImportTask implements Runnable {
 
                 @Override
                 public void onActivateDelivery(ImportMetaInformation information) {
-                    String deliveryKeyPath = dataPath.getAbsolutePath() + "/" + information.getCollection() + "/" + information.getDeliveryKey();
+                    File activationPath = getTemporaryActivationPath(dataPath, information.getDeliveryKey(), information.getDeliveryVersion());
+                    if(!activationPath.exists()) {
+                        activationPath.mkdirs();
+                    }
                     Properties active = new Properties();
-//                    active.setProperty("collection", information.getCollection());
-//                    active.setProperty("deliveryKey", information.getDeliveryKey());
                     active.setProperty("deliveryVersion", information.getDeliveryVersion());
 
-                    File activeDeliveryFile = new File(deliveryKeyPath + "/active.properties");
+                    File activeDeliveryFile = new File(activationPath.getAbsoluteFile() + "/" + information.getCollection());
                     FileOutputStream activeDeliveryFos = null;
                     try {
                         activeDeliveryFos = new FileOutputStream(activeDeliveryFile);
@@ -129,25 +127,137 @@ public class ImportTask implements Runnable {
                 }
 
                 @Override
-                public void onFinished() {
-                    Logger.info("should restart server ... onFinished");
+                public void onFinished(String deliveryKey, String deliveryVersion) {
+                    Logger.info("Moving temporary data to final path");
+                    moveDataFiles(deliveryKey, deliveryVersion);
+                    Logger.info("Temporary data to final path moved");
+                    Logger.info("Moving temporary index to final path");
+//                    moveIndexFiles(deliveryKey, deliveryVersion);
+                    Logger.info("Temporary index to final path moved");
+                    Logger.info("Moving activation files to final path");
+                    moveActivationFiles(deliveryKey, deliveryVersion);
+                    Logger.info("Activation files to final path moved");
+
+                    Logger.info("Cleaning up temporary stuff");
+                    try {
+                        FileUtils.deleteDirectory(getTemporaryDeliveryPath(dataPath, deliveryKey, deliveryVersion));
+                        FileUtils.deleteDirectory(getTemporaryDeliveryPath(indexPath, deliveryKey, deliveryVersion));
+                    } catch (IOException e) {
+                        Logger.error(e.toString());
+                        throw new RuntimeException(e);
+                    }
+                    Logger.info("Temporary stuff cleaned up");
+                    Logger.info("Restarting Query Server");
                     queryServer.restart();
+                    Logger.info("Restarted Query Server");
+                }
+
+                private void moveActivationFiles(String deliveryKey, String deliveryVersion) {
+                    File temporaryActivationPath = getTemporaryActivationPath(dataPath, deliveryKey, deliveryVersion);
+                    if(!temporaryActivationPath.exists()) {
+                        // nothing to activate
+                        return;
+                    }
+                    File[] collectionFiles = temporaryActivationPath.listFiles();
+                    for (File collectionFile : collectionFiles) {
+                        File finalFile = getFinalActivationFilePath(collectionFile.getName(), deliveryKey);
+                        if(finalFile.exists()) {
+                            finalFile.delete();
+                        }
+                        collectionFile.renameTo(finalFile);
+                    }
+                }
+
+                private void moveIndexFiles(String deliveryKey, String deliveryVersion) {
+                    File temporaryIndexPath = getTemporaryIndexPath(deliveryKey, deliveryVersion);
+                    FileFilter directory = DirectoryFileFilter.INSTANCE;
+                    File[] collectionFolders = temporaryIndexPath.listFiles(directory);
+                    for (File collectionFolder : collectionFolders) {
+                        File[] indexFolders = collectionFolder.listFiles(directory);
+                        for (File indexFolder : indexFolders) {
+                            File finalFolder = getFinalIndexPath(collectionFolder.getName(), indexFolder.getName(), deliveryKey, deliveryVersion);
+                            if(!finalFolder.getParentFile().exists()) {
+                                finalFolder.getParentFile().mkdirs();
+                            }
+                            collectionFolder.renameTo(finalFolder);
+                        }
+                    }
+                }
+
+                private void moveDataFiles(String deliveryKey, String deliveryVersion) {
+                    File temporaryDataPath = getTemporaryDataPath(deliveryKey, deliveryVersion);
+                    File[] collectionFolders = temporaryDataPath.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
+                    for (File collectionFolder : collectionFolders) {
+                        File finalFolder = getFinalDataPath(collectionFolder.getName(), deliveryKey, deliveryVersion);
+                        if(!finalFolder.getParentFile().exists()) {
+                            finalFolder.getParentFile().mkdirs();
+                        }
+                        collectionFolder.renameTo(finalFolder);
+                    }
                 }
             });
         } catch (IOException e) {
-            System.err.println(e);
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(databaseImportSession);
         }
     }
 
-    private String getImportAbsolutePathByType(ImportMetaFileInformation information) throws IOException {
+    private File getFinalIndexPath(String collection, String indexName, String deliveryKey, String deliverVersion) {
+        return new File(indexPath.getAbsolutePath() + "/" + collection + "/" + deliveryKey + "/" + deliverVersion + "/" + indexName + "/");
+    }
+
+
+    private File getFinalActivationFilePath(String collection, String deliveryKey) {
+        return new File(dataPath.getAbsolutePath() + "/" + collection + "/" + deliveryKey + "/active.properties");
+    }
+
+    private File getFinalDataPath(String collection, String deliveryKey, String deliverVersion) {
+        return new File(dataPath.getAbsolutePath() + "/" + collection + "/" + deliveryKey + "/" + deliverVersion + "/");
+    }
+
+    private File getTemporaryDataPath(String deliveryKey, String deliverVersion) {
+        return getTemporaryImportPath(dataPath, deliveryKey, deliverVersion);
+    }
+
+    private File getTemporaryIndexPath(String deliveryKey, String deliverVersion) {
+        return getTemporaryImportPath(indexPath, deliveryKey, deliverVersion);
+    }
+
+    private File getTemporaryPath(File path) {
+        return new File(path.getAbsolutePath() + "/.tmp/");
+    }
+
+    private File getTemporaryImportPath(File path, String deliveryKey, String deliveryVersion) {
+        File temporaryDeliveryPath = getTemporaryDeliveryPath(path, deliveryKey, deliveryVersion);
+        return new File(temporaryDeliveryPath.getAbsolutePath() + "/import");
+    }
+
+    private File getTemporaryDeliveryPath(File path, String deliveryKey, String deliveryVersion) {
+        return new File(getTemporaryPath(path).getAbsolutePath() + "/" + deliveryKey + "_" + deliveryVersion);
+    }
+
+    private File getTemporaryActivationPath(File path, String deliveryKey, String deliveryVersion) {
+        File temporaryDeliveryPath = getTemporaryDeliveryPath(path, deliveryKey, deliveryVersion);
+        return new File(temporaryDeliveryPath.getAbsolutePath() + "/activate");
+    }
+
+
+    private String getTemporaryImportAbsolutePathByType(ImportMetaFileInformation information) throws IOException {
         if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
-            return dataPath.getAbsolutePath() + "/" + information.getCollection() + "/" + information.getDeliveryKey() + "/" + information.getDeliveryVersion() + "/";
+            return getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion()) + "/" + information.getCollection() + "/";
         } else if (information.getFileType() == ImportMetaFileInformation.FileType.INDEX) {
-            return indexPath.getAbsolutePath() + "/" + information.getCollection() + "/" + information.getDeliveryKey() + "/" + information.getDeliveryVersion() + "/" + information.getIndexName() + "/";
+            return getTemporaryIndexPath(information.getDeliveryKey(), information.getDeliveryVersion()) + "/" + information.getCollection() + "/" + information.getIndexName() + "/";
         }
         throw new IllegalArgumentException("Type " + information.getFileType() + " is not allowed, only data and index.");
     }
+
+//    private String getImportAbsolutePathByType(String deliveryKey, String deliveryVersion, ) throws IOException {
+//        if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
+//            return dataPath.getAbsolutePath() + "/" + information.getCollection() + "/" + information.getDeliveryKey() + "/" + information.getDeliveryVersion() + "/";
+//        } else if (information.getFileType() == ImportMetaFileInformation.FileType.INDEX) {
+//            return indexPath.getAbsolutePath() + "/" + information.getCollection() + "/" + information.getDeliveryKey() + "/" + information.getDeliveryVersion() + "/" + information.getIndexName() + "/";
+//        }
+//        throw new IllegalArgumentException("Type " + information.getFileType() + " is not allowed, only data and index.");
+//    }
 }

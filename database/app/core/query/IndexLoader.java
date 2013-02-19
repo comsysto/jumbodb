@@ -27,16 +27,18 @@ public class IndexLoader {
             return result;
         }
         for (File dataCollectionFolder  : dataCollectionDirectories) {
-            String collectionName = dataCollectionFolder.getName();
-            // CARSTEN fix this later temporaryDefaultDeliveryKey
-            String dataDeliveryKeyFolder = dataCollectionFolder.getAbsolutePath() + "/" + temporaryDefaultDeliveryKey + "/";
-            Properties activeProps = loadProperties(new File(dataDeliveryKeyFolder + "active.properties"));
-            String deliveryVersion = activeProps.getProperty("deliveryVersion");
+            if(!dataCollectionFolder.getName().startsWith(".")) {
+                String collectionName = dataCollectionFolder.getName();
+                // CARSTEN fix this later temporaryDefaultDeliveryKey
+                String dataDeliveryKeyFolder = dataCollectionFolder.getAbsolutePath() + "/" + temporaryDefaultDeliveryKey + "/";
+                Properties activeProps = loadProperties(new File(dataDeliveryKeyFolder + "active.properties"));
+                String deliveryVersion = activeProps.getProperty("deliveryVersion");
 
-            String dataDeliveryVersionFolder = dataDeliveryKeyFolder + deliveryVersion + "/";
-            String indexDeliveryVersionFolder = indexPath.getAbsolutePath() + "/" + collectionName + "/" + temporaryDefaultDeliveryKey + "/" + deliveryVersion + "/";
-            DataCollection dataCollection = createDataCollection(new File(indexDeliveryVersionFolder), new File(dataDeliveryVersionFolder));
-            result.put(collectionName, dataCollection);
+                String dataDeliveryVersionFolder = dataDeliveryKeyFolder + deliveryVersion + "/";
+                String indexDeliveryVersionFolder = indexPath.getAbsolutePath() + "/" + collectionName + "/" + temporaryDefaultDeliveryKey + "/" + deliveryVersion + "/";
+                DataCollection dataCollection = createDataCollection(new File(indexDeliveryVersionFolder), new File(dataDeliveryVersionFolder));
+                result.put(collectionName, dataCollection);
+            }
         }
         return result;
 
@@ -74,11 +76,13 @@ public class IndexLoader {
         File[] indexFolders = collectionIndexFolder.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
         HashMultimap<String, IndexFile> resIndexFiles = HashMultimap.create();
         Map<Integer, File> resDataFiles = new HashMap<Integer, File>();
-        for (File indexFolder : indexFolders) {
-            File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".odx"));
-            for (File indexFile : indexFiles) {
-                if(indexFile.length() > 0) {
-                    resIndexFiles.put(indexFolder.getName(), createIndexFileDescription(indexFile));
+        if(indexFolders != null) {
+            for (File indexFolder : indexFolders) {
+                File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".odx"));
+                for (File indexFile : indexFiles) {
+                    if(indexFile.length() > 0) {
+                        resIndexFiles.put(indexFolder.getName(), createIndexFileDescription(indexFile));
+                    }
                 }
             }
         }

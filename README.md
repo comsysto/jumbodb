@@ -1,4 +1,4 @@
-dumboDB
+jumboDB
 =======
 
 ## Data Store for low-latency Big Data Apps
@@ -6,7 +6,7 @@ dumboDB
 Already using Apache Hadoop for batch data deliveries? Need
 the efficient store for your analytical application?
 
-dumboDB allows you to store, index and query large amounts of
+jumboDB allows you to store, index and query large amounts of
 data using Apache Hadoop core features
 
 ## Big Data for the masses!

@@ -92,7 +92,7 @@ public class SearchIndexUtils {
     }
 
 
-    public static HashMultimap<File, Integer> groupByIndexFile(DataCollection dataCollection, DumboQuery.IndexComparision query) {
+    public static HashMultimap<File, Integer> groupByIndexFile(DataCollection dataCollection, JumboQuery.IndexComparision query) {
         Collection<IndexFile> indexFiles = dataCollection.getIndexFiles().get(query.getName());
         // CARSTEN this map one is very slow
         HashMultimap<File, Integer> groupByIndexFile = HashMultimap.create();

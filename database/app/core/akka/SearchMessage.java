@@ -1,6 +1,6 @@
 package core.akka;
 
-import core.query.DumboQuery;
+import core.query.JumboQuery;
 
 /**
  * User: carsten
@@ -9,9 +9,9 @@ import core.query.DumboQuery;
  */
 public class SearchMessage {
     private String collectionName;
-    private DumboQuery searchQuery;
+    private JumboQuery searchQuery;
 
-    public SearchMessage(String collectionName, DumboQuery searchQuery) {
+    public SearchMessage(String collectionName, JumboQuery searchQuery) {
         this.collectionName = collectionName;
         this.searchQuery = searchQuery;
     }
@@ -20,7 +20,7 @@ public class SearchMessage {
         return collectionName;
     }
 
-    public DumboQuery getSearchQuery() {
+    public JumboQuery getSearchQuery() {
         return searchQuery;
     }
 }

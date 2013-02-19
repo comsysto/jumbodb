@@ -13,14 +13,14 @@ public class QueryTask implements Runnable {
 
     private Socket clientSocket;
     private int clientID = -1;
-    private DumboSearcher dumboSearcher;
+    private JumboSearcher jumboSearcher;
     private final ObjectMapper jsonMapper;
     private DatabaseQuerySession databaseQuerySession;
 
-    public QueryTask(Socket s, int clientID, DumboSearcher dumboSearcher, ObjectMapper jsonMapper) {
+    public QueryTask(Socket s, int clientID, JumboSearcher jumboSearcher, ObjectMapper jsonMapper) {
         clientSocket = s;
         this.clientID = clientID;
-        this.dumboSearcher = dumboSearcher;
+        this.jumboSearcher = jumboSearcher;
         this.jsonMapper = jsonMapper;
     }
 
@@ -34,8 +34,8 @@ public class QueryTask implements Runnable {
                 @Override
                 public int onQuery(String collection, String query, final DatabaseQuerySession.ResultWriter resultWriter) {
                     try {
-                        DumboQuery searchQuery = jsonMapper.readValue(query, DumboQuery.class);
-                        return dumboSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {
+                        JumboQuery searchQuery = jsonMapper.readValue(query, JumboQuery.class);
+                        return jumboSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {
                             @Override
                             public void writeResult(String result) throws IOException {
                                 resultWriter.writeResult(result);

@@ -21,11 +21,11 @@ public class QueryServer {
     private boolean serverActive = false;
     private ExecutorService serverSocketExecutor = Executors.newCachedThreadPool();
     private int port;
-    private DumboSearcher dumboSearcher;
+    private JumboSearcher jumboSearcher;
     private final ObjectMapper jsonMapper;
 
     public QueryServer(int port, File dataPath, File indexPath) {
-        this.dumboSearcher = new DumboSearcher(dataPath, indexPath);
+        this.jumboSearcher = new JumboSearcher(dataPath, indexPath);
         this.port = port;
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -42,7 +42,7 @@ public class QueryServer {
                     Logger.info("QueryServer started");
                     while (serverActive) {
                         Socket clientSocket = m_ServerSocket.accept();
-                        serverSocketExecutor.submit(new QueryTask(clientSocket, id++, dumboSearcher, jsonMapper));
+                        serverSocketExecutor.submit(new QueryTask(clientSocket, id++, jumboSearcher, jsonMapper));
                     }
                     Logger.info("QueryServer stopped");
                 } catch (Exception e) {
@@ -53,12 +53,12 @@ public class QueryServer {
     }
 
     public void restart() {
-        dumboSearcher.restart();
+        jumboSearcher.restart();
     }
 
     public void stop() {
         serverActive = false;
-        dumboSearcher.stop();
+        jumboSearcher.stop();
         serverSocketExecutor.shutdown();
     }
 

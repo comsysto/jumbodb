@@ -14,7 +14,7 @@ import java.util.concurrent.*;
  * Date: 11/23/12
  * Time: 10:53 AM
  */
-public class DumboSearcher {
+public class JumboSearcher {
 
     private final File dataPath;
     private final File indexPath;
@@ -24,7 +24,7 @@ public class DumboSearcher {
     private ExecutorService indexFileExecutor;
     private ObjectMapper jsonMapper;
 
-    public DumboSearcher(File dataPath, File indexPath) {
+    public JumboSearcher(File dataPath, File indexPath) {
         this.dataPath = dataPath;
         this.indexPath = indexPath;
         retrieveDataSetsExecutor = Executors.newScheduledThreadPool(20);
@@ -49,7 +49,7 @@ public class DumboSearcher {
         indexFileExecutor.shutdown();
     }
 
-    public int findResultAndWriteIntoCallback(String collectionName, DumboQuery searchQuery, ResultCallback resultCallback) {
+    public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery, ResultCallback resultCallback) {
         DataCollection dataCollection = dataCollections.get(collectionName);
         if(dataCollection != null) {
             Collection<FileOffset> fileOffsets = findFileOffsets(dataCollection, searchQuery);
@@ -58,7 +58,7 @@ public class DumboSearcher {
         return 0;
     }
 
-    private int findDataSetsByFileOffsets(DataCollection dataCollection, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, DumboQuery searchQuery) {
+    private int findDataSetsByFileOffsets(DataCollection dataCollection, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery) {
         int numberOfResults = 0;
         long startTime = System.currentTimeMillis();
         HashMultimap<Integer, Long> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
@@ -106,12 +106,12 @@ public class DumboSearcher {
         return result;
     }
 
-    private Collection<FileOffset> findFileOffsets(DataCollection dataCollection, DumboQuery searchQuery) {
+    private Collection<FileOffset> findFileOffsets(DataCollection dataCollection, JumboQuery searchQuery) {
         if(searchQuery.getIndexComparision().size() == 0) {
             return Collections.emptyList();
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
-        for (DumboQuery.IndexComparision indexQuery : searchQuery.getIndexComparision()) {
+        for (JumboQuery.IndexComparision indexQuery : searchQuery.getIndexComparision()) {
             tasks.add(indexExecutor.submit(new SearchIndexTask(dataCollection, indexQuery, indexFileExecutor)));
         }
 

@@ -11,10 +11,10 @@ import java.util.concurrent.Future;
 
 public class SearchIndexTask implements Callable<Set<FileOffset>> {
     private final DataCollection dataCollection;
-    private DumboQuery.IndexComparision query;
+    private JumboQuery.IndexComparision query;
     private ExecutorService indexFileExecutor;
 
-    public SearchIndexTask(DataCollection dataCollection, DumboQuery.IndexComparision query, ExecutorService indexFileExecutor) {
+    public SearchIndexTask(DataCollection dataCollection, JumboQuery.IndexComparision query, ExecutorService indexFileExecutor) {
         this.dataCollection = dataCollection;
         this.query = query;
         this.indexFileExecutor = indexFileExecutor;

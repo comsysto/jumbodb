@@ -16,14 +16,14 @@ import java.util.concurrent.Callable;
 public class RetrieveDataSetsTask implements Callable<Integer> {
 
     private final File file;
-    private final DumboQuery searchQuery;
+    private final JumboQuery searchQuery;
     private final ResultCallback resultCallback;
     private final List<Long> offsets;
     private final int bufferSize = 4096;
     private final byte[] defaultBuffer = new byte[bufferSize]; // for reuse
 
 
-    public RetrieveDataSetsTask(File file, Set<Long> offsets, DumboQuery searchQuery, ResultCallback resultCallback) {
+    public RetrieveDataSetsTask(File file, Set<Long> offsets, JumboQuery searchQuery, ResultCallback resultCallback) {
         this.file = file;
         this.searchQuery = searchQuery;
         this.resultCallback = resultCallback;
@@ -115,7 +115,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         JSONObject json = (JSONObject) parser.parse(s);
         //    Map<String, Object> json = jsonMapper.readValue(s, Map.class);
         boolean matching = true;
-        for (DumboQuery.JsonValueComparision jsonValueComparision : searchQuery.getJsonComparision()) {
+        for (JumboQuery.JsonValueComparision jsonValueComparision : searchQuery.getJsonComparision()) {
             String[] split = StringUtils.split(jsonValueComparision.getName(), '.');
             Object lastObj = json;
             for (String key : split) {
@@ -124,11 +124,11 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                     lastObj = map.get(key);
                 }
             }
-            if (jsonValueComparision.getComparisionType() == DumboQuery.JsonComparisionType.EQUALS &&
+            if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS &&
                     lastObj != null) {
                 // CARSTEN vielleicht ist hier ein hashset schneller?
                 matching &= jsonValueComparision.getValues().contains(lastObj);
-            } else if (jsonValueComparision.getComparisionType() == DumboQuery.JsonComparisionType.EQUALS_IGNORE_CASE) {
+            } else if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS_IGNORE_CASE) {
                 throw new IllegalArgumentException("Not yet implemented " + jsonValueComparision.getComparisionType());
             } else {
                 throw new IllegalArgumentException("Unsupported comparision type " + jsonValueComparision.getComparisionType());

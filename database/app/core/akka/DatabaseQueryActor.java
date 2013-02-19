@@ -4,7 +4,8 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.actor.UntypedActorFactory;
-import core.query.DumboQuery;
+import core.query.JumboQuery;
+import core.query.JumboQuery;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.xerial.snappy.SnappyOutputStream;
@@ -35,7 +36,7 @@ public class DatabaseQueryActor extends UntypedActor {
     DataOutputStream dataOutputStream = null;
     BufferedOutputStream bufferedOutputStream = null;
     SnappyOutputStream snappyOutputStream = null;
-    private DumboQuery searchQuery;
+    private JumboQuery searchQuery;
 
     public DatabaseQueryActor(Socket s, int i, ObjectMapper jsonMapper, ActorRef searchIndexFileActor, Map<String, DataCollection> dataCollections) {
         clientSocket = s;
@@ -76,7 +77,7 @@ public class DatabaseQueryActor extends UntypedActor {
                         String collection = dataInputStream.readUTF();
                         Logger.info("Collection: " + collection);
                         String jsonQueryString = dataInputStream.readUTF();
-                        searchQuery = jsonMapper.readValue(jsonQueryString, DumboQuery.class);
+                        searchQuery = jsonMapper.readValue(jsonQueryString, JumboQuery.class);
                         Logger.info("Query: " + searchQuery.toString());
                         long start = System.currentTimeMillis();
                         ActorRef actor = context().actorOf(new Props(new UntypedActorFactory() {
@@ -85,8 +86,8 @@ public class DatabaseQueryActor extends UntypedActor {
                             }
                         }));
 
-                        List<DumboQuery.IndexComparision> indexComparision = searchQuery.getIndexComparision();
-                        for (DumboQuery.IndexComparision comparision : indexComparision) {
+                        List<JumboQuery.IndexComparision> indexComparision = searchQuery.getIndexComparision();
+                        for (JumboQuery.IndexComparision comparision : indexComparision) {
                             SearchIndexQueryMessage m = new SearchIndexQueryMessage(dataCollections.get(collection), comparision);
                             actor.tell(m);
                         }

@@ -132,7 +132,7 @@ public class ImportTask implements Runnable {
                     moveDataFiles(deliveryKey, deliveryVersion);
                     Logger.info("Temporary data to final path moved");
                     Logger.info("Moving temporary index to final path");
-//                    moveIndexFiles(deliveryKey, deliveryVersion);
+                    moveIndexFiles(deliveryKey, deliveryVersion);
                     Logger.info("Temporary index to final path moved");
                     Logger.info("Moving activation files to final path");
                     moveActivationFiles(deliveryKey, deliveryVersion);

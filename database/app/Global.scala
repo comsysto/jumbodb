@@ -16,10 +16,10 @@ object Global extends GlobalSettings {
 //  var databaseQueryServer: DatabaseQueryServer = null
 
   override def onStart(app: Application) {
-    val importPort = app.configuration.getInt("odb.import.port").get
-    val queryPort = app.configuration.getInt("odb.query.port").get
-    val dataPath = new File(app.configuration.getString("odb.datapath").get)
-    val indexPath = new File(app.configuration.getString("odb.indexpath").get)
+    val importPort = app.configuration.getInt("jumbodb.import.port").get
+    val queryPort = app.configuration.getInt("jumbodb.query.port").get
+    val dataPath = new File(app.configuration.getString("jumbodb.datapath").get)
+    val indexPath = new File(app.configuration.getString("jumbodb.indexpath").get)
 
     Logger.info("Database Import Port: " + importPort)
     Logger.info("Database Query Port: " + queryPort)

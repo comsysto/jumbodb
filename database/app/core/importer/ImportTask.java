@@ -172,14 +172,16 @@ public class ImportTask implements Runnable {
                     File temporaryIndexPath = getTemporaryIndexPath(deliveryKey, deliveryVersion);
                     FileFilter directory = DirectoryFileFilter.INSTANCE;
                     File[] collectionFolders = temporaryIndexPath.listFiles(directory);
-                    for (File collectionFolder : collectionFolders) {
-                        File[] indexFolders = collectionFolder.listFiles(directory);
-                        for (File indexFolder : indexFolders) {
-                            File finalFolder = getFinalIndexPath(collectionFolder.getName(), indexFolder.getName(), deliveryKey, deliveryVersion);
-                            if(!finalFolder.getParentFile().exists()) {
-                                finalFolder.getParentFile().mkdirs();
+                    if(collectionFolders != null) {
+                        for (File collectionFolder : collectionFolders) {
+                            File[] indexFolders = collectionFolder.listFiles(directory);
+                            for (File indexFolder : indexFolders) {
+                                File finalFolder = getFinalIndexPath(collectionFolder.getName(), indexFolder.getName(), deliveryKey, deliveryVersion);
+                                if(!finalFolder.getParentFile().exists()) {
+                                    finalFolder.getParentFile().mkdirs();
+                                }
+                                indexFolder.renameTo(finalFolder);
                             }
-                            collectionFolder.renameTo(finalFolder);
                         }
                     }
                 }
@@ -203,8 +205,8 @@ public class ImportTask implements Runnable {
         }
     }
 
-    private File getFinalIndexPath(String collection, String indexName, String deliveryKey, String deliverVersion) {
-        return new File(indexPath.getAbsolutePath() + "/" + collection + "/" + deliveryKey + "/" + deliverVersion + "/" + indexName + "/");
+    private File getFinalIndexPath(String collection, String indexName, String deliveryKey, String deliveryVersion) {
+        return new File(indexPath.getAbsolutePath() + "/" + collection + "/" + deliveryKey + "/" + deliveryVersion + "/" + indexName + "/");
     }
 
 

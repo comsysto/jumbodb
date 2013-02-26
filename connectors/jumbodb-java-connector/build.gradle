@@ -1,15 +1,15 @@
-defaultTasks 'build'
-
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin:'groovy'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 group = 'org.jumbodb.connector'
 archivesBaseName = 'jumbodb-java-connector'
-version = '1.0-SNAPSHOT'
+version = '0.0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -30,7 +30,15 @@ sourceSets {
     }
 }
 
+
+configurations {
+    deployerJars
+}
+
 dependencies {
+//    deployerJars ("org.apache.maven.wagon:wagon-http:2.2")
+    deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
+//    deployerJars 'commons-httpclient:commons-httpclient:3.1'
     compile 'commons-io:commons-io:2.3'
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.7'
     compile 'commons-lang:commons-lang:2.5'
@@ -42,14 +50,75 @@ dependencies {
 }
 
 
+//you probably want to upload javadoc and sources too
+task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+task packageSources(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+artifacts {
+    archives(packageJavadoc) {
+        type = 'javadoc'
+        extension = 'jar'
+    }
+    archives(packageSources)
+}
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            configuration = configurations.deployerJars
+            snapshotRepository(id: 'cloudbees', url: uri("dav:https://repository-${project.cloudbeesAccountName}.forge.cloudbees.com/snapshot/")) {
+                authentication(userName: project.cloudbeesUsername, password: project.cloudbeesPassword)
+            }
+            repository(id: 'cloudbees', url: uri("dav:https://repository-${project.cloudbeesAccountName}.forge.cloudbees.com/release/")) {
+                authentication(userName: project.cloudbeesUsername, password: project.cloudbeesPassword)
+            }
+
+            pom.project {
+                name 'jumboDB java connector'
+                packaging 'jar'
+                description 'jumboDB java connector'
+                url 'http://www.jumbodb.org'
+                inceptionYear '2013'
+
+//        scm {
+//            developerConnection 'git@github.com:ari/gradle-release-plugin.git'
+//            connection 'git://github.com/ari/gradle-release-plugin.git'
+//            url 'https://github.com/ari/gradle-release-plugin'
+//        }
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'chufe'
+                        name 'Carsten Hufe'
+                        email 'carsten.hufe@comsysto.com    '
+                        roles {
+                            role 'Developer'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// https://github.com/ari/gradle-release-plugin/blob/master/build.gradle
+
+
 // generate gradle bootstrapping
 // run gradle createWrapper
 task createWrapper(type: Wrapper) {
-    gradleVersion = '1.0'
-}
-
-manifest {
-    attributes
+    gradleVersion = '1.4'
 }
 
 eclipse {

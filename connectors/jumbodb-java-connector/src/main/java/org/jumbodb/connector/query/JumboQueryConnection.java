@@ -5,6 +5,7 @@ import org.apache.commons.lang.UnhandledException;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.connector.JumboConstants;
 import org.xerial.snappy.SnappyInputStream;
 
 import java.io.*;
@@ -18,15 +19,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date: 11/23/12
  * Time: 10:53 AM
  */
-public class JumboQueryConnector {
-    private static final Logger LOG = Logger.getLogger(JumboQueryConnector.class);
-    private static final int PROTOCOL_VERSION = 2;
+public class JumboQueryConnection {
+    private static final Logger LOG = Logger.getLogger(JumboQueryConnection.class);
     private final String host;
     private final int port;
     private final ObjectMapper jsonMapper;
-    private final long waitingTimeoutInMs = 300000;  // 5min kein ergebnis
 
-    public JumboQueryConnector(String host, int port) {
+    public JumboQueryConnection(String host, int port) {
         this.host = host;
         this.port = port;
         this.jsonMapper = new ObjectMapper();
@@ -47,8 +46,8 @@ public class JumboQueryConnector {
                 while(queue.size() == 0 && !finished.get()) {
                     // wait nothing to do
                     long diffInTimeMillis = System.currentTimeMillis() - start;
-                    if(diffInTimeMillis > waitingTimeoutInMs) {
-                        throw new RuntimeException("Fetching results took longer than " + waitingTimeoutInMs + "ms");
+                    if(diffInTimeMillis > JumboConstants.QUERY_WAITING_TIMEOUT_IN_MS) {
+                        throw new RuntimeException("Fetching results took longer than " + JumboConstants.QUERY_WAITING_TIMEOUT_IN_MS + "ms");
                     }
                 }
                 return queue.size() > 0;
@@ -130,8 +129,8 @@ public class JumboQueryConnector {
             snappyInputStream = new SnappyInputStream(bufferedInputStream);
             dis = new DataInputStream(snappyInputStream);
             int protocolVersion = dis.readInt();
-            if(protocolVersion != PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version. Got " + protocolVersion + ", but expected " + PROTOCOL_VERSION);
+            if(protocolVersion != JumboConstants.PROTOCOL_VERSION) {
+                throw new RuntimeException("Wrong protocol version. Got " + protocolVersion + ", but expected " + JumboConstants.PROTOCOL_VERSION);
             }
             dos.writeUTF(":cmd:query");
             dos.writeUTF(collection);

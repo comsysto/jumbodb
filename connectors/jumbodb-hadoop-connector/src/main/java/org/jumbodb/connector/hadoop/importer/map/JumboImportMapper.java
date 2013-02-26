@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop.importer.map;
 
+import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.apache.hadoop.conf.Configuration;
@@ -8,10 +9,8 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
-import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -43,69 +42,40 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
     @Override
     protected void map(FileStatus key, NullWritable value, Context context) throws IOException, InterruptedException {
         FSDataInputStream fis = null;
-        Socket socket = null;
-        OutputStream outputStream = null;
-        BufferedOutputStream bufferedOutputStream = null;
-        SnappyOutputStream snappyOutputStream = null;
-        DataOutputStream dos = null;
-        DataInputStream dis = null;
+        JumboImportConnection jumboImportConnection = new JumboImportConnection(host, port);
         try {
-            socket = new Socket(host, port);
-            outputStream = socket.getOutputStream();
-            dos = new DataOutputStream(outputStream);
-            bufferedOutputStream = new BufferedOutputStream(outputStream, JumboConstants.BUFFER_SIZE);   // make configurable
-            snappyOutputStream = new SnappyOutputStream(bufferedOutputStream);
-            dis = new DataInputStream(socket.getInputStream());
-            int protocolVersion = dis.readInt();
-            if(protocolVersion != JumboConstants.PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version - Got " + protocolVersion + ", but expected " + JumboConstants.PROTOCOL_VERSION);
-            }
             Path path = key.getPath();
             FileSystem fs = FileSystem.get(new URI(path.toString()), context.getConfiguration());
             fis = fs.open(path);
             long fileLength = fs.getFileStatus(path).getLen();
-            String collection = null;
-            String fileName = null;
             if(JumboConstants.DATA_TYPE_INDEX.equals(type)) {
-                collection = path.getParent().getParent().getName();
-                fileName = path.getName();
+                String collection = path.getParent().getParent().getName();
+                String fileName = path.getName();
                 String indexName = path.getParent().getName();
-                dos.writeUTF(":cmd:import:collection:index");
-                dos.writeUTF(collection);
-                dos.writeUTF(indexName);
-                dos.writeUTF(fileName);
-                dos.writeLong(fileLength);
-                dos.writeUTF(deliveryKey);
-                dos.writeUTF(deliveryVersion);
+                IndexInfo indexInfo = new IndexInfo(collection, indexName, fileName, fileLength, deliveryKey, deliveryVersion);
+                CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
+                jumboImportConnection.importIndex(indexInfo, copyDataCallback);
             }
             else if(JumboConstants.DATA_TYPE_DATA.equals(type)) {
-                collection = path.getParent().getName();
-                fileName = path.getName();
-                dos.writeUTF(":cmd:import:collection:data");
-                dos.writeUTF(collection);
-                dos.writeUTF(fileName);
-                dos.writeLong(fileLength);
-                dos.writeUTF(deliveryKey);
-                dos.writeUTF(deliveryVersion);
+                String collection = path.getParent().getParent().getName();
+                String fileName = path.getName();
+                DataInfo dataInfo = new DataInfo(collection, fileName, fileLength, deliveryKey, deliveryVersion);
+                CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
+                jumboImportConnection.importData(dataInfo, copyDataCallback);
             } else {
                 throw new RuntimeException("Unsupported type " + type);
             }
-            dos.flush();
-            copyBytes(fis, snappyOutputStream, fileLength, context, fileName, collection);
             context.write(new Text("Imported " + path.toString()), NullWritable.get());
         } catch (URISyntaxException e) {
             context.setStatus("ABORTED " + e.toString());
             throw new RuntimeException(e);
         } finally {
-            IOUtils.closeStream(bufferedOutputStream);
-            IOUtils.closeStream(snappyOutputStream);
-            IOUtils.closeStream(outputStream);
             IOUtils.closeStream(fis);
-            IOUtils.closeStream(dos);
-            IOUtils.closeStream(dis);
-            IOUtils.closeSocket(socket);
+            IOUtils.closeStream(jumboImportConnection);
         }
     }
+
+
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
@@ -113,54 +83,78 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         super.cleanup(context);
     }
 
-    public void copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, double fileSize, Context context, String filename, String collection)
-            throws IOException
-    {
-        try
+
+    private class CopyDataCallback implements OnCopyCallback {
+        private InputStream inputStream;
+        private long fileLength;
+        private Context context;
+        private String filename;
+        private String collection;
+
+        private CopyDataCallback(InputStream inputStream, long fileLength, Context context, String filename, String collection) {
+            this.inputStream = inputStream;
+            this.fileLength = fileLength;
+            this.context = context;
+            this.filename = filename;
+            this.collection = collection;
+        }
+
+        @Override
+        public void onCopy(OutputStream outputStream) {
+            try {
+                copyBytes(inputStream, outputStream, fileLength, context, filename, collection);
+            } catch (IOException e) {
+                throw new UnhandledException(e);
+            }
+        }
+
+        // TODO make this nicer dont need the params ... because it's in the member variables
+        public void copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, double fileSize, Context context, String filename, String collection)
+                throws IOException
         {
-            copyBytes(in, out, buffSize, fileSize, context, filename, collection);
-        } finally {
-            if (close) {
-                out.close();
-                in.close();
+            try
+            {
+                copyBytes(in, out, buffSize, fileSize, context, filename, collection);
+            } finally {
+                if (close) {
+                    out.close();
+                    in.close();
+                }
             }
         }
-    }
 
-    public void copyBytes(InputStream in, OutputStream out, int buffSize, double fileSize, Context context, String filename, String collection)
-            throws IOException
-    {
-        PrintStream ps = (out instanceof PrintStream) ? (PrintStream)out : null;
-        byte[] buf = new byte[buffSize];
-        int bytesRead = in.read(buf);
-        int currentFileBytes = 0;
-        while (bytesRead >= 0) {
-            out.write(buf, 0, bytesRead);
-            if ((ps != null) && (ps.checkError())) {
-                throw new IOException("Unable to write to output stream.");
+        public void copyBytes(InputStream in, OutputStream out, int buffSize, double fileSize, Context context, String filename, String collection)  throws IOException {
+            PrintStream ps = (out instanceof PrintStream) ? (PrintStream)out : null;
+            byte[] buf = new byte[buffSize];
+            int bytesRead = in.read(buf);
+            int currentFileBytes = 0;
+            while (bytesRead >= 0) {
+                out.write(buf, 0, bytesRead);
+                if ((ps != null) && (ps.checkError())) {
+                    throw new IOException("Unable to write to output stream.");
+                }
+                bytesReadAll += bytesRead;
+                currentFileBytes += bytesRead;
+                long percentage = Math.round((currentFileBytes / fileSize) * 100);
+                StringBuilder statusBuf = new StringBuilder();
+                statusBuf.append("COPYING [");
+                statusBuf.append(percentage);
+                statusBuf.append("% for ");
+                statusBuf.append(collection);
+                statusBuf.append('/');
+                statusBuf.append(filename);
+                statusBuf.append("]");
+                context.setStatus(statusBuf.toString());
+                context.progress();
+                JumboInputFormat.JumboInputSplit inputSplit = (JumboInputFormat.JumboInputSplit) context.getInputSplit();
+                inputSplit.setCurrentlyCopied(bytesReadAll);
+                bytesRead = in.read(buf);
             }
-            bytesReadAll += bytesRead;
-            currentFileBytes += bytesRead;
-            long percentage = Math.round((currentFileBytes / fileSize) * 100);
-            StringBuilder statusBuf = new StringBuilder();
-            statusBuf.append("COPYING [");
-            statusBuf.append(percentage);
-            statusBuf.append("% for ");
-            statusBuf.append(collection);
-            statusBuf.append('/');
-            statusBuf.append(filename);
-            statusBuf.append("]");
-            context.setStatus(statusBuf.toString());
-            context.progress();
-            JumboInputFormat.JumboInputSplit inputSplit = (JumboInputFormat.JumboInputSplit) context.getInputSplit();
-            inputSplit.setCurrentlyCopied(bytesReadAll);
-            bytesRead = in.read(buf);
+        }
+
+        public void copyBytes(InputStream in, OutputStream out, double fileSize, Context context, String filename, String collection)
+                throws IOException  {
+            copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), true, fileSize, context, filename, collection);
         }
     }
-
-    public void copyBytes(InputStream in, OutputStream out, double fileSize, Context context, String filename, String collection)
-            throws IOException  {
-        copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), true, fileSize, context, filename, collection);
-    }
-
 }

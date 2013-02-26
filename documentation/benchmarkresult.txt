@@ -1,0 +1,7 @@
+5 million documents parsed with 2 String, one long, one double and a double array with 7 elements
+
+Msgpack: 23447ms
+Jackson (String parsing): 31329ms
+Jackson (byte arrays): 29342ms
+JSON-Smart (String): 22754ms (reusing the parsing object leads to a three times  better performance)
+JSON-Smart (byte array): 36830ms

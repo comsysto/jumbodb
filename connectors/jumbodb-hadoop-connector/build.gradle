@@ -2,28 +2,26 @@ defaultTasks 'build'
 
 apply plugin: 'idea'
 apply plugin: 'java'
-apply plugin: 'project-reports'
 apply plugin: 'eclipse'
-apply plugin: 'application'
+apply plugin: 'maven'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 group = 'org.jumbodb.connector'
 archivesBaseName = 'jumbodb-hadoop-connector'
-version = "0.1-ALPHA"
+version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    mavenRepo(url: "http://repository-comsysto.forge.cloudbees.com/release")
+    mavenRepo(url: "http://repository-comsysto.forge.cloudbees.com/snapshot")
 }
-
 
 configurations {
-    // this scope extracts the files and copies it into he same jar file, because ou can just use one jar file in emr
-    bundle {
-        transitive = false
-    }
+    deployerJars
 }
+
 sourceSets {
     main {
         resources {
@@ -40,7 +38,8 @@ sourceSets {
 }
 
 dependencies {
-    compile 'com.esotericsoftware.kryo:kryo:2.20'
+    deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
+    compile "org.jumbodb.connector:jumbodb-java-connector:0.0.1"
     compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
     compile "org.apache.hadoop:hadoop-core:1.0.3"
     compile 'com.google.guava:guava:r09'
@@ -49,18 +48,69 @@ dependencies {
     compile 'commons-collections:commons-collections:3.2.1'
     compile 'com.google.guava:guava:13.0'
     compile 'org.xerial.snappy:snappy-java:1.0.4.1'
-    compile 'org.msgpack:msgpack:0.6.7'
-    compile 'net.minidev:json-smart:2.0-RC2'
-//    compile 'de.undercouch:bson4jackson:2.0.0'
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.0"
 }
 
+task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+task packageSources(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+artifacts {
+    archives(packageJavadoc) {
+        type = 'javadoc'
+        extension = 'jar'
+    }
+    archives(packageSources)
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            configuration = configurations.deployerJars
+            snapshotRepository(id: 'cloudbees', url: uri("dav:https://repository-${project.cloudbeesAccountName}.forge.cloudbees.com/snapshot/")) {
+                authentication(userName: project.cloudbeesUsername, password: project.cloudbeesPassword)
+            }
+            repository(id: 'cloudbees', url: uri("dav:https://repository-${project.cloudbeesAccountName}.forge.cloudbees.com/release/")) {
+                authentication(userName: project.cloudbeesUsername, password: project.cloudbeesPassword)
+            }
+
+            pom.project {
+                name 'jumboDB hadoop connector'
+                packaging 'jar'
+                description 'jumboDB hadoop connector'
+                url 'http://www.jumbodb.org'
+                inceptionYear '2013'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'chufe'
+                        name 'Carsten Hufe'
+                        email 'carsten.hufe@comsysto.com    '
+                        roles {
+                            role 'Developer'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 // generate gradle bootstrapping
 // run gradle createWrapper
 task createWrapper(type: Wrapper) {
-    gradleVersion = '1.1'
+    gradleVersion = '1.4'
 }
 
 eclipse {

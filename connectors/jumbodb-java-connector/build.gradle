@@ -47,7 +47,6 @@ dependencies {
 }
 
 
-//you probably want to upload javadoc and sources too
 task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
     from javadoc.destinationDir
     classifier = 'javadoc'
@@ -83,11 +82,6 @@ uploadArchives {
                 url 'http://www.jumbodb.org'
                 inceptionYear '2013'
 
-//        scm {
-//            developerConnection 'git@github.com:ari/gradle-release-plugin.git'
-//            connection 'git://github.com/ari/gradle-release-plugin.git'
-//            url 'https://github.com/ari/gradle-release-plugin'
-//        }
                 licenses {
                     license {
                         name 'The Apache Software License, Version 2.0'

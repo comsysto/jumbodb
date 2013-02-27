@@ -9,6 +9,10 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.jumbodb.connector.importer.DataInfo;
+import org.jumbodb.connector.importer.IndexInfo;
+import org.jumbodb.connector.importer.JumboImportConnection;
+import org.jumbodb.connector.importer.OnCopyCallback;
 
 import java.io.*;
 import java.net.URI;

@@ -2,14 +2,13 @@ apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
-apply plugin:'groovy'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 group = 'org.jumbodb.connector'
 archivesBaseName = 'jumbodb-java-connector'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 repositories {
     mavenCentral()
@@ -36,9 +35,7 @@ configurations {
 }
 
 dependencies {
-//    deployerJars ("org.apache.maven.wagon:wagon-http:2.2")
     deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
-//    deployerJars 'commons-httpclient:commons-httpclient:3.1'
     compile 'commons-io:commons-io:2.3'
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.7'
     compile 'commons-lang:commons-lang:2.5'

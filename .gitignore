@@ -4,4 +4,4 @@
 *.ipr
 .gradle
 out/
-connectors/build/
+build/

@@ -1,0 +1,7 @@
+*.iml
+*.iwr
+*.iws
+*.ipr
+.gradle
+out/
+connectors/build/

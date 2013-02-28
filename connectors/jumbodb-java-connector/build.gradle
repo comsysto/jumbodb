@@ -1,14 +1,10 @@
-apply plugin: 'idea'
 apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
-group = 'org.jumbodb.connector'
 archivesBaseName = 'jumbodb-java-connector'
-version = '0.0.2'
 
 repositories {
     mavenCentral()

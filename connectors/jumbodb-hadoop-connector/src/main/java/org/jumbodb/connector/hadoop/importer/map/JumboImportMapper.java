@@ -61,7 +61,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
                 jumboImportConnection.importIndex(indexInfo, copyDataCallback);
             }
             else if(JumboConstants.DATA_TYPE_DATA.equals(type)) {
-                String collection = path.getParent().getParent().getName();
+                String collection = path.getParent().getName();
                 String fileName = path.getName();
                 DataInfo dataInfo = new DataInfo(collection, fileName, fileLength, deliveryKey, deliveryVersion);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);

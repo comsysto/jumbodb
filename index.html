@@ -38,7 +38,7 @@
             <h2 class="motto"><strong>Data Store</strong> for low-latency <br/><strong>Big Data Apps</strong>.</h2>
             <h3 class="subheader">
                 Already using Apache Hadoop for batch data deliveries?<br/>
-                Need the efficient store for your analytical application?
+                Need an efficient store for your analytical application?
             </h3>
             <img id="feature-screenshot" src="img/pics/jumbo.png" alt="screenshot" />
         </div>
@@ -114,7 +114,8 @@
                 <article class="span6 offset1">
                     <h3>Batch processing - delivery driven approach</h3>
                     <p>
-                        “Write once – read many”, one batch of data is an atomic write with the rollback possibility.
+                        “Write once – read many”, one batch of data is an atomic write with the instant rollback, replacement or combination possibility and
+                        delivery versioning included.
                     </p>
                 </article>
                 <div class="span4">
@@ -137,7 +138,7 @@
                     <h3>Power and scalability of Apache Hadoop</h3>
                     <p>
                         For batch processing, aggregation and indexing of your
-                        data.(e.g. writes up to 500.000 JSON documents per second).
+                        data. Example: jumboDB allows writes up to 500.000 JSON documents per second on a single AWS m1.xlarge instance (document size being 420 bytes).
                     </p>
                 </article>
                 <div class="span4">
@@ -152,8 +153,8 @@
                     <h3>Low read latency for end-user apps</h3>
                     <p>
                         Optimized querying even for large result sets through
-                        multithreading and efficient data streaming (e.g. 100.000
-                        JSON documents returned in less than a second).
+                        multithreading and efficient data streaming.
+                        Example: 100.000 JSON documents returned in less than a second on a single m1.xlarge AWS instance.
                     </p>
                 </article>
             </div>
@@ -188,10 +189,10 @@
                 Dedicated to cost efficient Big Data.
             </p>
             <p>
-                Working on Big Data projects with Telefonica Digital, Carsten
-                Hufe from comSysto started looking for an efficient and affordable
-                way to store and query large amounts of data being delivered
-                in large batches through Apache Hadoop.
+                Working on Big Data projects with Telefonica Digital, Carsten Hufe and the comSysto-Team started looking for an efficient and affordable way to
+                store and query large amounts of data being delivered in large batches through Apache Hadoop. Our goal was to build a data visualization app for
+                end users issuing different kinds of selective queries on already processed data. Some of the queries were returning large result sets of up to
+                800.000 JSON documents representing data points for browser visualisation.
                 <p/>
                 We faced three major challenges:
                 <ul class="unstyled">
@@ -209,26 +210,27 @@
                     Cost saving pressure for AWS infrastructure
                 </li>
                 </ul>
-                Instead of waiting for the database to write and index the data
-                Carsten proposed to organize the result data within the Hadoop
-                process, including index builds. Using Snappy for compression he
-                reduced the overall the hardware and network footprint of the
-                stored data while increasing performance.
+                Instead of waiting for the database to write and index the data, Carsten proposed to organize the batch result data within the Hadoop process,
+                including index builds. Using Snappy for compression he reduced the overall the hardware and network footprint of the stored data while
+                increasing write and read performance. Index builds are now part of the standard Hadoop processing saving valuable processing time and money,
+                still allowing fast querying of large data sets. With jumboDB we were able to deliver all required features based on a full data set while
+                saving infrastructure cost.
             </p>
             <p>
                 <strong>Do with jumboDB:</strong>
                 <ul class="unstyled">
-                    <li><i class="icon-thumbs-up"></i> Store your data for analytical end-user apps</li>
+                    <li><i class="icon-thumbs-up"></i> Store your data for complex data visualisation apps</li>
                     <li><i class="icon-thumbs-up"></i> Improve Write performance for Hadoop batch jobs</li>
-                    <li><i class="icon-thumbs-up"></i> Low-latency range queries on indexed data for large result sets</li>
+                    <li><i class="icon-thumbs-up"></i> Low-latency queries on indexed data for large result sets </li>
                 </ul>
             </p>
             <p>
                 <strong>Don’t:</strong>
                 <ul class="unstyled">
-                    <li><i class="icon-thumbs-down"></i> Perform exploratory analysis</li>
-                    <li><i class="icon-thumbs-down"></i> Use SQL on jumboDB</li>
-                </ul>
+                <li><i class="icon-thumbs-down"></i> Use SQL on jumboDB</li>
+                <li><i class="icon-thumbs-down"></i> Use dumboDB without Apache Hadoop</li>
+                <li><i class="icon-thumbs-down"></i> Update single documents</li>
+            </ul>
 
             </p>
             </article>
@@ -236,42 +238,56 @@
     </div>
 </div>
 <div class="container">
-    <h3 class="subheader">
-        Initiated by Carsten Hufe, Lean Java Expert at comSysto GmbH.<br/>
-        Powered by Telefonica Digital and comSysto.
-    </h3>
-    <!--
-<div class="row">
-<div class="span8">
-    <h4>About us</h4>
-    <p>
-        Innovation through insight :: Thinking lean and moving agile when delivering software products
-    </p>
-    <p></p>
+    <div class="row">
+        <div class="span12 box">
+            <article class="span10 offset1">
+                <p>
+                    <strong>About TDI</strong>
 
-</div>
-<div class="span4">
+                <p>
+                    Telefónica Dynamic Insights provide near real-time data, collected 24 hours a day, 7 days a week, 365 days a year and present it through
+                    simple
+                    web interfaces to enable visualisation and understanding. We fuse this data with the best consumer preference, attitude and behavioural
+                    insight
+                    through our global partnership with GfK.
+                    <a href="http://dynamicinsights.telefonica.com" target="_blank">Find out more about TDI</a>.
+                </p>
+                </p>
 
-    <form class="form-horizontal">
-        <h4>Sign up to the newsletter</h4>
-        <div class="input-prepend">
-            <span class="add-on"><i class="icon-envelope"></i></span><input type="text" id="inputIcon" class="span2" placeholder="Email address">
+                <p>
+                    <strong>About comSysto</strong>
+
+                <p>
+                    comSysto is a Munich-based software company specialized in lean business and technology development. While supporting all three steps of a
+                    well
+                    known Build-Measure-Learn lean feedback loop, comSysto focuses on open source frameworks and software as major enablers of short, agile
+                    Build-Measure-Learn iterations and fast gains in validated learning. Powerful MongoDB technology provides the needed flexibility and agility
+                    for
+                    turning ideas into products as well as performance for handling Big Data while turning data into knowledge.
+
+                    We also enjoy developing with Spring framework and its subprojects, Apache Wicket, Gradle, Git, Oracle DB and Oracle BI. comSysto is
+                    dedicated
+                    to eliminating waste in both business and technology since 2005. <a href="http://www.comsysto.com" target="_blank">Find out more about
+                    comSysto</a>.
+                </p>
+                </p>
         </div>
-
-        <button class="btn">Sign up</button>
-    </form>
-
+    </div>
 </div>
 </div>
-    -->
+<div class="container">
+    <h3 class="subheader">
+        Initiated by Carsten Hufe, Lean Java Expert at comSysto GmbH, created
+        in the Telefónica Big Data Lab.<br/>
+        Powered by Telefónica Dynamic Insights and comSysto.
+    </h3>
     <div class="row">
         <div class="span12 graded center">
-                <a href="http://www.twitter.com/comsysto" target="_blank"><img src="img/icons/twitter.png" alt="twitter" /></a>
-                <a href="http://www.facebook.com/comSysto" target="_blank"><img src="img/icons/facebook.png" alt="fb" /></a>
+            <a href="http://www.twitter.com/comsysto" target="_blank"><img src="img/icons/twitter.png" alt="twitter" /></a>
+            <a href="http://www.facebook.com/comSysto" target="_blank"><img src="img/icons/facebook.png" alt="fb" /></a>
             </ul>
         </div>
     </div>
-
 </div>
 
 </body>

@@ -28,16 +28,13 @@ object Global extends GlobalSettings {
 
     queryServer = new QueryServer(queryPort, dataPath, indexPath)
     importServer = new ImportServer(importPort, dataPath, indexPath, queryServer)
-//    databaseQueryServer = new DatabaseQueryServer(12003, dataPath, indexPath)
     queryServer.start()
     importServer.start()
-//    databaseQueryServer.start()
   }
 
   override def onStop(app: Application) {
     importServer.stop()
     queryServer.stop()
-//    databaseQueryServer.stop()
   }
 
 }

@@ -14,8 +14,7 @@ object ApplicationBuild extends Build {
       "org.angularjs" %  "angular"  % "1.0.1-1",
       "org.xerial.snappy" %  "snappy-java"  % "1.0.4.1",
       "com.github.twitter" %  "bootstrap"  % "2.1.0",
-      "net.minidev" %  "json-smart"  % "1.1.1",
-      "json-simple" % "json-simple" % "1.1.1" from "http://json-simple.googlecode.com/files/json-simple-1.1.1.jar"
+      "net.minidev" %  "json-smart"  % "1.1.1"
 
     )
 

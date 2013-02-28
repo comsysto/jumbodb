@@ -1,0 +1,28 @@
+group = 'org.jumbodb'
+
+allprojects {
+    apply plugin: 'idea'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'project-reports'
+    apply plugin: 'eclipse'
+  
+    group = 'org.jumbodb'
+    version = '0.0.3-SNAPSHOT'
+  
+
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+// generate gradle bootstrapping
+// run gradle createWrapper
+task createWrapper(type: Wrapper) {
+  gradleVersion = '1.4'
+}

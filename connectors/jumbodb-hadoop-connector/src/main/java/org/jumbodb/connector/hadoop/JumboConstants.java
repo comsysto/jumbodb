@@ -19,7 +19,6 @@ public class JumboConstants {
     public static final int PORT_DEFAULT = 12001;
     public static final String MAX_PARALLEL_IMPORTS = "jumbo.max.parallel.imports";
     public static final int MAX_PARALLEL_IMPORTS_DEFAULT = 5;
-    public static final int PROTOCOL_VERSION = 3;
 
     public static final int BUFFER_SIZE = 32 * 1024;
 

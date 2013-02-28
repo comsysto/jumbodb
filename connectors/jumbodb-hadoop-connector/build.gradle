@@ -10,7 +10,7 @@ targetCompatibility = 1.6
 
 group = 'org.jumbodb.connector'
 archivesBaseName = 'jumbodb-hadoop-connector'
-version = "0.0.2-SNAPSHOT"
+version = "0.0.2"
 
 repositories {
     mavenCentral()
@@ -39,7 +39,7 @@ sourceSets {
 
 dependencies {
     deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
-    compile "org.jumbodb.connector:jumbodb-java-connector:0.0.2-SNAPSHOT"
+    compile "org.jumbodb.connector:jumbodb-java-connector:0.0.2"
     compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
     compile "org.apache.hadoop:hadoop-core:1.0.3"
     compile 'com.google.guava:guava:r09'

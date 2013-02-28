@@ -7,6 +7,7 @@ import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * User: carsten
@@ -14,7 +15,6 @@ import java.net.Socket;
  * Time: 4:35 PM
  */
 public class JumboImportConnection implements Closeable {
-
     private Socket socket;
     private OutputStream outputStream;
     private BufferedOutputStream bufferedOutputStream;
@@ -65,6 +65,32 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(dataInfo.getDeliveryVersion());
             dos.flush();
             callback.onCopy(snappyOutputStream);
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
+    public void sendMetaData(MetaData metaData) {
+        try {
+            dos.writeUTF(":cmd:import:collection:meta");
+            dos.writeUTF(metaData.getCollection());
+            dos.writeUTF(metaData.getDeliveryKey());
+            dos.writeUTF(metaData.getDeliveryVersion());
+            dos.writeUTF(metaData.getPath());
+            dos.writeBoolean(metaData.isActivate());
+            dos.writeUTF(metaData.getInfo());
+            dos.flush();
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
+    public void sendFinishedNotification(String deliveryKey, String deliveryVersion) {
+        try {
+            dos.writeUTF(":cmd:import:finished");
+            dos.writeUTF(deliveryKey);
+            dos.writeUTF(deliveryVersion);
+            dos.flush();
         } catch (IOException e) {
             throw new UnhandledException(e);
         }

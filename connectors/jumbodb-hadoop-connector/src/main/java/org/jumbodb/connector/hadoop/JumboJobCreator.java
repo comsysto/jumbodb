@@ -9,6 +9,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
+import org.jumbodb.connector.importer.JumboImportConnection;
+import org.jumbodb.connector.importer.MetaData;
 
 import java.io.*;
 import java.net.Socket;
@@ -23,7 +25,6 @@ import java.util.UUID;
  * Time: 3:42 PM
  */
 public class JumboJobCreator {
-    // CARSTEN todo wrap in own protocol, in the java driver
 
     public static List<ControlledJob> createIndexAndImportJob(Configuration conf, Path inputDataPath, Path outputIndexPath, Path outputReportPath, Class<? extends AbstractIndexMapper>... mapper) throws IOException {
         if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
@@ -51,46 +52,17 @@ public class JumboJobCreator {
         if(!JumboConstants.DATA_TYPE_DATA.equals(type)) {
             return;
         }
-
-        FSDataInputStream fis = null;
-        Socket socket = null;
-        OutputStream outputStream = null;
-        DataOutputStream dos = null;
-        DataInputStream dis = null;
+        JumboImportConnection jumbo = null;
         try {
-            socket = new Socket(conf.get(JumboConstants.HOST), conf.getInt(JumboConstants.PORT, JumboConstants.PORT_DEFAULT));
-            outputStream = socket.getOutputStream();
-            dos = new DataOutputStream(outputStream);
-            dis = new DataInputStream(socket.getInputStream());
-            int protocolVersion = dis.readInt();
-            if(protocolVersion != JumboConstants.PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version - Got " + protocolVersion + ", but expected " + JumboConstants.PROTOCOL_VERSION);
-            }
+            jumbo = new JumboImportConnection(conf.get(JumboConstants.HOST), conf.getInt(JumboConstants.PORT, JumboConstants.PORT_DEFAULT));
             String pathString = conf.get(JumboConstants.IMPORT_PATH);
             Path path = new Path(pathString);
             String collection = path.getName();
-
-            dos.writeUTF(":cmd:import:collection:meta");
-            dos.writeUTF(collection);
-            String deliveryKey = conf.get(JumboConstants.DELIVERY_KEY);
-            dos.writeUTF(deliveryKey);
-            String deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
-            dos.writeUTF(deliveryVersion);
-            dos.writeUTF(pathString);
-            dos.writeBoolean(conf.getBoolean(JumboConstants.DELIVERY_ACTIVATE, JumboConstants.DELIVERY_ACTIVATE_DEFAULT));
-            dos.writeUTF(conf.get(JumboConstants.DELIVERY_INFO, "none"));
-
-            dos.flush();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            boolean activate = conf.getBoolean(JumboConstants.DELIVERY_ACTIVATE, JumboConstants.DELIVERY_ACTIVATE_DEFAULT);
+            MetaData metaData = new MetaData(collection, conf.get(JumboConstants.DELIVERY_KEY), conf.get(JumboConstants.DELIVERY_VERSION), pathString, activate, conf.get(JumboConstants.DELIVERY_INFO, "none"));
+            jumbo.sendMetaData(metaData);
         } finally {
-            IOUtils.closeStream(outputStream);
-            IOUtils.closeStream(fis);
-            IOUtils.closeStream(dos);
-            IOUtils.closeStream(dis);
-            IOUtils.closeSocket(socket);
+            IOUtils.closeStream(jumbo);
         }
     }
 
@@ -103,34 +75,12 @@ public class JumboJobCreator {
     }
 
     public static void sendFinishedNotification(Configuration conf) {
-        Socket socket = null;
-        OutputStream outputStream = null;
-        DataOutputStream dos = null;
-        DataInputStream dis = null;
+        JumboImportConnection jumbo = null;
         try {
-            socket = new Socket(conf.get(JumboConstants.HOST), conf.getInt(JumboConstants.PORT, JumboConstants.PORT_DEFAULT));
-            outputStream = socket.getOutputStream();
-            dos = new DataOutputStream(outputStream);
-            dis = new DataInputStream(socket.getInputStream());
-            int protocolVersion = dis.readInt();
-            if(protocolVersion != JumboConstants.PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version - Got " + protocolVersion + ", but expected " + JumboConstants.PROTOCOL_VERSION);
-            }
-            dos.writeUTF(":cmd:import:finished");
-            String deliveryKey = conf.get(JumboConstants.DELIVERY_KEY);
-            dos.writeUTF(deliveryKey);
-            String deliveryVersion = JumboConstants.DELIVERY_VERSION;
-            dos.writeUTF(conf.get(deliveryVersion));
-            dos.flush();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            jumbo = new JumboImportConnection(conf.get(JumboConstants.HOST), conf.getInt(JumboConstants.PORT, JumboConstants.PORT_DEFAULT));
+            jumbo.sendFinishedNotification(conf.get(JumboConstants.DELIVERY_KEY), conf.get(JumboConstants.DELIVERY_VERSION));
         } finally {
-            IOUtils.closeStream(outputStream);
-            IOUtils.closeStream(dos);
-            IOUtils.closeStream(dis);
-            IOUtils.closeSocket(socket);
+            IOUtils.closeStream(jumbo);
         }
     }
 }

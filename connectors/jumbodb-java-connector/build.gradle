@@ -32,7 +32,6 @@ configurations {
 
 dependencies {
     deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
-    compile 'commons-io:commons-io:2.3'
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.7'
     compile 'commons-lang:commons-lang:2.5'
     compile 'commons-io:commons-io:2.3'

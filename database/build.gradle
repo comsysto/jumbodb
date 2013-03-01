@@ -69,9 +69,9 @@ dependencies{
     provided 'org.scala-lang:scala-library:2.10.0'
 
 // Play 2.0 Framework public API
-    provided group: 'play', name: 'play_2.10.0', version: '2.1.0', configuration: 'compile'
+    provided group: 'play', name: 'play_2.10', version: '2.1.0', configuration: 'compile'
 
-    playManaged files('target/scala-2.10.0/classes_managed')
+    playManaged files('target/scala-2.10/classes_managed')
 }
 
 task copyPlayLibs(type: Copy){

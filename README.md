@@ -66,8 +66,11 @@ JSON documents returned in less than a second)
 ### How to run the database
 
 Run the database
-`cd database`
-`play start`
+
+```
+cd database
+play start
+```
 
 Data is stored by default in your home folder under `jumbodb`.
 
@@ -76,6 +79,7 @@ Data is stored by default in your home folder under `jumbodb`.
 **Gradle**
 
 *Repositories*
+
 ```
 repositories {
     mavenCentral()
@@ -85,6 +89,7 @@ repositories {
 ```
 
 *Dependency*
+
 ```
 compile "org.jumbodb.connector:jumbodb-java-connector:0.0.3"
 ```
@@ -92,6 +97,7 @@ compile "org.jumbodb.connector:jumbodb-java-connector:0.0.3"
 **Maven**
 
 *Repository*
+
 ```
 <repositories>
     <repository>
@@ -123,17 +129,24 @@ Create `~/.gradle/gradle.properties` in your home folder with the following cont
 ```
 cloudbeesUsername=your user name
 cloudbeesPassword=your password
-cloudbeesAccountName=comsysto`
+cloudbeesAccountName=comsysto
 ```
 
 Set the current version in the root `build.gradle`
-`cd connectors`
-`gradle uploadArchives`
+
+``
+cd connectors
+gradle uploadArchives
+```
 
 ### Release the database
 
-`cd database`
-`play dist` produces a full bundled distribution. Just unzip and call ./start
+```
+cd database
+play dist
+````
+
+This produces a full bundled distribution. Just unzip and call ./start
 
 
 

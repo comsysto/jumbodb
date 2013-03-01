@@ -1,6 +1,8 @@
 jumboDB
 =======
 
+http://comsysto.github.com/jumbodb/
+
 ## Data Store for low-latency Big Data Apps
 
 Already using Apache Hadoop for batch data deliveries? Need
@@ -38,3 +40,103 @@ multithreading and efficient data streaming (e.g. 100.000
 JSON documents returned in less than a second)
 
 7. Hadoop Connector and Java Driver available
+
+## How to setup
+
+### Requirements
+
+* Java 1.6 or higher
+* Gradle 1.4
+    * Download & install (must be in $PATH) http://www.gradle.org
+    * Mac user with brew:  `brew install gradle`
+* Play Framework 2.1
+    * Download & install (must be in $PATH) http://www.playframework.com/
+
+### Setup project
+
+* Eclipse users do `gradle eclipse` in the root folder
+* Intellij IDEA users do `gradle idea`
+
+### Project structure
+
+* `connectors` contains all the connectors like java and hadoop connector
+* `database` contains the database
+* `test` contains different things, like integration tests, evaluations and test data generation
+
+### How to run the database
+
+Run the database
+`cd database`
+`play start`
+
+Data is stored by default in your home folder under `jumbodb`.
+
+### Use the connectors
+
+_Gradle_
+
+Repositories
+```
+repositories {
+    mavenCentral()
+    mavenRepo(url: "http://repository-comsysto.forge.cloudbees.com/release")
+    mavenRepo(url: "http://repository-comsysto.forge.cloudbees.com/snapshot")
+}
+```
+
+Dependency
+```
+compile "org.jumbodb.connector:jumbodb-java-connector:0.0.3"
+```
+
+_Maven_
+
+Repository
+```
+<repositories>
+    <repository>
+      <id>comsysto-release</id>
+      <url>http://repository-comsysto.forge.cloudbees.com/release</url>
+    </repository>
+    <repository>
+      <id>comsysto-snapshot</id>
+      <url>http://repository-comsysto.forge.cloudbees.com/snapshot</url>
+    </repository>
+  </repositories>
+```
+
+Dependency
+```
+<dependency>
+  <groupId>org.jumbodb.connector::</groupId>
+  <artifactId>jumbodb-java-connector</artifactId>
+  <version>0.0.3</version>
+  <type>jar</type>
+  <scope>compile</scope>
+</dependency>
+```
+
+### Release the connectors
+
+Create `~/.gradle/gradle.properties` in your home folder with the following contents:
+
+```
+cloudbeesUsername=your user name
+cloudbeesPassword=your password
+cloudbeesAccountName=comsysto`
+```
+
+Set the current version in the root `build.gradle`
+`cd connectors`
+`gradle uploadArchives`
+
+### Release the database
+
+`cd database`
+`play dist` produces a full bundled distribution. Just unzip and call ./start
+
+
+
+
+
+

@@ -48,7 +48,7 @@ JSON documents returned in less than a second)
 * Java 1.6 or higher
 * Gradle 1.4
     * Download & install (must be in $PATH) http://www.gradle.org
-    * Mac user with brew:  `brew install gradle`
+    * Mac users can use brew:  `brew install gradle`
 * Play Framework 2.1
     * Download & install (must be in $PATH) http://www.playframework.com/
 
@@ -134,7 +134,7 @@ cloudbeesAccountName=comsysto
 
 Set the current version in the root `build.gradle`
 
-``
+```
 cd connectors
 gradle uploadArchives
 ```
@@ -144,7 +144,7 @@ gradle uploadArchives
 ```
 cd database
 play dist
-````
+```
 
 This produces a full bundled distribution. Just unzip and call ./start
 

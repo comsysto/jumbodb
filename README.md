@@ -73,9 +73,9 @@ Data is stored by default in your home folder under `jumbodb`.
 
 ### Use the connectors
 
-_Gradle_
+**Gradle**
 
-Repositories
+*Repositories*
 ```
 repositories {
     mavenCentral()
@@ -84,14 +84,14 @@ repositories {
 }
 ```
 
-Dependency
+*Dependency*
 ```
 compile "org.jumbodb.connector:jumbodb-java-connector:0.0.3"
 ```
 
-_Maven_
+**Maven**
 
-Repository
+*Repository*
 ```
 <repositories>
     <repository>
@@ -105,7 +105,7 @@ Repository
   </repositories>
 ```
 
-Dependency
+*Dependency*
 ```
 <dependency>
   <groupId>org.jumbodb.connector::</groupId>

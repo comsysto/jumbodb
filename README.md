@@ -1,7 +1,7 @@
-jumboDB
-=======
 
-http://comsysto.github.com/jumbodb/
+![jumboDB](http://comsysto.github.com/jumbodb/img/pics/jumbo.png)
+
+Website: http://comsysto.github.com/jumbodb/
 
 ## Data Store for low-latency Big Data Apps
 

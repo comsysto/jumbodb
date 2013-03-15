@@ -107,7 +107,6 @@ public class JumboQueryConnection {
         return result;
     }
 
-        // CARSTEN later support asyncronous calls
     private <T> void findWithCallback(String collection, Class<T> jsonClazz, JumboQuery searchQuery, ResultHandler<T> resultHandler) {
         long start = System.currentTimeMillis();
         Socket sock = null;

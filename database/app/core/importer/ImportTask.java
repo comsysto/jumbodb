@@ -36,13 +36,13 @@ public class ImportTask implements Runnable {
             databaseImportSession.runImport(new ImportHandler() {
                 @Override
                 public void onImport(ImportMetaFileInformation information, InputStream dataInputStream) {
-                    OutputStream fos = null;
+                    OutputStream sos = null;
                     DataOutputStream dos = null;
+                    BufferedOutputStream bos = null;
+                    FileOutputStream snappyChunksFos = null;
+                    DataOutputStream snappyChunksDos = null;
                     try {
                         String absoluteImportPath = getTemporaryImportAbsolutePathByType(information);
-                        // CARSTEN abstract store format for index and data in own classes
-                        // CARSTEN or single managing class
-
                         File storageFolderFile = new File(absoluteImportPath);
                         if (!storageFolderFile.exists()) {
                             storageFolderFile.mkdirs();
@@ -54,21 +54,42 @@ public class ImportTask implements Runnable {
                         }
                         Logger.info("ImportServer - " + filePlacePath);
 
-
                         if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
-                            fos = new SnappyOutputStream(new BufferedOutputStream(new FileOutputStream(filePlacePathFile)));
-                            dos = new DataOutputStream(fos);
-                            dos.writeLong(information.getFileLength());
-                            dos.flush();
+                            String filePlaceChunksPath = filePlacePath + ".chunks.snappy";
+                            File filePlaceChunksFile = new File(filePlaceChunksPath);
+                            if (filePlaceChunksFile.exists()) {
+                                filePlaceChunksFile.delete();
+                            }
+
+                            snappyChunksFos = new FileOutputStream(filePlaceChunksFile);
+                            snappyChunksDos = new DataOutputStream(snappyChunksFos);
+                            final DataOutputStream finalSnappyChunksDos = snappyChunksDos;
+
+                            snappyChunksDos.writeLong(information.getFileLength());
+                            // CARSTEN pfui, cleanup when time!
+                            bos = new BufferedOutputStream(new FileOutputStream(filePlacePathFile)) {
+                                @Override
+                                public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
+                                    finalSnappyChunksDos.writeInt(i2);
+                                    super.write(bytes, i, i2);
+                                }
+                            };
+//                            sos = new SnappyOutputStream(bos);
+//                            dos = new DataOutputStream(sos);
+//                            dos.writeLong(information.getFileLength());
+//                            dos.flush();
                         } else {
-                            fos = new FileOutputStream(filePlacePathFile);
+                            sos = new FileOutputStream(filePlacePathFile);
                         }
-                        IOUtils.copy(dataInputStream, fos);
+                        IOUtils.copy(dataInputStream, sos);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     } finally {
                         IOUtils.closeQuietly(dos);
-                        IOUtils.closeQuietly(fos);
+                        IOUtils.closeQuietly(bos);
+                        IOUtils.closeQuietly(sos);
+                        IOUtils.closeQuietly(snappyChunksDos);
+                        IOUtils.closeQuietly(snappyChunksFos);
                         IOUtils.closeQuietly(clientSocket);
                     }
                 }

@@ -9,8 +9,8 @@ apply plugin: 'application'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
-group = 'org.jumbodb.test.testdata'
-archivesBaseName = 'jumbodb-testdata'
+group = 'org.jumbodb.test.evaluation'
+archivesBaseName = 'jumbodb-evalution'
 version = "0.0.1-SNAPSHOT"
 
 repositories {
@@ -51,6 +51,8 @@ dependencies {
     compile 'org.xerial.snappy:snappy-java:1.0.4.1'
     compile 'org.msgpack:msgpack:0.6.7'
     compile 'net.minidev:json-smart:2.0-RC2'
+    compile project(':connectors:jumbodb-java-connector')
+
 //    compile 'de.undercouch:bson4jackson:2.0.0'
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.0"

@@ -20,6 +20,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
     private final ResultCallback resultCallback;
     private final List<Long> offsets;
     private final int bufferSize = 4096;
+    private final int snappyChunkSize = 512 * 1024;
     private final byte[] defaultBuffer = new byte[bufferSize]; // for reuse
 
 
@@ -36,23 +37,23 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         Collections.sort(this.offsets);
         long start = System.currentTimeMillis();
         FileInputStream fis = null;
-        BufferedInputStream bis = null;
-        SnappyInputStream lis = null;
+//        BufferedInputStream bis = null;
+        ChunkSkipableSnappyInputStream sis = null;
         DataInputStream dis = null;
         BufferedReader br = null;
+        FileInputStream chunksFis = new FileInputStream(file.getAbsolutePath() + ".chunks.snappy");
+        DataInputStream chunksDis = new DataInputStream(new BufferedInputStream(chunksFis));
         int results = 0;
 
         try {
 
             List<List<Long>> offsetGroups = groupOffsetsByBufferSize(bufferSize);
-            System.out.println(file);
             fis = new FileInputStream(file);
-            bis = new BufferedInputStream(fis);
-            lis = new SnappyInputStream(bis);
-            dis = new DataInputStream(lis);
-            long length = dis.readLong();
-            br = new BufferedReader(new InputStreamReader(lis));
-
+//            bis = new BufferedInputStream(fis); // CARSTEN ChunkSkipableSnappyInputStream and BufferedInputStream does work together
+            sis = new ChunkSkipableSnappyInputStream(fis);
+            dis = new DataInputStream(sis);
+            long length = chunksDis.readLong();
+            br = new BufferedReader(new InputStreamReader(sis));
 
 
             if (searchQuery.getIndexComparision().size() == 0) {
@@ -69,20 +70,16 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                     count++;
                 }
             } else {
-                //                long length = fis.available();
-                long currentOffset = 8;
-
-                // CARSTEN achtung 8 byte for length)
-
+                long currentOffset = 0;
                 for (List<Long> offsetGroup : offsetGroups) {
                     long firstOffset = offsetGroup.get(0);
 
-                    long toSkip = firstOffset - currentOffset + 8;
-                    lis.skip(toSkip);
+                    long toSkip = firstOffset - currentOffset;
+                    sis.skip(toSkip);
                     currentOffset += toSkip;
                     long available = length - currentOffset;
                     byte[] buffer = getBufferByOffsetGroup(offsetGroup, available);
-                    lis.read(buffer);
+                    sis.read(buffer);
                     currentOffset += buffer.length;
                     for (Long offset : offsetGroup) {
                         String dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(buffer, (int) (offset - firstOffset));
@@ -100,10 +97,12 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(dis);
-            IOUtils.closeQuietly(bis);
+//            IOUtils.closeQuietly(bis);
             IOUtils.closeQuietly(fis);
-            IOUtils.closeQuietly(lis);
+            IOUtils.closeQuietly(sis);
             IOUtils.closeQuietly(br);
+            IOUtils.closeQuietly(chunksDis);
+            IOUtils.closeQuietly(chunksFis);
         }
         return results;
     }

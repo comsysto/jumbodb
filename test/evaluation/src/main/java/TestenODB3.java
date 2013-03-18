@@ -12,12 +12,20 @@ import java.util.Map;
  */
 public class TestenODB3 {
     public static void main(String[] args) throws Exception {
-//        JumboDriver jumboDriver = new JumboDriver("smartsteps-mongo-dval01.ec2.smartste.ps", 12002);
+////        JumboDriver jumboDriver = new JumboDriver("smartsteps-mongo-dval01.ec2.smartste.ps", 12002);
+//        JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
+//        JumboQuery query = new JumboQuery();
+//        query.addIndexComparision("tocellid_date", Arrays.asList("1124332342224-20121002", "1121332314344-20121002"));
+//        long start = System.currentTimeMillis();
+//        List<Map> daily = jumboDriver.find("de.catchment.aggregated.daily.sum.by_cell", Map.class, query);
+//        System.out.println(daily);
+//        System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
+
+        //        JumboDriver jumboDriver = new JumboDriver("smartsteps-mongo-dval01.ec2.smartste.ps", 12002);
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
         JumboQuery query = new JumboQuery();
-        query.addIndexComparision("tocellid_date", Arrays.asList("1124332342224-20121002", "1121332314344-20121002"));
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find("de.catchment.aggregated.daily.sum.by_cell", Map.class, query);
+        List<Map> daily = jumboDriver.find("de.catchment.dates.daily", Map.class, query);
         System.out.println(daily);
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }

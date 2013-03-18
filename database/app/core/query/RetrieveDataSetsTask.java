@@ -5,7 +5,6 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.xerial.snappy.SnappyInputStream;
 import play.Logger;
 
 import java.io.*;
@@ -20,7 +19,6 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
     private final ResultCallback resultCallback;
     private final List<Long> offsets;
     private final int bufferSize = 4096;
-    private final int snappyChunkSize = 512 * 1024;
     private final byte[] defaultBuffer = new byte[bufferSize]; // for reuse
 
 
@@ -41,18 +39,26 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         ChunkSkipableSnappyInputStream sis = null;
         DataInputStream dis = null;
         BufferedReader br = null;
-        FileInputStream chunksFis = new FileInputStream(file.getAbsolutePath() + ".chunks.snappy");
-        DataInputStream chunksDis = new DataInputStream(new BufferedInputStream(chunksFis));
+        FileInputStream chunksFis = null;
+        DataInputStream chunksDis = null;
         int results = 0;
 
         try {
 
             List<List<Long>> offsetGroups = groupOffsetsByBufferSize(bufferSize);
             fis = new FileInputStream(file);
-//            bis = new BufferedInputStream(fis); // CARSTEN ChunkSkipableSnappyInputStream and BufferedInputStream does work together
+//            bis = new BufferedInputStream(fis); // CARSTEN ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
             sis = new ChunkSkipableSnappyInputStream(fis);
             dis = new DataInputStream(sis);
+            String chunkFileName = file.getAbsolutePath() + ".chunks.snappy";
+            File chunkFile = new File(chunkFileName);
+            chunksFis = new FileInputStream(chunkFileName);
+            chunksDis = new DataInputStream(new BufferedInputStream(chunksFis));
             long length = chunksDis.readLong();
+            int snappyChunkSize = chunksDis.readInt();
+            long numberOfChunks = (chunkFile.length() - 8 - 4 - 4) / 4;
+            List<Integer> snappyChunks = buildSnappyChunks(chunksDis, numberOfChunks);
+
             br = new BufferedReader(new InputStreamReader(sis));
 
 
@@ -73,9 +79,41 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                 long currentOffset = 0;
                 for (List<Long> offsetGroup : offsetGroups) {
                     long firstOffset = offsetGroup.get(0);
-
+//                    System.out.println("firstOffset " + firstOffset);
+                    // voller skip
                     long toSkip = firstOffset - currentOffset;
-                    sis.skip(toSkip);
+//                    System.out.println("Current Offset " + currentOffset);
+//                    System.out.println("toSkip " + toSkip);
+
+
+                    /////////
+
+//                    System.out.println(file.getAbsolutePath());
+                    long chunkIndex = (firstOffset / snappyChunkSize);
+//                    System.out.println("chunkIndex " + chunkIndex );
+                    long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks);
+//                    System.out.println("chunkOffsetCompressed " + chunkOffsetCompressed );
+                    long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunkSize);
+//                    System.out.println("chunkOffsetUncompressed " + chunkOffsetUncompressed );
+                    long position = fis.getChannel().position();
+//                    System.out.println("position " + position );
+                    long chunkOffsetToSkip = chunkOffsetCompressed - position;
+//                    System.out.println("chunkOffsetToSkip " + chunkOffsetToSkip );
+                    if(chunkOffsetToSkip > 0) {
+                        // other chunk
+                        sis.skipCompressed(chunkOffsetToSkip);
+                        long partialSkipInData = firstOffset - chunkOffsetUncompressed;
+//                    System.out.println("partialSkipInData " + partialSkipInData );
+                        sis.skip(partialSkipInData);
+                    }
+                    else {
+                        // same chunk
+                        sis.skip(toSkip);
+                    }
+
+
+                    ////////
+//                    sis.skip(toSkip);
                     currentOffset += toSkip;
                     long available = length - currentOffset;
                     byte[] buffer = getBufferByOffsetGroup(offsetGroup, available);
@@ -84,6 +122,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                     for (Long offset : offsetGroup) {
                         String dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(buffer, (int) (offset - firstOffset));
                         if (matchingFilter(dataSetFromOffsetsGroup, parser)) {
+//                            System.out.println(dataSetFromOffsetsGroup);
                             resultCallback.writeResult(dataSetFromOffsetsGroup);
                             results++;
                         }
@@ -105,6 +144,30 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             IOUtils.closeQuietly(chunksFis);
         }
         return results;
+    }
+
+    private long calculateChunkOffsetUncompressed(long chunkIndex, int snappyChunkSize) {
+//        long l = chunkIndex - 1;
+//        return l > 0 ? l * ChunkSkipableSnappyInputStream.snappyChunkSize : 0;
+        return chunkIndex * snappyChunkSize;
+    }
+
+    private long calculateChunkOffsetCompressed(long chunkIndex, List<Integer> snappyChunks) {
+        long result = 0l;
+        for(int i = 0; i < chunkIndex; i++) {
+            result += snappyChunks.get(i) + 4; // 4 byte for length of chunk
+        }
+        return result + 16;
+    }
+
+    private List<Integer> buildSnappyChunks(DataInputStream chunksDis, long numberOfChunks) throws IOException {
+        List<Integer> snappyChunks = new ArrayList<Integer>((int)numberOfChunks);
+        // - 8 is length value, 4 is the chunksize
+        chunksDis.readInt(); // remove version chunk
+        for(int i = 0; i < numberOfChunks; i++) {
+            snappyChunks.add(chunksDis.readInt());
+        }
+        return snappyChunks;
     }
 
     private boolean matchingFilter(String s, JSONParser parser) throws IOException, ParseException {

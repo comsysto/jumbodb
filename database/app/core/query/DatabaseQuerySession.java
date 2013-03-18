@@ -49,8 +49,8 @@ public class DatabaseQuerySession implements Closeable {
 
             Logger.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
             dataOutputStream.writeUTF(":result:end");
-            snappyOutputStream.flush();
             dataOutputStream.flush();
+            snappyOutputStream.flush();
         }
 
     }

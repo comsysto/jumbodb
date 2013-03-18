@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Properties;
 
 public class ImportTask implements Runnable {
+    public static final int snappyChunkSize = 512 * 1024;
     private Socket clientSocket;
     private int clientID;
     private File dataPath;
@@ -66,6 +67,7 @@ public class ImportTask implements Runnable {
                             final DataOutputStream finalSnappyChunksDos = snappyChunksDos;
 
                             snappyChunksDos.writeLong(information.getFileLength());
+                            snappyChunksDos.writeInt(snappyChunkSize);
                             // CARSTEN pfui, cleanup when time!
                             bos = new BufferedOutputStream(new FileOutputStream(filePlacePathFile)) {
                                 @Override
@@ -74,7 +76,7 @@ public class ImportTask implements Runnable {
                                     super.write(bytes, i, i2);
                                 }
                             };
-//                            sos = new SnappyOutputStream(bos);
+                            sos = new SnappyOutputStream(bos, snappyChunkSize);
 //                            dos = new DataOutputStream(sos);
 //                            dos.writeLong(information.getFileLength());
 //                            dos.flush();
@@ -82,6 +84,7 @@ public class ImportTask implements Runnable {
                             sos = new FileOutputStream(filePlacePathFile);
                         }
                         IOUtils.copy(dataInputStream, sos);
+                        sos.flush();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     } finally {

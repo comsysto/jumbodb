@@ -2,6 +2,7 @@ package core.query;
 
 import com.google.common.collect.HashMultimap;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
@@ -86,7 +87,10 @@ public class IndexLoader {
                 }
             }
         }
-        File[] dataFiles = collectionDataFolder.listFiles((FilenameFilter) new NotFileFilter(new SuffixFileFilter(".properties")));
+        AndFileFilter ands = new AndFileFilter();
+        ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".properties")));
+        ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".chunks.snappy")));
+        File[] dataFiles = collectionDataFolder.listFiles((FilenameFilter) ands);
         for (File dataFile : dataFiles) {
             resDataFiles.put(dataFile.getName().hashCode(), dataFile);
         }

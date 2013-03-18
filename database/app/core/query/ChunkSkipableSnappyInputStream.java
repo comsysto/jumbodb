@@ -16,6 +16,7 @@ import java.io.InputStream;
  */
 public class ChunkSkipableSnappyInputStream extends InputStream
 {
+
     private boolean             finishedReading    = false;
     protected final InputStream in;
 

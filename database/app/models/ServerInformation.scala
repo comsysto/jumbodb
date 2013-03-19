@@ -13,5 +13,8 @@ case class ServerInformation(
   maximumMemory: String,
   allocatedMemory: String,
   freeMemory: String,
-  totalFreeMemory: String
+  totalFreeMemory: String,
+  numberOfQueries: Long,
+  numberOfResults: Long,
+  startupTime: String
 )

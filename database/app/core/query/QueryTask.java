@@ -1,5 +1,6 @@
 package core.query;
 
+import core.GlobalStatistics;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import play.Logger;

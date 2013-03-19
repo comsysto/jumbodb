@@ -1,5 +1,6 @@
 package core.query;
 
+import core.GlobalStatistics;
 import org.apache.commons.io.IOUtils;
 import org.xerial.snappy.SnappyOutputStream;
 import play.Logger;
@@ -46,7 +47,8 @@ public class DatabaseQuerySession implements Closeable {
             Logger.info("Query: " + jsonQueryString);
             long start = System.currentTimeMillis();
             int numberOfResults = queryHandler.onQuery(collection, jsonQueryString, new ResultWriter());
-
+            GlobalStatistics.incNumberOfQueries(1l);
+            GlobalStatistics.incNumberOfResults(numberOfResults);
             Logger.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
             dataOutputStream.writeUTF(":result:end");
             dataOutputStream.flush();

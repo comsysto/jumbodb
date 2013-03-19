@@ -4,7 +4,9 @@ import play.api._
 import play.api.mvc._
 
 import views._
+import core._
 import java.text.NumberFormat
+import java.text.DateFormat
 import models.ServerInformation
 import java.io.File
 
@@ -13,6 +15,7 @@ object Application extends Controller {
   def index = Action {
     val runtime = Runtime.getRuntime()
     val format = NumberFormat.getInstance()
+    val dateFormat = DateFormat.getDateTimeInstance
     val maxMemory = runtime.maxMemory()
     val allocatedMemory = runtime.totalMemory()
     val freeMemory = runtime.freeMemory()
@@ -32,7 +35,10 @@ object Application extends Controller {
       maximumMemory = format.format(maxMemory / divideMB) + " MB",
       allocatedMemory = format.format(allocatedMemory / divideMB) + " MB",
       freeMemory = format.format(freeMemory / divideMB) + " MB",
-      totalFreeMemory = format.format((freeMemory + (maxMemory - allocatedMemory)) / divideMB) + " MB"
+      totalFreeMemory = format.format((freeMemory + (maxMemory - allocatedMemory)) / divideMB) + " MB",
+      numberOfQueries = GlobalStatistics.getNumberOfQueries,
+      numberOfResults = GlobalStatistics.getNumberOfResults,
+      startupTime = dateFormat.format(GlobalStatistics.getStartupTime)
     )
     Ok(html.index(info))
   }

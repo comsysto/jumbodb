@@ -37,13 +37,14 @@ public class QueryServer {
             @Override
             public void run() {
                 try {
-                    ServerSocket m_ServerSocket = new ServerSocket(port);
+                    ServerSocket serverSocket = new ServerSocket(port);
                     int id = 0;
                     Logger.info("QueryServer started");
                     while (serverActive) {
-                        Socket clientSocket = m_ServerSocket.accept();
+                        Socket clientSocket = serverSocket.accept();
                         serverSocketExecutor.submit(new QueryTask(clientSocket, id++, jumboSearcher, jsonMapper));
                     }
+                    serverSocket.close();
                     Logger.info("QueryServer stopped");
                 } catch (Exception e) {
                     throw new RuntimeException(e);

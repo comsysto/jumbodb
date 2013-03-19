@@ -44,6 +44,7 @@ public class ImportServer {
                         Socket clientSocket = serverSocket.accept();
                         executorService.submit(new ImportTask(clientSocket, id++, dataPath, indexPath, queryServer));
                     }
+                    serverSocket.close();
                     Logger.info("ImportServer stopped");
                 } catch (Exception e) {
                     throw new RuntimeException(e);

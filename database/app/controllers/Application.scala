@@ -4,27 +4,36 @@ import play.api._
 import play.api.mvc._
 
 import views._
+import java.text.NumberFormat
+import models.ServerInformation
+import java.io.File
 
 object Application extends Controller {
   
   def index = Action {
-    Ok(html.index())
-  }
+    val runtime = Runtime.getRuntime()
+    val format = NumberFormat.getInstance()
+    val maxMemory = runtime.maxMemory()
+    val allocatedMemory = runtime.totalMemory()
+    val freeMemory = runtime.freeMemory()
+    import play.api.Play.current
+    val conf = Play.application.configuration
+    val importPort = conf.getInt("jumbodb.import.port").get
+    val queryPort = conf.getInt("jumbodb.query.port").get
+    val dataPath = new File(conf.getString("jumbodb.datapath").get).getAbsolutePath
+    val indexPath = new File(conf.getString("jumbodb.indexpath").get).getAbsolutePath
+    val divideMB = 1024 * 1024
 
-//  // CARSTEN könnte als alternativer upload weg bestehen bleiben
-//  def upload = Action(parse.multipartFormData) { request =>
-//    request.body.file("part-file").map { picture =>
-//      import java.io.File
-//      val filename = picture.filename
-//      val contentType = picture.contentType
-//      picture.ref.moveTo(new File("/Users/carsten/myfile"))
-//      println("File uploaded")
-//      Ok("File uploaded")
-//    }.getOrElse {
-//      Redirect(routes.Application.index).flashing(
-//        "error" -> "Missing file"
-//      )
-//    }
-//  }
-  
+    val info = ServerInformation(
+      queryPort = queryPort,
+      importPort = importPort,
+      dataPath = dataPath,
+      indexPath = indexPath,
+      maximumMemory = format.format(maxMemory / divideMB) + " MB",
+      allocatedMemory = format.format(allocatedMemory / divideMB) + " MB",
+      freeMemory = format.format(freeMemory / divideMB) + " MB",
+      totalFreeMemory = format.format((freeMemory + (maxMemory - allocatedMemory)) / divideMB) + " MB"
+    )
+    Ok(html.index(info))
+  }
 }

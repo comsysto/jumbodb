@@ -4,7 +4,7 @@
 
 <html>
     <head>
-        <title>Form samples</title>
+        <title>jumboDB</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
@@ -22,6 +22,9 @@
                         </li>
                         <li class="@("active".when(nav == "contact"))">
                             <a href="@routes.Contacts.form">Deliveries</a>
+                        </li>
+                        <li class="@("active".when(nav == "brwose"))">
+                            <a href="@routes.Contacts.form">Browse</a>
                         </li>
                     </ul>
                 </div>

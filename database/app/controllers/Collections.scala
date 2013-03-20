@@ -59,7 +59,8 @@ object Collections extends Controller {
       val version = f.getName
       val compressedSize = FileUtils.sizeOfDirectory(f)
       val uncompressedSize = calculateUncompressed(f)
-      val indexSize = FileUtils.sizeOfDirectory(new File(indexPath.getAbsolutePath + "/" + collectionName + "/" + chunkKey + "/" + version))
+      val indexFolder = new File(indexPath.getAbsolutePath + "/" + collectionName + "/" + chunkKey + "/" + version)
+      val indexSize = if(indexFolder.exists()) FileUtils.sizeOfDirectory(indexFolder) else 0
 
         DeliveryVersion(
           version = version,

@@ -1,5 +1,4 @@
-@import helper._
-@import helper.twitterBootstrap._
+@(collections: Seq[models.collections.JumboCollection])
 
 @title = {
     Collections
@@ -7,84 +6,76 @@
 
 @main(title, nav = "collections") {
 <div id="accordion2" class="accordion">
-    <div class="accordion-group">
-        <div class="accordion-heading">
-            <div class="accordion-toggle">
-                <a href="#collapseOne" data-parent="#accordion2" data-toggle="collapse">
-                    <strong>uk.catchment.daily</strong>
-                </a>
-                <div style="font-size: smaller;">Size: 500 MB - 5 deliveries</div>
-            </div>
-        </div>
-        <div class="accordion-body collapse" id="collapseOne" style="height: 0px;">
-            <div class="accordion-inner">
-                <div>
-                    <h4>first_delivery</h4>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Version</th>
-                                <th>Date</th>
-                                <th>Size</th>
-                                <th>Info</th>
-                                <th>&nbsp;</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>192dbecf-d3ae-4119-8a63-7cb03c3863d8</td>
-                                <td>2013-03-15 16:13</td>
-                                <td>300 MB</td>
-                                <td>Footfalls generated from\: s3n\://comsysto/input/footfalls/uk_grid/merged/</td>
-                                <td><button class="btn btn-success" type="button">Running</button></td>
-                            </tr>
-                            <tr>
-                                <td>192dbecf-d3ae-4119-8a63-7cb03c3863d8</td>
-                                <td>2013-03-15 16:13</td>
-                                <td>300 MB</td>
-                                <td>Footfalls generated from\: s3n\://comsysto/input/footfalls/uk_grid/merged/</td>
-                                <td><button class="btn" type="button">Activate</button> <button class="btn" type="button"><i class="icon-trash"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>192dbecf-d3ae-4119-8a63-7cb03c3863d8</td>
-                                <td>2013-03-15 16:13</td>
-                                <td>300 MB</td>
-                                <td>Footfalls generated from\: s3n\://comsysto/input/footfalls/uk_grid/merged/</td>
-                                <td><button class="btn" type="button">Activate</button> <button class="btn" type="button"><i class="icon-trash"></i></button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <button class="btn" type="button"><i class="icon-trash"></i> Delete delivery key first_delivery</button>
-                    <button class="btn" type="button"><i class="icon-trash"></i> Delete collection uk.catchment.daily</button>
-                    <hr/>
+    @collections.map {
+        case (collection) => {
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <div class="accordion-toggle">
+                        <a href="#@collection.collapseId" data-parent="#accordion2" data-toggle="collapse">
+                            <strong>@collection.name</strong>
+                        </a>
+                        <div style="font-size: smaller;">@collection.formatedCompressedSize compressed data - @collection.formatedUncompressedSize uncompressed data - @collection.formatedIndexSize Index</div>
+                    </div>
+                </div>
+                <div class="accordion-body collapse" id="@collection.collapseId" style="height: 0px;">
+                    <div class="accordion-inner">
+                       @collection.chunks.map {
+                        case (chunk) => {
+                        <div>
+                            <h4>Delivery Chunk @chunk.key</h4>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Version / Info</th>
+                                        <th>Date</th>
+                                        <th>Compressed</th>
+                                        <th>Uncompressed</th>
+                                        <th>Index</th>
+                                        <th>&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @chunk.versions.map {
+                                    case (version) => {
+                                    <tr>
+                                        <td>
+                                            <strong><small>@version.version</small></strong>
+                                            <p>@version.info</p>
+                                        </td>
+                                        <td>@version.date</td>
+                                        <td>@version.formatedCompressedSize</td>
+                                        <td>@version.formatedUncompressedSize</td>
+                                        <td>@version.formatedIndexSize</td>
+                                        <td>
+                                             @if(version.active) {
+                                                 <button class="btn btn-success" type="button">Running</button>
+
+                                             } else {
+                                                 <button class="btn" type="button" onclick="alert('Not yet implemented')">Activate</button> <button class="btn" type="button" onclick="alert('Not yet implemented')"><i class="icon-trash"></i></button>
+                                             }
+                                        </td>
+                                    </tr>
+                                    }}
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td><strong>@chunk.formatedCompressedSize</strong></td>
+                                        <td><strong>@chunk.formatedUncompressedSize</strong></td>
+                                        <td><strong>@chunk.formatedIndexSize</strong></td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button class="btn" type="button" onclick="alert('Not yet implemented');"><i class="icon-trash"></i> Delete delivery chunk @chunk.key</button>
+                            <button class="btn" type="button" onclick="alert('Not yet implemented');"><i class="icon-trash"></i> Delete collection @collection.name</button>
+                            <hr/>
+                        </div>
+                        }}
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        }
+    }
 
-    <div class="accordion-group">
-        <div class="accordion-heading">
-            <a href="#collapseTwo" data-parent="#accordion2" data-toggle="collapse" class="accordion-toggle">
-                    Collapsible Group Item #2
-            </a>
-        </div>
-        <div class="accordion-body collapse" id="collapseTwo" style="height: 0px;">
-            <div class="accordion-inner">
-                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-            </div>
-        </div>
-    </div>
-    <div class="accordion-group">
-        <div class="accordion-heading">
-            <a href="#collapseThree" data-parent="#accordion2" data-toggle="collapse" class="accordion-toggle">
-                    Collapsible Group Item #3
-            </a>
-        </div>
-        <div class="accordion-body in collapse" id="collapseThree" style="height: 0px;">
-            <div class="accordion-inner">
-                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-            </div>
-        </div>
-    </div>
 </div>
 }

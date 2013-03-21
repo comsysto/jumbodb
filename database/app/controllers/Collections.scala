@@ -1,12 +1,9 @@
 package controllers
 
 import play.api.mvc._
-import play.api.data._
-import play.api.data.Forms._
 import java.io.File
 import org.apache.commons.io.FileUtils
 import com.typesafe.config.ConfigFactory
-import java.text.SimpleDateFormat
 import java.io.FileInputStream
 import java.io.DataInputStream
 import play.api._
@@ -37,7 +34,7 @@ object Collections extends Controller {
           name = collectionName,
           chunks = chunks(f, collectionName)
         )
-    }
+    } sortBy(_.name)
   }
 
   def chunks(collectionFolder: File, collectionName: String) = {

@@ -7,6 +7,10 @@ GET     /                           controllers.Application.index
 
 # Collections
 GET     /collections                controllers.Collections.overview
+GET     /deliveries                 controllers.Deliveries.overview
+GET     /monitoring                 controllers.Monitoring.overview
+GET     /maintenance                 controllers.Maintenance.overview
+GET     /browse                 controllers.Browse.overview
 
 # Signup
 GET     /signup                     controllers.SignUp.form
@@ -21,4 +25,4 @@ POST    /contacts                   controllers.Contacts.submit
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
-GET     /webjars/*file                    controllers.WebJarAssets.at(file)
+GET     /webjars/*file              controllers.WebJarAssets.at(file)

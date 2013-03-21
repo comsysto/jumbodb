@@ -1,0 +1,87 @@
+@(collections: Seq[models.deliveries.ChunkedDeliveryVersion])
+
+@title = {
+    Deliveries
+}
+
+@main(title, nav = "deliveries") {
+<div id="accordion2" class="accordion">
+    @collections.map {
+        case (delivery) => {
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <div class="accordion-toggle">
+                        <div class="row">
+                            <span class="span8">
+                            <a href="#@delivery.collapseId" data-parent="#accordion2" data-toggle="collapse">
+                                <strong>@delivery.chunkKey - @delivery.version</strong>
+                            </a>
+                            </span>
+                            @if(delivery.allRunning) {
+                                <span class="label label-success offset2">All running </span>
+                            }
+                            @if(delivery.someRunning) {
+                                <span class="label label-warning offset2">Some running </span>
+                            }
+                            @if(delivery.noneRunning) {
+                                <span class="label offset2">None running </span>
+                            }
+                        </div>
+                        <div style="font-size: smaller;">@delivery.info</div>
+                        <div style="font-size: smaller;">@delivery.date - @delivery.formatedCompressedSize compressed data - @delivery.formatedUncompressedSize uncompressed data - @delivery.formatedIndexSize Index</div>
+                    </div>
+                </div>
+                <div class="accordion-body collapse" id="@delivery.collapseId" style="height: 0px;">
+                    <div class="accordion-inner">
+                        <div>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Collection</th>
+                                        <th>Compressed</th>
+                                        <th>Uncompressed</th>
+                                        <th>Index</th>
+                                        <th>&nbsp;</th>
+                                        <th>&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @delivery.collections.map {
+                                    case (collection) => {
+                                    <tr>
+                                        <td>@collection.collectionName</td>
+                                        <td>@collection.formatedCompressedSize</td>
+                                        <td>@collection.formatedUncompressedSize</td>
+                                        <td>@collection.formatedIndexSize</td>
+                                        <td>
+                                             @if(collection.active) {
+                                                 <span class="label label-success">Running</span>
+                                             } else {
+                                                 <button class="btn btn-inverse" type="button" onclick="alert('Not yet implemented')"><i class="icon-hand-right icon-white"></i> Activate</button>
+                                             }
+                                        </td>
+                                        <td><button class="btn btn-danger" type="button" onclick="alert('Not yet implemented')"><i class="icon-trash icon-white"></i></button></td>
+                                    </tr>
+                                    }}
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td><strong>@delivery.formatedCompressedSize</strong></td>
+                                        <td><strong>@delivery.formatedUncompressedSize</strong></td>
+                                        <td><strong>@delivery.formatedIndexSize</strong></td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button class="btn btn-inverse" type="button" onclick="alert('Not yet implemented');"><i class="icon-hand-right icon-white"></i> Activate delivery version</button>
+                            &nbsp;&nbsp;
+                            <button class="btn btn-danger" type="button" onclick="alert('Not yet implemented');"><i class="icon-trash icon-white"></i> Delete delivery version</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+</div>
+}

@@ -32,6 +32,7 @@
                                         <th>Uncompressed</th>
                                         <th>Index</th>
                                         <th>&nbsp;</th>
+                                        <th>&nbsp;</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -48,12 +49,14 @@
                                         <td>@version.formatedIndexSize</td>
                                         <td>
                                              @if(version.active) {
-                                                 <button class="btn btn-success" type="button">Running</button>
-
+                                                 <span class="label label-success">Running</span>
                                              } else {
-                                                 <button class="btn" type="button" onclick="alert('Not yet implemented')">Activate</button> <button class="btn" type="button" onclick="alert('Not yet implemented')"><i class="icon-trash"></i></button>
+                                                 <button class="btn btn-inverse" type="button" onclick="alert('Not yet implemented')"><i class="icon-hand-right icon-white"></i> Activate</button>
+
                                              }
                                         </td>
+                                        <td><button class="btn btn-danger" type="button" onclick="alert('Not yet implemented')"><i class="icon-trash icon-white"></i></button></td>
+
                                     </tr>
                                     }}
                                     <tr>
@@ -63,11 +66,11 @@
                                         <td><strong>@chunk.formatedUncompressedSize</strong></td>
                                         <td><strong>@chunk.formatedIndexSize</strong></td>
                                         <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
                                     </tr>
                                 </tbody>
                             </table>
-                            <button class="btn" type="button" onclick="alert('Not yet implemented');"><i class="icon-trash"></i> Delete delivery chunk @chunk.key</button>
-                            <button class="btn" type="button" onclick="alert('Not yet implemented');"><i class="icon-trash"></i> Delete collection @collection.name</button>
+                            <button class="btn btn-danger" type="button" onclick="alert('Not yet implemented');"><i class="icon-trash icon-white"></i> Delete collection <strong>@collection.name</strong></button>
                             <hr/>
                         </div>
                         }}

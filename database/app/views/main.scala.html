@@ -23,14 +23,17 @@
                         <li class="@("active".when(nav == "collections"))">
                             <a href="@routes.Collections.overview">Collections</a>
                         </li>
-                        <li class="@("active".when(nav == "contact"))">
-                            <a href="@routes.Contacts.form">Deliveries</a>
+                        <li class="@("active".when(nav == "deliveries"))">
+                            <a href="@routes.Deliveries.overview">Deliveries</a>
                         </li>
                         <li class="@("active".when(nav == "browse"))">
-                            <a href="@routes.Contacts.form">Browse</a>
+                            <a href="@routes.Browse.overview">Browse</a>
                         </li>
-                        <li class="@("active".when(nav == "browse"))">
-                            <a href="@routes.Contacts.form">Temporary files</a>
+                        <li class="@("active".when(nav == "maintenance"))">
+                            <a href="@routes.Maintenance.overview">Maintenance</a>
+                        </li>
+                        <li class="@("active".when(nav == "monitoring"))">
+                            <a href="@routes.Monitoring.overview">Monitoring</a>
                         </li>
                     </ul>
                 </div>

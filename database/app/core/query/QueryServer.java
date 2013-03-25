@@ -17,7 +17,7 @@ import play.Logger;
  * Date: 1/8/13
  * Time: 3:41 PM
  */
-public class QueryServer {
+public class QueryServer implements Restartable {
     private boolean serverActive = false;
     private ExecutorService serverSocketExecutor = Executors.newCachedThreadPool();
     private int port;
@@ -53,6 +53,7 @@ public class QueryServer {
         });
     }
 
+    @Override
     public void restart() {
         jumboSearcher.restart();
     }

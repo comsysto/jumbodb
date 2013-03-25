@@ -1,6 +1,6 @@
 package core.importer;
 
-import core.query.QueryServer;
+import core.query.Restartable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -19,9 +19,9 @@ public class ImportTask implements Runnable {
     private int clientID;
     private File dataPath;
     private File indexPath;
-    private QueryServer queryServer;
+    private Restartable queryServer;
 
-    public ImportTask(Socket s, int i, File dataPath, File indexPath, QueryServer queryServer) {
+    public ImportTask(Socket s, int i, File dataPath, File indexPath, Restartable queryServer) {
         this.clientSocket = s;
         this.clientID = i;
         this.dataPath = dataPath;
@@ -135,19 +135,8 @@ public class ImportTask implements Runnable {
                     if(!activationPath.exists()) {
                         activationPath.mkdirs();
                     }
-                    Properties active = new Properties();
-                    active.setProperty("deliveryVersion", information.getDeliveryVersion());
-
                     File activeDeliveryFile = new File(activationPath.getAbsoluteFile() + "/" + information.getCollection());
-                    FileOutputStream activeDeliveryFos = null;
-                    try {
-                        activeDeliveryFos = new FileOutputStream(activeDeliveryFile);
-                        active.store(activeDeliveryFos, "Active Delivery");
-                    } catch(IOException e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        IOUtils.closeQuietly(activeDeliveryFos);
-                    }
+                    ImportHelper.writeActiveFile(activeDeliveryFile, information.getDeliveryVersion());
                 }
 
                 @Override

@@ -1,7 +1,7 @@
 package core.importer;
 
 
-import core.query.QueryServer;
+import core.query.Restartable;
 import play.Logger;
 
 import java.io.*;
@@ -21,10 +21,10 @@ public class ImportServer {
     private int port;
     private File dataPath;
     private File indexPath;
-    private QueryServer queryServer;
+    private Restartable queryServer;
 
 
-    public ImportServer(int port, File dataPath, File indexPath, QueryServer queryServer) {
+    public ImportServer(int port, File dataPath, File indexPath, Restartable queryServer) {
         this.port = port;
         this.dataPath = dataPath;
         this.indexPath = indexPath;

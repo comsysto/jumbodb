@@ -14,8 +14,8 @@ import java.util.Date;
 import java.util.Properties;
 
 public class ImportTask implements Runnable {
-    public static final int SNAPPY_DATA_CHUNK_SIZE = 512 * 1024;
-    public static final int SNAPPY_INDEX_CHUNK_SIZE = 64 * 1024; // must be a multiple of 16! (4 byte data hash, 4 byte file name hash, 8 byte offset)
+    public static final int SNAPPY_DATA_CHUNK_SIZE = 32 * 1024;
+    public static final int SNAPPY_INDEX_CHUNK_SIZE = 32 * 1024; // must be a multiple of 16! (4 byte data hash, 4 byte file name hash, 8 byte offset)
     private Socket clientSocket;
     private int clientID;
     private File dataPath;

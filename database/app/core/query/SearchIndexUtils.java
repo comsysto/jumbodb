@@ -50,6 +50,7 @@ public class SearchIndexUtils {
 
 
             if(firstHash == searchHash) {
+//                Logger.info("firstHash == searchHash " + searchHash);
                 // ok ist gleich ein block weiter zurück ... da es bereits da beginnen könnte
                 while(currentChunk > 0) {
                     currentChunk--;
@@ -66,12 +67,15 @@ public class SearchIndexUtils {
 
             }
             else if(firstHash <= searchHash && lastHash >= searchHash) {
+//                Logger.info("firstHash <= searchHash && lastHash >= searchHash" + searchHash);
                 // ok firstHash == searchHash hat nicht gegriffen, aber die condition, der block den wir suchen!
                 return currentChunk;
             }
             else if (lastHash < searchHash) {
+//                Logger.info("lastHash < searchHash" + searchHash);
                 fromChunk = currentChunk;
             } else if(firstHash > searchHash) {
+//                Logger.info("firstHash > searchHash" + searchHash);
                 toChunk = currentChunk;
             }
         }

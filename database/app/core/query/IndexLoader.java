@@ -42,18 +42,6 @@ public class IndexLoader {
             }
         }
         return result;
-
-//        Map<String, DataCollection> result = new HashMap<String, DataCollection>();
-//        File[] files = indexPath.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
-//        if(files == null) {
-//            return result;
-//        }
-//        for (File collectionIndexFolder  : files) {
-//            String collectionName = collectionIndexFolder.getName();
-//            DataCollection dataCollection = createDataCollection(collectionIndexFolder, new File(dataPath.getAbsolutePath() + "/" + collectionName + "/"));
-//            result.put(collectionName, dataCollection);
-//        }
-//        return result;
     }
 
     public static Properties loadProperties(File file) {
@@ -81,8 +69,9 @@ public class IndexLoader {
             for (File indexFolder : indexFolders) {
                 File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".odx"));
                 for (File indexFile : indexFiles) {
-                    if(indexFile.length() > 0) {
-                        resIndexFiles.put(indexFolder.getName(), createIndexFileDescription(indexFile));
+                    SnappyChunks snappyChunks = SnappyChunksUtil.getSnappyChunksByFile(indexFile);
+                    if(snappyChunks.getNumberOfChunks() > 0) {
+                        resIndexFiles.put(indexFolder.getName(), createIndexFileDescription(indexFile, snappyChunks));
                     }
                 }
             }
@@ -98,13 +87,14 @@ public class IndexLoader {
     }
 
 
-    private static IndexFile createIndexFileDescription(File indexFile) {
+    private static IndexFile createIndexFileDescription(File indexFile, SnappyChunks snappyChunks) {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(indexFile, "r");
-            int fromHash = raf.readInt();
-            raf.seek(raf.length() - 16);
-            int toHash = raf.readInt();
+            byte[] uncompressed = SearchIndexUtils.getUncompressed(raf, snappyChunks, 0);
+            int fromHash = SearchIndexUtils.readFirstHash(uncompressed);
+            uncompressed = SearchIndexUtils.getUncompressed(raf, snappyChunks, snappyChunks.getNumberOfChunks() - 1);
+            int toHash = SearchIndexUtils.readLastHash(uncompressed);
             return new IndexFile(fromHash, toHash, indexFile);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -113,5 +103,20 @@ public class IndexLoader {
         } finally {
             IOUtils.closeQuietly(raf);
         }
+
+//        RandomAccessFile raf = null;
+//        try {
+//            raf = new RandomAccessFile(indexFile, "r");
+//            int fromHash = raf.readInt();
+//            raf.seek(raf.length() - 16);
+//            int toHash = raf.readInt();
+//            return new IndexFile(fromHash, toHash, indexFile);
+//        } catch (FileNotFoundException e) {
+//            throw new RuntimeException(e);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        } finally {
+//            IOUtils.closeQuietly(raf);
+//        }
     }
 }

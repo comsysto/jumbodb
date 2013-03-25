@@ -14,7 +14,8 @@ import java.util.Date;
 import java.util.Properties;
 
 public class ImportTask implements Runnable {
-    public static final int snappyChunkSize = 512 * 1024;
+    public static final int SNAPPY_DATA_CHUNK_SIZE = 512 * 1024;
+    public static final int SNAPPY_INDEX_CHUNK_SIZE = 64 * 1024; // must be a multiple of 16! (4 byte data hash, 4 byte file name hash, 8 byte offset)
     private Socket clientSocket;
     private int clientID;
     private File dataPath;
@@ -55,34 +56,31 @@ public class ImportTask implements Runnable {
                         }
                         Logger.info("ImportServer - " + filePlacePath);
 
-                        if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
-                            String filePlaceChunksPath = filePlacePath + ".chunks.snappy";
-                            File filePlaceChunksFile = new File(filePlaceChunksPath);
-                            if (filePlaceChunksFile.exists()) {
-                                filePlaceChunksFile.delete();
-                            }
-
-                            snappyChunksFos = new FileOutputStream(filePlaceChunksFile);
-                            snappyChunksDos = new DataOutputStream(snappyChunksFos);
-                            final DataOutputStream finalSnappyChunksDos = snappyChunksDos;
-
-                            snappyChunksDos.writeLong(information.getFileLength());
-                            snappyChunksDos.writeInt(snappyChunkSize);
-                            // CARSTEN pfui, cleanup when time!
-                            bos = new BufferedOutputStream(new FileOutputStream(filePlacePathFile)) {
-                                @Override
-                                public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
-                                    finalSnappyChunksDos.writeInt(i2);
-                                    super.write(bytes, i, i2);
-                                }
-                            };
-                            sos = new SnappyOutputStream(bos, snappyChunkSize);
-//                            dos = new DataOutputStream(sos);
-//                            dos.writeLong(information.getFileLength());
-//                            dos.flush();
-                        } else {
-                            sos = new FileOutputStream(filePlacePathFile);
+//                        if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
+                        String filePlaceChunksPath = filePlacePath + ".chunks.snappy";
+                        File filePlaceChunksFile = new File(filePlaceChunksPath);
+                        if (filePlaceChunksFile.exists()) {
+                            filePlaceChunksFile.delete();
                         }
+                        int chunkSize = information.getFileType() == ImportMetaFileInformation.FileType.DATA ? SNAPPY_DATA_CHUNK_SIZE : SNAPPY_INDEX_CHUNK_SIZE;
+                        snappyChunksFos = new FileOutputStream(filePlaceChunksFile);
+                        snappyChunksDos = new DataOutputStream(snappyChunksFos);
+                        final DataOutputStream finalSnappyChunksDos = snappyChunksDos;
+
+                        snappyChunksDos.writeLong(information.getFileLength());
+                        snappyChunksDos.writeInt(chunkSize);
+                        // CARSTEN pfui, cleanup when time!
+                        bos = new BufferedOutputStream(new FileOutputStream(filePlacePathFile)) {
+                            @Override
+                            public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
+                                finalSnappyChunksDos.writeInt(i2);
+                                super.write(bytes, i, i2);
+                            }
+                        };
+                        sos = new SnappyOutputStream(bos, chunkSize);
+//                        } else {
+//                            sos = new FileOutputStream(filePlacePathFile);
+//                        }
                         IOUtils.copy(dataInputStream, sos);
                         sos.flush();
                     } catch (IOException e) {

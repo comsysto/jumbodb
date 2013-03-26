@@ -4,11 +4,13 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import core.importer.ImportHelper;
 import core.query.Restartable;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -194,35 +196,38 @@ public class StorageManagement {
     }
 
     private void activateDeliveryVersion(String version, File activeDeliveryFile) {
-        // TODO implement with real
-        System.out.println("Mock: Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
-//        Logger.info("Mock: Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
-//        ImportHelper.writeActiveFile(activeDeliveryFile, version);
+//        System.out.println("Mock: Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
+        Logger.info("Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
+        ImportHelper.writeActiveFile(activeDeliveryFile, version);
     }
 
 
     private void delete(File file) {
-        // TODO implement with real
-        System.out.println("Mock Delete: " + file.getAbsolutePath());
-//        Logger.info("Mock Delete: " + file.getAbsolutePath());
-    }
-
-    public static void main(String[] args) {
-        StorageManagement sm = new StorageManagement(new File("/Users/carsten/workspaces/jumbodb/database/~/jumbodb/data"), new File("/Users/carsten/workspaces/jumbodb/database/~/jumbodb/index"), new RestartableServer());
-//        sm.activateChunkedVersionInCollection("de.catchment.aggregated.daily.sum.by_cell", "first_delivery", "my_new_version");
-//        sm.deleteCompleteCollection("de.catchment.aggregated.daily.sum.by_cell");
-//          sm.activateChunkedVersionForAllCollections("first_delivery", "58373ec0-f23e-486b-b27c-9a1ef9796d99");
-//        System.out.println(sm.findAppropriateInactiveVersionToActivate("de.catchment.aggregated.daily.sum.by_cell", "first_delivery"));
-//        sm.deleteChunkedVersionInCollection("de.catchment.aggregated.daily.sum.by_cell", "first_delivery", "e0ffe949-b499-4723-b43d-023d07af73d3");
-        sm.deleteChunkedVersionForAllCollections("first_delivery", "f3b7673f-60ac-4feb-b914-0a488d6833bf");
-    }
-
-    private static class RestartableServer implements Restartable {
-        @Override
-        public void restart() {
-            System.out.println("Restart Server");
+//        System.out.println("Mock Delete: " + file.getAbsolutePath());
+        Logger.info("Delete: " + file.getAbsolutePath());
+        try {
+            FileUtils.deleteDirectory(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
-    // CARSTEN here some list methods
+
+//    public static void main(String[] args) {
+//        StorageManagement sm = new StorageManagement(new File("/Users/carsten/workspaces/jumbodb/database/~/jumbodb/data"), new File("/Users/carsten/workspaces/jumbodb/database/~/jumbodb/index"), new RestartableServer());
+////        sm.activateChunkedVersionInCollection("de.catchment.aggregated.daily.sum.by_cell", "first_delivery", "my_new_version");
+////        sm.deleteCompleteCollection("de.catchment.aggregated.daily.sum.by_cell");
+////          sm.activateChunkedVersionForAllCollections("first_delivery", "58373ec0-f23e-486b-b27c-9a1ef9796d99");
+////        System.out.println(sm.findAppropriateInactiveVersionToActivate("de.catchment.aggregated.daily.sum.by_cell", "first_delivery"));
+////        sm.deleteChunkedVersionInCollection("de.catchment.aggregated.daily.sum.by_cell", "first_delivery", "e0ffe949-b499-4723-b43d-023d07af73d3");
+//        sm.deleteChunkedVersionForAllCollections("first_delivery", "f3b7673f-60ac-4feb-b914-0a488d6833bf");
+//    }
+//
+//    private static class RestartableServer implements Restartable {
+//        @Override
+//        public void restart() {
+//            System.out.println("Restart Server");
+//        }
+//    }
+//    // CARSTEN here some list methods
 
 }

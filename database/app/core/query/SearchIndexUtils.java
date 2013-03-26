@@ -35,14 +35,15 @@ public class SearchIndexUtils {
     }
 
     private static long findFirstMatchingChunk(RandomAccessFile indexRaf, int searchHash, SnappyChunks snappyChunks) throws IOException {
-        long numberOfChunks = snappyChunks.getNumberOfChunks();
-        long fromChunk = 0l;
-        long toChunk = numberOfChunks;
+        int numberOfChunks = snappyChunks.getNumberOfChunks();
+        int fromChunk = 0;
+        int toChunk = numberOfChunks;
+        int maxChunk = numberOfChunks - 1;
 
         // TODO verify snappy version
-        while(toChunk - fromChunk != 1) {
-            long chunkDiff = (toChunk - fromChunk) / 2;
-            long currentChunk = chunkDiff + fromChunk;
+        while(toChunk - fromChunk != 0 || fromChunk == maxChunk) {
+            int chunkDiff = (toChunk - fromChunk) / 2;
+            int currentChunk = chunkDiff + fromChunk;
 
             byte[] uncompressed = getUncompressed(indexRaf, snappyChunks, currentChunk);
             int firstHash = readFirstHash(uncompressed);

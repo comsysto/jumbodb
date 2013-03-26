@@ -10,10 +10,10 @@ import java.util.List;
 public class SnappyChunks {
     private long length;
     private int chunkSize;
-    private long numberOfChunks;
+    private int numberOfChunks;
     private List<Integer> chunks;
 
-    public SnappyChunks(long length, int chunkSize, long numberOfChunks, List<Integer> chunks) {
+    public SnappyChunks(long length, int chunkSize, int numberOfChunks, List<Integer> chunks) {
         this.length = length;
         this.chunkSize = chunkSize;
         this.numberOfChunks = numberOfChunks;
@@ -28,7 +28,7 @@ public class SnappyChunks {
         return chunkSize;
     }
 
-    public long getNumberOfChunks() {
+    public int getNumberOfChunks() {
         return numberOfChunks;
     }
 

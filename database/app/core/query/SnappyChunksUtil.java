@@ -22,7 +22,7 @@ public class SnappyChunksUtil {
             chunksDis = new DataInputStream(new BufferedInputStream(chunksFis));
             long length = chunksDis.readLong();
             int snappyChunkSize = chunksDis.readInt();
-            long numberOfChunks = (chunkFile.length() - 8 - 4 - 4) / 4;
+            int numberOfChunks = (int)(chunkFile.length() - 8 - 4 - 4) / 4;
             List<Integer> snappyChunks = buildSnappyChunks(chunksDis, numberOfChunks);
             return new SnappyChunks(length, snappyChunkSize, numberOfChunks, snappyChunks);
 

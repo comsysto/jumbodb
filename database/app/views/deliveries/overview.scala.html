@@ -67,11 +67,11 @@
                                              @if(collection.active) {
                                                  <span class="label label-success">Running</span>
                                              } else {
-                                                 <a class="btn btn-inverse" href="@routes.Deliveries.activateChunkedVersionInCollection(collection.collectionName, delivery.chunkKey, delivery.version)" onclick="confirm('Are you sure?')"><i class="icon-hand-right icon-white"></i> Activate</a>
+                                                 <a class="btn btn-inverse" href="@routes.Deliveries.activateChunkedVersionInCollection(collection.collectionName, delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-hand-right icon-white"></i> Activate</a>
 
                                              }
                                         </td>
-                                        <td><a class="btn btn-danger" href="@routes.Deliveries.deleteChunkedVersionInCollection(collection.collectionName, delivery.chunkKey, delivery.version)" onclick="confirm('Are you sure?')"><i class="icon-trash icon-white"></i></a></td>
+                                        <td><a class="btn btn-danger" href="@routes.Deliveries.deleteChunkedVersionInCollection(collection.collectionName, delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i></a></td>
 
                                     </tr>
                                     }}
@@ -85,9 +85,9 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <a class="btn btn-inverse" href="@routes.Deliveries.activateChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="confirm('Are you sure?')"><i class="icon-hand-right icon-white"></i> Activate delivery version</a>
+                            <a class="btn btn-inverse" href="@routes.Deliveries.activateChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-hand-right icon-white"></i> Activate delivery version</a>
                             &nbsp;&nbsp;
-                            <a class="btn btn-danger" href="@routes.Deliveries.deleteChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="confirm('Are you sure?')"><i class="icon-trash icon-white"></i> Delete delivery version</a>
+                            <a class="btn btn-danger" href="@routes.Deliveries.deleteChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete delivery version</a>
                         </div>
                     </div>
                 </div>

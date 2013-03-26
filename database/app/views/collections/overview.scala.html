@@ -61,11 +61,11 @@
                                              @if(version.active) {
                                                  <span class="label label-success">Running</span>
                                              } else {
-                                                 <a class="btn btn-inverse" href="@routes.Collections.activateChunkedVersionInCollection(collection.name, chunk.key, version.version)" onclick="confirm('Are you sure?')"><i class="icon-hand-right icon-white"></i> Activate</a>
+                                                 <a class="btn btn-inverse" href="@routes.Collections.activateChunkedVersionInCollection(collection.name, chunk.key, version.version)" onclick="return confirm('Are you sure?');"><i class="icon-hand-right icon-white"></i> Activate</a>
 
                                              }
                                         </td>
-                                        <td><a class="btn btn-danger" href="@routes.Collections.deleteChunkedVersionInCollection(collection.name, chunk.key, version.version)" onclick="confirm('Are you sure?')"><i class="icon-trash icon-white"></i></a></td>
+                                        <td><a class="btn btn-danger" href="@routes.Collections.deleteChunkedVersionInCollection(collection.name, chunk.key, version.version)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i></a></td>
 
                                     </tr>
                                     }}
@@ -80,7 +80,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <a class="btn btn-danger" href="@routes.Collections.deleteCompleteCollection(collection.name)" onclick="confirm('Are you sure?')"><i class="icon-trash icon-white"></i> Delete collection <strong>@collection.name</strong></a>
+                            <a class="btn btn-danger" href="@routes.Collections.deleteCompleteCollection(collection.name)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete collection <strong>@collection.name</strong></a>
                             <hr/>
                         </div>
                         }}

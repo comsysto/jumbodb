@@ -14,7 +14,7 @@ import java.net.Socket;
  * Time: 11:06 AM
  */
 public class DatabaseQuerySession implements Closeable {
-    private static final int PROTOCOL_VERSION = 2;
+    public static final int PROTOCOL_VERSION = 2;
     private Socket clientSocket;
     private InputStream inputStream;
     private DataInputStream dataInputStream;

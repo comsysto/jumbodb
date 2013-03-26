@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory
 import java.io.FileInputStream
 import java.io.DataInputStream
 import play.api._
+import core._
 
 import views._
 
@@ -20,8 +21,9 @@ object Collections extends Controller {
   val indexPath = new File(conf.getString("jumbodb.indexpath").get)
   val dataPath = new File(conf.getString("jumbodb.datapath").get)
 
+  val Home = Redirect(routes.Collections.overview())
 
-  def overview = Action {
+  def overview = Action { implicit request =>
     Ok(html.collections.overview(collections))
   }
 
@@ -82,5 +84,20 @@ object Collections extends Controller {
       length
     }
     metaSizes.foldLeft(0L)(_ + _)
+  }
+
+  def deleteCompleteCollection(collection: String) = Action {
+    Storage.management.deleteCompleteCollection(collection)
+    Home.flashing("delete" -> ("Complete collection '" + collection + "' has been deleted."))
+  }
+
+  def deleteChunkedVersionInCollection(collection: String, chunkDeliveryKey: String, version: String) = Action {
+    Storage.management.deleteChunkedVersionInCollection(collection, chunkDeliveryKey, version)
+    Home.flashing("delete" -> ("Version '" + version + "' for '" + collection + "' has been deleted."))
+  }
+
+  def activateChunkedVersionInCollection(collection: String, chunkDeliveryKey: String, version: String) = Action {
+    Storage.management.activateChunkedVersionInCollection(collection, chunkDeliveryKey, version)
+    Home.flashing("activate" -> ("Version '" + version + "' for '" + collection + "' has been activated."))
   }
 }

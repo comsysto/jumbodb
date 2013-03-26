@@ -9,9 +9,6 @@ import java.io.*;
 import java.net.Socket;
 
 public class QueryTask implements Runnable {
-    private static final int PROTOCOL_VERSION = 2;
-
-
     private Socket clientSocket;
     private int clientID = -1;
     private JumboSearcher jumboSearcher;

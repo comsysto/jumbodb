@@ -50,28 +50,23 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
 //            bis = new BufferedInputStream(fis); // CARSTEN ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
             sis = new ChunkSkipableSnappyInputStream(fis);
             dis = new DataInputStream(sis);
-            String chunkFileName = file.getAbsolutePath() + ".chunks.snappy";
-            File chunkFile = new File(chunkFileName);
-            chunksFis = new FileInputStream(chunkFileName);
-            chunksDis = new DataInputStream(new BufferedInputStream(chunksFis));
-            long length = chunksDis.readLong();
-            int snappyChunkSize = chunksDis.readInt();
-            long numberOfChunks = (chunkFile.length() - 8 - 4 - 4) / 4;
-            List<Integer> snappyChunks = buildSnappyChunks(chunksDis, numberOfChunks);
+            SnappyChunks snappyChunks = SnappyChunksUtil.getSnappyChunksByFile(file);
 
             br = new BufferedReader(new InputStreamReader(sis));
 
 
             if (searchQuery.getIndexComparision().size() == 0) {
+                Logger.info("Full scan");
                 long count = 0;
                 String line;
                 while ((line = br.readLine()) != null) {
+                    Logger.info("Line " + line);
                     if (matchingFilter(line, parser)) {
                         resultCallback.writeResult(line);
                         results++;
                     }
                     if (count % 100000 == 0) {
-                        Logger.info(file.getAbsolutePath() + ": " + count + " datasets (File length " + length + ")");
+                        Logger.info(file.getAbsolutePath() + ": " + count + " datasets (File length " + snappyChunks.getLength() + ")");
                     }
                     count++;
                 }
@@ -89,11 +84,11 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                     /////////
 
 //                    System.out.println(file.getAbsolutePath());
-                    long chunkIndex = (firstOffset / snappyChunkSize);
+                    long chunkIndex = (firstOffset / snappyChunks.getChunkSize());
 //                    System.out.println("chunkIndex " + chunkIndex );
-                    long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks);
+                    long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
 //                    System.out.println("chunkOffsetCompressed " + chunkOffsetCompressed );
-                    long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunkSize);
+                    long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunks.getChunkSize());
 //                    System.out.println("chunkOffsetUncompressed " + chunkOffsetUncompressed );
                     long position = fis.getChannel().position();
 //                    System.out.println("position " + position );
@@ -115,7 +110,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                     ////////
 //                    sis.skip(toSkip);
                     currentOffset += toSkip;
-                    long available = length - currentOffset;
+                    long available = snappyChunks.getLength() - currentOffset;
                     byte[] buffer = getBufferByOffsetGroup(offsetGroup, available);
                     sis.read(buffer);
                     currentOffset += buffer.length;
@@ -158,16 +153,6 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             result += snappyChunks.get(i) + 4; // 4 byte for length of chunk
         }
         return result + 16;
-    }
-
-    private List<Integer> buildSnappyChunks(DataInputStream chunksDis, long numberOfChunks) throws IOException {
-        List<Integer> snappyChunks = new ArrayList<Integer>((int)numberOfChunks);
-        // - 8 is length value, 4 is the chunksize
-        chunksDis.readInt(); // remove version chunk
-        for(int i = 0; i < numberOfChunks; i++) {
-            snappyChunks.add(chunksDis.readInt());
-        }
-        return snappyChunks;
     }
 
     private boolean matchingFilter(String s, JSONParser parser) throws IOException, ParseException {

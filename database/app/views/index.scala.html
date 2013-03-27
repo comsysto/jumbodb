@@ -17,6 +17,15 @@
         Index path: @info.indexPath
     </p>
     <p>
+        Query protocol version: @core.query.DatabaseQuerySession.PROTOCOL_VERSION
+    </p>
+    <p>
+        Import protocol version: @core.importer.DatabaseImportSession.PROTOCOL_VERSION
+    </p>
+    <p>
+        Storage format version: @core.importer.ImportTask.STORAGE_VERSION
+    </p>
+    <p>
       Number of queries since running: @info.numberOfQueries
     </p>
     <p>
@@ -38,5 +47,4 @@
       Startup time: @info.startupTime
     </p>
 
-    <p><button class="btn btn-primary" type="button" onclick="alert('Not yet implemented');">Reload indexes</button></p>
 }

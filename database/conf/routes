@@ -7,7 +7,17 @@ GET     /                           controllers.Application.index
 
 # Collections
 GET     /collections                controllers.Collections.overview
+GET     /collections/:collection/deleteCompleteCollection  controllers.Collections.deleteCompleteCollection(collection:String)
+GET     /collections/:collection/:chunkDeliveryKey/:version/deleteChunkedVersionInCollection  controllers.Collections.deleteChunkedVersionInCollection(collection: String, chunkDeliveryKey: String, version: String)
+GET     /collections/:collection/:chunkDeliveryKey/:version/activateChunkedVersionInCollection  controllers.Collections.activateChunkedVersionInCollection(collection: String, chunkDeliveryKey: String, version: String)
+
 GET     /deliveries                 controllers.Deliveries.overview
+GET     /deliveries/:collection/:chunkDeliveryKey/:version/deleteChunkedVersionInCollection  controllers.Deliveries.deleteChunkedVersionInCollection(collection: String, chunkDeliveryKey: String, version: String)
+GET     /deliveries/:collection/:chunkDeliveryKey/:version/activateChunkedVersionInCollection  controllers.Deliveries.activateChunkedVersionInCollection(collection: String, chunkDeliveryKey: String, version: String)
+GET     /deliveries/:chunkDeliveryKey/:version/deleteChunkedVersionForAllCollections  controllers.Deliveries.deleteChunkedVersionForAllCollections(chunkDeliveryKey: String, version: String)
+GET     /deliveries/:chunkDeliveryKey/:version/activateChunkedVersionForAllCollections  controllers.Deliveries.activateChunkedVersionForAllCollections(chunkDeliveryKey: String, version: String)
+
+
 GET     /monitoring                 controllers.Monitoring.overview
 GET     /maintenance                 controllers.Maintenance.overview
 GET     /browse                 controllers.Browse.overview

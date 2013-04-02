@@ -188,7 +188,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         if (searchQuery.getJsonComparision().size() == 0) {
             return true;
         }
-        JSONObject cl = new JSONObject();
+//        JSONObject cl = new JSONObject();
 
         boolean matching = true;
         for (JumboQuery.JsonValueComparision jsonValueComparision : searchQuery.getJsonComparision()) {

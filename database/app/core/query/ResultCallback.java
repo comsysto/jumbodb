@@ -8,5 +8,5 @@ import java.io.IOException;
  * Time: 4:16 PM
  */
 public interface ResultCallback {
-    void writeResult(String result) throws IOException;
+    void writeResult(byte[] result) throws IOException;
 }

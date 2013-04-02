@@ -59,8 +59,10 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                 String line;
                 while ((line = br.readLine()) != null) {
                     Logger.info("Line " + line);
-                    if (matchingFilter(line, parser)) {
-                        resultCallback.writeResult(line);
+                    // CARSTEN fix this doubled conversion  -> String to byte, read bytes directly
+                    byte[] lineBytes = line.getBytes();
+                    if (matchingFilter(lineBytes, parser)) {
+                        resultCallback.writeResult(lineBytes);
                         results++;
                     }
                     if (count % 100000 == 0) {
@@ -99,11 +101,13 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
 
                     currentOffset += toSkip;
                     long available = snappyChunks.getLength() - currentOffset;
+                    // CARSTEN reuse buffer and let grow
+                    // CARSTEN support bigger documents
                     byte[] buffer = getBufferByOffsetGroup(offsetGroup, available);
                     sis.read(buffer);
                     currentOffset += buffer.length;
                     for (Long offset : offsetGroup) {
-                        String dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(buffer, (int) (offset - firstOffset));
+                        byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(buffer, (int) (offset - firstOffset));
                         if (matchingFilter(dataSetFromOffsetsGroup, parser)) {
                             resultCallback.writeResult(dataSetFromOffsetsGroup);
                             results++;
@@ -141,7 +145,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         return result + 16;
     }
 
-    private boolean matchingFilter(String s, JSONParser parser) throws IOException, ParseException {
+    private boolean matchingFilter(byte[] s, JSONParser parser) throws IOException, ParseException {
         if (searchQuery.getJsonComparision().size() == 0) {
             return true;
         }
@@ -169,7 +173,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         return matching;
     }
 
-    private String getDataSetFromOffsetsGroup(byte[] buffer, int relativeOffset) {
+    private byte[] getDataSetFromOffsetsGroup(byte[] buffer, int relativeOffset) {
         int pos = 0;
         for (int i = relativeOffset; i < buffer.length; i++) {
             byte aByte = buffer[i];
@@ -178,8 +182,12 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             }
             pos++;
         }
-        String s = new String(buffer, relativeOffset, pos);
-        return s;
+        // CARSTEN fixen
+        byte[] result = new byte[pos];
+        System.arraycopy(buffer, relativeOffset, result, 0, pos);
+        return result;
+//        String s = new String(buffer, relativeOffset, pos);
+//        return s;
     }
 
     private byte[] getBufferByOffsetGroup(List<Long> offsetGroup, long available) {

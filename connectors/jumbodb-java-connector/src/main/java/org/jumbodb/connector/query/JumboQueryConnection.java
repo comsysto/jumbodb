@@ -137,11 +137,21 @@ public class JumboQueryConnection {
             dos.writeInt(queryBytes.length);
             dos.write(queryBytes);
 
-            String s;
-            while(!(s = dis.readUTF()).equals(":result:end")) {
-//                result.add(jsonMapper.readValue(s, jsonClazz));
-                resultHandler.onResult(jsonMapper.readValue(s, jsonClazz));
+            int byteArrayLength;
+            byte[] jsonByteArray = new byte[1024];
+            while((byteArrayLength = dis.readInt()) > -1) {
+                // reassign and make bigger
+                if(byteArrayLength > jsonByteArray.length) {
+                    jsonByteArray = new byte[byteArrayLength];
+                }
+                dis.readFully(jsonByteArray, 0, byteArrayLength);
+                T result = jsonMapper.readValue(jsonByteArray, 0, byteArrayLength, jsonClazz);
+                resultHandler.onResult(result);
                 results++;
+            }
+            String cmd = dis.readUTF();
+            if(!cmd.equals(":result:end")) {
+                throw new IllegalStateException("After length -1 should :result:end must follow!");
             }
             resultHandler.onFinished();
         } catch (IOException e) {

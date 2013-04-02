@@ -35,7 +35,7 @@ public class QueryTask implements Runnable {
                         JumboQuery searchQuery = jsonMapper.readValue(query, JumboQuery.class);
                         return jumboSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {
                             @Override
-                            public void writeResult(String result) throws IOException {
+                            public void writeResult(byte[] result) throws IOException {
                                 resultWriter.writeResult(result);
                             }
                         });

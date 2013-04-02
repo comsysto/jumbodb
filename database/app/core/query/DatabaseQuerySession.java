@@ -53,6 +53,7 @@ public class DatabaseQuerySession implements Closeable {
             GlobalStatistics.incNumberOfQueries(1l);
             GlobalStatistics.incNumberOfResults(numberOfResults);
             Logger.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
+            dataOutputStream.writeInt(-1); // After -1 command follows
             dataOutputStream.writeUTF(":result:end");
             dataOutputStream.flush();
             snappyOutputStream.flush();
@@ -72,8 +73,9 @@ public class DatabaseQuerySession implements Closeable {
     }
 
     public class ResultWriter {
-        public synchronized void writeResult(String result) throws IOException {
-            dataOutputStream.writeUTF(result);
+        public synchronized void writeResult(byte[] result) throws IOException {
+            dataOutputStream.writeInt(result.length);
+            dataOutputStream.write(result);
         }
     }
 

@@ -13,11 +13,13 @@ import java.util.concurrent.Callable;
 
 public class RetrieveDataSetsTask implements Callable<Integer> {
 
+    public static final byte[] EMPTY_BUFFER = new byte[0];
     private final File file;
     private final JumboQuery searchQuery;
     private final ResultCallback resultCallback;
     private final List<Long> offsets;
-    private final int bufferSize = 4096;
+//    private final int bufferSize = 10;
+    private final int bufferSize = 16 * 1024; // CARSTEN make the buffer size learnable by collection
     private final byte[] defaultBuffer = new byte[bufferSize]; // for reuse
 
 
@@ -72,6 +74,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                 }
             } else {
                 long currentOffset = 0;
+                byte[] lastBuffer = EMPTY_BUFFER;
                 for (List<Long> offsetGroup : offsetGroups) {
                     long firstOffset = offsetGroup.get(0);
                     long toSkip = firstOffset - currentOffset;
@@ -94,20 +97,36 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
 //                    System.out.println("partialSkipInData " + partialSkipInData );
                         sis.skip(partialSkipInData);
                     }
-                    else {
+                    else if(toSkip > 0) {
                         // same chunk
                         sis.skip(toSkip);
                     }
-
-                    currentOffset += toSkip;
-                    long available = snappyChunks.getLength() - currentOffset;
+                    if(toSkip >= 0) {
+                        currentOffset += toSkip;
+                    }
                     // CARSTEN reuse buffer and let grow
-                    // CARSTEN support bigger documents
-                    byte[] buffer = getBufferByOffsetGroup(offsetGroup, available);
-                    sis.read(buffer);
-                    currentOffset += buffer.length;
+                    byte[] readBuffer = getBufferByOffsetGroup(offsetGroup);
+                    byte[] resultBuffer = getResultBuffer(lastBuffer, toSkip);
+                    boolean foundEnd =  false; // line break or EOF
+                    while(!foundEnd) {
+                        int read = sis.read(readBuffer);
+                        currentOffset += read;
+                        if(readBuffer.length == read) {
+                            foundEnd = findDatasetLengthByLineBreak(readBuffer, 0) != -1;
+
+                        } else {
+                            foundEnd = true;
+                        }
+                        resultBuffer = concat(readBuffer, resultBuffer);
+//                        System.out.println(new String(resultBuffer) + " read " + read + " readBuffer.length " + readBuffer.length);
+                    }
+                    lastBuffer = resultBuffer;
+
                     for (Long offset : offsetGroup) {
-                        byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(buffer, (int) (offset - firstOffset));
+                        int fromOffset = (int) (offset - firstOffset);
+                        int datasetLength = findDatasetLengthByLineBreak(resultBuffer, fromOffset);
+                        byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, fromOffset, datasetLength);
+
                         if (matchingFilter(dataSetFromOffsetsGroup, parser)) {
                             resultCallback.writeResult(dataSetFromOffsetsGroup);
                             results++;
@@ -129,6 +148,23 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             IOUtils.closeQuietly(chunksFis);
         }
         return results;
+    }
+
+    private byte[] getResultBuffer(byte[] lastBuffer, long toSkip) {
+        if(toSkip >= 0) {
+            return EMPTY_BUFFER;
+        }
+        int length = Math.abs((int)toSkip);
+        byte[] last = new byte[length];
+        System.arraycopy(lastBuffer, lastBuffer.length - length, last, 0, length);
+        return last;
+    }
+
+    private byte[] concat(byte[] readBuffer, byte[] resultBuffer) {
+        byte[] tmp = new byte[resultBuffer.length + readBuffer.length];
+        System.arraycopy(resultBuffer, 0, tmp, 0, resultBuffer.length);
+        System.arraycopy(readBuffer, 0, tmp, resultBuffer.length, readBuffer.length);
+        return tmp;
     }
 
     private long calculateChunkOffsetUncompressed(long chunkIndex, int snappyChunkSize) {
@@ -173,24 +209,30 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         return matching;
     }
 
-    private byte[] getDataSetFromOffsetsGroup(byte[] buffer, int relativeOffset) {
-        int pos = 0;
-        for (int i = relativeOffset; i < buffer.length; i++) {
-            byte aByte = buffer[i];
-            if (aByte == 10 || aByte == 13) {
-                break;
-            }
-            pos++;
-        }
-        // CARSTEN fixen
-        byte[] result = new byte[pos];
-        System.arraycopy(buffer, relativeOffset, result, 0, pos);
-        return result;
-//        String s = new String(buffer, relativeOffset, pos);
-//        return s;
+    private byte[] getDataSetFromOffsetsGroup(byte[] buffer, int fromOffset, int datasetLength) {
+        byte[] jsonDataset = new byte[datasetLength];
+        System.arraycopy(buffer, fromOffset, jsonDataset, 0, datasetLength);
+        return jsonDataset;
     }
 
-    private byte[] getBufferByOffsetGroup(List<Long> offsetGroup, long available) {
+    private int findDatasetLengthByLineBreak(byte[] buffer, int fromOffset) {
+        int datasetLength = 0;
+        boolean found = false;
+        for (int i = fromOffset; i < buffer.length; i++) {
+            byte aByte = buffer[i];
+            if (aByte == 13 || aByte == 10) {
+                found = true;
+                break;
+            }
+            datasetLength++;
+        }
+        if(!found) {
+            return -1;
+        }
+        return datasetLength;
+    }
+
+    private byte[] getBufferByOffsetGroup(List<Long> offsetGroup) {
         if (offsetGroup.size() == 1) {
             return defaultBuffer;
         }

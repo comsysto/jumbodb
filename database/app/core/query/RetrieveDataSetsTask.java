@@ -117,7 +117,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                         } else {
                             foundEnd = true;
                         }
-                        resultBuffer = concat(readBuffer, resultBuffer);
+                        resultBuffer = concat(readBuffer, resultBuffer, read);
 //                        System.out.println(new String(resultBuffer) + " read " + read + " readBuffer.length " + readBuffer.length);
                     }
                     lastBuffer = resultBuffer;
@@ -160,10 +160,10 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         return last;
     }
 
-    private byte[] concat(byte[] readBuffer, byte[] resultBuffer) {
-        byte[] tmp = new byte[resultBuffer.length + readBuffer.length];
+    private byte[] concat(byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
+        byte[] tmp = new byte[resultBuffer.length + readBufferLength];
         System.arraycopy(resultBuffer, 0, tmp, 0, resultBuffer.length);
-        System.arraycopy(readBuffer, 0, tmp, resultBuffer.length, readBuffer.length);
+        System.arraycopy(readBuffer, 0, tmp, resultBuffer.length, readBufferLength);
         return tmp;
     }
 

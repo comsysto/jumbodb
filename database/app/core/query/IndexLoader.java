@@ -8,9 +8,7 @@ import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * User: carsten
@@ -18,11 +16,10 @@ import java.util.Properties;
  * Time: 2:54 PM
  */
 public class IndexLoader {
-    // CARSTEN remove
-    public static final String temporaryDefaultDeliveryKey = "first_delivery";
+    public static final FileFilter FOLDER_INSTANCE = (FileFilter) DirectoryFileFilter.INSTANCE;
 
-    public static Map<String, DataCollection> loadIndex(File dataPath, File indexPath) {
-        Map<String, DataCollection> result = new HashMap<String, DataCollection>();
+    public static Map<String, Collection<DataDeliveryChunk>> loadIndex(File dataPath, File indexPath) {
+        Map<String, Collection<DataDeliveryChunk>> result = new HashMap<String, Collection<DataDeliveryChunk>>();
         File[] dataCollectionDirectories = dataPath.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
         if(dataCollectionDirectories == null) {
             return result;
@@ -30,18 +27,26 @@ public class IndexLoader {
         for (File dataCollectionFolder  : dataCollectionDirectories) {
             if(!dataCollectionFolder.getName().startsWith(".")) {
                 String collectionName = dataCollectionFolder.getName();
-                // CARSTEN fix this later temporaryDefaultDeliveryKey
-                String dataDeliveryKeyFolder = dataCollectionFolder.getAbsolutePath() + "/" + temporaryDefaultDeliveryKey + "/";
-                Properties activeProps = loadProperties(new File(dataDeliveryKeyFolder + "active.properties"));
-                String deliveryVersion = activeProps.getProperty("deliveryVersion");
-
-                String dataDeliveryVersionFolder = dataDeliveryKeyFolder + deliveryVersion + "/";
-                String indexDeliveryVersionFolder = indexPath.getAbsolutePath() + "/" + collectionName + "/" + temporaryDefaultDeliveryKey + "/" + deliveryVersion + "/";
-                DataCollection dataCollection = createDataCollection(new File(indexDeliveryVersionFolder), new File(dataDeliveryVersionFolder));
-                result.put(collectionName, dataCollection);
+                Collection<DataDeliveryChunk> dataDeliveryChunks = new LinkedList<DataDeliveryChunk>();
+                File[] chunkFolders = dataCollectionFolder.listFiles(FOLDER_INSTANCE);
+                for (File chunkFolder : chunkFolders) {
+                    DataDeliveryChunk dataDeliveryChunk = getDataDataDeliveryChunk(indexPath, dataCollectionFolder, collectionName, chunkFolder.getName());
+                    dataDeliveryChunks.add(dataDeliveryChunk);
+                }
+                result.put(collectionName, dataDeliveryChunks);
             }
         }
         return result;
+    }
+
+    private static DataDeliveryChunk getDataDataDeliveryChunk(File indexPath, File dataCollectionFolder, String collectionName, String chunkKey) {
+        String dataDeliveryKeyFolder = dataCollectionFolder.getAbsolutePath() + "/" + chunkKey + "/";
+        Properties activeProps = loadProperties(new File(dataDeliveryKeyFolder + "active.properties"));
+        String deliveryVersion = activeProps.getProperty("deliveryVersion");
+
+        String dataDeliveryVersionFolder = dataDeliveryKeyFolder + deliveryVersion + "/";
+        String indexDeliveryVersionFolder = indexPath.getAbsolutePath() + "/" + collectionName + "/" + chunkKey + "/" + deliveryVersion + "/";
+        return createDeliveryChunk(chunkKey, new File(indexDeliveryVersionFolder), new File(dataDeliveryVersionFolder));
     }
 
     public static Properties loadProperties(File file) {
@@ -61,8 +66,8 @@ public class IndexLoader {
 
     }
 
-    private static DataCollection createDataCollection(File collectionIndexFolder, File collectionDataFolder) {
-        File[] indexFolders = collectionIndexFolder.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
+    private static DataDeliveryChunk createDeliveryChunk(String chunkKey, File collectionIndexFolder, File collectionDataFolder) {
+        File[] indexFolders = collectionIndexFolder.listFiles(FOLDER_INSTANCE);
         HashMultimap<String, IndexFile> resIndexFiles = HashMultimap.create();
         Map<Integer, File> resDataFiles = new HashMap<Integer, File>();
         if(indexFolders != null) {
@@ -83,7 +88,7 @@ public class IndexLoader {
         for (File dataFile : dataFiles) {
             resDataFiles.put(dataFile.getName().hashCode(), dataFile);
         }
-        return new DataCollection(resIndexFiles.asMap(), resDataFiles);
+        return new DataDeliveryChunk(chunkKey, resIndexFiles.asMap(), resDataFiles);
     }
 
 

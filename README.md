@@ -20,7 +20,7 @@ Low IO requirements, efficient usage of disk space, low
 memory footprint
 
 2. Fast disk access through compression
-Snappy achieves compression rates up to 10 times
+Snappy achieves compression rates up to 5 times
 increasing disk IO efficiency and saving storage cost
 
 3. Batch processing - delivery driven approach

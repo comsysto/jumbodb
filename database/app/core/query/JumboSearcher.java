@@ -18,19 +18,21 @@ public class JumboSearcher {
 
     private final File dataPath;
     private final File indexPath;
-    private Map<String, DataCollection> dataCollections;
+    private Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks;
     private ExecutorService retrieveDataSetsExecutor;
     private ExecutorService indexExecutor;
+    private ExecutorService chunkExecutor;
     private ExecutorService indexFileExecutor;
     private ObjectMapper jsonMapper;
 
     public JumboSearcher(File dataPath, File indexPath) {
         this.dataPath = dataPath;
         this.indexPath = indexPath;
-        retrieveDataSetsExecutor = Executors.newScheduledThreadPool(20);
-        indexExecutor = Executors.newCachedThreadPool();
-        indexFileExecutor = Executors.newScheduledThreadPool(30);
-        this.dataCollections = IndexLoader.loadIndex(dataPath, indexPath);
+        this.retrieveDataSetsExecutor = Executors.newScheduledThreadPool(20);
+        this.chunkExecutor = Executors.newCachedThreadPool();
+        this.indexExecutor = Executors.newCachedThreadPool();
+        this.indexFileExecutor = Executors.newScheduledThreadPool(30);
+        this.dataDeliveryChunks = IndexLoader.loadIndex(dataPath, indexPath);
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         Logger.info("IndexedFileSearcher initialized for " + indexPath.getAbsolutePath());
@@ -39,7 +41,7 @@ public class JumboSearcher {
 
     public void restart() {
         Logger.info("IndexedFileSearcher restarting for " + indexPath.getAbsolutePath());
-        this.dataCollections = IndexLoader.loadIndex(dataPath, indexPath);
+        this.dataDeliveryChunks = IndexLoader.loadIndex(dataPath, indexPath);
         Logger.info("IndexedFileSearcher restarted for " + indexPath.getAbsolutePath());
     }
 
@@ -50,30 +52,47 @@ public class JumboSearcher {
     }
 
     public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery, ResultCallback resultCallback) {
-        DataCollection dataCollection = dataCollections.get(collectionName);
-        if(dataCollection != null) {
-            Collection<FileOffset> fileOffsets = findFileOffsets(dataCollection, searchQuery);
-            return findDataSetsByFileOffsets(dataCollection, fileOffsets, resultCallback, searchQuery);
+        Collection<DataDeliveryChunk> deliveryChunks = dataDeliveryChunks.get(collectionName);
+        if(deliveryChunks != null) {
+            Collection<Future<Integer>> futures = new LinkedList<Future<Integer>>();
+            for (DataDeliveryChunk deliveryChunk : deliveryChunks) {
+                futures.add(chunkExecutor.submit(new SearchDeliveryChunkTask(deliveryChunk, searchQuery, resultCallback)));
+            }
+            return getNumberOfResultsFromFutures(futures);
         }
         return 0;
     }
 
-    private int findDataSetsByFileOffsets(DataCollection dataCollection, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery) {
+    private int getNumberOfResultsFromFutures(Collection<Future<Integer>> futures) {
+        int results = 0;
+        try {
+            for (Future<Integer> future : futures) {
+                results += future.get();
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+        return results;
+    }
+
+    private int findDataSetsByFileOffsets(DataDeliveryChunk dataDeliveryChunk, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery) {
         int numberOfResults = 0;
         long startTime = System.currentTimeMillis();
         HashMultimap<Integer, Long> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
         List<Future<Integer>> tasks = new LinkedList<Future<Integer>>();
-        // CARSTEN diesen logic blog noch aufräumen
         if(searchQuery.getIndexComparision().size() == 0) {
             Logger.info("Running scanned search");
-            for (File file : dataCollection.getDataFiles().values()) {
+            for (File file : dataDeliveryChunk.getDataFiles().values()) {
                 tasks.add(retrieveDataSetsExecutor.submit(new RetrieveDataSetsTask(file, Collections.<Long>emptySet(), searchQuery, resultCallback)));
             }
         }
         else {
             Logger.info("Running indexed search");
             for (Integer fileNameHash : fileOffsetsMap.keySet()) {
-                File file = dataCollection.getDataFiles().get(fileNameHash);
+                File file = dataDeliveryChunk.getDataFiles().get(fileNameHash);
                 if(file == null) {
                     throw new IllegalStateException("File with " + fileNameHash + " not found!");
                 }
@@ -106,13 +125,13 @@ public class JumboSearcher {
         return result;
     }
 
-    private Collection<FileOffset> findFileOffsets(DataCollection dataCollection, JumboQuery searchQuery) {
+    private Collection<FileOffset> findFileOffsets(DataDeliveryChunk dataDeliveryChunk, JumboQuery searchQuery) {
         if(searchQuery.getIndexComparision().size() == 0) {
             return Collections.emptyList();
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
         for (JumboQuery.IndexComparision indexQuery : searchQuery.getIndexComparision()) {
-            tasks.add(indexExecutor.submit(new SearchIndexTask(dataCollection, indexQuery, indexFileExecutor)));
+            tasks.add(indexExecutor.submit(new SearchIndexTask(dataDeliveryChunk, indexQuery, indexFileExecutor)));
         }
 
         try {
@@ -135,6 +154,21 @@ public class JumboSearcher {
         }
     }
 
+    private class SearchDeliveryChunkTask implements Callable<Integer> {
+        private DataDeliveryChunk deliveryChunk;
+        private JumboQuery searchQuery;
+        private ResultCallback resultCallback;
 
+        private SearchDeliveryChunkTask(DataDeliveryChunk deliveryChunk, JumboQuery searchQuery, ResultCallback resultCallback) {
+            this.deliveryChunk = deliveryChunk;
+            this.searchQuery = searchQuery;
+            this.resultCallback = resultCallback;
+        }
 
+        @Override
+        public Integer call() throws Exception {
+            Collection<FileOffset> fileOffsets = findFileOffsets(deliveryChunk, searchQuery);
+            return findDataSetsByFileOffsets(deliveryChunk, fileOffsets, resultCallback, searchQuery);
+        }
+    }
 }

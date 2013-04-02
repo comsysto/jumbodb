@@ -10,12 +10,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class SearchIndexTask implements Callable<Set<FileOffset>> {
-    private final DataCollection dataCollection;
+    private final DataDeliveryChunk dataDeliveryChunk;
     private JumboQuery.IndexComparision query;
     private ExecutorService indexFileExecutor;
 
-    public SearchIndexTask(DataCollection dataCollection, JumboQuery.IndexComparision query, ExecutorService indexFileExecutor) {
-        this.dataCollection = dataCollection;
+    public SearchIndexTask(DataDeliveryChunk dataDeliveryChunk, JumboQuery.IndexComparision query, ExecutorService indexFileExecutor) {
+        this.dataDeliveryChunk = dataDeliveryChunk;
         this.query = query;
         this.indexFileExecutor = indexFileExecutor;
     }
@@ -23,7 +23,7 @@ public class SearchIndexTask implements Callable<Set<FileOffset>> {
     @Override
     public Set<FileOffset> call() throws Exception {
         long start = System.currentTimeMillis();
-        HashMultimap<File, Integer> groupedByIndexFile = SearchIndexUtils.groupByIndexFile(dataCollection, query);
+        HashMultimap<File, Integer> groupedByIndexFile = SearchIndexUtils.groupByIndexFile(dataDeliveryChunk, query);
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
         for (File indexFile : groupedByIndexFile.keySet()) {
             tasks.add(indexFileExecutor.submit(new SearchIndexFileTask(indexFile, groupedByIndexFile.get(indexFile))));

@@ -208,8 +208,8 @@ public class SearchIndexUtils {
     }
 
 
-    public static HashMultimap<File, Integer> groupByIndexFile(DataCollection dataCollection, JumboQuery.IndexComparision query) {
-        Collection<IndexFile> indexFiles = dataCollection.getIndexFiles().get(query.getName());
+    public static HashMultimap<File, Integer> groupByIndexFile(DataDeliveryChunk dataDeliveryChunk, JumboQuery.IndexComparision query) {
+        Collection<IndexFile> indexFiles = dataDeliveryChunk.getIndexFiles().get(query.getName());
         // CARSTEN this map one is very slow
         HashMultimap<File, Integer> groupByIndexFile = HashMultimap.create();
         for (IndexFile indexFile : indexFiles) {

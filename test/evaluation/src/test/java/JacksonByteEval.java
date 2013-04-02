@@ -14,7 +14,7 @@ public class JacksonByteEval {
     public static void main(String[] args) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         List<byte[]> messages = new LinkedList<byte[]>();
-        for(int i = 0; i < 5000000; i++) {
+        for(int i = 0; i < 1000000; i++) {
             MyTestClass cl = new MyTestClass();
             cl.d = i;
             cl.l = i;

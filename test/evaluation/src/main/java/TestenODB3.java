@@ -25,8 +25,8 @@ public class TestenODB3 {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
         JumboQuery query = new JumboQuery();
 //        query.addIndexComparision("tocellid_date", Arrays.asList("11211422244-20121002", "1121332341112-20121002"));
-        query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS, "_id.date", Arrays.asList((Object)"20121002"));
-        query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS, "_id.toCellId", Arrays.asList((Object)"11211422244", "1121332341112"));
+        query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS, "_id.date", Arrays.asList((Object)new Long(20121002)));
+        query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS, "_id.toCell", Arrays.asList((Object)"11211422244", "1121332341112"));
         long start = System.currentTimeMillis();
 //        List<Map> daily = jumboDriver.find("de.catchment.dates.daily", Map.class, query);
         List<Map> daily = jumboDriver.find("de.catchment.aggregated.daily.sum.by_cell", Map.class, query);

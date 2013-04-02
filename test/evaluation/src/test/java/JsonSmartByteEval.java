@@ -1,3 +1,4 @@
+import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -15,7 +16,7 @@ public class JsonSmartByteEval {
     public static void main(String[] args) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         List<byte[]> messages = new LinkedList<byte[]>();
-        for(int i = 0; i < 5000000; i++) {
+        for(int i = 0; i < 1000000; i++) {
             MyTestClass cl = new MyTestClass();
             cl.d = i;
             cl.l = i;
@@ -26,9 +27,9 @@ public class JsonSmartByteEval {
         }
         System.out.println("Starting deserialize");
         long start = System.currentTimeMillis();
-        List<MyTestClass> res = new LinkedList<MyTestClass>();
+        List<JSONObject> res = new LinkedList<JSONObject>();
         for (byte[] message : messages) {
-            res.add(JSONValue.parse(message, MyTestClass.class));
+            res.add(JSONValue.parse(message, JSONObject.class));
         }
         System.out.println((System.currentTimeMillis() - start) + "ms");
     }

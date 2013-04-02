@@ -1,6 +1,8 @@
 package core.query;
 
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+import net.minidev.json.mapper.UpdaterMapper;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
@@ -32,8 +34,8 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
         Collections.sort(this.offsets);
+        JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
         long start = System.currentTimeMillis();
         FileInputStream fis = null;
         ChunkSkipableSnappyInputStream sis = null;
@@ -60,11 +62,8 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                 long count = 0;
                 String line;
                 while ((line = br.readLine()) != null) {
-                    Logger.info("Line " + line);
-                    // CARSTEN fix this doubled conversion  -> String to byte, read bytes directly
-                    byte[] lineBytes = line.getBytes();
-                    if (matchingFilter(lineBytes, parser)) {
-                        resultCallback.writeResult(lineBytes);
+                    if (matchingFilter(line, jsonParser)) {
+                        resultCallback.writeResult(line.getBytes());
                         results++;
                     }
                     if (count % 100000 == 0) {
@@ -127,7 +126,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                         int datasetLength = findDatasetLengthByLineBreak(resultBuffer, fromOffset);
                         byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, fromOffset, datasetLength);
 
-                        if (matchingFilter(dataSetFromOffsetsGroup, parser)) {
+                        if (matchingFilter(dataSetFromOffsetsGroup, jsonParser)) {
                             resultCallback.writeResult(dataSetFromOffsetsGroup);
                             results++;
                         }
@@ -181,29 +180,36 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         return result + 16;
     }
 
-    private boolean matchingFilter(byte[] s, JSONParser parser) throws IOException, ParseException {
+    private boolean matchingFilter(byte[] s, JSONParser jsonParser) throws IOException, ParseException {
+        return matchingFilter(new String(s), jsonParser);
+    }
+
+    private boolean matchingFilter(String s, JSONParser jsonParser) throws IOException, ParseException {
         if (searchQuery.getJsonComparision().size() == 0) {
             return true;
         }
-        JSONObject json = (JSONObject) parser.parse(s);
-        //    Map<String, Object> json = jsonMapper.readValue(s, Map.class);
+        JSONObject cl = new JSONObject();
+
         boolean matching = true;
         for (JumboQuery.JsonValueComparision jsonValueComparision : searchQuery.getJsonComparision()) {
+//            cl.clear();
             String[] split = StringUtils.split(jsonValueComparision.getName(), '.');
-            Object lastObj = json;
+//            UpdaterMapper<JSONObject> mapper = new UpdaterMapper<JSONObject>(cl);
+            Object lastObj = jsonParser.parse(s);
             for (String key : split) {
                 if (lastObj != null) {
                     Map<String, Object> map = (Map<String, Object>) lastObj;
                     lastObj = map.get(key);
                 }
             }
-            if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS &&
-                    lastObj != null) {
-                matching &= jsonValueComparision.getValues().contains(lastObj);
+            if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS) {
+                if(lastObj != null) {
+                    matching &= jsonValueComparision.getValues().contains(lastObj);
+                }
             } else if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS_IGNORE_CASE) {
                 throw new IllegalArgumentException("Not yet implemented " + jsonValueComparision.getComparisionType());
             } else {
-                throw new IllegalArgumentException("Unsupported comparision type " + jsonValueComparision.getComparisionType());
+                throw new IllegalArgumentException("Unsupported comparision type " + jsonValueComparision.getComparisionType().getClass() + " " + jsonValueComparision.getComparisionType());
             }
         }
         return matching;

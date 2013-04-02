@@ -30,7 +30,7 @@ public class QueryTask implements Runnable {
             databaseQuerySession = new DatabaseQuerySession(clientSocket, clientID);
             databaseQuerySession.query(new DatabaseQuerySession.QueryHandler() {
                 @Override
-                public int onQuery(String collection, String query, final DatabaseQuerySession.ResultWriter resultWriter) {
+                public int onQuery(String collection, byte[] query, final DatabaseQuerySession.ResultWriter resultWriter) {
                     try {
                         JumboQuery searchQuery = jsonMapper.readValue(query, JumboQuery.class);
                         return jumboSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {

@@ -11,7 +11,6 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-// CARSTEN extract method as static methods
 public class RetrieveDataSetsTask implements Callable<Integer> {
 
     private final File file;
@@ -35,7 +34,6 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
         Collections.sort(this.offsets);
         long start = System.currentTimeMillis();
         FileInputStream fis = null;
-//        BufferedInputStream bis = null;
         ChunkSkipableSnappyInputStream sis = null;
         DataInputStream dis = null;
         BufferedReader br = null;
@@ -47,7 +45,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
 
             List<List<Long>> offsetGroups = groupOffsetsByBufferSize(bufferSize);
             fis = new FileInputStream(file);
-//            bis = new BufferedInputStream(fis); // CARSTEN ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
+             // ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
             sis = new ChunkSkipableSnappyInputStream(fis);
             dis = new DataInputStream(sis);
             SnappyChunks snappyChunks = SnappyChunksUtil.getSnappyChunksByFile(file);
@@ -74,14 +72,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                 long currentOffset = 0;
                 for (List<Long> offsetGroup : offsetGroups) {
                     long firstOffset = offsetGroup.get(0);
-//                    System.out.println("firstOffset " + firstOffset);
-                    // voller skip
                     long toSkip = firstOffset - currentOffset;
-//                    System.out.println("Current Offset " + currentOffset);
-//                    System.out.println("toSkip " + toSkip);
-
-
-                    /////////
 
 //                    System.out.println(file.getAbsolutePath());
                     long chunkIndex = (firstOffset / snappyChunks.getChunkSize());
@@ -106,9 +97,6 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                         sis.skip(toSkip);
                     }
 
-
-                    ////////
-//                    sis.skip(toSkip);
                     currentOffset += toSkip;
                     long available = snappyChunks.getLength() - currentOffset;
                     byte[] buffer = getBufferByOffsetGroup(offsetGroup, available);
@@ -117,7 +105,6 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                     for (Long offset : offsetGroup) {
                         String dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(buffer, (int) (offset - firstOffset));
                         if (matchingFilter(dataSetFromOffsetsGroup, parser)) {
-//                            System.out.println(dataSetFromOffsetsGroup);
                             resultCallback.writeResult(dataSetFromOffsetsGroup);
                             results++;
                         }
@@ -131,7 +118,6 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(dis);
-//            IOUtils.closeQuietly(bis);
             IOUtils.closeQuietly(fis);
             IOUtils.closeQuietly(sis);
             IOUtils.closeQuietly(br);
@@ -173,7 +159,6 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             }
             if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS &&
                     lastObj != null) {
-                // CARSTEN vielleicht ist hier ein hashset schneller?
                 matching &= jsonValueComparision.getValues().contains(lastObj);
             } else if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS_IGNORE_CASE) {
                 throw new IllegalArgumentException("Not yet implemented " + jsonValueComparision.getComparisionType());
@@ -198,9 +183,6 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
     }
 
     private byte[] getBufferByOffsetGroup(List<Long> offsetGroup, long available) {
-//            if(available < bufferSize) {
-//                return new byte[(int)available];
-//            }
         if (offsetGroup.size() == 1) {
             return defaultBuffer;
         }

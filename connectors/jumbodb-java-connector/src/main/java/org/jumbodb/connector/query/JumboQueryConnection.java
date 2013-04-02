@@ -133,7 +133,9 @@ public class JumboQueryConnection {
             }
             dos.writeUTF(":cmd:query");
             dos.writeUTF(collection);
-            dos.writeUTF(jsonMapper.writeValueAsString(searchQuery));
+            byte[] queryBytes = jsonMapper.writeValueAsBytes(searchQuery);
+            dos.writeInt(queryBytes.length);
+            dos.write(queryBytes);
 
             String s;
             while(!(s = dis.readUTF()).equals(":result:end")) {

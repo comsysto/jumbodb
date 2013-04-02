@@ -14,7 +14,7 @@ import java.net.Socket;
  * Time: 11:06 AM
  */
 public class DatabaseQuerySession implements Closeable {
-    public static final int PROTOCOL_VERSION = 2;
+    public static final int PROTOCOL_VERSION = 3;
     private Socket clientSocket;
     private InputStream inputStream;
     private DataInputStream dataInputStream;
@@ -43,10 +43,13 @@ public class DatabaseQuerySession implements Closeable {
         if (cmd.equals(":cmd:query")) {
             String collection = dataInputStream.readUTF();
             Logger.info("Collection: " + collection);
-            String jsonQueryString = dataInputStream.readUTF();
-            Logger.info("Query: " + jsonQueryString);
+            int size = dataInputStream.readInt();
+            byte[] jsonQueryDocument = new byte[size];
+            dataInputStream.readFully(jsonQueryDocument);
+//            String jsonQueryString = dataInputStream.readUTF();
+//            Logger.info("Query: " + jsonQueryString);
             long start = System.currentTimeMillis();
-            int numberOfResults = queryHandler.onQuery(collection, jsonQueryString, new ResultWriter());
+            int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, new ResultWriter());
             GlobalStatistics.incNumberOfQueries(1l);
             GlobalStatistics.incNumberOfResults(numberOfResults);
             Logger.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
@@ -75,6 +78,6 @@ public class DatabaseQuerySession implements Closeable {
     }
 
     public interface QueryHandler {
-        int onQuery(String collection, String query, ResultWriter resultWriter);
+        int onQuery(String collection, byte[] query, ResultWriter resultWriter);
     }
 }

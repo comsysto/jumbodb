@@ -50,15 +50,11 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             List<List<Long>> offsetGroups = groupOffsetsByBufferSize(bufferSize);
             fis = new FileInputStream(file);
              // ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
-            sis = new ChunkSkipableSnappyInputStream(fis);
-            dis = new DataInputStream(sis);
-            SnappyChunks snappyChunks = SnappyChunksUtil.getSnappyChunksByFile(file);
-
-            br = new BufferedReader(new InputStreamReader(sis));
-
 
             if (searchQuery.getIndexComparision().size() == 0) {
-                Logger.info("Full scan");
+                sis = new ChunkSkipableSnappyInputStream(new BufferedInputStream(fis));
+                br = new BufferedReader(new InputStreamReader(sis));
+                Logger.info("Full scan ");
                 long count = 0;
                 String line;
                 while ((line = br.readLine()) != null) {
@@ -67,11 +63,15 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                         results++;
                     }
                     if (count % 100000 == 0) {
-                        Logger.info(file.getAbsolutePath() + ": " + count + " datasets (File length " + snappyChunks.getLength() + ")");
+                        Logger.info(file.getAbsolutePath() + ": " + count + " datasets");
                     }
                     count++;
                 }
             } else {
+                sis = new ChunkSkipableSnappyInputStream(fis);
+                dis = new DataInputStream(sis);
+                SnappyChunks snappyChunks = SnappyChunksUtil.getSnappyChunksByFile(file);
+
                 long currentOffset = 0;
                 byte[] lastBuffer = EMPTY_BUFFER;
                 for (List<Long> offsetGroup : offsetGroups) {

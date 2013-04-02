@@ -24,7 +24,7 @@ public class TestenODB3 {
         //        JumboDriver jumboDriver = new JumboDriver("smartsteps-mongo-dval01.ec2.smartste.ps", 12002);
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
         JumboQuery query = new JumboQuery();
-//        query.addIndexComparision("tocellid_date", Arrays.asList("11211422244-20121002", "1121332341112-20121002"));
+        query.addIndexComparision("tocellid_date", Arrays.asList("11211422244-20121002", "1121332341112-20121002"));
         query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS, "_id.date", Arrays.asList((Object)new Long(20121002)));
         query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS, "_id.toCell", Arrays.asList((Object)"11211422244", "1121332341112"));
         long start = System.currentTimeMillis();

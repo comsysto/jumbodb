@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.importer;
 
 
+import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.query.Restartable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +22,12 @@ public class ImportServer {
 
     private boolean serverActive = false;
     private ExecutorService executorService = Executors.newCachedThreadPool();
-    private int port;
-    private File dataPath;
-    private File indexPath;
     private Restartable queryServer;
+    private JumboConfiguration config;
 
 
-    public ImportServer(int port, File dataPath, File indexPath, Restartable queryServer) {
-        this.port = port;
-        this.dataPath = dataPath;
-        this.indexPath = indexPath;
+    public ImportServer(JumboConfiguration config, Restartable queryServer) {
+        this.config = config;
         this.queryServer = queryServer;
     }
 
@@ -40,12 +37,12 @@ public class ImportServer {
             @Override
             public void run() {
                 try {
-                    ServerSocket serverSocket = new ServerSocket(port);
+                    ServerSocket serverSocket = new ServerSocket(config.getImportPort());
                     int id = 0;
                     log.info("ImportServer started");
                     while (isServerActive()) {
                         Socket clientSocket = serverSocket.accept();
-                        executorService.submit(new ImportTask(clientSocket, id++, dataPath, indexPath, queryServer));
+                        executorService.submit(new ImportTask(clientSocket, id++, config.getDataPath(), config.getIndexPath(), queryServer));
                     }
                     serverSocket.close();
                     log.info("ImportServer stopped");

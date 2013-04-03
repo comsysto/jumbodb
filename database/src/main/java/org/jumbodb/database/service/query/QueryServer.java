@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,13 +23,13 @@ public class QueryServer implements Restartable {
 
     private boolean serverActive = false;
     private ExecutorService serverSocketExecutor = Executors.newCachedThreadPool();
-    private int port;
     private JumboSearcher jumboSearcher;
     private final ObjectMapper jsonMapper;
+    private JumboConfiguration config;
 
-    public QueryServer(int port, File dataPath, File indexPath) {
-        this.jumboSearcher = new JumboSearcher(dataPath, indexPath);
-        this.port = port;
+    public QueryServer(JumboConfiguration config) {
+        this.config = config;
+        this.jumboSearcher = new JumboSearcher(config.getDataPath(), config.getIndexPath());
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -39,7 +40,7 @@ public class QueryServer implements Restartable {
             @Override
             public void run() {
                 try {
-                    ServerSocket serverSocket = new ServerSocket(port);
+                    ServerSocket serverSocket = new ServerSocket(config.getQueryPort());
                     int id = 0;
                     log.info("QueryServer started");
                     while (serverActive) {

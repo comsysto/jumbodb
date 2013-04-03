@@ -31,7 +31,7 @@
 
     <servlet-mapping>
         <servlet-name>jumborest</servlet-name>
-        <url-pattern>/rest/*</url-pattern>
+        <url-pattern>/jumbodb/*</url-pattern>
     </servlet-mapping>
 
 

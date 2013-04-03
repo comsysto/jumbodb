@@ -11,14 +11,11 @@ import java.io.File;
  * Date: 4/3/13
  * Time: 11:54 AM
  */
-public class WebAppStart {
+public class JumboDevelopmentStarter {
     public static void main(String[] args) throws LifecycleException, ServletException {
-        String webappDirLocation = "./database/src/main/webapp/";
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(9000);
-//        tomcat.setBaseDir("./database/");
-//        tomcat.addWebapp("/", new File(webappDirLocation).getAbsolutePath());
-        tomcat.addWebapp("/", "/Users/carsten/workspaces/jumbodb/database/build/libs/jumbodb-0.0.5-SNAPSHOT.war");
+        tomcat.addWebapp("/", new File("./database/src/main/webapp/").getAbsolutePath());
         tomcat.start();
         tomcat.getServer().await();
     }

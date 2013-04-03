@@ -1,6 +1,7 @@
 include 'connectors:jumbodb-hadoop-connector'
 include 'connectors:jumbodb-java-connector'
 include 'database'
+include 'bundle'
 include 'test:evaluation'
 include 'test:hadoop-example-import'
 include 'test:testdata'

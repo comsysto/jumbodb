@@ -1,0 +1,87 @@
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+archivesBaseName = 'jumbodb-starter'
+applicationName = 'jumbodb'
+
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/resources'
+            srcDir 'src/main/java'
+        }
+    }
+    test {
+        resources {
+            srcDir 'src/test/resources'
+            srcDir 'src/test/java'
+        }
+    }
+}
+
+mainClassName = "org.jumbodb.starter.JumboDBStarter"
+
+
+dependencies {
+//    compile 'javax.servlet:servlet-api:2.5'
+    compile 'commons-lang:commons-lang:2.6'
+    compile "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+    compile "org.apache.tomcat.embed:tomcat-embed-logging-log4j:${tomcatVersion}"
+    compile "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+    compile "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
+    compile "org.eclipse.jdt.core.compiler:ecj:3.6"
+}
+
+def retrieveWarFileName() {
+    def p = project(':database')
+    'jumbodb-' + p.version + '.war'
+}
+
+def retrieveJarFileName() {
+    archivesBaseName + '-' + version + '.jar'
+}
+
+def retrieveTargetWarPath() {
+    '/war/' + retrieveWarFileName()
+}
+def retrieveTargetJarPath() {
+    '/lib/' + retrieveJarFileName()
+}
+
+
+def locateWarPath() {
+    def p = project(':database')
+    new File(p.libsDir.path + '/' + retrieveWarFileName())
+}
+
+task copyWar(dependsOn: ':database:war') {
+    doLast {
+        def path = locateWarPath()
+        println("Copying WAR File " + path)
+        applicationDistribution.from(path) {
+            into "war"
+        }
+    }
+}
+jar.dependsOn copyWar
+
+
+jar {
+    manifest {
+        attributes("warPath": retrieveTargetWarPath())
+        attributes("jarPath": retrieveTargetJarPath())
+    }
+}
+
+eclipse {
+    classpath {
+        downloadSources = true
+        downloadJavadoc = false
+    }
+}

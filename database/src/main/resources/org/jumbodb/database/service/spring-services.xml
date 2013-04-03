@@ -29,5 +29,17 @@
             ignore-unresolvable="true"
             file-encoding="UTF-8" />
 
+    <bean id="queryServer" class="org.jumbodb.database.service.query.QueryServer" init-method="start" destroy-method="stop">
+        <constructor-arg value="${jumbodb.query.port}"/>
+        <constructor-arg value="${jumbodb.datapath}"/>
+        <constructor-arg value="${jumbodb.indexpath}"/>
+    </bean>
+
+    <bean id="importServer" class="org.jumbodb.database.service.importer.ImportServer" init-method="start" destroy-method="stop">
+        <constructor-arg value="${jumbodb.import.port}"/>
+        <constructor-arg value="${jumbodb.datapath}"/>
+        <constructor-arg value="${jumbodb.indexpath}"/>
+        <constructor-arg ref="queryServer"/>
+    </bean>
 
 </beans>

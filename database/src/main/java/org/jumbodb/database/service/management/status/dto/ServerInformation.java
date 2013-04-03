@@ -1,4 +1,4 @@
-package org.jumbodb.database.rest.dto.status;
+package org.jumbodb.database.service.management.status.dto;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 

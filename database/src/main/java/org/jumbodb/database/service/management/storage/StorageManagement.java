@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.management;
+package org.jumbodb.database.service.management.storage;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -12,8 +12,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.importer.ImportHelper;
 import org.jumbodb.database.service.query.Restartable;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -23,17 +25,14 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
  * Date: 3/22/13
  * Time: 2:12 PM
  */
-// CARSTEN make spring bean
 public class StorageManagement {
-    private org.slf4j.Logger log = LoggerFactory.getLogger(StorageManagement.class);
+    private final Logger log = LoggerFactory.getLogger(StorageManagement.class);
 
-    private File dataPath;
-    private File indexPath;
+    private JumboConfiguration config;
     private Restartable queryServer;
 
-    public StorageManagement(File dataPath, File indexPath, Restartable queryServer) {
-        this.dataPath = dataPath;
-        this.indexPath = indexPath;
+    public StorageManagement(JumboConfiguration config, Restartable queryServer) {
+        this.config = config;
         this.queryServer = queryServer;
     }
 
@@ -52,11 +51,11 @@ public class StorageManagement {
     }
 
     private File findCollectionIndexFolder(String collectionName) {
-        return new File(indexPath.getAbsolutePath() + "/" + collectionName);
+        return new File(getIndexPath().getAbsolutePath() + "/" + collectionName);
     }
 
     private File findCollectionDataFolder(String collectionName) {
-        return new File(dataPath.getAbsolutePath() + "/" + collectionName);
+        return new File(getDataPath().getAbsolutePath() + "/" + collectionName);
     }
 
     public void deleteChunkedVersionForAllCollections(String chunkedDeliveryKey, String version) {
@@ -105,14 +104,14 @@ public class StorageManagement {
             deleteCompleteCollectionWithoutRestart(collection);
         }
         else {
-            delete(new File(dataPath.getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey));
-            delete(new File(indexPath.getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey));
+            delete(new File(getDataPath().getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey));
+            delete(new File(getIndexPath().getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey));
         }
     }
 
     private void rawDeleteChunkedVersionInCollection(String collection, String chunkDeliveryKey, String version) {
-        delete(new File(dataPath.getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/" + version));
-        delete(new File(indexPath.getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/" + version));
+        delete(new File(getDataPath().getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/" + version));
+        delete(new File(getIndexPath().getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/" + version));
     }
 
     public void activateChunkedVersionForAllCollections(String chunkedDeliveryKey, String version) {
@@ -140,7 +139,8 @@ public class StorageManagement {
 
     private List<File> findCollectionDirectories() {
         List<File> collectionDirectories = new LinkedList<File>();
-        for (File file : dataPath.listFiles()) {
+        File[] files = getDataPath().listFiles();
+        for (File file : files) {
             if(!file.getName().startsWith(".") && file.isDirectory()) {
                 collectionDirectories.add(file);
             }
@@ -166,12 +166,12 @@ public class StorageManagement {
     }
 
     private File getActiveDeliveryFile(String collection, String chunkDeliveryKey) {
-        return new File(dataPath.getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/active.properties");
+        return new File(getDataPath().getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/active.properties");
     }
 
     private String findAppropriateInactiveVersionToActivate(String collection, String deliveryChunkKey) {
         String excludedVersion = getActiveDeliveryVersion(collection, deliveryChunkKey);
-        File pathToVersions = new File(dataPath.getAbsolutePath() + "/" + collection + "/" + deliveryChunkKey);
+        File pathToVersions = new File(getDataPath().getAbsolutePath() + "/" + collection + "/" + deliveryChunkKey);
         File[] versionFolders = pathToVersions.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
         SortedMap<Date, String> possibleVersions = new TreeMap<Date, String>();
         for (File versionFolder : versionFolders) {
@@ -213,6 +213,13 @@ public class StorageManagement {
         ImportHelper.writeActiveFile(activeDeliveryFile, version);
     }
 
+    public File getIndexPath() {
+        return config.getIndexPath();
+    }
+
+    public File getDataPath() {
+        return config.getDataPath();
+    }
 
     private void delete(File file) {
 //        System.out.println("Mock Delete: " + file.getAbsolutePath());

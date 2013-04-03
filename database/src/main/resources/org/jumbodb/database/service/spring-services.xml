@@ -47,4 +47,13 @@
         <constructor-arg ref="queryServer"/>
     </bean>
 
+    <bean id="storageManagement" class="org.jumbodb.database.service.management.storage.StorageManagement">
+        <constructor-arg ref="jumboConfig"/>
+        <constructor-arg ref="queryServer"/>
+    </bean>
+
+    <bean id="statusService" class="org.jumbodb.database.service.management.status.StatusService">
+        <constructor-arg ref="jumboConfig"/>
+    </bean>
+
 </beans>

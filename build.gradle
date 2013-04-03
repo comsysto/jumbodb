@@ -10,7 +10,7 @@ subprojects {
     apply plugin: 'eclipse'
   
     group = 'org.jumbodb'
-    version = '0.0.3-SNAPSHOT'
+    version = '0.0.5-SNAPSHOT'
   
 
     sourceCompatibility = 1.6

@@ -1,2 +1,56 @@
-Welcome - jumboDB
+<!DOCTYPE html>
+<html ng-app="jumbodb">
+<head>
+    <title>jumboDB</title>
+    <link rel="stylesheet" href="/jumbodb/resources/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/jumbodb/resources/bootstrap/css/bootstrap-responsive.min.css">
+    <link rel="stylesheet" media="screen" href="/css/main.css">
+    <script src="/jumbodb/resources/jquery/jquery.min.js" type="text/javascript"></script>
+    <script src="/jumbodb/resources/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/jumbodb/resources/angularjs/angular.min.js" type="text/javascript"></script>
+    <script src="/js/app.js" type="text/javascript"></script>
+    <script src="/js/controllers.js" type="text/javascript"></script>
+</head>
 
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="#/overview">jumboDB</a>
+            <ul class="nav">
+                <li class="">
+                    <a href="#/collections">Collections</a>
+                </li>
+                <li class="">
+                    <a href="#/deliveries">Deliveries</a>
+                </li>
+                <li class="">
+                    <a href="#/browse">Browse</a>
+                </li>
+                <li class="">
+                    <a href="#/maintenance">Maintenance</a>
+                </li>
+                <li class="">
+                    <a href="#/monitoring">Monitoring</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+
+    <div class="content">
+        <div ng-view></div>
+    </div>
+
+    <footer>
+        <p/>
+        <p>
+            <a href="http://www.jumbodb.org">www.jumbodb.org</a>
+        </p>
+    </footer>
+</div>
+</body>
+</html>

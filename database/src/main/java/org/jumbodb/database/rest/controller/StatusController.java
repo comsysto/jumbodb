@@ -3,6 +3,9 @@ package org.jumbodb.database.rest.controller;
 import org.jumbodb.database.rest.dto.Helloworld;
 import org.jumbodb.database.rest.dto.status.ServerInformation;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
+import org.jumbodb.database.service.importer.DatabaseImportSession;
+import org.jumbodb.database.service.importer.ImportTask;
+import org.jumbodb.database.service.query.DatabaseQuerySession;
 import org.jumbodb.database.service.statistics.GlobalStatistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -46,6 +49,9 @@ public class StatusController {
         status.setQueryPort(jumboConfiguration.getQueryPort());
         status.setStartupTime(dateFormat.format(GlobalStatistics.getStartupTime()));
         status.setTotalFreeMemory(format.format((freeMemory + (maxMemory - allocatedMemory)) / divideMB) + " MB");
+        status.setQueryProtocolVersion(String.valueOf(DatabaseQuerySession.PROTOCOL_VERSION));
+        status.setImportProtocolVersion(String.valueOf(DatabaseImportSession.PROTOCOL_VERSION));
+        status.setStorageFormatVersion(ImportTask.STORAGE_VERSION);
         return status;
     }
 }

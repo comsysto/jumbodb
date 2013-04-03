@@ -21,6 +21,9 @@ public class ServerInformation {
     private Long numberOfQueries;
     private Long numberOfResults;
     private String startupTime;
+    private String queryProtocolVersion;
+    private String importProtocolVersion;
+    private String storageFormatVersion;
 
     public Integer getQueryPort() {
         return queryPort;
@@ -110,6 +113,30 @@ public class ServerInformation {
         this.startupTime = startupTime;
     }
 
+    public String getQueryProtocolVersion() {
+        return queryProtocolVersion;
+    }
+
+    public void setQueryProtocolVersion(String queryProtocolVersion) {
+        this.queryProtocolVersion = queryProtocolVersion;
+    }
+
+    public String getImportProtocolVersion() {
+        return importProtocolVersion;
+    }
+
+    public void setImportProtocolVersion(String importProtocolVersion) {
+        this.importProtocolVersion = importProtocolVersion;
+    }
+
+    public String getStorageFormatVersion() {
+        return storageFormatVersion;
+    }
+
+    public void setStorageFormatVersion(String storageFormatVersion) {
+        this.storageFormatVersion = storageFormatVersion;
+    }
+
     @Override
     public String toString() {
         return "ServerInformation{" +
@@ -124,49 +151,9 @@ public class ServerInformation {
                 ", numberOfQueries=" + numberOfQueries +
                 ", numberOfResults=" + numberOfResults +
                 ", startupTime='" + startupTime + '\'' +
+                ", queryProtocolVersion='" + queryProtocolVersion + '\'' +
+                ", importProtocolVersion='" + importProtocolVersion + '\'' +
+                ", storageFormatVersion='" + storageFormatVersion + '\'' +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ServerInformation that = (ServerInformation) o;
-
-        if (allocatedMemory != null ? !allocatedMemory.equals(that.allocatedMemory) : that.allocatedMemory != null)
-            return false;
-        if (dataPath != null ? !dataPath.equals(that.dataPath) : that.dataPath != null) return false;
-        if (freeMemory != null ? !freeMemory.equals(that.freeMemory) : that.freeMemory != null) return false;
-        if (importPort != null ? !importPort.equals(that.importPort) : that.importPort != null) return false;
-        if (indexPath != null ? !indexPath.equals(that.indexPath) : that.indexPath != null) return false;
-        if (maximumMemory != null ? !maximumMemory.equals(that.maximumMemory) : that.maximumMemory != null)
-            return false;
-        if (numberOfQueries != null ? !numberOfQueries.equals(that.numberOfQueries) : that.numberOfQueries != null)
-            return false;
-        if (numberOfResults != null ? !numberOfResults.equals(that.numberOfResults) : that.numberOfResults != null)
-            return false;
-        if (queryPort != null ? !queryPort.equals(that.queryPort) : that.queryPort != null) return false;
-        if (startupTime != null ? !startupTime.equals(that.startupTime) : that.startupTime != null) return false;
-        if (totalFreeMemory != null ? !totalFreeMemory.equals(that.totalFreeMemory) : that.totalFreeMemory != null)
-            return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = queryPort != null ? queryPort.hashCode() : 0;
-        result = 31 * result + (importPort != null ? importPort.hashCode() : 0);
-        result = 31 * result + (dataPath != null ? dataPath.hashCode() : 0);
-        result = 31 * result + (indexPath != null ? indexPath.hashCode() : 0);
-        result = 31 * result + (maximumMemory != null ? maximumMemory.hashCode() : 0);
-        result = 31 * result + (allocatedMemory != null ? allocatedMemory.hashCode() : 0);
-        result = 31 * result + (freeMemory != null ? freeMemory.hashCode() : 0);
-        result = 31 * result + (totalFreeMemory != null ? totalFreeMemory.hashCode() : 0);
-        result = 31 * result + (numberOfQueries != null ? numberOfQueries.hashCode() : 0);
-        result = 31 * result + (numberOfResults != null ? numberOfResults.hashCode() : 0);
-        result = 31 * result + (startupTime != null ? startupTime.hashCode() : 0);
-        return result;
     }
 }

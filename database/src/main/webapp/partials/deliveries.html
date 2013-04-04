@@ -5,12 +5,12 @@
 <div class="row">
     <div class="span12">
         <div id="accordion2" class="accordion">
-            <!--<div class="alert alert-error">-->
-                <!--@message-->
-            <!--</div>-->
-            <!--<div class="alert alert-success">-->
-                <!--@message-->
-            <!--</div>-->
+            <div class="alert alert-error" ng-show="msg.error">
+                {{msg.message}}
+            </div>
+            <div class="alert alert-success" ng-show="msg.success">
+                {{msg.message}}
+            </div>
             <div class="accordion-group" ng-repeat="delivery in deliveries">
                 <div class="accordion-heading">
                     <div class="accordion-toggle">
@@ -50,9 +50,9 @@
                                     <td>{{collection.formatedIndexSize}}</td>
                                     <td>
                                         <span class="label label-success" ng-show="collection.active">Running</span>
-                                        <a class="btn btn-inverse" ng-hide="collection.active" href="@routes.Deliveries.activateChunkedVersionInCollection(collection.collectionName, delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-hand-right icon-white"></i> Activate</a>
+                                        <button class="btn btn-inverse" ng-hide="collection.active" ng-click="activateChunkedVersionInCollection(collection.collectionName, delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-hand-right icon-white"></i> Activate</button>
                                     </td>
-                                    <td><a class="btn btn-danger" href="@routes.Deliveries.deleteChunkedVersionInCollection(collection.collectionName, delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i></a></td>
+                                    <td><button class="btn btn-danger" ng-click="deleteChunkedVersionInCollection(collection.collectionName, delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i></button></td>
 
                                 </tr>
                                 <tr>
@@ -65,9 +65,9 @@
                                 </tr>
                                 </tbody>
                             </table>
-                            <a class="btn btn-inverse" href="@routes.Deliveries.activateChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-hand-right icon-white"></i> Activate delivery version</a>
+                            <button class="btn btn-inverse" ng-click="activateChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-hand-right icon-white"></i> Activate delivery version</button>
                             &nbsp;&nbsp;
-                            <a class="btn btn-danger" href="@routes.Deliveries.deleteChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete delivery version</a>
+                            <button class="btn btn-danger" ng-click="deleteChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete delivery version</button>
                         </div>
                     </div>
                 </div>

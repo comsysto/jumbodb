@@ -1,8 +1,6 @@
 package org.jumbodb.database.service.management.storage;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multiset;
-import com.sun.tools.javac.resources.version;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -222,10 +220,9 @@ public class StorageManagement {
     }
 
     private void activateDeliveryVersion(String version, File activeDeliveryFile) {
-        System.out.println("Mock: Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
+//        System.out.println("Mock: Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
         log.info("Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
-// CARSTEN fix
-//        ImportHelper.writeActiveFile(activeDeliveryFile, version);
+        ImportHelper.writeActiveFile(activeDeliveryFile, version);
     }
 
     public File getIndexPath() {
@@ -237,14 +234,13 @@ public class StorageManagement {
     }
 
     private void delete(File file) {
-        System.out.println("Mock Delete: " + file.getAbsolutePath());
-        // CARSTEN fix
-//        log.info("Delete: " + file.getAbsolutePath());
-//        try {
-//            FileUtils.deleteDirectory(file);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+//        System.out.println("Mock Delete: " + file.getAbsolutePath());
+        log.info("Delete: " + file.getAbsolutePath());
+        try {
+            FileUtils.deleteDirectory(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

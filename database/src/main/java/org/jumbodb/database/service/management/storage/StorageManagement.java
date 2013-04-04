@@ -222,9 +222,10 @@ public class StorageManagement {
     }
 
     private void activateDeliveryVersion(String version, File activeDeliveryFile) {
-//        System.out.println("Mock: Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
+        System.out.println("Mock: Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
         log.info("Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
-        ImportHelper.writeActiveFile(activeDeliveryFile, version);
+// CARSTEN fix
+//        ImportHelper.writeActiveFile(activeDeliveryFile, version);
     }
 
     public File getIndexPath() {
@@ -236,13 +237,14 @@ public class StorageManagement {
     }
 
     private void delete(File file) {
-//        System.out.println("Mock Delete: " + file.getAbsolutePath());
-        log.info("Delete: " + file.getAbsolutePath());
-        try {
-            FileUtils.deleteDirectory(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println("Mock Delete: " + file.getAbsolutePath());
+        // CARSTEN fix
+//        log.info("Delete: " + file.getAbsolutePath());
+//        try {
+//            FileUtils.deleteDirectory(file);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
 

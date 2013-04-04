@@ -4,6 +4,73 @@
 
 <div class="row">
     <div class="span12">
-       Collections here
+
+        <div id="accordion2" class="accordion">
+            <!--<div class="alert alert-error">-->
+                <!--@message-->
+            <!--</div>-->
+            <!--<div class="alert alert-success">-->
+                <!--@message-->
+            <!--</div>-->
+            <div class="accordion-group" ng-repeat="collection in collections">
+                <div class="accordion-heading">
+                    <div class="accordion-toggle">
+                        <a href="#{{collection.collapseId}}" data-parent="#accordion2" data-toggle="collapse">
+                            <strong>{{collection.name}}</strong>
+                        </a>
+                        <div style="font-size: smaller;">{{collection.formatedCompressedSize}} compressed data - {{collection.formatedUncompressedSize}} uncompressed data - {{collection.formatedIndexSize}} index</div>
+                    </div>
+                </div>
+                <div class="accordion-body collapse" id="{{collection.collapseId}}" style="height: 0px;">
+                    <div class="accordion-inner">
+                        <div ng-repeat="chunk in collection.chunks">
+                            <h4>Delivery Chunk {{chunk.key}}</h4>
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Version / Info</th>
+                                    <th>Date</th>
+                                    <th>Compressed</th>
+                                    <th>Uncompressed</th>
+                                    <th>Index</th>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="version in chunk.versions">
+                                    <td>
+                                        <strong><small>{{version.version}}</small></strong>
+                                        <p>{{version.info}}</p>
+                                    </td>
+                                    <td>{{version.date}}</td>
+                                    <td>{{version.formatedCompressedSize}}</td>
+                                    <td>{{version.formatedUncompressedSize}}</td>
+                                    <td>{{version.formatedIndexSize}}</td>
+                                    <td>
+                                        <span class="label label-success" ng-show="version.active">Running</span>
+                                        <a class="btn btn-inverse" ng-hide="version.active" href="@routes.Collections.activateChunkedVersionInCollection(collection.name, chunk.key, version.version)" onclick="return confirm('Are you sure?');"><i class="icon-hand-right icon-white"></i> Activate</a>
+                                    </td>
+                                    <td><a class="btn btn-danger" href="@routes.Collections.deleteChunkedVersionInCollection(collection.name, chunk.key, version.version)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i></a></td>
+
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td><strong>{{chunk.formatedCompressedSize}}</strong></td>
+                                    <td><strong>{{chunk.formatedUncompressedSize}}</strong></td>
+                                    <td><strong>{{chunk.formatedIndexSize}}</strong></td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <a class="btn btn-danger" href="@routes.Collections.deleteCompleteCollection(collection.name)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete collection <strong>{{collection.name}}</strong></a>
+                            <hr/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

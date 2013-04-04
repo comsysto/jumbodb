@@ -5,10 +5,14 @@ function OverviewCtrl($scope, $http) {
 
 }
 
-function CollectionsListCtrl($scope) {
-
+function CollectionsListCtrl($scope, $http) {
+    $http.get('/jumbodb/rest/collections').success(function(data) {
+        $scope.collections = data;
+    });
 }
 
-function DeliveriesListCtrl($scope) {
-
+function DeliveriesListCtrl($scope, $http) {
+    $http.get('/jumbodb/rest/deliveries').success(function(data) {
+        $scope.deliveries = data;
+    });
 }

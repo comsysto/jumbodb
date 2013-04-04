@@ -1,19 +1,27 @@
 package org.jumbodb.database.service.management.storage;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multiset;
+import com.sun.tools.javac.resources.version;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.UnhandledException;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.importer.ImportHelper;
+import org.jumbodb.database.service.management.storage.dto.collections.DeliveryChunk;
+import org.jumbodb.database.service.management.storage.dto.collections.DeliveryVersion;
+import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
+import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
+import org.jumbodb.database.service.management.storage.dto.deliveries.VersionedJumboCollection;
 import org.jumbodb.database.service.query.Restartable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +34,8 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
  * Time: 2:12 PM
  */
 public class StorageManagement {
+    public static final FileFilter FOLDER_FILTER = FileFilterUtils.makeDirectoryOnly(FileFilterUtils.notFileFilter(FileFilterUtils.prefixFileFilter(".")));
+
     private final Logger log = LoggerFactory.getLogger(StorageManagement.class);
 
     private JumboConfiguration config;
@@ -188,8 +198,7 @@ public class StorageManagement {
     }
 
     private Date getDateForVersion(File versionFolder) {
-        String deliveryPropsPath = versionFolder.getAbsolutePath() + "/delivery.properties";
-        String date = getDate(deliveryPropsPath);
+        String date = getDate(versionFolder);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         try {
             return sdf.parse(date);
@@ -198,10 +207,15 @@ public class StorageManagement {
         }
     }
 
-    private String getDate(String deliveryPropsPath) {
+    private String getDate(File versionFolder) {
+        Properties activeProps = getDeliveryProperties(versionFolder);
+        return activeProps.getProperty("date");
+    }
+
+    private Properties getDeliveryProperties(File versionFolder) {
         try {
-            Properties activeProps = PropertiesLoaderUtils.loadProperties(new FileSystemResource(new File(deliveryPropsPath)));
-            return activeProps.getProperty("date");
+            String deliveryPropsPath = versionFolder.getAbsolutePath() + "/delivery.properties";
+            return PropertiesLoaderUtils.loadProperties(new FileSystemResource(deliveryPropsPath));
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -228,6 +242,201 @@ public class StorageManagement {
             FileUtils.deleteDirectory(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+
+    public List<JumboCollection> getJumboCollections() {
+        List<JumboCollection> collections = new LinkedList<JumboCollection>();
+        File[] collectionFolders = getDataPath().listFiles(FOLDER_FILTER);
+        for (File collectionFolder : collectionFolders) {
+            collections.add(getJumboCollection(collectionFolder));
+        }
+        Collections.sort(collections);
+        return collections;
+    }
+
+    private JumboCollection getJumboCollection(File collectionFolder) {
+        String collectionName = collectionFolder.getName();
+        List<DeliveryChunk> collectionChunks = getCollectionDeliveryChunks(collectionName, collectionFolder);
+        String collapseId = "col" + collectionName.hashCode();
+        return new JumboCollection(collapseId, collectionName, collectionChunks);
+    }
+
+    private List<DeliveryChunk> getCollectionDeliveryChunks(String collectionName, File collectionFolder) {
+        List<DeliveryChunk> deliveryChunks = new LinkedList<DeliveryChunk>();
+        File[] chunkFolders = collectionFolder.listFiles(FOLDER_FILTER);
+        for (File chunkFolder : chunkFolders) {
+            deliveryChunks.add(getDeliveryChunk(chunkFolder, collectionName));
+        }
+        Collections.sort(deliveryChunks);
+        return deliveryChunks;
+    }
+
+    private DeliveryChunk getDeliveryChunk(File chunkFolder, String collectionName) {
+        String chunkKey = chunkFolder.getName();
+        String activeVersion = getActiveDeliveryVersion(collectionName, chunkKey);
+        return new DeliveryChunk(chunkKey, getDeliveryVersions(chunkFolder, collectionName, chunkKey, activeVersion));
+    }
+
+    private List<DeliveryVersion> getDeliveryVersions(File chunkFolder, String collectionName, String chunkKey, String activeVersion) {
+        List<DeliveryVersion> deliveryVersions = new LinkedList<DeliveryVersion>();
+        File[] deliveryVersionFolders = chunkFolder.listFiles(FOLDER_FILTER);
+        for (File deliveryVersionFolder : deliveryVersionFolders) {
+            deliveryVersions.add(getDeliveryVersion(deliveryVersionFolder, collectionName, chunkKey, activeVersion));
+        }
+        Collections.sort(deliveryVersions);
+        return deliveryVersions;
+    }
+
+    private DeliveryVersion getDeliveryVersion(File deliveryVersionFolder, String collectionName, String chunkKey, String activeVersion) {
+        String version = deliveryVersionFolder.getName();
+        Properties deliveryProperties = getDeliveryProperties(deliveryVersionFolder);
+        String info = deliveryProperties.getProperty("info");
+        String date = deliveryProperties.getProperty("date");
+        long compressedSize = calculateCompressedSize(deliveryVersionFolder);
+        long uncompressedSize = getUncompressedSize(deliveryVersionFolder);
+        long indexSize = getIndexSize(collectionName, chunkKey, version);
+        boolean active = activeVersion.equals(version);
+        return new DeliveryVersion(version, info, date, compressedSize, uncompressedSize, indexSize, active);
+    }
+
+    private long getUncompressedSize(File deliveryVersionFolder) {
+        long uncompressedSize = 0l;
+        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".chunks.snappy"));
+        File[] snappyChunks = deliveryVersionFolder.listFiles(metaFiler);
+        for (File snappyChunk : snappyChunks) {
+            uncompressedSize += getSizeFromSnappyChunk(snappyChunk);
+        }
+        return uncompressedSize;
+    }
+
+    private long getSizeFromSnappyChunk(File snappyChunk) {
+        FileInputStream fis = null;
+        DataInputStream dis = null;
+        try {
+            fis = new FileInputStream(snappyChunk);
+            dis = new DataInputStream(fis);
+            return dis.readLong();
+        } catch (FileNotFoundException e) {
+            throw new UnhandledException(e);
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+        finally {
+            IOUtils.closeQuietly(dis);
+            IOUtils.closeQuietly(fis);
+        }
+    }
+
+    private long getIndexSize(String collectionName, String chunkKey, String version) {
+        File indexVersionFolder = new File(getIndexPath().getAbsolutePath() + "/" + collectionName + "/" + chunkKey + "/" + version);
+        if(indexVersionFolder.exists()) {
+            return calculateCompressedSize(indexVersionFolder);
+        }
+        return 0l;
+    }
+
+    public List<ChunkedDeliveryVersion> getChunkedDeliveryVersions() {
+        List<ChunkedDeliveryVersion> chunkedDeliveryVersions = new LinkedList<ChunkedDeliveryVersion>();
+        List<VersionedJumboCollection> versionedJumboCollections = getAllVersionedJumboCollections();
+        HashMultimap<ChunkKeyVersion, VersionedJumboCollection> groupByChunkKeyAndVersion = groupByChunkKeyAndVersion(versionedJumboCollections);
+        Set<ChunkKeyVersion> keys = groupByChunkKeyAndVersion.keySet();
+        for (ChunkKeyVersion key : keys) {
+            List<VersionedJumboCollection> versions = new ArrayList<VersionedJumboCollection>(groupByChunkKeyAndVersion.get(key));
+            Collections.sort(versions);
+            String collapseId = "col" + key.hashCode();
+            String info = findInfos(versions);
+            String date = findDates(versions);
+            chunkedDeliveryVersions.add(new ChunkedDeliveryVersion(collapseId, key.chunkKey, key.version, info, date, versions));
+        }
+        Collections.sort(chunkedDeliveryVersions);
+        return chunkedDeliveryVersions;
+    }
+
+    private String findDates(List<VersionedJumboCollection> versions) {
+        Set<String> dates = new HashSet<String>();
+        for (VersionedJumboCollection version : versions) {
+            dates.add(version.getDate());
+        }
+        return StringUtils.join(dates, ",");
+    }
+
+    private String findInfos(List<VersionedJumboCollection> versions) {
+        Set<String> infos = new HashSet<String>();
+        for (VersionedJumboCollection version : versions) {
+            infos.add(version.getInfo());
+        }
+        return StringUtils.join(infos, " - ");
+    }
+
+    private HashMultimap<ChunkKeyVersion, VersionedJumboCollection> groupByChunkKeyAndVersion(List<VersionedJumboCollection> versionedJumboCollections) {
+        HashMultimap<ChunkKeyVersion, VersionedJumboCollection> groupedByChunkKeyAndVersion = HashMultimap.create();
+        for (VersionedJumboCollection versionedJumboCollection : versionedJumboCollections) {
+            groupedByChunkKeyAndVersion.put(new ChunkKeyVersion(versionedJumboCollection.getChunkKey(), versionedJumboCollection.getVersion()), versionedJumboCollection);
+        }
+        return groupedByChunkKeyAndVersion;
+    }
+
+    private List<VersionedJumboCollection> getAllVersionedJumboCollections() {
+        List<VersionedJumboCollection> versionedJumboCollections = new LinkedList<VersionedJumboCollection>();
+        File[] collectionFolders = getDataPath().listFiles(FOLDER_FILTER);
+        for (File collectionFolder : collectionFolders) {
+            String collectionName = collectionFolder.getName();
+            File[] deliveryChunkFolders = collectionFolder.listFiles(FOLDER_FILTER);
+            for (File deliveryChunkFolder : deliveryChunkFolders) {
+                String chunkKey = deliveryChunkFolder.getName();
+                String activeVersion = getActiveDeliveryVersion(collectionName, chunkKey);
+                File[] versionFolders = deliveryChunkFolder.listFiles(FOLDER_FILTER);
+                for (File versionFolder : versionFolders) {
+                    String version = versionFolder.getName();
+                    Properties deliveryProperties = getDeliveryProperties(versionFolder);
+                    String info = deliveryProperties.getProperty("info");
+                    String date = deliveryProperties.getProperty("date");
+                    boolean active = activeVersion.equals(version);
+                    long compressedSize = calculateCompressedSize(versionFolder);
+                    long uncompressedSize = getUncompressedSize(versionFolder);
+                    long indexSize = getIndexSize(collectionName, chunkKey, version);
+                    versionedJumboCollections.add(new VersionedJumboCollection(collectionName, version, chunkKey, info, date, active, compressedSize, uncompressedSize, indexSize));
+                }
+            }
+
+        }
+        return versionedJumboCollections;
+    }
+
+    private long calculateCompressedSize(File versionFolder) {
+        return FileUtils.sizeOfDirectory(versionFolder);
+    }
+
+
+    private static class ChunkKeyVersion {
+        final String chunkKey;
+        final String version;
+
+        private ChunkKeyVersion(String chunkKey, String version) {
+            this.chunkKey = chunkKey;
+            this.version = version;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ChunkKeyVersion that = (ChunkKeyVersion) o;
+
+            if (!chunkKey.equals(that.chunkKey)) return false;
+            if (!version.equals(that.version)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = chunkKey.hashCode();
+            result = 31 * result + version.hashCode();
+            return result;
         }
     }
 }

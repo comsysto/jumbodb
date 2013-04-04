@@ -126,7 +126,7 @@ public class ImportTask implements Runnable {
                         IOUtils.closeQuietly(deliveryInfoFos);
                     }
                     // pfad sollte der richtige sein ...
-                    File activeDeliveryFile = new File(deliveryKeyPath + "/active.properties");
+                    File activeDeliveryFile = getFinalActivationFilePath(information.getCollection(), information.getDeliveryKey());//new File(deliveryKeyPath + "/active.properties");
                     if(!activeDeliveryFile.exists()) {
                         onActivateDelivery(information);
                     }

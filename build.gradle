@@ -1,5 +1,13 @@
 group = 'org.jumbodb'
 
+repositories {
+    mavenCentral()
+    mavenRepo(url: "http://repository-comsysto.forge.cloudbees.com/release")
+    mavenRepo(url: "http://repository-comsysto.forge.cloudbees.com/snapshot/")
+    mavenRepo(url: "http://maven.springframework.org/release")
+    mavenRepo(url: "http://maven.springframework.org/milestone")
+}
+
 allprojects {
     apply plugin: 'idea'
 }
@@ -11,7 +19,6 @@ subprojects {
   
     group = 'org.jumbodb'
     version = '0.0.5-SNAPSHOT'
-  
 
     sourceCompatibility = 1.6
     targetCompatibility = 1.6

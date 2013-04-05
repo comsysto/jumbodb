@@ -49,8 +49,6 @@ JSON documents returned in less than a second)
 * Gradle 1.4
     * Download & install (must be in $PATH) http://www.gradle.org
     * Mac users can use brew:  `brew install gradle`
-* Play Framework 2.1
-    * Download & install (must be in $PATH) http://www.playframework.com/
 
 ### Setup project
 
@@ -65,11 +63,16 @@ JSON documents returned in less than a second)
 
 ### How to run the database
 
-Run the database
+Run the database from IDE
 
 ```
-cd database
-play start
+Run JumboDevelopmentStarter
+```
+
+Run the database from command line
+
+```
+TODO add later
 ```
 
 Data is stored by default in your home folder under `jumbodb`.
@@ -91,7 +94,7 @@ repositories {
 *Dependency*
 
 ```
-compile "org.jumbodb.connector:jumbodb-java-connector:0.0.3"
+compile "org.jumbodb.connector:jumbodb-java-connector:0.0.4"
 ```
 
 **Maven**
@@ -114,9 +117,9 @@ compile "org.jumbodb.connector:jumbodb-java-connector:0.0.3"
 *Dependency*
 ```
 <dependency>
-  <groupId>org.jumbodb.connector::</groupId>
+  <groupId>org.jumbodb.connector</groupId>
   <artifactId>jumbodb-java-connector</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4</version>
   <type>jar</type>
   <scope>compile</scope>
 </dependency>
@@ -142,11 +145,11 @@ gradle uploadArchives
 ### Release the database
 
 ```
-cd database
-play dist
+cd bundle
+gradle clean distZip
 ```
 
-This produces a full bundled distribution. Just unzip and call ./start
+This produces a full bundled distribution. Just unzip and call ./bin/jumbodb
 
 
 ## Licenses

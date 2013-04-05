@@ -8,6 +8,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * User: carsten
@@ -26,6 +27,15 @@ public class JumboConfigurationLoader {
         if (StringUtils.isNotEmpty(jumboConfig)) {
             PropertiesLoaderUtils.fillProperties(properties, new FileSystemResource(jumboConfig));
         }
-        return properties;
+        String userHome = System.getProperty("user.home");
+        Set<String> keys = properties.stringPropertyNames();
+        Properties result = new Properties();
+        for (String key : keys) {
+            String property = properties.getProperty(key);
+            property = StringUtils.replace(property, "$USER_HOME", userHome);
+            property = StringUtils.replace(property, "%USER_HOME%", userHome);
+            result.setProperty(key, property);
+        }
+        return result;
     }
 }

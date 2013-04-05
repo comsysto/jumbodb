@@ -43,6 +43,7 @@ public class QueryServer implements Restartable {
                     ServerSocket serverSocket = new ServerSocket(config.getQueryPort());
                     int id = 0;
                     log.info("QueryServer started");
+                    log.info("Configuration " + config.toString());
                     while (serverActive) {
                         Socket clientSocket = serverSocket.accept();
                         serverSocketExecutor.submit(new QueryTask(clientSocket, id++, jumboSearcher, jsonMapper));

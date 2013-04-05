@@ -13,19 +13,10 @@
     <context:component-scan base-package="org.jumbodb.database.service" />
 
 
-    <util:properties id="defaultProperties">
-        <prop key="jumbodb.import.port">12001</prop>
-        <prop key="jumbodb.query.port">12002</prop>
-        <!--<prop key="jumbodb.datapath">~/jumbodb/data</prop>-->
-        <!--<prop key="jumbodb.indexpath">~/jumbodb/index</prop>-->
-        <prop key="jumbodb.datapath">database_old/~/jumbodb/data</prop>
-        <prop key="jumbodb.indexpath">database_old/~/jumbodb/index</prop>
-    </util:properties>
+    <bean id="jumboConfigProperties" class="org.jumbodb.database.configuration.JumboConfigurationLoader" factory-method="loadConfiguration"/>
 
-    <!-- CARSTEN later set config file over initializer -->
     <context:property-placeholder
-            properties-ref="defaultProperties"
-            location="file:/etc/jumbodb.conf"
+            properties-ref="jumboConfigProperties"
             local-override="false"
             ignore-resource-not-found="true"
             ignore-unresolvable="true"

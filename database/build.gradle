@@ -1,6 +1,7 @@
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'war'
+apply plugin: 'tomcat'
 apply plugin: 'eclipse'
 apply plugin: 'eclipse-wtp'
 
@@ -22,6 +23,22 @@ sourceSets {
             srcDir 'src/test/java'
         }
     }
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:0.9.8'
+    }
+}
+
+tomcatRun {
+    httpPort = 9000
+    httpsPort = 9443
+    enableSSL = false
 }
 
 dependencies {
@@ -72,6 +89,13 @@ dependencies {
     providedCompile "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
     providedCompile "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
     providedCompile "org.eclipse.jdt.core.compiler:ecj:3.6"
+
+    def tomcatVersion = '7.0.37'
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+    tomcat "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+    }
 }
 
 

@@ -72,7 +72,8 @@ Run JumboDevelopmentStarter
 Run the database from command line
 
 ```
-TODO add later
+cd database
+gradle tomcatRun
 ```
 
 Data is stored by default in your home folder under `jumbodb`.

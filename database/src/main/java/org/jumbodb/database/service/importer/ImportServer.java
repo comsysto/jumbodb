@@ -24,6 +24,7 @@ public class ImportServer {
     private ExecutorService executorService = Executors.newCachedThreadPool();
     private Restartable queryServer;
     private JumboConfiguration config;
+    private ServerSocket serverSocket;
 
 
     public ImportServer(JumboConfiguration config, Restartable queryServer) {
@@ -33,18 +34,18 @@ public class ImportServer {
 
     public void start() throws Exception {
         serverActive = true;
+        serverSocket = new ServerSocket(config.getImportPort());
         new Thread() {
             @Override
             public void run() {
                 try {
-                    ServerSocket serverSocket = new ServerSocket(config.getImportPort());
                     int id = 0;
                     log.info("ImportServer started");
                     while (isServerActive()) {
                         Socket clientSocket = serverSocket.accept();
                         executorService.submit(new ImportTask(clientSocket, id++, config.getDataPath(), config.getIndexPath(), queryServer));
                     }
-                    serverSocket.close();
+//                    serverSocket.close();
                     log.info("ImportServer stopped");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -53,7 +54,8 @@ public class ImportServer {
         }.start();
     }
 
-    public void stop() {
+    public void stop() throws IOException {
+        serverSocket.close();
         serverActive = false;
         executorService.shutdown();
     }

@@ -26,6 +26,7 @@ public class QueryServer implements Restartable {
     private JumboSearcher jumboSearcher;
     private final ObjectMapper jsonMapper;
     private JumboConfiguration config;
+    private  ServerSocket serverSocket;
 
     public QueryServer(JumboConfiguration config) {
         this.config = config;
@@ -36,11 +37,12 @@ public class QueryServer implements Restartable {
 
     public void start() throws Exception {
         serverActive = true;
+        serverSocket = new ServerSocket(config.getQueryPort());
         serverSocketExecutor.submit(new Thread() {
             @Override
             public void run() {
                 try {
-                    ServerSocket serverSocket = new ServerSocket(config.getQueryPort());
+
                     int id = 0;
                     log.info("QueryServer started");
                     log.info("Configuration " + config.toString());
@@ -48,7 +50,7 @@ public class QueryServer implements Restartable {
                         Socket clientSocket = serverSocket.accept();
                         serverSocketExecutor.submit(new QueryTask(clientSocket, id++, jumboSearcher, jsonMapper));
                     }
-                    serverSocket.close();
+//                    serverSocket.close();
                     log.info("QueryServer stopped");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -62,7 +64,8 @@ public class QueryServer implements Restartable {
         jumboSearcher.restart();
     }
 
-    public void stop() {
+    public void stop() throws IOException {
+        serverSocket.close();
         serverActive = false;
         jumboSearcher.stop();
         serverSocketExecutor.shutdown();

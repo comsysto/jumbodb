@@ -4,6 +4,8 @@ import com.google.common.collect.HashMultimap;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.xerial.snappy.Snappy;
 
 import java.io.*;
@@ -214,15 +216,14 @@ public class SearchIndexUtils {
     }
 
 
-    public static HashMultimap<File, Integer> groupByIndexFile(DataDeliveryChunk dataDeliveryChunk, JumboQuery.IndexComparision query) {
+    public static MultiValueMap<File, Integer> groupByIndexFile(DataDeliveryChunk dataDeliveryChunk, JumboQuery.IndexComparision query) {
         Collection<IndexFile> indexFiles = dataDeliveryChunk.getIndexFiles().get(query.getName());
-        // CARSTEN this map one is very slow
-        HashMultimap<File, Integer> groupByIndexFile = HashMultimap.create();
+        MultiValueMap<File, Integer> groupByIndexFile = new LinkedMultiValueMap<File, Integer>();
         for (IndexFile indexFile : indexFiles) {
             for (String obj : query.getValues()) {
                 int hash = obj.hashCode();
                 if (hash >= indexFile.getFromHash() && hash <= indexFile.getToHash()) {
-                    groupByIndexFile.put(indexFile.getIndexFile(), hash);
+                    groupByIndexFile.add(indexFile.getIndexFile(), hash);
                 }
 
             }

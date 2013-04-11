@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query;
 import com.google.common.collect.HashMultimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.MultiValueMap;
 
 import java.io.File;
 import java.util.*;
@@ -26,10 +27,10 @@ public class SearchIndexTask implements Callable<Set<FileOffset>> {
     @Override
     public Set<FileOffset> call() throws Exception {
         long start = System.currentTimeMillis();
-        HashMultimap<File, Integer> groupedByIndexFile = SearchIndexUtils.groupByIndexFile(dataDeliveryChunk, query);
+        MultiValueMap<File, Integer> groupedByIndexFile = SearchIndexUtils.groupByIndexFile(dataDeliveryChunk, query);
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
         for (File indexFile : groupedByIndexFile.keySet()) {
-            tasks.add(indexFileExecutor.submit(new SearchIndexFileTask(indexFile, groupedByIndexFile.get(indexFile))));
+            tasks.add(indexFileExecutor.submit(new SearchIndexFileTask(indexFile, new HashSet<Integer>(groupedByIndexFile.get(indexFile)))));
         }
         Set<FileOffset> result = new HashSet<FileOffset>();
         for (Future<Set<FileOffset>> task : tasks) {

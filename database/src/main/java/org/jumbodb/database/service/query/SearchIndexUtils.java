@@ -42,9 +42,10 @@ public class SearchIndexUtils {
         int fromChunk = 0;
         int toChunk = numberOfChunks;
         int maxChunk = numberOfChunks - 1;
-
+        int lastFromChunk = -1;
+        int lastToChunk = -1;
         // TODO verify snappy version
-        while(toChunk - fromChunk != 0 || fromChunk == maxChunk) {
+        while((lastFromChunk != fromChunk && lastToChunk != toChunk) || fromChunk == maxChunk) {
             int chunkDiff = (toChunk - fromChunk) / 2;
             int currentChunk = chunkDiff + fromChunk;
 
@@ -77,9 +78,11 @@ public class SearchIndexUtils {
             }
             else if (lastHash < searchHash) {
 //                Logger.info("lastHash < searchHash" + searchHash);
+                lastFromChunk = fromChunk;
                 fromChunk = currentChunk;
             } else if(firstHash > searchHash) {
 //                Logger.info("firstHash > searchHash" + searchHash);
+                lastToChunk = toChunk;
                 toChunk = currentChunk;
             }
         }

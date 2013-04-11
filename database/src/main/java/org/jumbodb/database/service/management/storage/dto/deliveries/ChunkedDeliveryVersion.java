@@ -135,7 +135,7 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
 
     @Override
     public int compareTo(ChunkedDeliveryVersion chunkedDeliveryVersion) {
-        return date.compareTo(chunkedDeliveryVersion.getDate());
+        return chunkedDeliveryVersion.getDate().compareTo(date);
     }
 
     @Override

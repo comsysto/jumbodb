@@ -24,6 +24,62 @@ public class ServerInformation {
     private String queryProtocolVersion;
     private String importProtocolVersion;
     private String storageFormatVersion;
+    private String indexDiskUsedSpace;
+    private String indexDiskTotalSpace;
+    private String indexDiskFreeSpace;
+    private Double indexDiskUsedSpacePerc;
+    private String dataDiskUsedSpace;
+    private String dataDiskTotalSpace;
+    private String dataDiskFreeSpace;
+    private Double dataDiskUsedSpacePerc;
+
+    public String getIndexDiskTotalSpace() {
+        return indexDiskTotalSpace;
+    }
+
+    public void setIndexDiskTotalSpace(String indexDiskTotalSpace) {
+        this.indexDiskTotalSpace = indexDiskTotalSpace;
+    }
+
+    public String getIndexDiskFreeSpace() {
+        return indexDiskFreeSpace;
+    }
+
+    public void setIndexDiskFreeSpace(String indexDiskFreeSpace) {
+        this.indexDiskFreeSpace = indexDiskFreeSpace;
+    }
+
+    public Double getIndexDiskUsedSpacePerc() {
+        return indexDiskUsedSpacePerc;
+    }
+
+    public void setIndexDiskUsedSpacePerc(Double indexDiskUsedSpacePerc) {
+        this.indexDiskUsedSpacePerc = indexDiskUsedSpacePerc;
+    }
+
+    public String getDataDiskTotalSpace() {
+        return dataDiskTotalSpace;
+    }
+
+    public void setDataDiskTotalSpace(String dataDiskTotalSpace) {
+        this.dataDiskTotalSpace = dataDiskTotalSpace;
+    }
+
+    public String getDataDiskFreeSpace() {
+        return dataDiskFreeSpace;
+    }
+
+    public void setDataDiskFreeSpace(String dataDiskFreeSpace) {
+        this.dataDiskFreeSpace = dataDiskFreeSpace;
+    }
+
+    public Double getDataDiskUsedSpacePerc() {
+        return dataDiskUsedSpacePerc;
+    }
+
+    public void setDataDiskUsedSpacePerc(Double dataDiskUsedSpacePerc) {
+        this.dataDiskUsedSpacePerc = dataDiskUsedSpacePerc;
+    }
 
     public Integer getQueryPort() {
         return queryPort;
@@ -137,6 +193,22 @@ public class ServerInformation {
         this.storageFormatVersion = storageFormatVersion;
     }
 
+    public String getIndexDiskUsedSpace() {
+        return indexDiskUsedSpace;
+    }
+
+    public void setIndexDiskUsedSpace(String indexDiskUsedSpace) {
+        this.indexDiskUsedSpace = indexDiskUsedSpace;
+    }
+
+    public String getDataDiskUsedSpace() {
+        return dataDiskUsedSpace;
+    }
+
+    public void setDataDiskUsedSpace(String dataDiskUsedSpace) {
+        this.dataDiskUsedSpace = dataDiskUsedSpace;
+    }
+
     @Override
     public String toString() {
         return "ServerInformation{" +
@@ -154,6 +226,14 @@ public class ServerInformation {
                 ", queryProtocolVersion='" + queryProtocolVersion + '\'' +
                 ", importProtocolVersion='" + importProtocolVersion + '\'' +
                 ", storageFormatVersion='" + storageFormatVersion + '\'' +
+                ", indexDiskUsedSpace='" + indexDiskUsedSpace + '\'' +
+                ", indexDiskTotalSpace='" + indexDiskTotalSpace + '\'' +
+                ", indexDiskFreeSpace='" + indexDiskFreeSpace + '\'' +
+                ", indexDiskUsedSpacePerc=" + indexDiskUsedSpacePerc +
+                ", dataDiskUsedSpace='" + dataDiskUsedSpace + '\'' +
+                ", dataDiskTotalSpace='" + dataDiskTotalSpace + '\'' +
+                ", dataDiskFreeSpace='" + dataDiskFreeSpace + '\'' +
+                ", dataDiskUsedSpacePerc=" + dataDiskUsedSpacePerc +
                 '}';
     }
 }

@@ -32,6 +32,11 @@ public class StatusService {
         long freeMemory = runtime.freeMemory();
         long divideMB = 1024 * 1024;
 
+        long indexDiskTotalSpace = config.getIndexPath().getTotalSpace();
+        long indexDiskFreeSpace = config.getIndexPath().getFreeSpace();
+        long dataDiskTotalSpace = config.getDataPath().getTotalSpace();
+        long dataDiskFreeSpace = config.getDataPath().getFreeSpace();
+
         ServerInformation status = new ServerInformation();
         status.setAllocatedMemory(format.format(allocatedMemory / divideMB) + " MB");
         status.setDataPath(config.getDataPath().getAbsolutePath());
@@ -47,6 +52,14 @@ public class StatusService {
         status.setQueryProtocolVersion(String.valueOf(DatabaseQuerySession.PROTOCOL_VERSION));
         status.setImportProtocolVersion(String.valueOf(DatabaseImportSession.PROTOCOL_VERSION));
         status.setStorageFormatVersion(ImportTask.STORAGE_VERSION);
+        status.setDataDiskFreeSpace(format.format(dataDiskFreeSpace / divideMB) + " MB");
+        status.setDataDiskTotalSpace(format.format(dataDiskTotalSpace / divideMB) + " MB");
+        status.setDataDiskUsedSpacePerc((double)(((dataDiskTotalSpace - dataDiskFreeSpace) * 100) / dataDiskTotalSpace));
+        status.setDataDiskUsedSpace(format.format((dataDiskTotalSpace - dataDiskFreeSpace) / divideMB) + " MB");
+        status.setIndexDiskFreeSpace(format.format(indexDiskFreeSpace / divideMB) + " MB");
+        status.setIndexDiskTotalSpace(format.format(indexDiskTotalSpace / divideMB) + " MB");
+        status.setIndexDiskUsedSpacePerc((double)(((indexDiskTotalSpace - indexDiskFreeSpace) * 100) / indexDiskTotalSpace));
+        status.setIndexDiskUsedSpace(format.format((indexDiskTotalSpace - indexDiskFreeSpace) / divideMB) + " MB");
         return status;
     }
 }

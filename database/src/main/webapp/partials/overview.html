@@ -64,5 +64,15 @@
         <p>
             {{status.startupTime}}
         </p>
+        <p>
+            <hr/>
+        </p>
+        <p>
+            Index partition: {{status.indexDiskUsedSpace}} of {{status.indexDiskTotalSpace}} used ({{status.indexDiskUsedSpacePerc}} %)
+        </p>
+        <p>
+            Data partition: {{status.dataDiskUsedSpace}} of {{status.dataDiskTotalSpace}} used ({{status.dataDiskUsedSpacePerc}} %)
+        </p>
+
     </div>
 </div>

@@ -89,7 +89,7 @@ public class JumboJobCreator {
                 jumbo = new JumboImportConnection(hostsJson.getHost(), hostsJson.getPort());
                 String collection = importPath.getName();
                 boolean activate = importJson.isActivateDelivery();
-                MetaData metaData = new MetaData(collection, importJson.getDeliveryChunk(), conf.get(JumboConstants.DELIVERY_VERSION), importPath.toString(), activate, conf.get(JumboConstants.DELIVERY_INFO, "none"));
+                MetaData metaData = new MetaData(collection, importJson.getDeliveryChunk(), conf.get(JumboConstants.DELIVERY_VERSION), importPath.toString(), activate, importJson.getDescription());
                 jumbo.sendMetaData(metaData);
             } finally {
                 IOUtils.closeStream(jumbo);

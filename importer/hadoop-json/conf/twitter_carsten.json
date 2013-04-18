@@ -1,6 +1,7 @@
 {
     "input": "/Users/carsten/smhadoop/input/twitter",
     "output": "/Users/carsten/smhadoop/output/twitter",
+    "description": "Carstens Twitter Test Import",
     "collectionName": "carsten.twitter",
     "deliveryChunk": "first_delivery",
     "sort": ["user.screen_name"],

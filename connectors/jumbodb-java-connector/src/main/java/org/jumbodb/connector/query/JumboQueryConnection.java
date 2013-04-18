@@ -128,8 +128,8 @@ public class JumboQueryConnection {
             snappyInputStream = new SnappyInputStream(bufferedInputStream);
             dis = new DataInputStream(snappyInputStream);
             int protocolVersion = dis.readInt();
-            if(protocolVersion != JumboConstants.PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version. Got " + protocolVersion + ", but expected " + JumboConstants.PROTOCOL_VERSION);
+            if(protocolVersion != JumboConstants.QUERY_PROTOCOL_VERSION) {
+                throw new RuntimeException("Wrong protocol version. Got " + protocolVersion + ", but expected " + JumboConstants.QUERY_PROTOCOL_VERSION);
             }
             dos.writeUTF(":cmd:query");
             dos.writeUTF(collection);

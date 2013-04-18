@@ -7,7 +7,6 @@ import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 /**
  * User: carsten
@@ -31,8 +30,8 @@ public class JumboImportConnection implements Closeable {
             snappyOutputStream = new SnappyOutputStream(bufferedOutputStream);
             dis = new DataInputStream(socket.getInputStream());
             int protocolVersion = dis.readInt();
-            if(protocolVersion != JumboConstants.PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version - Got " + protocolVersion + ", but expected " + JumboConstants.PROTOCOL_VERSION);
+            if(protocolVersion != JumboConstants.IMPORT_PROTOCOL_VERSION) {
+                throw new RuntimeException("Wrong protocol version - Got " + protocolVersion + ", but expected " + JumboConstants.IMPORT_PROTOCOL_VERSION);
             }
         } catch (IOException e) {
             throw new UnhandledException(e);

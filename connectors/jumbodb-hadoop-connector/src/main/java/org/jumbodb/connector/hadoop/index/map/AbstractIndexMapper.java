@@ -36,7 +36,7 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
         String indexableValue = getIndexableValue(input);
         int hashCode = 0;
         if(indexableValue != null) {
-            indexableValue.hashCode();
+            hashCode = indexableValue.hashCode();
         }
         context.write(new IntWritable(hashCode), new FileOffsetWritable(name.hashCode(), key.get()));
     }

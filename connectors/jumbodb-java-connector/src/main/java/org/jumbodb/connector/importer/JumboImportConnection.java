@@ -69,9 +69,23 @@ public class JumboImportConnection implements Closeable {
         }
     }
 
+    public void sendMetaIndex(MetaIndex metaIndex) {
+        try {
+            dos.writeUTF(":cmd:import:collection:meta:index");
+            dos.writeUTF(metaIndex.getCollection());
+            dos.writeUTF(metaIndex.getDeliveryKey());
+            dos.writeUTF(metaIndex.getDeliveryVersion());
+            dos.writeUTF(metaIndex.getIndexName());
+            dos.writeUTF(metaIndex.getStrategy());
+            dos.flush();
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
     public void sendMetaData(MetaData metaData) {
         try {
-            dos.writeUTF(":cmd:import:collection:meta");
+            dos.writeUTF(":cmd:import:collection:meta:data");
             dos.writeUTF(metaData.getCollection());
             dos.writeUTF(metaData.getDeliveryKey());
             dos.writeUTF(metaData.getDeliveryVersion());

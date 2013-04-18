@@ -82,9 +82,6 @@ public class ImportTask implements Runnable {
                             }
                         };
                         sos = new SnappyOutputStream(bos, chunkSize);
-//                        } else {
-//                            sos = new FileOutputStream(filePlacePathFile);
-//                        }
                         IOUtils.copy(dataInputStream, sos);
                         sos.flush();
                     } catch (IOException e) {
@@ -100,7 +97,7 @@ public class ImportTask implements Runnable {
                 }
 
                 @Override
-                public void onCollectionMetaInformation(ImportMetaInformation information) {
+                public void onCollectionMetaData(ImportMetaData information) {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String deliveryKeyPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/";
                     Properties deliveryInfo = new Properties();
@@ -133,7 +130,35 @@ public class ImportTask implements Runnable {
                 }
 
                 @Override
-                public void onActivateDelivery(ImportMetaInformation information) {
+                public void onCollectionMetaIndex(ImportMetaIndex information) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    String deliveryKeyPath = getTemporaryIndexPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/" + information.getIndexName() + "/";
+                    Properties deliveryInfo = new Properties();
+                    deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
+                    deliveryInfo.setProperty("date", sdf.format(new Date()));
+                    deliveryInfo.setProperty("storageVersion", STORAGE_VERSION);
+                    deliveryInfo.setProperty("indexName", information.getIndexName());
+                    deliveryInfo.setProperty("strategy", information.getStrategy());
+
+
+                    File deliveryVersionFilePath = new File(deliveryKeyPath);
+                    if(!deliveryVersionFilePath.exists()) {
+                        deliveryVersionFilePath.mkdirs();
+                    }
+                    File deliveryInfoFile = new File(deliveryKeyPath + "/index.properties");
+                    FileOutputStream deliveryInfoFos = null;
+                    try {
+                        deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
+                        deliveryInfo.store(deliveryInfoFos, "Delivery Information");
+                    } catch(IOException e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        IOUtils.closeQuietly(deliveryInfoFos);
+                    }
+                }
+
+                @Override
+                public void onActivateDelivery(ImportMetaData information) {
                     File activationPath = getTemporaryActivationPath(dataPath, information.getDeliveryKey(), information.getDeliveryVersion());
                     if(!activationPath.exists()) {
                         activationPath.mkdirs();

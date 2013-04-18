@@ -16,7 +16,7 @@ import java.net.Socket;
 public class DatabaseImportSession implements Closeable {
     private Logger log = LoggerFactory.getLogger(DatabaseImportSession.class);
 
-    public static final int PROTOCOL_VERSION = 2;
+    public static final int PROTOCOL_VERSION = 3;
     private Socket clientSocket;
     private int clientID;
     private InputStream inputStream;
@@ -66,18 +66,26 @@ public class DatabaseImportSession implements Closeable {
             snappyInputStream = new SnappyInputStream(bufferedInputStream);
             importHandler.onImport(meta, snappyInputStream);
 
-        } else if(":cmd:import:collection:meta".equals(cmd)) {
+        } else if(":cmd:import:collection:meta:data".equals(cmd)) {
             String collection = dataInputStream.readUTF();
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();
             String sourcePath = dataInputStream.readUTF();
             boolean activate = dataInputStream.readBoolean();
             String info = dataInputStream.readUTF();
-            ImportMetaInformation meta = new ImportMetaInformation(collection, deliveryKey, deliveryVersion, sourcePath, info);
-            importHandler.onCollectionMetaInformation(meta);
+            ImportMetaData meta = new ImportMetaData(collection, deliveryKey, deliveryVersion, sourcePath, info);
+            importHandler.onCollectionMetaData(meta);
             if(activate) {
                 importHandler.onActivateDelivery(meta);
             }
+        } else if(":cmd:import:collection:meta:index".equals(cmd)) {
+            String collection = dataInputStream.readUTF();
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
+            String indexName = dataInputStream.readUTF();
+            String strategy = dataInputStream.readUTF();
+            ImportMetaIndex meta = new ImportMetaIndex(collection, deliveryKey, deliveryVersion, indexName, strategy);
+            importHandler.onCollectionMetaIndex(meta);
         } else if(":cmd:import:finished".equals(cmd)) {
             log.info(":cmd:import:finished");
             importHandler.onFinished(dataInputStream.readUTF(), dataInputStream.readUTF());

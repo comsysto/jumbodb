@@ -16,7 +16,7 @@ import java.io.IOException;
  * Date: 11/3/12
  * Time: 3:26 PM
  */
-public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, IntWritable, FileOffsetWritable> {
+public abstract class AbstractHashCodeIndexMapper<T> extends Mapper<LongWritable, Text, IntWritable, FileOffsetWritable> {
     private ObjectMapper jsonMapper;
 
     @Override

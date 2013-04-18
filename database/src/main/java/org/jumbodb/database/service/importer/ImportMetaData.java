@@ -5,14 +5,14 @@ package org.jumbodb.database.service.importer;
  * Date: 2/8/13
  * Time: 10:00 AM
  */
-public class ImportMetaInformation {
+public class ImportMetaData {
     private String collection;
     private String deliveryKey;
     private String deliveryVersion;
     private String sourcePath;
     private String info;
 
-    public ImportMetaInformation(String collection, String deliveryKey, String deliveryVersion, String sourcePath, String info) {
+    public ImportMetaData(String collection, String deliveryKey, String deliveryVersion, String sourcePath, String info) {
         this.collection = collection;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
@@ -42,7 +42,7 @@ public class ImportMetaInformation {
 
     @Override
     public String toString() {
-        return "ImportMetaInformation{" +
+        return "ImportMetaData{" +
                 "collection='" + collection + '\'' +
                 ", deliveryKey='" + deliveryKey + '\'' +
                 ", deliveryVersion='" + deliveryVersion + '\'' +

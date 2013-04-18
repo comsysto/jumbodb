@@ -11,7 +11,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.index.json.HadoopJsonConfig;
 import org.jumbodb.connector.hadoop.index.json.ImportJson;
 import org.jumbodb.connector.hadoop.index.json.IndexJson;
-import org.jumbodb.connector.hadoop.index.map.GenericJsonIndexMapper;
+import org.jumbodb.connector.hadoop.index.map.GenericJsonHashCodeIndexMapper;
 
 import java.io.IOException;
 import java.net.URI;
@@ -82,9 +82,9 @@ public class HadoopConfigurationUtil {
     }
 
     public static IndexJson loadIndexJson(Configuration conf) throws IOException {
-        String importJson = conf.get(GenericJsonIndexMapper.JUMBO_INDEX_JSON_CONF);
+        String importJson = conf.get(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF);
         if(StringUtils.isBlank(importJson)) {
-            throw new IllegalStateException(GenericJsonIndexMapper.JUMBO_INDEX_JSON_CONF + " is not set.");
+            throw new IllegalStateException(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF + " is not set.");
         }
 
         ObjectMapper mapper = new ObjectMapper();

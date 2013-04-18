@@ -29,6 +29,10 @@
         <constructor-arg value="${jumbodb.indexpath}"/>
     </bean>
 
+    <bean id="initializer" class="org.jumbodb.database.bootstrap.JumboDBInitializer" init-method="initialize">
+        <constructor-arg ref="jumboConfig"/>
+    </bean>
+    
     <bean id="queryServer" class="org.jumbodb.database.service.query.QueryServer" init-method="start" destroy-method="stop">
         <constructor-arg ref="jumboConfig"/>
     </bean>

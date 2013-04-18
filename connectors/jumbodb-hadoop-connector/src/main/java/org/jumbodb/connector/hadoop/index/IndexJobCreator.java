@@ -1,7 +1,10 @@
 package org.jumbodb.connector.hadoop.index;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
+import org.jumbodb.connector.hadoop.index.json.IndexJson;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.map.GenericJsonIndexMapper;
 import org.jumbodb.connector.hadoop.index.output.BinaryIndexOutputFormat;
 import org.jumbodb.connector.hadoop.index.output.HashRangePartitioner;
 import org.apache.hadoop.conf.Configuration;
@@ -21,6 +24,25 @@ import java.util.ArrayList;
  * Time: 3:21 PM
  */
 public class IndexJobCreator {
+
+    public static IndexControlledJob createGenericIndexJob(Configuration conf, IndexJson indexJson, Path jsonDataToIndex, Path outputPath) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Path output = new Path(outputPath.toString() + "/" + indexJson.getIndexName());
+        Job job = new Job(conf, "Index " + indexJson.getIndexName() + " Job " + jsonDataToIndex);
+        FileInputFormat.addInputPath(job, jsonDataToIndex);
+        FileOutputFormat.setOutputPath(job, output);
+        FileOutputFormat.setCompressOutput(job, false);
+        job.getConfiguration().set(GenericJsonIndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexJson));
+        job.setJarByClass(IndexJobCreator.class);
+        job.setMapperClass(GenericJsonIndexMapper.class);
+        job.setMapOutputKeyClass(IntWritable.class);
+        job.setMapOutputValueClass(FileOffsetWritable.class);
+        job.setOutputFormatClass(BinaryIndexOutputFormat.class);
+        job.setOutputKeyClass(IntWritable.class);
+        job.setOutputValueClass(FileOffsetWritable.class);
+        job.setPartitionerClass(HashRangePartitioner.class);
+        return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
+    }
 
     public static IndexControlledJob createIndexJob(Configuration conf, Class<? extends AbstractIndexMapper> mapper, Path jsonDataToIndex, Path outputPath) throws IOException {
         AbstractIndexMapper abstractIndexMapper = createInstance(mapper);

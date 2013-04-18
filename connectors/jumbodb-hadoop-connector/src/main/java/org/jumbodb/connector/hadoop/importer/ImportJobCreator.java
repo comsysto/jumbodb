@@ -13,9 +13,12 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.jumbodb.connector.hadoop.index.json.HostsJson;
+import org.jumbodb.connector.hadoop.index.json.ImportJson;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: carsten
@@ -25,15 +28,15 @@ import java.util.ArrayList;
 public class ImportJobCreator {
 
     public static ControlledJob createIndexImportJob(Configuration conf, Path importPathIndex, Path reportOutputPath) throws IOException {
-        return createJumboJob(conf, importPathIndex, reportOutputPath, JumboConstants.DATA_TYPE_INDEX);
+        return createJumboJob(conf, importPathIndex, reportOutputPath, JumboConstants.DATA_TYPE_INDEX, null, null);
     }
 
     public static ControlledJob createDataImportJob(Configuration conf, Path importPathData, Path reportOutputPath) throws IOException {
-        return createJumboJob(conf, importPathData, reportOutputPath, JumboConstants.DATA_TYPE_DATA);
+        return createJumboJob(conf, importPathData, reportOutputPath, JumboConstants.DATA_TYPE_DATA, null, null);
     }
 
-    private static ControlledJob createJumboJob(Configuration conf, Path importPath, Path reportOutputPath, String type) throws IOException {
-        Job job = new Job(conf, "jumboDB Import Job " + importPath.toString() + ":" + type);
+    private static ControlledJob createJumboJob(Configuration conf, Path importPath, Path reportOutputPath, String type, ImportJson importJson, HostsJson hostsJson) throws IOException {
+        Job job = new Job(conf, "jumboDB Import " + importPath.toString() + ":" + type);
         JumboInputFormat.setDataType(job, type);
         JumboInputFormat.setImportPath(job, importPath);
         JumboInputFormat.setDataType(job, type);
@@ -51,7 +54,32 @@ public class ImportJobCreator {
         job.setNumReduceTasks(1);
         job.setSpeculativeExecution(false);
         job.setMapSpeculativeExecution(false);
-        JumboJobCreator.sendMetaData(job.getConfiguration());
+        if(hostsJson != null) {
+            job.setJobName("jumboDB Import " + hostsJson.getHost() + " " + importPath.toString() + ":" + type);
+            Configuration jobConf = job.getConfiguration();
+            jobConf.set(JumboConstants.HOST, hostsJson.getHost());
+            jobConf.setInt(JumboConstants.PORT, hostsJson.getPort());
+            JumboJobCreator.sendMetaData(importJson, importPath, job.getConfiguration());
+
+        } else {
+            JumboJobCreator.sendMetaData(job.getConfiguration());
+        }
         return new ControlledJob(job, new ArrayList<ControlledJob>());
+    }
+
+    public static List<ControlledJob> createDataImportJobs(Configuration conf, Path importPathData, Path reportOutputPath, ImportJson importJson) throws IOException {
+        List<ControlledJob> jobs = new ArrayList<ControlledJob>();
+        for (HostsJson host : importJson.getHosts()) {
+            jobs.add(createJumboJob(conf, importPathData, reportOutputPath, JumboConstants.DATA_TYPE_DATA, importJson, host));
+        }
+        return jobs;
+    }
+
+    public static List<ControlledJob> createIndexImportJobs(Configuration conf, Path importPathIndex, Path reportOutputPath, ImportJson importJson) throws IOException {
+        List<ControlledJob> jobs = new ArrayList<ControlledJob>();
+        for (HostsJson host : importJson.getHosts()) {
+            jobs.add(createJumboJob(conf, importPathIndex, reportOutputPath, JumboConstants.DATA_TYPE_INDEX, importJson, host));
+        }
+        return jobs;
     }
 }

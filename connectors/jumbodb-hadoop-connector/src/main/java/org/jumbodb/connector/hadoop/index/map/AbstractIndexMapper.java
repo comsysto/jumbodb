@@ -20,7 +20,7 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
     private ObjectMapper jsonMapper;
 
     @Override
-    protected final void setup(Context context) throws IOException, InterruptedException {
+    protected void setup(Context context) throws IOException, InterruptedException {
         super.setup(context);
         jsonMapper = new ObjectMapper();
         jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);

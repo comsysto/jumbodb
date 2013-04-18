@@ -2,6 +2,9 @@ package org.jumbodb.connector.hadoop;
 
 import org.jumbodb.connector.hadoop.importer.ImportJobCreator;
 import org.jumbodb.connector.hadoop.index.IndexJobCreator;
+import org.jumbodb.connector.hadoop.index.json.HostsJson;
+import org.jumbodb.connector.hadoop.index.json.ImportJson;
+import org.jumbodb.connector.hadoop.index.json.IndexJson;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -26,6 +29,30 @@ import java.util.UUID;
  */
 public class JumboJobCreator {
 
+
+    public static List<ControlledJob> createIndexAndImportJob(Configuration conf, Path inputDataPath, Path outputIndexPath, Path outputReportPath, ImportJson importJson) throws IOException {
+        if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
+            conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
+        }
+        List<ControlledJob> controlledJobs = new LinkedList<ControlledJob>();
+
+        List<ControlledJob> dataImportJobs = ImportJobCreator.createDataImportJobs(conf, inputDataPath, new Path(outputReportPath.toString() + "/data"), importJson);
+        controlledJobs.addAll(dataImportJobs);
+
+        for (IndexJson indexJson : importJson.getIndexes()) {
+            IndexJobCreator.IndexControlledJob indexJob = IndexJobCreator.createGenericIndexJob(conf, indexJson, inputDataPath, outputIndexPath);
+            ControlledJob controlledIndexJob = indexJob.getControlledJob();
+            List<ControlledJob> indexImportJobs = ImportJobCreator.createIndexImportJobs(conf, indexJob.getIndexPath(), new Path(outputReportPath.toString() + "/index"), importJson);
+
+            for (ControlledJob controlledJob : indexImportJobs) {
+                controlledJob.addDependingJob(controlledIndexJob);
+            }
+            controlledJobs.add(controlledIndexJob);
+            controlledJobs.addAll(indexImportJobs);
+        }
+        return controlledJobs;
+    }
+
     public static List<ControlledJob> createIndexAndImportJob(Configuration conf, Path inputDataPath, Path outputIndexPath, Path outputReportPath, Class<? extends AbstractIndexMapper>... mapper) throws IOException {
         if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
             conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
@@ -45,6 +72,26 @@ public class JumboJobCreator {
             controlledJobs.add(indexImportJob);
         }
         return controlledJobs;
+    }
+
+    public static void sendMetaData(ImportJson importJson, Path importPath, Configuration conf) {
+        String type = conf.get(JumboConstants.DATA_TYPE);
+        if(!JumboConstants.DATA_TYPE_DATA.equals(type)) {
+            return;
+        }
+        for (HostsJson hostsJson : importJson.getHosts()) {
+            JumboImportConnection jumbo = null;
+            try {
+                jumbo = new JumboImportConnection(hostsJson.getHost(), hostsJson.getPort());
+                String collection = importPath.getName();
+                boolean activate = importJson.isActivateDelivery();
+                MetaData metaData = new MetaData(collection, importJson.getDeliveryChunk(), conf.get(JumboConstants.DELIVERY_VERSION), importPath.toString(), activate, conf.get(JumboConstants.DELIVERY_INFO, "none"));
+                jumbo.sendMetaData(metaData);
+            } finally {
+                IOUtils.closeStream(jumbo);
+            }
+        }
+
     }
 
     public static void sendMetaData(Configuration conf) {
@@ -67,6 +114,9 @@ public class JumboJobCreator {
     }
 
     public static void sendFinishedNotification(JobControl jobControl, Configuration conf) {
+        if(!conf.getBoolean(JumboConstants.EXPORT_ENABLED, false)) {
+            return;
+        }
         if(jobControl.getFailedJobList().size() == 0
                 && jobControl.allFinished()) {
             sendFinishedNotification(conf);

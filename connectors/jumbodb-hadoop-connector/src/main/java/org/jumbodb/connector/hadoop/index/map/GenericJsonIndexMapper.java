@@ -1,0 +1,70 @@
+package org.jumbodb.connector.hadoop.index.map;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.codehaus.jackson.JsonNode;
+import org.jumbodb.connector.hadoop.HadoopConfigurationUtil;
+import org.jumbodb.connector.hadoop.index.json.IndexJson;
+
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * User: carsten
+ * Date: 4/17/13
+ * Time: 4:52 PM
+ */
+public class GenericJsonIndexMapper extends AbstractIndexMapper<JsonNode> {
+    public static final String JUMBO_INDEX_JSON_CONF = "jumbo.index.json";
+
+    private IndexJson indexJson;
+
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        super.setup(context);
+        Configuration configuration = context.getConfiguration();
+        indexJson = HadoopConfigurationUtil.loadIndexJson(configuration);
+    }
+
+    @Override
+    public String getIndexableValue(JsonNode input) {
+        return getIndexKey(input);
+    }
+
+    @Override
+    public String getIndexName() {
+        return indexJson.getIndexName();
+    }
+
+    @Override
+    public Class<JsonNode> getJsonClass() {
+        return JsonNode.class;
+    }
+
+
+    private String getIndexKey(JsonNode jsonNode) {
+        List<String> keys = new LinkedList<String>();
+        for (String indexField : indexJson.getFields()) {
+            keys.add(getValueFor(indexField,  jsonNode));
+        }
+
+        if(keys.size() > 0) {
+            return StringUtils.join(keys, "-");
+        }
+        return "default";
+    }
+
+    private String getValueFor(String key, JsonNode jsonNode) {
+        String[] split = StringUtils.split(key, ".");
+        for (String s : split) {
+            jsonNode = jsonNode.path(s);
+        }
+        if(jsonNode.isValueNode()) {
+            // CARSTEN ist das richtig?
+            String s = jsonNode.asText();
+            return s;
+        }
+        throw new RuntimeException("index key references on container node: " + key);
+    }
+}

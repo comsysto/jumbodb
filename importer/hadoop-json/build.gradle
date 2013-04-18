@@ -1,0 +1,74 @@
+defaultTasks 'build'
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'project-reports'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+group = 'org.jumbodb.importer'
+archivesBaseName = 'hadoop-json'
+version = "0.0.1-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+
+configurations {
+    // this scope extracts the files and copies it into he same jar file, because ou can just use one jar file in emr
+    bundle {
+        transitive = false
+    }
+}
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/resources'
+            srcDir 'src/main/java'
+        }
+    }
+    test {
+        resources {
+            srcDir 'src/test/resources'
+            srcDir 'src/test/java'
+        }
+    }
+}
+
+dependencies {
+    compile project(':connectors:jumbodb-hadoop-connector')
+
+    bundle project(':connectors:jumbodb-hadoop-connector')
+    bundle 'org.xerial.snappy:snappy-java:1.0.4.1'
+    bundle 'commons-io:commons-io:2.3'
+//    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+//    compile "org.apache.hadoop:hadoop-core:1.0.3"
+//    compile 'com.google.guava:guava:r09'
+//    compile 'commons-io:commons-io:2.3'
+//    compile 'commons-lang:commons-lang:2.5'
+//    compile 'commons-collections:commons-collections:3.2.1'
+//    compile 'com.google.guava:guava:13.0'
+//    compile 'org.xerial.snappy:snappy-java:1.0.4.1'
+//    compile 'org.msgpack:msgpack:0.6.7'
+//    compile 'net.minidev:json-smart:2.0-RC2'
+//    testCompile "junit:junit:4.10"
+//    testCompile "org.mockito:mockito-core:1.9.0"
+}
+
+jar {
+    from configurations.bundle.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest {
+        attributes("Main-Class": "org.jumbodb.importer.hadoop.json.JsonImporterJob")
+    }
+}
+
+eclipse {
+    classpath {
+        downloadSources = true
+        downloadJavadoc = false
+    }
+}

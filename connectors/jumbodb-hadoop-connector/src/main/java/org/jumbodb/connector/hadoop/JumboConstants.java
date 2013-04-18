@@ -25,4 +25,8 @@ public class JumboConstants {
     public static final String DATA_TYPE = "jumbo.data.type";
     public static final String DATA_TYPE_DATA = "jumbo.data.type.data";
     public static final String DATA_TYPE_INDEX = "jumbo.data.type.index";
+
+    public static final String JUMBO_JSON_CONF = "jumbo.json.conf";
+
+
 }

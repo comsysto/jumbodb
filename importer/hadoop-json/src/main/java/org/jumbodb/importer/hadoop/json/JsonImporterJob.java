@@ -57,11 +57,12 @@ public class JsonImporterJob extends Configured implements Tool {
 
         String importDataPath = importJson.getInput();
         ControlledJob controlledSortJob = null;
+        String collectionName = importJson.getCollectionName();
         if(importJson.getSort() != null && importJson.getSort().size() > 0) {
-            importDataPath = outputData;
+            importDataPath = outputData + collectionName + "/";
             Job sortJob = new Job(conf, "Sort Job " + importJson.getCollectionName());
             FileInputFormat.addInputPath(sortJob, new Path(importJson.getInput()));
-            FileOutputFormat.setOutputPath(sortJob, new Path(outputData));
+            FileOutputFormat.setOutputPath(sortJob, new Path(importDataPath));
             sortJob.setJarByClass(JsonImporterJob.class);
             sortJob.setMapperClass(GenericJsonSortMapper.class);
             sortJob.setMapOutputKeyClass(Text.class);
@@ -75,9 +76,8 @@ public class JsonImporterJob extends Configured implements Tool {
         }
 
         if(conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
-            String collectionName = importJson.getCollectionName();
-            Path indexOutputPath = new Path(outputIndex + collectionName);
-            Path logOutputPath = new Path(outputLog + collectionName);
+            Path indexOutputPath = new Path(outputIndex + collectionName + "/");
+            Path logOutputPath = new Path(outputLog + collectionName + "/");
             List<ControlledJob> jumboIndexAndImportJob = JumboJobCreator.createIndexAndImportJob(conf, new Path(importDataPath), indexOutputPath, logOutputPath, importJson);
             if(controlledSortJob != null) {
                 for (ControlledJob current : jumboIndexAndImportJob) {
@@ -100,7 +100,7 @@ public class JsonImporterJob extends Configured implements Tool {
                 System.err.println(e);
             }
         }
-        JumboJobCreator.sendFinishedNotification(control, conf);
+        JumboJobCreator.sendFinishedNotification(importJson, control, conf);
         return control.getFailedJobList().size() == 0 ? 0 : 1;
     }
 }

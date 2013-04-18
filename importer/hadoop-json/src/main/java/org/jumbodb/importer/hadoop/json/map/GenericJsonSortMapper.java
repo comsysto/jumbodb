@@ -43,7 +43,10 @@ public class GenericJsonSortMapper extends Mapper<LongWritable, Text, Text, Text
     private String getSortKey(JsonNode jsonNode) {
         List<String> keys = new LinkedList<String>();
         for (String sort : importJson.getSort()) {
-            keys.add(getValueFor(sort,  jsonNode));
+            String valueFor = getValueFor(sort, jsonNode);
+            if(valueFor != null) {
+                keys.add(valueFor);
+            }
         }
 
         if(keys.size() > 0) {
@@ -58,10 +61,9 @@ public class GenericJsonSortMapper extends Mapper<LongWritable, Text, Text, Text
             jsonNode = jsonNode.path(s);
         }
         if(jsonNode.isValueNode()) {
-            // CARSTEN ist das richtig?
             String s = jsonNode.asText();
             return s;
         }
-        throw new RuntimeException("index key references on container node: " + key);
+        return "null";
     }
 }

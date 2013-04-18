@@ -14,7 +14,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public abstract class TextValueOutputFormat<K, V, R> extends TextOutputFormat<K, V> {
+public class TextValueOutputFormat<K, V, R> extends TextOutputFormat<K, V> {
 
     @Override
     public RecordWriter<K, V> getRecordWriter(
@@ -50,8 +50,7 @@ public abstract class TextValueOutputFormat<K, V, R> extends TextOutputFormat<K,
         @Override
         public synchronized void write(K key, V value)
                 throws IOException {
-            out.writeUTF(value.toString());
-            out.writeChars("\n");
+            out.writeBytes(value.toString() + '\n');
         }
     }
 }

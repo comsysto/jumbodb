@@ -20,6 +20,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -31,6 +32,9 @@ public class JumboJobCreator {
 
 
     public static List<ControlledJob> createIndexAndImportJob(Configuration conf, Path inputDataPath, Path outputIndexPath, Path outputReportPath, ImportJson importJson) throws IOException {
+        if(conf.get(JumboConstants.DELIVERY_KEY) == null) {
+            conf.set(JumboConstants.DELIVERY_KEY, importJson.getDeliveryChunk());
+        }
         if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
             conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
         }
@@ -124,6 +128,17 @@ public class JumboJobCreator {
 
     }
 
+    public static void sendFinishedNotification(ImportJson importJson, JobControl jobControl, Configuration conf) {
+        if(!conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
+            return;
+        }
+        if(jobControl.getFailedJobList().size() == 0
+                && jobControl.allFinished()) {
+            sendFinishedNotification(importJson, conf);
+        }
+
+    }
+
     public static void sendFinishedNotification(Configuration conf) {
         JumboImportConnection jumbo = null;
         try {
@@ -132,5 +147,20 @@ public class JumboJobCreator {
         } finally {
             IOUtils.closeStream(jumbo);
         }
+    }
+
+    public static void sendFinishedNotification(ImportJson importJson, Configuration conf) {
+        String deliveryChunk = importJson.getDeliveryChunk();
+        String deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
+        for (HostsJson hostsJson : importJson.getHosts()) {
+            JumboImportConnection jumbo = null;
+            try {
+                jumbo = new JumboImportConnection(hostsJson.getHost(), hostsJson.getPort());
+                jumbo.sendFinishedNotification(deliveryChunk, deliveryVersion);
+            } finally {
+                IOUtils.closeStream(jumbo);
+            }
+        }
+
     }
 }

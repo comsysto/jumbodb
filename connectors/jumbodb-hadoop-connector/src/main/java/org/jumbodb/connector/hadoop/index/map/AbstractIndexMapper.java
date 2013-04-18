@@ -34,7 +34,11 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
 
         T input = jsonMapper.readValue(value.toString(), getJsonClass());
         String indexableValue = getIndexableValue(input);
-        context.write(new IntWritable(indexableValue.hashCode()), new FileOffsetWritable(name.hashCode(), key.get()));
+        int hashCode = 0;
+        if(indexableValue != null) {
+            indexableValue.hashCode();
+        }
+        context.write(new IntWritable(hashCode), new FileOffsetWritable(name.hashCode(), key.get()));
     }
 
     public abstract String getIndexableValue(T input);

@@ -9,6 +9,9 @@ public class HostsJson {
     private String host;
     private int port;
 
+    public HostsJson() {
+    }
+
     public HostsJson(String host, int port) {
         this.host = host;
         this.port = port;

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.UUID;
 
 /**
  * User: carsten
@@ -55,6 +56,12 @@ public class HadoopConfigurationUtil {
             mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, true);
             ImportJson importJson = mapper.readValue(fdis, ImportJson.class);
             conf.set(JumboConstants.JUMBO_JSON_CONF, mapper.writeValueAsString(importJson));
+            if(conf.get(JumboConstants.DELIVERY_KEY) == null) {
+                conf.set(JumboConstants.DELIVERY_KEY, importJson.getDeliveryChunk());
+            }
+            if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
+                conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
+            }
             updateHadoopConfiguration(conf, importJson);
             return importJson;
 

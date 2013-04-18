@@ -46,7 +46,10 @@ public class GenericJsonIndexMapper extends AbstractIndexMapper<JsonNode> {
     private String getIndexKey(JsonNode jsonNode) {
         List<String> keys = new LinkedList<String>();
         for (String indexField : indexJson.getFields()) {
-            keys.add(getValueFor(indexField,  jsonNode));
+            String valueFor = getValueFor(indexField, jsonNode);
+            if(valueFor != null) {
+                keys.add(valueFor);
+            }
         }
 
         if(keys.size() > 0) {
@@ -65,6 +68,7 @@ public class GenericJsonIndexMapper extends AbstractIndexMapper<JsonNode> {
             String s = jsonNode.asText();
             return s;
         }
-        throw new RuntimeException("index key references on container node: " + key);
+        // CARSTEN omg fix
+        return "null";
     }
 }

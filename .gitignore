@@ -6,3 +6,5 @@
 out/
 build/
 tomcat.9000/
+classes/
+.idea

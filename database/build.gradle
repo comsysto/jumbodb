@@ -61,7 +61,7 @@ dependencies {
     compile 'joda-time:joda-time:2.1'
     compile 'org.freemarker:freemarker:2.3.19'
     compile 'commons-lang:commons-lang:2.6'
-    compile "org.xerial.snappy:snappy-java:1.0.5-M3"
+    compile "org.xerial.snappy:snappy-java:1.0.5-M4"
     compile "net.minidev:json-smart:2.0-RC2"
     compile 'org.slf4j:slf4j-api:1.7.3'
     compile 'javax.servlet:jstl:1.2'

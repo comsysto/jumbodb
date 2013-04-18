@@ -207,6 +207,8 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS) {
                 if(lastObj != null) {
                     matching &= jsonValueComparision.getValues().contains(lastObj);
+                } else {
+                    matching = false;
                 }
             } else if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS_IGNORE_CASE) {
                 throw new IllegalArgumentException("Not yet implemented " + jsonValueComparision.getComparisionType());

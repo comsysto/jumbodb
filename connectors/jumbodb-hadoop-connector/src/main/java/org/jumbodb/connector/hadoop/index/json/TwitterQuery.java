@@ -17,9 +17,9 @@ public class TwitterQuery {
     public static void main(String[] args) throws Exception {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
         JumboQuery query = new JumboQuery();
-//        query.addIndexComparision("screen_name", Arrays.asList("alexjenkins29"));
-        List<Object> alexjenkins29 = new ArrayList<Object>(Arrays.asList("alexjenkins29"));
-        query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS,"user.screen_name", alexjenkins29);
+        query.addIndexComparision("screen_name", Arrays.asList("alexjenkins29"));
+//        List<Object> alexjenkins29 = new ArrayList<Object>(Arrays.asList("alexjenkins29"));
+//        query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS,"user.screen_name", alexjenkins29);
 //        query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS, "_id.date", Arrays.asList((Object)new Long(20121002)));
 //        query.addJsonComparision(JumboQuery.JsonComparisionType.EQUALS, "_id.toCell", Arrays.asList((Object)"11211422244", "1121332341112"));
         long start = System.currentTimeMillis();

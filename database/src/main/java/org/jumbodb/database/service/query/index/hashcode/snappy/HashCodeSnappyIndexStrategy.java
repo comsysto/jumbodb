@@ -1,9 +1,6 @@
 package org.jumbodb.database.service.query.index.hashcode.snappy;
 
-import org.jumbodb.database.service.query.DataDeliveryChunk;
-import org.jumbodb.database.service.query.FileOffset;
-import org.jumbodb.database.service.query.JumboQuery;
-import org.jumbodb.database.service.query.QueryOperation;
+import org.jumbodb.database.service.query.*;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -39,11 +36,11 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
     }
 
     @Override
-    public void onInitialize(Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks) {
+    public void onInitialize(CollectionDefinition collectionDefinition) {
     }
 
     @Override
-    public void onDataChanged(Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks) {
+    public void onDataChanged(CollectionDefinition collectionDefinition) {
     }
 
     @Required

@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query;
 import com.google.common.collect.HashMultimap;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ public class JumboSearcher {
 
     private final File dataPath;
     private final File indexPath;
+    private IndexStrategyManager indexStrategyManager;
     private Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks;
     private ExecutorService retrieveDataSetsExecutor;
     private ExecutorService indexExecutor;
@@ -27,13 +29,15 @@ public class JumboSearcher {
     private ExecutorService indexFileExecutor;
     private ObjectMapper jsonMapper;
 
-    public JumboSearcher(File dataPath, File indexPath) {
+    public JumboSearcher(File dataPath, File indexPath, IndexStrategyManager indexStrategyManager) {
         this.dataPath = dataPath;
         this.indexPath = indexPath;
-        this.retrieveDataSetsExecutor = Executors.newScheduledThreadPool(20);
+        this.indexStrategyManager = indexStrategyManager;
+        // CARSTEN initialize in spring
+        this.retrieveDataSetsExecutor = Executors.newFixedThreadPool(20);
         this.chunkExecutor = Executors.newCachedThreadPool();
         this.indexExecutor = Executors.newCachedThreadPool();
-        this.indexFileExecutor = Executors.newScheduledThreadPool(30);
+        this.indexFileExecutor = Executors.newFixedThreadPool(30);
       //  this.dataDeliveryChunks = IndexLoader.loadIndex(dataPath, indexPath);
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -85,7 +89,7 @@ public class JumboSearcher {
         long startTime = System.currentTimeMillis();
         HashMultimap<Integer, Long> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
         List<Future<Integer>> tasks = new LinkedList<Future<Integer>>();
-        if(searchQuery.getIndexComparision().size() == 0) {
+        if(searchQuery.getIndexQuery().size() == 0) {
             log.info("Running scanned search");
             for (File file : dataDeliveryChunk.getDataFiles().values()) {
                 tasks.add(retrieveDataSetsExecutor.submit(new RetrieveDataSetsTask(file, Collections.<Long>emptySet(), searchQuery, resultCallback)));
@@ -128,12 +132,12 @@ public class JumboSearcher {
     }
 
     private Collection<FileOffset> findFileOffsets(DataDeliveryChunk dataDeliveryChunk, JumboQuery searchQuery) {
-        if(searchQuery.getIndexComparision().size() == 0) {
+        if(searchQuery.getIndexQuery().size() == 0) {
             return Collections.emptyList();
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
-        for (JumboQuery.IndexComparision indexQuery : searchQuery.getIndexComparision()) {
-            tasks.add(indexExecutor.submit(new SearchIndexTask(dataDeliveryChunk, indexQuery, indexFileExecutor)));
+        for (JumboQuery.IndexQuery indexQuery : searchQuery.getIndexQuery()) {
+            tasks.add(indexExecutor.submit(new SearchIndexTask(dataDeliveryChunk, indexQuery, indexStrategyManager, indexFileExecutor)));
         }
 
         try {

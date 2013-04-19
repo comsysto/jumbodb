@@ -46,7 +46,7 @@ public class IndexLoader {
 
         String dataDeliveryVersionFolder = dataDeliveryKeyFolder + deliveryVersion + "/";
         String indexDeliveryVersionFolder = indexPath.getAbsolutePath() + "/" + collectionName + "/" + chunkKey + "/" + deliveryVersion + "/";
-        return createDeliveryChunk(chunkKey, new File(indexDeliveryVersionFolder), new File(dataDeliveryVersionFolder));
+        return createDeliveryChunk(collectionName, chunkKey, new File(indexDeliveryVersionFolder), new File(dataDeliveryVersionFolder));
     }
 
     public static Properties loadProperties(File file) {
@@ -66,7 +66,7 @@ public class IndexLoader {
 
     }
 
-    private static DataDeliveryChunk createDeliveryChunk(String chunkKey, File collectionIndexFolder, File collectionDataFolder) {
+    private static DataDeliveryChunk createDeliveryChunk(String collectionName, String chunkKey, File collectionIndexFolder, File collectionDataFolder) {
         File[] indexFolders = collectionIndexFolder.listFiles(FOLDER_INSTANCE);
         HashMultimap<String, IndexFile> resIndexFiles = HashMultimap.create();
         Map<Integer, File> resDataFiles = new HashMap<Integer, File>();
@@ -88,7 +88,7 @@ public class IndexLoader {
         for (File dataFile : dataFiles) {
             resDataFiles.put(dataFile.getName().hashCode(), dataFile);
         }
-        return new DataDeliveryChunk(chunkKey, resIndexFiles.asMap(), resDataFiles);
+        return new DataDeliveryChunk(collectionName, chunkKey, resIndexFiles.asMap(), resDataFiles);
     }
 
 

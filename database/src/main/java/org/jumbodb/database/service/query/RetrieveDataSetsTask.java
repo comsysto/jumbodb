@@ -1,7 +1,5 @@
 package org.jumbodb.database.service.query;
 
-import net.minidev.json.JSONObject;
-import net.minidev.json.mapper.UpdaterMapper;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
@@ -52,7 +50,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
             fis = new FileInputStream(file);
              // ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
 
-            if (searchQuery.getIndexComparision().size() == 0) {
+            if (searchQuery.getIndexQuery().size() == 0) {
                 sis = new ChunkSkipableSnappyInputStream(new BufferedInputStream(fis));
                 br = new BufferedReader(new InputStreamReader(sis));
                 log.info("Full scan ");

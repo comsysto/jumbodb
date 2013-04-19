@@ -26,7 +26,6 @@ public class JumboSearcher {
     private ExecutorService retrieveDataSetsExecutor;
     private ExecutorService indexExecutor;
     private ExecutorService chunkExecutor;
-    private ExecutorService indexFileExecutor;
     private ObjectMapper jsonMapper;
 
     public JumboSearcher(File dataPath, File indexPath, IndexStrategyManager indexStrategyManager) {
@@ -37,7 +36,6 @@ public class JumboSearcher {
         this.retrieveDataSetsExecutor = Executors.newFixedThreadPool(20);
         this.chunkExecutor = Executors.newCachedThreadPool();
         this.indexExecutor = Executors.newCachedThreadPool();
-        this.indexFileExecutor = Executors.newFixedThreadPool(30);
       //  this.dataDeliveryChunks = IndexLoader.loadIndex(dataPath, indexPath);
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -54,7 +52,6 @@ public class JumboSearcher {
     public void stop() {
         retrieveDataSetsExecutor.shutdown();
         indexExecutor.shutdown();
-        indexFileExecutor.shutdown();
     }
 
     public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery, ResultCallback resultCallback) {
@@ -137,7 +134,7 @@ public class JumboSearcher {
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
         for (JumboQuery.IndexQuery indexQuery : searchQuery.getIndexQuery()) {
-            tasks.add(indexExecutor.submit(new SearchIndexTask(dataDeliveryChunk, indexQuery, indexStrategyManager, indexFileExecutor)));
+            tasks.add(indexExecutor.submit(new SearchIndexTask(dataDeliveryChunk, indexQuery, indexStrategyManager)));
         }
 
         try {

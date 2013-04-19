@@ -34,7 +34,7 @@
         <constructor-arg ref="jumboConfig"/>
     </bean>
 
-    <bean id="indexFileExecutor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
+    <bean id="indexFileExecutor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool" destroy-method="shutdown">
         <constructor-arg value="30" />
     </bean>
 

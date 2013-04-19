@@ -19,13 +19,11 @@ public class SearchIndexTask implements Callable<Set<FileOffset>> {
 
     private final DataDeliveryChunk dataDeliveryChunk;
     private JumboQuery.IndexQuery query;
-    private ExecutorService indexFileExecutor;
 
-    public SearchIndexTask(DataDeliveryChunk dataDeliveryChunk, JumboQuery.IndexQuery query, IndexStrategyManager indexStrategyManager, ExecutorService indexFileExecutor) {
+    public SearchIndexTask(DataDeliveryChunk dataDeliveryChunk, JumboQuery.IndexQuery query, IndexStrategyManager indexStrategyManager) {
         this.dataDeliveryChunk = dataDeliveryChunk;
         this.query = query;
         this.indexStrategyManager = indexStrategyManager;
-        this.indexFileExecutor = indexFileExecutor;
     }
 
     @Override

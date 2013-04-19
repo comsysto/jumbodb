@@ -1,19 +1,14 @@
 package org.jumbodb.database.service.query.index.hashcode.snappy;
 
 import org.apache.commons.io.IOUtils;
-import org.jumbodb.connector.query.JumboQuery;
-import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.xerial.snappy.Snappy;
 
 import java.io.*;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

@@ -26,6 +26,7 @@ sourceSets {
 dependencies {
     deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
     compile project(':connectors:jumbodb-java-connector')
+    compile project(':commons:query')
 
     compile "org.apache.hadoop:hadoop-core:1.0.3"
     compile 'commons-io:commons-io:2.3'

@@ -4,7 +4,9 @@ import com.google.common.collect.Maps;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang.UnhandledException;
-import org.jumbodb.connector.query.JumboQuery;
+import org.jumbodb.common.query.IndexClause;
+import org.jumbodb.common.query.IndexQuery;
+import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.*;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
@@ -93,7 +95,7 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
     }
 
     @Override
-    public Set<FileOffset> findFileOffsets(String collection, String chunkKey, JumboQuery.IndexQuery query) {
+    public Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query) {
         try {
             MultiValueMap<File, Integer> groupedByIndexFile = groupByIndexFile(collection, chunkKey, query);
             List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
@@ -110,11 +112,11 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
         }
     }
 
-    public MultiValueMap<File, Integer> groupByIndexFile(String collection, String chunkKey, JumboQuery.IndexQuery query) {
+    public MultiValueMap<File, Integer> groupByIndexFile(String collection, String chunkKey, IndexQuery query) {
         List<HashCodeSnappyIndexFile> indexFiles = getIndexFiles(collection, chunkKey, query);
         MultiValueMap<File, Integer> groupByIndexFile = new LinkedMultiValueMap<File, Integer>();
         for (HashCodeSnappyIndexFile hashCodeSnappyIndexFile : indexFiles) {
-            for (JumboQuery.IndexClause obj : query.getClauses()) {
+            for (IndexClause obj : query.getClauses()) {
                 int hash = obj.getValue().hashCode();
                 if (hash >= hashCodeSnappyIndexFile.getFromHash() && hash <= hashCodeSnappyIndexFile.getToHash()) {
                     groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), hash);
@@ -125,13 +127,13 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
         return groupByIndexFile;
     }
 
-    private List<HashCodeSnappyIndexFile> getIndexFiles(String collection, String chunkKey, JumboQuery.IndexQuery query) {
+    private List<HashCodeSnappyIndexFile> getIndexFiles(String collection, String chunkKey, IndexQuery query) {
         return indexFiles.get(new IndexKey(collection, chunkKey, query.getName()));
     }
 
     @Override
-    public List<JumboQuery.QueryOperation> getSupportedOperations() {
-        return Arrays.asList(JumboQuery.QueryOperation.EQ);
+    public List<QueryOperation> getSupportedOperations() {
+        return Arrays.asList(QueryOperation.EQ);
     }
 
     @Override

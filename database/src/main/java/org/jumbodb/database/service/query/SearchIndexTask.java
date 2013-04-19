@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query;
 
-import org.jumbodb.connector.query.JumboQuery;
+import org.jumbodb.common.query.IndexQuery;
+import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
@@ -16,9 +17,9 @@ public class SearchIndexTask implements Callable<Set<FileOffset>> {
     private IndexStrategyManager indexStrategyManager;
 
     private final DeliveryChunkDefinition deliveryChunkDefinition;
-    private JumboQuery.IndexQuery query;
+    private IndexQuery query;
 
-    public SearchIndexTask(DeliveryChunkDefinition deliveryChunkDefinition, JumboQuery.IndexQuery query, IndexStrategyManager indexStrategyManager) {
+    public SearchIndexTask(DeliveryChunkDefinition deliveryChunkDefinition, IndexQuery query, IndexStrategyManager indexStrategyManager) {
         this.deliveryChunkDefinition = deliveryChunkDefinition;
         this.query = query;
         this.indexStrategyManager = indexStrategyManager;

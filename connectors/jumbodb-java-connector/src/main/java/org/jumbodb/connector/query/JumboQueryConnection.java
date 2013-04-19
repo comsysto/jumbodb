@@ -5,6 +5,7 @@ import org.apache.commons.lang.UnhandledException;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.connector.JumboConstants;
 import org.xerial.snappy.SnappyInputStream;
 

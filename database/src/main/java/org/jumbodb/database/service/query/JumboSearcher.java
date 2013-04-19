@@ -3,7 +3,8 @@ package org.jumbodb.database.service.query;
 import com.google.common.collect.HashMultimap;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jumbodb.connector.query.JumboQuery;
+import org.jumbodb.common.query.IndexQuery;
+import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
@@ -142,7 +143,7 @@ public class JumboSearcher {
             return Collections.emptyList();
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
-        for (JumboQuery.IndexQuery indexQuery : searchQuery.getIndexQuery()) {
+        for (IndexQuery indexQuery : searchQuery.getIndexQuery()) {
             tasks.add(indexExecutor.submit(new SearchIndexTask(deliveryChunkDefinition, indexQuery, indexStrategyManager)));
         }
 

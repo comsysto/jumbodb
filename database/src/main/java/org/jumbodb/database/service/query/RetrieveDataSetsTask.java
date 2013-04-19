@@ -4,7 +4,9 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jumbodb.connector.query.JumboQuery;
+import org.jumbodb.common.query.JsonComparisionType;
+import org.jumbodb.common.query.JsonValueComparision;
+import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.service.query.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
@@ -195,7 +197,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
 //        JSONObject cl = new JSONObject();
 
         boolean matching = true;
-        for (JumboQuery.JsonValueComparision jsonValueComparision : searchQuery.getJsonComparision()) {
+        for (JsonValueComparision jsonValueComparision : searchQuery.getJsonComparision()) {
 //            cl.clear();
             String[] split = StringUtils.split(jsonValueComparision.getName(), '.');
 //            UpdaterMapper<JSONObject> mapper = new UpdaterMapper<JSONObject>(cl);
@@ -206,13 +208,13 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                     lastObj = map.get(key);
                 }
             }
-            if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS) {
+            if (jsonValueComparision.getComparisionType() == JsonComparisionType.EQUALS) {
                 if(lastObj != null) {
                     matching &= jsonValueComparision.getValues().contains(lastObj);
                 } else {
                     matching = false;
                 }
-            } else if (jsonValueComparision.getComparisionType() == JumboQuery.JsonComparisionType.EQUALS_IGNORE_CASE) {
+            } else if (jsonValueComparision.getComparisionType() == JsonComparisionType.EQUALS_IGNORE_CASE) {
                 throw new IllegalArgumentException("Not yet implemented " + jsonValueComparision.getComparisionType());
             } else {
                 throw new IllegalArgumentException("Unsupported comparision type " + jsonValueComparision.getComparisionType().getClass() + " " + jsonValueComparision.getComparisionType());

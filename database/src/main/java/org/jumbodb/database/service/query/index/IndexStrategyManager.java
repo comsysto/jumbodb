@@ -1,10 +1,12 @@
 package org.jumbodb.database.service.query.index;
 
+import com.google.common.collect.Maps;
+import org.jumbodb.database.index.resolver.IndexKey;
 import org.jumbodb.database.service.query.CollectionDefinition;
 import org.jumbodb.database.service.query.DeliveryChunkDefinition;
+import org.jumbodb.database.service.query.IndexDefinition;
 import org.springframework.beans.factory.annotation.Required;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -12,18 +14,25 @@ import java.util.Map;
  * @author Carsten Hufe
  */
 public class IndexStrategyManager {
+
+    public static final String INDEX_PROPERTIES_FILE_NAME = "index.properties";
+    public static final String INDEX_STRATEGY_KEY = "index.strategy";
+
+    private Map<IndexKey, IndexStrategy> indexLocationsAndStrategies;
     private List<IndexStrategy> strategies;
+
 
     public void initialize(CollectionDefinition collectionDefinition) {
         onDataChanged(collectionDefinition);
     }
+
 
     public String getStrategyKey(String collection, String chunkKey, String indexName) {
         return null;
     }
 
     public IndexStrategy getStrategy(String collection, String chunkKey, String indexName) {
-        return null;
+        return indexLocationsAndStrategies.get(new IndexKey(collection, chunkKey, indexName));
     }
 
     public IndexStrategy getStrategy(String strategyKey) {
@@ -37,5 +46,35 @@ public class IndexStrategyManager {
     @Required
     public void setStrategies(List<IndexStrategy> strategies) {
         this.strategies = strategies;
+    }
+
+    private Map<IndexKey, IndexStrategy> buildIndexStrategies(CollectionDefinition collectionDefinition){
+
+        Map<IndexKey, IndexStrategy> result = Maps.newHashMap();
+        Map<String, IndexStrategy> strategiesByNames = buildStratgeisByName(strategies);
+
+        for (String collectionName : collectionDefinition.getCollections()) {
+
+            for (DeliveryChunkDefinition deliveryChunkDef : collectionDefinition.getChunks(collectionName)) {
+
+                for (IndexDefinition indexDef : deliveryChunkDef.getIndexes()) {
+
+                    result.put(new IndexKey(collectionName, deliveryChunkDef.getChunkKey(), indexDef.getName()),
+                            strategiesByNames.get(indexDef.getStrategy()));
+                }
+            }
+        }
+        return result;
+    }
+
+    private Map<String, IndexStrategy> buildStratgeisByName(List<IndexStrategy> strategies){
+
+        Map<String, IndexStrategy> result = Maps.newHashMap();
+
+        for (IndexStrategy strategy : strategies) {
+
+            result.put(strategy.getStrategyName(), strategy);
+        }
+        return result;
     }
 }

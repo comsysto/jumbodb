@@ -1,10 +1,13 @@
 package org.jumbodb.database.service.query.index;
 
+import org.jumbodb.database.service.query.DataDeliveryChunk;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Carsten Hufe
@@ -12,8 +15,8 @@ import java.util.List;
 public class IndexStrategyManager {
     private List<IndexStrategy> strategies;
 
-    public void initialize() {
-        onDataChanged();
+    public void initialize(Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks) {
+        onDataChanged(dataDeliveryChunks);
     }
 
     public String getStrategyKey(String collection, String chunkKey, String indexName) {
@@ -28,8 +31,7 @@ public class IndexStrategyManager {
         return null;
     }
 
-    @PostConstruct
-    public void onDataChanged() {
+    public void onDataChanged(Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks) {
         // make reload
     }
 

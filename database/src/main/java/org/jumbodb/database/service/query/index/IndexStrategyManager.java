@@ -14,9 +14,6 @@ import java.util.Map;
  */
 public class IndexStrategyManager {
 
-    public static final String INDEX_PROPERTIES_FILE_NAME = "index.properties";
-    public static final String INDEX_STRATEGY_KEY = "index.strategy";
-
     private Map<IndexKey, IndexStrategy> indexLocationsAndStrategies;
     private List<IndexStrategy> strategies;
 
@@ -27,7 +24,7 @@ public class IndexStrategyManager {
 
 
     public String getStrategyKey(String collection, String chunkKey, String indexName) {
-        return null;
+        return indexLocationsAndStrategies.get(new IndexKey(collection, chunkKey, indexName)).getStrategyName();
     }
 
     public IndexStrategy getStrategy(String collection, String chunkKey, String indexName) {
@@ -35,11 +32,11 @@ public class IndexStrategyManager {
     }
 
     public IndexStrategy getStrategy(String strategyKey) {
-        return null;
+        return buildStratgiesByName(strategies).get(strategyKey);
     }
 
     public void onDataChanged(CollectionDefinition collectionDefinition) {
-        // make reload
+        indexLocationsAndStrategies = buildIndexStrategies(collectionDefinition);
     }
 
     @Required
@@ -47,10 +44,11 @@ public class IndexStrategyManager {
         this.strategies = strategies;
     }
 
+
     private Map<IndexKey, IndexStrategy> buildIndexStrategies(CollectionDefinition collectionDefinition){
 
         Map<IndexKey, IndexStrategy> result = Maps.newHashMap();
-        Map<String, IndexStrategy> strategiesByNames = buildStratgeisByName(strategies);
+        Map<String, IndexStrategy> strategiesByNames = buildStratgiesByName(strategies);
 
         for (String collectionName : collectionDefinition.getCollections()) {
 
@@ -66,7 +64,7 @@ public class IndexStrategyManager {
         return result;
     }
 
-    private Map<String, IndexStrategy> buildStratgeisByName(List<IndexStrategy> strategies){
+    private Map<String, IndexStrategy> buildStratgiesByName(List<IndexStrategy> strategies){
 
         Map<String, IndexStrategy> result = Maps.newHashMap();
 

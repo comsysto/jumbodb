@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query;
 import com.google.common.collect.HashMultimap;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.connector.query.JumboQuery;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query;
 
+import org.jumbodb.connector.query.JumboQuery;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;

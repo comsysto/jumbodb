@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query;
 
 import org.apache.commons.io.IOUtils;
+import org.jumbodb.connector.query.JumboQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.LinkedMultiValueMap;

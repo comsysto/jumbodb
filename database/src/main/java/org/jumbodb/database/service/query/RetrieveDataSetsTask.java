@@ -4,6 +4,7 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jumbodb.connector.query.JumboQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.hashcode.snappy;
 
+import org.jumbodb.connector.query.JumboQuery;
 import org.jumbodb.database.service.query.*;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.springframework.beans.factory.annotation.Required;
@@ -35,8 +36,8 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
     }
 
     @Override
-    public List<QueryOperation> getSupportedOperations() {
-        return Arrays.asList(QueryOperation.EQ);
+    public List<JumboQuery.QueryOperation> getSupportedOperations() {
+        return Arrays.asList(JumboQuery.QueryOperation.EQ);
     }
 
     @Override

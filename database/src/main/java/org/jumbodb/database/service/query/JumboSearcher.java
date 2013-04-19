@@ -32,25 +32,30 @@ public class JumboSearcher {
         this.dataPath = dataPath;
         this.indexPath = indexPath;
         this.indexStrategyManager = indexStrategyManager;
-        // CARSTEN initialize in spring
+        // CARSTEN initialize executors in spring
         this.retrieveDataSetsExecutor = Executors.newFixedThreadPool(20);
         this.chunkExecutor = Executors.newCachedThreadPool();
         this.indexExecutor = Executors.newCachedThreadPool();
-      //  this.dataDeliveryChunks = IndexLoader.loadIndex(dataPath, indexPath);
+        // CARSTEN fix, load without index ranges
+        this.dataDeliveryChunks = IndexLoader.loadIndex(dataPath, indexPath);
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         log.info("IndexedFileSearcher initialized for " + indexPath.getAbsolutePath());
+        indexStrategyManager.initialize(dataDeliveryChunks);
 
     }
 
     public void restart() {
         log.info("IndexedFileSearcher restarting for " + indexPath.getAbsolutePath());
+        // CARSTEN fix, load without index ranges
         this.dataDeliveryChunks = IndexLoader.loadIndex(dataPath, indexPath);
+        indexStrategyManager.onDataChanged(dataDeliveryChunks);
         log.info("IndexedFileSearcher restarted for " + indexPath.getAbsolutePath());
     }
 
     public void stop() {
         retrieveDataSetsExecutor.shutdown();
+        chunkExecutor.shutdown();
         indexExecutor.shutdown();
     }
 

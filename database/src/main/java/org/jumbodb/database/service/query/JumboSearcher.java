@@ -34,7 +34,7 @@ public class JumboSearcher {
         this.chunkExecutor = Executors.newCachedThreadPool();
         this.indexExecutor = Executors.newCachedThreadPool();
         this.indexFileExecutor = Executors.newScheduledThreadPool(30);
-        this.dataDeliveryChunks = IndexLoader.loadIndex(dataPath, indexPath);
+      //  this.dataDeliveryChunks = IndexLoader.loadIndex(dataPath, indexPath);
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         log.info("IndexedFileSearcher initialized for " + indexPath.getAbsolutePath());

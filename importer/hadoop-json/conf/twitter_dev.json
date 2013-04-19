@@ -1,0 +1,21 @@
+{
+    "input": "maprfs:///twitter/input-20130417",
+    "output": "maprfs:///twitter/output",
+    "description": "Carstens Twitter Test Import",
+    "collectionName": "twitter",
+    "deliveryChunk": "first_delivery",
+    "sort": ["user.screen_name"],
+    "indexes": [{
+        "indexName": "screen_name",
+        "fields" : ["user.screen_name"],
+        "strategy": "HASHCODE_SNAPPY_V1"
+    }],
+    "hosts": [
+        {"host": "ex4s-dev01.devproof.org", "port": 12001},
+        {"host": "ex4s-dev02.devproof.org", "port": 12001},
+        {"host": "ex4s-dev03.devproof.org", "port": 12001},
+        {"host": "ex10-dev01.devproof.org", "port": 12001}
+    ],
+    "numberOfOutputFiles": 10,
+    "hadoop": []
+}

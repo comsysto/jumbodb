@@ -15,8 +15,8 @@ import org.jumbodb.connector.hadoop.HadoopConfigurationUtil;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.JumboJobCreator;
 import org.jumbodb.connector.hadoop.index.json.ImportJson;
-import org.jumbodb.importer.hadoop.json.map.GenericJsonSortMapper;
-import org.jumbodb.importer.hadoop.json.output.TextValueOutputFormat;
+import org.jumbodb.connector.hadoop.index.map.GenericJsonSortMapper;
+import org.jumbodb.connector.hadoop.index.output.TextValueOutputFormat;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;

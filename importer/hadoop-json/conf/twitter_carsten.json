@@ -1,13 +1,14 @@
 {
     "input": "/Users/carsten/smhadoop/input/twitter",
     "output": "/Users/carsten/smhadoop/output/twitter",
+    "description": "Carstens Twitter Test Import",
     "collectionName": "carsten.twitter",
     "deliveryChunk": "first_delivery",
     "sort": ["user.screen_name"],
     "indexes": [{
         "indexName": "screen_name",
         "fields" : ["user.screen_name"],
-        "strategy": "hash_snappy_v1"
+        "strategy": "HASHCODE_SNAPPY_V1"
     }],
     "hosts": [{"host": "localhost", "port": 12001}],
     "numberOfOutputFiles": 5,

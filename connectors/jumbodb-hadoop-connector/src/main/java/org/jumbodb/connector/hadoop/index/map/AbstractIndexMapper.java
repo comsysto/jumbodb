@@ -1,6 +1,5 @@
 package org.jumbodb.connector.hadoop.index.map;
 
-import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -8,6 +7,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 
 import java.io.IOException;
 
@@ -33,15 +33,11 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
         String name = sp.getPath().getName();
 
         T input = jsonMapper.readValue(value.toString(), getJsonClass());
-        String indexableValue = getIndexableValue(input);
-        int hashCode = 0;
-        if(indexableValue != null) {
-            hashCode = indexableValue.hashCode();
-        }
-        context.write(new IntWritable(hashCode), new FileOffsetWritable(name.hashCode(), key.get()));
+        onDataset(key, name.hashCode(), input, context);
     }
 
-    public abstract String getIndexableValue(T input);
+    public abstract void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException;
     public abstract String getIndexName();
+    public abstract String getStrategy();
     public abstract Class<T> getJsonClass();
 }

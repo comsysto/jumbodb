@@ -14,6 +14,7 @@ import java.util.List;
 public class ImportJson {
     private String input;
     private String output;
+    private String description;
     private String collectionName;
     private String deliveryChunk;
     private List<String> sort = new LinkedList<String>();
@@ -24,6 +25,14 @@ public class ImportJson {
     private List<HadoopJsonConfig> hadoop = new LinkedList<HadoopJsonConfig>();
 
     public ImportJson() {
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public boolean isActivateDelivery() {

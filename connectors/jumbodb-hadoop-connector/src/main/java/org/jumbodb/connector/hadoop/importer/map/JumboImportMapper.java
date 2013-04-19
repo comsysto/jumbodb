@@ -29,6 +29,8 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
     private String type;
     private String deliveryKey;
     private String deliveryVersion;
+    private String collection;
+    private String indexName;
     private long bytesReadAll = 0l;
 
     @Override
@@ -39,6 +41,8 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         this.type = conf.get(JumboConstants.DATA_TYPE);
         this.deliveryKey = conf.get(JumboConstants.DELIVERY_KEY);
         this.deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
+        this.collection = conf.get(JumboConstants.COLLECTION_NAME);
+        this.indexName = conf.get(JumboConstants.INDEX_NAME);
         this.bytesReadAll = 0l;
         super.setup(context);
     }
@@ -53,15 +57,15 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             fis = fs.open(path);
             long fileLength = fs.getFileStatus(path).getLen();
             if(JumboConstants.DATA_TYPE_INDEX.equals(type)) {
-                String collection = path.getParent().getParent().getName();
+//                String collection = path.getParent().getParent().getName();
                 String fileName = path.getName();
-                String indexName = path.getParent().getName();
+//                String indexName = path.getParent().getName();
                 IndexInfo indexInfo = new IndexInfo(collection, indexName, fileName, fileLength, deliveryKey, deliveryVersion);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
                 jumboImportConnection.importIndex(indexInfo, copyDataCallback);
             }
             else if(JumboConstants.DATA_TYPE_DATA.equals(type)) {
-                String collection = path.getParent().getName();
+//                String collection = path.getParent().getName();
                 String fileName = path.getName();
                 DataInfo dataInfo = new DataInfo(collection, fileName, fileLength, deliveryKey, deliveryVersion);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);

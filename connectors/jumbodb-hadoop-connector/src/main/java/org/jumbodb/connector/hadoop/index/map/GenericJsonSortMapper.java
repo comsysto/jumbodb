@@ -1,4 +1,4 @@
-package org.jumbodb.importer.hadoop.json.map;
+package org.jumbodb.connector.hadoop.index.map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.LongWritable;
@@ -8,7 +8,6 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.HadoopConfigurationUtil;
-import org.jumbodb.importer.hadoop.json.JsonImporterJob;
 import org.jumbodb.connector.hadoop.index.json.ImportJson;
 
 import java.io.IOException;

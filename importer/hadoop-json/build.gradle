@@ -43,6 +43,7 @@ dependencies {
     compile project(':connectors:jumbodb-hadoop-connector')
 
     bundle project(':connectors:jumbodb-hadoop-connector')
+    bundle project(':connectors:jumbodb-java-connector')
     bundle 'org.xerial.snappy:snappy-java:1.0.5-M4'
     bundle 'commons-io:commons-io:2.3'
 //    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
@@ -60,7 +61,9 @@ dependencies {
 }
 
 jar {
-    from configurations.bundle.collect { it.isDirectory() ? it : zipTree(it) }
+    from configurations.bundle.collect {
+        it.isDirectory() ? it : zipTree(it)
+    }
     manifest {
         attributes("Main-Class": "org.jumbodb.importer.hadoop.json.JsonImporterJob")
     }

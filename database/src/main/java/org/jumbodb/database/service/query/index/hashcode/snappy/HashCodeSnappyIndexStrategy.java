@@ -13,10 +13,14 @@ import java.util.concurrent.ExecutorService;
 public class HashCodeSnappyIndexStrategy implements IndexStrategy {
 
     private ExecutorService indexFileExecutor;
+    private CollectionDefinition collectionDefinition;
 
     @Override
     public boolean isResponsibleFor(String collection, String chunkKey, String indexName) {
-
+        IndexDefinition chunkIndex = collectionDefinition.getChunkIndex(collection, chunkKey, indexName);
+        if(chunkIndex != null) {
+            return getStrategyName().equals(chunkIndex.getStrategy());
+        }
         return false;
     }
 
@@ -37,10 +41,12 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
 
     @Override
     public void onInitialize(CollectionDefinition collectionDefinition) {
+        this.collectionDefinition = collectionDefinition;
     }
 
     @Override
     public void onDataChanged(CollectionDefinition collectionDefinition) {
+        this.collectionDefinition = collectionDefinition;
     }
 
     @Required

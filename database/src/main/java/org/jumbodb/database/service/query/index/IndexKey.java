@@ -1,4 +1,4 @@
-package org.jumbodb.database.index.resolver;
+package org.jumbodb.database.service.query.index;
 
 
 public class IndexKey {

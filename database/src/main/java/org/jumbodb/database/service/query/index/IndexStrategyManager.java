@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.index;
 
 import com.google.common.collect.Maps;
-import org.jumbodb.database.index.resolver.IndexKey;
 import org.jumbodb.database.service.query.CollectionDefinition;
 import org.jumbodb.database.service.query.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.IndexDefinition;

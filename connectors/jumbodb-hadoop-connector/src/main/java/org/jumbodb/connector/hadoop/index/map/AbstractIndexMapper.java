@@ -5,7 +5,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -35,20 +34,15 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
         String name = sp.getPath().getName();
 
         try {
-            T input;
-            if(readJsonTree()) {
-                input = (T) jsonMapper.readTree(value.toString());
-            }
-            else {
-                input = jsonMapper.readValue(value.toString(), getJsonClass());
-            }
-
+            T input = jsonMapper.readValue(value.toString(), getJsonClass());
             onDataset(key, name.hashCode(), input, context);
         }
         catch(JsonParseException ex) {
             System.err.println("Json " + ((FileSplit) context.getInputSplit()).getPath().toString());
             System.err.println("Json " + value.toString());
-            throw ex;
+            if(throwErrorOnInvalidDataset()) {
+                throw ex;
+            }
         }
     }
 
@@ -56,7 +50,8 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
     public abstract String getIndexName();
     public abstract String getStrategy();
     public abstract Class<T> getJsonClass();
-    public boolean readJsonTree() {
-        return false;
+
+    public boolean throwErrorOnInvalidDataset() {
+        return true;
     }
 }

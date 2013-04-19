@@ -70,4 +70,9 @@ public class GenericJsonHashCodeIndexMapper extends AbstractHashCodeIndexMapper<
         // CARSTEN omg fix
         return "null";
     }
+
+    @Override
+    public boolean throwErrorOnInvalidDataset() {
+        return false;
+    }
 }

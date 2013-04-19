@@ -79,12 +79,14 @@ public class JsonImporterJob extends Configured implements Tool {
             Path indexOutputPath = new Path(outputIndex + collectionName + "/");
             Path logOutputPath = new Path(outputLog + collectionName + "/");
             List<ControlledJob> jumboIndexAndImportJob = JumboJobCreator.createIndexAndImportJob(conf, new Path(importDataPath), indexOutputPath, logOutputPath, importJson);
+            System.out.println("Number of Jumbo Index and Import Jobs " + jumboIndexAndImportJob.size());
             if(controlledSortJob != null) {
                 for (ControlledJob current : jumboIndexAndImportJob) {
                     current.addDependingJob(controlledSortJob);
                 }
             }
             control.addJobCollection(jumboIndexAndImportJob);
+            System.out.println("Number of Jumbo Index and Import JobsWaiting Jobs " + control.getWaitingJobList().size());
         }
         // index job, import job
 

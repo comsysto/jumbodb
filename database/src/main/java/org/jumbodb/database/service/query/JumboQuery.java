@@ -8,15 +8,15 @@ import java.util.*;
  * Time: 1:05 PM
  */
 public class JumboQuery {
-    private List<IndexComparision> indexComparision;
+    private List<IndexQuery> indexQuery;
     private List<JsonValueComparision> jsonComparision;
 
-    public List<IndexComparision> getIndexComparision() {
-        return indexComparision;
+    public List<IndexQuery> getIndexQuery() {
+        return indexQuery;
     }
 
-    public void setIndexComparision(List<IndexComparision> indexComparision) {
-        this.indexComparision = indexComparision;
+    public void setIndexQuery(List<IndexQuery> indexQuery) {
+        this.indexQuery = indexQuery;
     }
 
     public List<JsonValueComparision> getJsonComparision() {
@@ -30,7 +30,7 @@ public class JumboQuery {
     @Override
     public String toString() {
         return "JumboQuery{" +
-                "indexComparision=" + indexComparision +
+                "indexQuery=" + indexQuery +
                 ", jsonComparision=" + jsonComparision +
                 '}';
     }
@@ -76,9 +76,9 @@ public class JumboQuery {
         }
     }
 
-    public static class IndexComparision {
+    public static class IndexQuery {
         private String name;
-        private List<String> values;
+        private List<IndexClause> clauses;
 
         public String getName() {
             return name;
@@ -88,19 +88,56 @@ public class JumboQuery {
             this.name = name;
         }
 
-        public List<String> getValues() {
-            return values;
+        public List<IndexClause> getClauses() {
+            return clauses;
         }
 
-        public void setValues(List<String> values) {
-            this.values = values;
+        public void setClauses(List<IndexClause> clauses) {
+            this.clauses = clauses;
         }
 
         @Override
         public String toString() {
-            return "IndexComparision{" +
+            return "IndexQuery{" +
                     "name='" + name + '\'' +
-                    ", values='" + values + '\'' +
+                    ", values='" + clauses + '\'' +
+                    '}';
+        }
+    }
+
+    public static class IndexClause {
+        private QueryOperation queryOperation;
+        private Object value;
+
+        public IndexClause() {
+        }
+
+        public IndexClause(QueryOperation queryOperation, String value) {
+            this.queryOperation = queryOperation;
+            this.value = value;
+        }
+
+        public QueryOperation getQueryOperation() {
+            return queryOperation;
+        }
+
+        public void setQueryOperation(QueryOperation queryOperation) {
+            this.queryOperation = queryOperation;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public void setValue(Object value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return "IndexClause{" +
+                    "queryOperation=" + queryOperation +
+                    ", value='" + value + '\'' +
                     '}';
         }
     }

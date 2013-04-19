@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
+import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +29,9 @@ public class QueryServer implements Restartable {
     private JumboConfiguration config;
     private  ServerSocket serverSocket;
 
-    public QueryServer(JumboConfiguration config) {
+    public QueryServer(JumboConfiguration config, IndexStrategyManager indexStrategyManager) {
         this.config = config;
-        this.jumboSearcher = new JumboSearcher(config.getDataPath(), config.getIndexPath());
+        this.jumboSearcher = new JumboSearcher(config.getDataPath(), config.getIndexPath(), indexStrategyManager);
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }

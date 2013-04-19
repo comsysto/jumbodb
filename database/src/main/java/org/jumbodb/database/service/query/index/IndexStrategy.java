@@ -1,9 +1,6 @@
 package org.jumbodb.database.service.query.index;
 
-import org.jumbodb.database.service.query.DataDeliveryChunk;
-import org.jumbodb.database.service.query.FileOffset;
-import org.jumbodb.database.service.query.JumboQuery;
-import org.jumbodb.database.service.query.QueryOperation;
+import org.jumbodb.database.service.query.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +17,6 @@ public interface IndexStrategy {
     String getStrategyName();
     Set<FileOffset> findFileOffsets(String collection, String chunkKey, JumboQuery.IndexQuery query);
     List<QueryOperation> getSupportedOperations();
-    void onInitialize(Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks);
-    void onDataChanged(Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks);
+    void onInitialize(CollectionDefinition collectionDefinition);
+    void onDataChanged(CollectionDefinition collectionDefinition);
 }

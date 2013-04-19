@@ -215,18 +215,20 @@ public class SearchIndexUtils {
     }
 
 
-    public static MultiValueMap<File, Integer> groupByIndexFile(DataDeliveryChunk dataDeliveryChunk, JumboQuery.IndexQuery query) {
-        Collection<IndexFile> indexFiles = dataDeliveryChunk.getIndexFiles().get(query.getName());
-        MultiValueMap<File, Integer> groupByIndexFile = new LinkedMultiValueMap<File, Integer>();
-        for (IndexFile indexFile : indexFiles) {
-            for (JumboQuery.IndexClause obj : query.getClauses()) {
-                int hash = obj.getValue().hashCode();
-                if (hash >= indexFile.getFromHash() && hash <= indexFile.getToHash()) {
-                    groupByIndexFile.add(indexFile.getIndexFile(), hash);
-                }
-
-            }
-        }
-        return groupByIndexFile;
+    public static MultiValueMap<File, Integer> groupByIndexFile(DeliveryChunkDefinition deliveryChunkDefinition, JumboQuery.IndexQuery query) {
+        // CARSTEN fix
+        return null;
+//        Collection<IndexFile> indexFiles = deliveryChunkDefinition.getIndexFiles().get(query.getName());
+//        MultiValueMap<File, Integer> groupByIndexFile = new LinkedMultiValueMap<File, Integer>();
+//        for (IndexFile indexFile : indexFiles) {
+//            for (JumboQuery.IndexClause obj : query.getClauses()) {
+//                int hash = obj.getValue().hashCode();
+//                if (hash >= indexFile.getFromHash() && hash <= indexFile.getToHash()) {
+//                    groupByIndexFile.add(indexFile.getIndexFile(), hash);
+//                }
+//
+//            }
+//        }
+//        return groupByIndexFile;
     }
 }

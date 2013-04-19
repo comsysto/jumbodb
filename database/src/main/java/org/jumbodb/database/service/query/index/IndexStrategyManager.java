@@ -1,10 +1,9 @@
 package org.jumbodb.database.service.query.index;
 
-import org.jumbodb.database.service.query.DataDeliveryChunk;
+import org.jumbodb.database.service.query.CollectionDefinition;
+import org.jumbodb.database.service.query.DeliveryChunkDefinition;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +14,8 @@ import java.util.Map;
 public class IndexStrategyManager {
     private List<IndexStrategy> strategies;
 
-    public void initialize(Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks) {
-        onDataChanged(dataDeliveryChunks);
+    public void initialize(CollectionDefinition collectionDefinition) {
+        onDataChanged(collectionDefinition);
     }
 
     public String getStrategyKey(String collection, String chunkKey, String indexName) {
@@ -31,7 +30,7 @@ public class IndexStrategyManager {
         return null;
     }
 
-    public void onDataChanged(Map<String, Collection<DataDeliveryChunk>> dataDeliveryChunks) {
+    public void onDataChanged(CollectionDefinition collectionDefinition) {
         // make reload
     }
 

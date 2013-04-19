@@ -10,7 +10,11 @@
         "fields" : ["user.screen_name"],
         "strategy": "HASHCODE_SNAPPY_V1"
     }],
-    "hosts": [{"host": "localhost", "port": 12001}],
+    "hosts": [
+        {"host": "localhost", "port": 12001},
+        {"host": "localhost", "port": 12001}
+
+    ],
     "numberOfOutputFiles": 5,
     "hadoop": []
 }

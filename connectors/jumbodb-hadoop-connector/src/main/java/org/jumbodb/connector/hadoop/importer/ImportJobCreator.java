@@ -32,7 +32,7 @@ public class ImportJobCreator {
 
 
     private static ControlledJob createJumboJob(Configuration conf, Path importPath, Path reportOutputPath, String type, ImportJson importJson, HostsJson hostsJson, IndexJson indexJson) throws IOException {
-        Job job = new Job(conf, "jumboDB Import " + importPath.toString() + ":" + type);
+        Job job = new Job(conf, "jumboDB Import " + hostsJson.getHost() + " " + importPath.toString() + ":" + type);
         JumboInputFormat.setDataType(job, type);
         JumboInputFormat.setImportPath(job, importPath);
         JumboInputFormat.setIndexName(job, indexJson != null ? indexJson.getIndexName() : "not_set");

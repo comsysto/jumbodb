@@ -46,7 +46,7 @@ dependencies {
     bundle project(':connectors:jumbodb-java-connector')
     bundle 'org.xerial.snappy:snappy-java:1.0.5-M4'
     bundle 'commons-io:commons-io:2.3'
-//    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+//    bundle "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
 //    compile "org.apache.hadoop:hadoop-core:1.0.3"
 //    compile 'com.google.guava:guava:r09'
 //    compile 'commons-io:commons-io:2.3'

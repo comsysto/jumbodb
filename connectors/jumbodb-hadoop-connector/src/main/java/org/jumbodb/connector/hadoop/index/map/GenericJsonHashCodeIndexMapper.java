@@ -64,7 +64,7 @@ public class GenericJsonHashCodeIndexMapper extends AbstractHashCodeIndexMapper<
             jsonNode = jsonNode.path(s);
         }
         if(jsonNode.isValueNode()) {
-            String s = jsonNode.asText();
+            String s = jsonNode.getValueAsText();
             return s;
         }
         // CARSTEN omg fix

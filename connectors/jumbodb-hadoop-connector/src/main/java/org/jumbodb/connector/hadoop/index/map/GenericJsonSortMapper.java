@@ -60,7 +60,7 @@ public class GenericJsonSortMapper extends Mapper<LongWritable, Text, Text, Text
             jsonNode = jsonNode.path(s);
         }
         if(jsonNode.isValueNode()) {
-            String s = jsonNode.asText();
+            String s = jsonNode.getValueAsText();
             return s;
         }
         return "null";

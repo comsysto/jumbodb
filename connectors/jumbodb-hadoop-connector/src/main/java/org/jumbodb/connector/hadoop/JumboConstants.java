@@ -11,8 +11,10 @@ public class JumboConstants {
     public static final String IMPORT_PATH = "jumbo.import.path";
     public static final String DELIVERY_VERSION = "jumbo.delivery.version";
     public static final String DELIVERY_KEY = "jumbo.delivery.key";
-    public static final String DELIVERY_INFO = "jumbo.delivery.info";
-    public static final String DELIVERY_ACTIVATE = "jumbo.delivery.activate";
+    public static final String COLLECTION_NAME = "jumbo.collection.name";
+    public static final String INDEX_NAME = "jumbo.index.name";
+//    public static final String DELIVERY_INFO = "jumbo.delivery.info";
+//    public static final String DELIVERY_ACTIVATE = "jumbo.delivery.activate";
     public static final boolean DELIVERY_ACTIVATE_DEFAULT = true;
     public static final String HOST = "jumbo.host";
     public static final String PORT = "jumbo.port";

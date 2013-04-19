@@ -28,19 +28,15 @@ import java.util.List;
  */
 public class ImportJobCreator {
 
-    public static ControlledJob createIndexImportJob(Configuration conf, Path importPathIndex, Path reportOutputPath) throws IOException {
-        return createJumboJob(conf, importPathIndex, reportOutputPath, JumboConstants.DATA_TYPE_INDEX, null, null, null);
-    }
 
-    public static ControlledJob createDataImportJob(Configuration conf, Path importPathData, Path reportOutputPath) throws IOException {
-        return createJumboJob(conf, importPathData, reportOutputPath, JumboConstants.DATA_TYPE_DATA, null, null, null);
-    }
+
 
     private static ControlledJob createJumboJob(Configuration conf, Path importPath, Path reportOutputPath, String type, ImportJson importJson, HostsJson hostsJson, IndexJson indexJson) throws IOException {
         Job job = new Job(conf, "jumboDB Import " + importPath.toString() + ":" + type);
         JumboInputFormat.setDataType(job, type);
         JumboInputFormat.setImportPath(job, importPath);
-        JumboInputFormat.setDataType(job, type);
+        JumboInputFormat.setIndexName(job, indexJson != null ? indexJson.getIndexName() : "not_set");
+        JumboInputFormat.setCollectionName(job, importJson.getCollectionName());
         FileOutputFormat.setOutputPath(job, reportOutputPath);
         FileInputFormat.addInputPath(job, importPath);
         job.setJarByClass(ImportJobCreator.class);
@@ -55,19 +51,12 @@ public class ImportJobCreator {
         job.setNumReduceTasks(1);
         job.setSpeculativeExecution(false);
         job.setMapSpeculativeExecution(false);
-        if(hostsJson != null) {
-            job.setJobName("jumboDB Import " + hostsJson.getHost() + " " + importPath.toString() + ":" + type);
-            Configuration jobConf = job.getConfiguration();
-            jobConf.set(JumboConstants.HOST, hostsJson.getHost());
-            jobConf.setInt(JumboConstants.PORT, hostsJson.getPort());
-            JumboJobCreator.sendMetaData(importJson, importPath, job.getConfiguration());
-            JumboJobCreator.sendMetaIndex(importJson, indexJson, job.getConfiguration());
-
-
-        } else {
-            JumboJobCreator.sendMetaData(job.getConfiguration());
-            JumboJobCreator.sendMetaIndex(job.getConfiguration());
-        }
+        job.setJobName("jumboDB Import " + hostsJson.getHost() + " " + importPath.toString() + ":" + type);
+        Configuration jobConf = job.getConfiguration();
+        jobConf.set(JumboConstants.HOST, hostsJson.getHost());
+        jobConf.setInt(JumboConstants.PORT, hostsJson.getPort());
+        JumboJobCreator.sendMetaData(importJson, importPath, job.getConfiguration());
+        JumboJobCreator.sendMetaIndex(importJson, indexJson, job.getConfiguration());
         return new ControlledJob(job, new ArrayList<ControlledJob>());
     }
 

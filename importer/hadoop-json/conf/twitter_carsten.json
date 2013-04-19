@@ -8,7 +8,7 @@
     "indexes": [{
         "indexName": "screen_name",
         "fields" : ["user.screen_name"],
-        "strategy": "hashcode_snappy_v1"
+        "strategy": "HASHCODE_SNAPPY_V1"
     }],
     "hosts": [{"host": "localhost", "port": 12001}],
     "numberOfOutputFiles": 5,

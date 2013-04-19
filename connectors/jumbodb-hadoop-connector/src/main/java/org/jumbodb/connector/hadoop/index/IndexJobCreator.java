@@ -5,6 +5,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.index.json.IndexJson;
 import org.jumbodb.connector.hadoop.index.map.AbstractHashCodeIndexMapper;
+import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.map.GenericJsonHashCodeIndexMapper;
 import org.jumbodb.connector.hadoop.index.output.BinaryIndexOutputFormat;
 import org.jumbodb.connector.hadoop.index.output.HashRangePartitioner;
@@ -29,7 +30,7 @@ import java.util.Map;
  */
 public class IndexJobCreator {
 
-    public static final String HASHCODE_SNAPPY_V_1 = "hashcode_snappy_v1";
+    public static final String HASHCODE_SNAPPY_V_1 = "HASHCODE_SNAPPY_V1";
 
     public static Map<String, Class<? extends Mapper>> GENERIC_INDEX_MAPPER_STRATEGIES = createIndexMapper();
 
@@ -62,9 +63,9 @@ public class IndexJobCreator {
         return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
     }
 
-    public static IndexControlledJob createIndexJob(Configuration conf, Class<? extends AbstractHashCodeIndexMapper> mapper, Path jsonDataToIndex, Path outputPath) throws IOException {
-        AbstractHashCodeIndexMapper abstractHashCodeIndexMapper = createInstance(mapper);
-        String indexName = abstractHashCodeIndexMapper.getIndexName();
+    public static IndexControlledJob createIndexJob(Configuration conf, Class<? extends AbstractIndexMapper> mapper, Path jsonDataToIndex, Path outputPath) throws IOException {
+        AbstractIndexMapper abstractIndexMapper = createInstance(mapper);
+        String indexName = abstractIndexMapper.getIndexName();
         Path output = new Path(outputPath.toString() + "/" + indexName);
         Job job = new Job(conf, "Index " + mapper.getSimpleName() + " Job " + jsonDataToIndex);
         FileInputFormat.addInputPath(job, jsonDataToIndex);
@@ -81,7 +82,12 @@ public class IndexJobCreator {
         return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
     }
 
-    private static AbstractHashCodeIndexMapper createInstance(Class<? extends AbstractHashCodeIndexMapper> mapper)  {
+    public static IndexJson getIndexInformation(Class<? extends AbstractIndexMapper> mapper) {
+        AbstractIndexMapper instance = createInstance(mapper);
+        return new IndexJson(instance.getIndexName(), new ArrayList<String>(), instance.getStrategy());
+    }
+
+    private static AbstractIndexMapper createInstance(Class<? extends AbstractIndexMapper> mapper)  {
         try {
             return mapper.newInstance();
         } catch (InstantiationException e) {

@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop.index.map;
 
+import org.jumbodb.connector.hadoop.index.IndexJobCreator;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -16,32 +17,21 @@ import java.io.IOException;
  * Date: 11/3/12
  * Time: 3:26 PM
  */
-public abstract class AbstractHashCodeIndexMapper<T> extends Mapper<LongWritable, Text, IntWritable, FileOffsetWritable> {
-    private ObjectMapper jsonMapper;
-
+public abstract class AbstractHashCodeIndexMapper<T> extends AbstractIndexMapper<T> {
     @Override
-    protected void setup(Context context) throws IOException, InterruptedException {
-        super.setup(context);
-        jsonMapper = new ObjectMapper();
-        jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    }
-
-    @Override
-    protected final void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-        FileSplit sp = (FileSplit)context.getInputSplit();
-        String name = sp.getPath().getName();
-
-        T input = jsonMapper.readValue(value.toString(), getJsonClass());
+    public void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException {
         String indexableValue = getIndexableValue(input);
         int hashCode = 0;
         if(indexableValue != null) {
             hashCode = indexableValue.hashCode();
         }
-        context.write(new IntWritable(hashCode), new FileOffsetWritable(name.hashCode(), key.get()));
+        context.write(new IntWritable(hashCode), new FileOffsetWritable(fileNameHashCode, offset.get()));
+    }
+
+    @Override
+    public String getStrategy() {
+        return IndexJobCreator.HASHCODE_SNAPPY_V_1;
     }
 
     public abstract String getIndexableValue(T input);
-    public abstract String getIndexName();
-    public abstract Class<T> getJsonClass();
 }

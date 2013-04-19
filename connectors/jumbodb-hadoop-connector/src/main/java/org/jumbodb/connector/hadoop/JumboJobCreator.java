@@ -11,6 +11,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
+import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.jumbodb.connector.importer.JumboImportConnection;
 import org.jumbodb.connector.importer.MetaData;
 import org.jumbodb.connector.importer.MetaIndex;
@@ -54,23 +55,26 @@ public class JumboJobCreator {
         return controlledJobs;
     }
 
-    public static List<ControlledJob> createIndexAndImportJob(Configuration conf, Path inputDataPath, Path outputIndexPath, Path outputReportPath, Class<? extends AbstractHashCodeIndexMapper>... mapper) throws IOException {
+    public static List<ControlledJob> createIndexAndImportJob(Configuration conf, Path inputDataPath, Path outputIndexPath, Path outputReportPath, ImportJson importJson, Class<? extends AbstractIndexMapper>... mapper) throws IOException {
         if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
             conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
         }
         List<ControlledJob> controlledJobs = new LinkedList<ControlledJob>();
 
-        ControlledJob dataImportJob = ImportJobCreator.createDataImportJob(conf, inputDataPath, new Path(outputReportPath.toString() + "/data"));
-        controlledJobs.add(dataImportJob);
+        List<ControlledJob> dataImportJob = ImportJobCreator.createDataImportJobs(conf, inputDataPath, new Path(outputReportPath.toString() + "/data"), importJson);
+        controlledJobs.addAll(dataImportJob);
 
-        for (Class<? extends AbstractHashCodeIndexMapper> map : mapper) {
+        for (Class<? extends AbstractIndexMapper> map : mapper) {
             IndexJobCreator.IndexControlledJob indexJob = IndexJobCreator.createIndexJob(conf, map, inputDataPath, outputIndexPath);
             ControlledJob controlledIndexJob = indexJob.getControlledJob();
 
-            ControlledJob indexImportJob = ImportJobCreator.createIndexImportJob(conf, indexJob.getIndexPath(), new Path(outputReportPath.toString() + "/index"));
-            indexImportJob.addDependingJob(controlledIndexJob);
+            IndexJson indexInformation = IndexJobCreator.getIndexInformation(map);
+            List<ControlledJob> indexImportJob = ImportJobCreator.createIndexImportJobs(conf, indexJob.getIndexPath(), new Path(outputReportPath.toString() + "/index"), importJson, indexInformation);
+            for (ControlledJob controlledJob : indexImportJob) {
+                controlledJob.addDependingJob(controlledIndexJob);
+            }
             controlledJobs.add(controlledIndexJob);
-            controlledJobs.add(indexImportJob);
+            controlledJobs.addAll(indexImportJob);
         }
         return controlledJobs;
     }
@@ -95,29 +99,28 @@ public class JumboJobCreator {
 
     }
 
-    /**
-     * TODO remove
-     * @param conf
-     */
-    @Deprecated
-    public static void sendMetaIndex(Configuration conf) {
-        String type = conf.get(JumboConstants.DATA_TYPE);
-        if(!JumboConstants.DATA_TYPE_INDEX.equals(type)) {
-            return;
-        }
-        JumboImportConnection jumbo = null;
-        try {
-            jumbo = new JumboImportConnection(conf.get(JumboConstants.HOST), conf.getInt(JumboConstants.PORT, JumboConstants.PORT_DEFAULT));
-            String pathString = conf.get(JumboConstants.IMPORT_PATH);
-            Path path = new Path(pathString);
-            String collection = path.getParent().getName();
-            String indexName = path.getName();
-            MetaIndex metaIndex = new MetaIndex(collection, conf.get(JumboConstants.DELIVERY_KEY), conf.get(JumboConstants.DELIVERY_VERSION), indexName, IndexJobCreator.HASHCODE_SNAPPY_V_1);
-            jumbo.sendMetaIndex(metaIndex);
-        } finally {
-            IOUtils.closeStream(jumbo);
-        }
-    }
+//    /**
+//     * @param conf
+//     */
+//    @Deprecated
+//    public static void sendMetaIndex(Configuration conf) {
+//        String type = conf.get(JumboConstants.DATA_TYPE);
+//        if(!JumboConstants.DATA_TYPE_INDEX.equals(type)) {
+//            return;
+//        }
+//        JumboImportConnection jumbo = null;
+//        try {
+//            jumbo = new JumboImportConnection(conf.get(JumboConstants.HOST), conf.getInt(JumboConstants.PORT, JumboConstants.PORT_DEFAULT));
+//            String pathString = conf.get(JumboConstants.IMPORT_PATH);
+//            Path path = new Path(pathString);
+//            String collection = path.getParent().getName();
+//            String indexName = path.getName();
+//            MetaIndex metaIndex = new MetaIndex(collection, conf.get(JumboConstants.DELIVERY_KEY), conf.get(JumboConstants.DELIVERY_VERSION), indexName, IndexJobCreator.HASHCODE_SNAPPY_V_1);
+//            jumbo.sendMetaIndex(metaIndex);
+//        } finally {
+//            IOUtils.closeStream(jumbo);
+//        }
+//    }
 
 
     public static void sendMetaData(ImportJson importJson, Path importPath, Configuration conf) {
@@ -129,7 +132,8 @@ public class JumboJobCreator {
             JumboImportConnection jumbo = null;
             try {
                 jumbo = new JumboImportConnection(hostsJson.getHost(), hostsJson.getPort());
-                String collection = importPath.getName();
+//                String collection = importPath.getName();
+                String collection = importJson.getCollectionName();
                 boolean activate = importJson.isActivateDelivery();
                 MetaData metaData = new MetaData(collection, importJson.getDeliveryChunk(), conf.get(JumboConstants.DELIVERY_VERSION), importPath.toString(), activate, importJson.getDescription());
                 jumbo.sendMetaData(metaData);
@@ -140,29 +144,28 @@ public class JumboJobCreator {
 
     }
 
-    /**
-     * TODO remove
-     * @param conf
-     */
-    @Deprecated
-    public static void sendMetaData(Configuration conf) {
-        String type = conf.get(JumboConstants.DATA_TYPE);
-        if(!JumboConstants.DATA_TYPE_DATA.equals(type)) {
-            return;
-        }
-        JumboImportConnection jumbo = null;
-        try {
-            jumbo = new JumboImportConnection(conf.get(JumboConstants.HOST), conf.getInt(JumboConstants.PORT, JumboConstants.PORT_DEFAULT));
-            String pathString = conf.get(JumboConstants.IMPORT_PATH);
-            Path path = new Path(pathString);
-            String collection = path.getName();
-            boolean activate = conf.getBoolean(JumboConstants.DELIVERY_ACTIVATE, JumboConstants.DELIVERY_ACTIVATE_DEFAULT);
-            MetaData metaData = new MetaData(collection, conf.get(JumboConstants.DELIVERY_KEY), conf.get(JumboConstants.DELIVERY_VERSION), pathString, activate, conf.get(JumboConstants.DELIVERY_INFO, "none"));
-            jumbo.sendMetaData(metaData);
-        } finally {
-            IOUtils.closeStream(jumbo);
-        }
-    }
+//    /**
+//     * @param conf
+//     */
+//    @Deprecated
+//    public static void sendMetaData(Configuration conf) {
+//        String type = conf.get(JumboConstants.DATA_TYPE);
+//        if(!JumboConstants.DATA_TYPE_DATA.equals(type)) {
+//            return;
+//        }
+//        JumboImportConnection jumbo = null;
+//        try {
+//            jumbo = new JumboImportConnection(conf.get(JumboConstants.HOST), conf.getInt(JumboConstants.PORT, JumboConstants.PORT_DEFAULT));
+//            String pathString = conf.get(JumboConstants.IMPORT_PATH);
+//            Path path = new Path(pathString);
+//            String collection = path.getName();
+//            boolean activate = conf.getBoolean(JumboConstants.DELIVERY_ACTIVATE, JumboConstants.DELIVERY_ACTIVATE_DEFAULT);
+//            MetaData metaData = new MetaData(collection, conf.get(JumboConstants.DELIVERY_KEY), conf.get(JumboConstants.DELIVERY_VERSION), pathString, activate, conf.get(JumboConstants.DELIVERY_INFO, "none"));
+//            jumbo.sendMetaData(metaData);
+//        } finally {
+//            IOUtils.closeStream(jumbo);
+//        }
+//    }
 
     public static void sendFinishedNotification(JobControl jobControl, Configuration conf) {
         if(!conf.getBoolean(JumboConstants.EXPORT_ENABLED, false)) {

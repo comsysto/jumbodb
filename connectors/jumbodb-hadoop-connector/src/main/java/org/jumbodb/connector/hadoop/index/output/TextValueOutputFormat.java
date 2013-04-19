@@ -1,4 +1,4 @@
-package org.jumbodb.importer.hadoop.json.output;
+package org.jumbodb.connector.hadoop.index.output;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;

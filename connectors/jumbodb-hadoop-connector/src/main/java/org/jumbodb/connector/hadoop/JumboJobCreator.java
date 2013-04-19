@@ -38,13 +38,14 @@ public class JumboJobCreator {
         }
         List<ControlledJob> controlledJobs = new LinkedList<ControlledJob>();
 
-        List<ControlledJob> dataImportJobs = ImportJobCreator.createDataImportJobs(conf, inputDataPath, new Path(outputReportPath.toString() + "/data"), importJson);
+        List<ControlledJob> dataImportJobs = ImportJobCreator.createDataImportJobs(conf, inputDataPath, outputReportPath, importJson);
+        System.out.println("Number of dataImportJobs " + dataImportJobs.size());
         controlledJobs.addAll(dataImportJobs);
 
         for (IndexJson indexJson : importJson.getIndexes()) {
             IndexJobCreator.IndexControlledJob indexJob = IndexJobCreator.createGenericIndexJob(conf, indexJson, inputDataPath, outputIndexPath);
             ControlledJob controlledIndexJob = indexJob.getControlledJob();
-            List<ControlledJob> indexImportJobs = ImportJobCreator.createIndexImportJobs(conf, indexJob.getIndexPath(), new Path(outputReportPath.toString() + "/index"), importJson, indexJson);
+            List<ControlledJob> indexImportJobs = ImportJobCreator.createIndexImportJobs(conf, indexJob.getIndexPath(), outputReportPath, importJson, indexJson);
 
             for (ControlledJob controlledJob : indexImportJobs) {
                 controlledJob.addDependingJob(controlledIndexJob);

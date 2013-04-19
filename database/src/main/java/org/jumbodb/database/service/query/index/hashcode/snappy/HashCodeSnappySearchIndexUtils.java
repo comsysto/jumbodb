@@ -1,7 +1,11 @@
-package org.jumbodb.database.service.query;
+package org.jumbodb.database.service.query.index.hashcode.snappy;
 
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.connector.query.JumboQuery;
+import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
+import org.jumbodb.database.service.query.FileOffset;
+import org.jumbodb.database.service.query.snappy.SnappyChunks;
+import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.LinkedMultiValueMap;
@@ -19,8 +23,8 @@ import java.util.Set;
  * Date: 2/6/13
  * Time: 5:40 PM
  */
-public class SearchIndexUtils {
-    private static Logger log = LoggerFactory.getLogger(SearchIndexUtils.class);
+public class HashCodeSnappySearchIndexUtils {
+    private static Logger log = LoggerFactory.getLogger(HashCodeSnappySearchIndexUtils.class);
 
     public static Set<FileOffset> searchOffsetsByHashes(File indexFile, Set<Integer> hashes) throws IOException {
         long start = System.currentTimeMillis();
@@ -215,21 +219,4 @@ public class SearchIndexUtils {
         return b1 | b2 | b3 | b4;
     }
 
-
-    public static MultiValueMap<File, Integer> groupByIndexFile(DeliveryChunkDefinition deliveryChunkDefinition, JumboQuery.IndexQuery query) {
-        // CARSTEN fix
-        return null;
-//        Collection<IndexFile> indexFiles = deliveryChunkDefinition.getIndexFiles().get(query.getName());
-//        MultiValueMap<File, Integer> groupByIndexFile = new LinkedMultiValueMap<File, Integer>();
-//        for (IndexFile indexFile : indexFiles) {
-//            for (JumboQuery.IndexClause obj : query.getClauses()) {
-//                int hash = obj.getValue().hashCode();
-//                if (hash >= indexFile.getFromHash() && hash <= indexFile.getToHash()) {
-//                    groupByIndexFile.add(indexFile.getIndexFile(), hash);
-//                }
-//
-//            }
-//        }
-//        return groupByIndexFile;
-    }
 }

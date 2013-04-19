@@ -5,6 +5,9 @@ import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumbodb.connector.query.JumboQuery;
+import org.jumbodb.database.service.query.snappy.ChunkSkipableSnappyInputStream;
+import org.jumbodb.database.service.query.snappy.SnappyChunks;
+import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

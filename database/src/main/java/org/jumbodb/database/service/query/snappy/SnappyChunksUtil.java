@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query;
+package org.jumbodb.database.service.query.snappy;
 
 import org.apache.commons.io.IOUtils;
 

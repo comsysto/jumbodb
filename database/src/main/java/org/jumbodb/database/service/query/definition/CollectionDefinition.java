@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query;
+package org.jumbodb.database.service.query.definition;
 
 import java.util.Collection;
 import java.util.Collections;

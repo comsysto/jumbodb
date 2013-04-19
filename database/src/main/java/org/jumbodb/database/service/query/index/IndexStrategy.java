@@ -2,10 +2,9 @@ package org.jumbodb.database.service.query.index;
 
 import org.jumbodb.connector.query.JumboQuery;
 import org.jumbodb.database.service.query.*;
+import org.jumbodb.database.service.query.definition.CollectionDefinition;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**

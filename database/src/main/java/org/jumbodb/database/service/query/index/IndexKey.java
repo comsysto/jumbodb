@@ -4,13 +4,13 @@ package org.jumbodb.database.service.query.index;
 public class IndexKey {
 
     private final String collectionName;
-    private final String chunkeKey;
+    private final String chunkKey;
     private final String indexName;
 
 
-    public IndexKey(String indexName, String chunkeKey, String collectionName) {
+    public IndexKey(String collectionName, String chunkKey, String indexName) {
         this.indexName = indexName;
-        this.chunkeKey = chunkeKey;
+        this.chunkKey = chunkKey;
         this.collectionName = collectionName;
     }
 
@@ -19,8 +19,8 @@ public class IndexKey {
         return collectionName;
     }
 
-    public String getChunkeKey() {
-        return chunkeKey;
+    public String getChunkKey() {
+        return chunkKey;
     }
 
     public String getIndexName() {
@@ -34,7 +34,7 @@ public class IndexKey {
 
         IndexKey that = (IndexKey) o;
 
-        if (!chunkeKey.equals(that.chunkeKey)) return false;
+        if (!chunkKey.equals(that.chunkKey)) return false;
         if (!collectionName.equals(that.collectionName)) return false;
         if (!indexName.equals(that.indexName)) return false;
 
@@ -44,7 +44,7 @@ public class IndexKey {
     @Override
     public int hashCode() {
         int result = collectionName.hashCode();
-        result = 31 * result + chunkeKey.hashCode();
+        result = 31 * result + chunkKey.hashCode();
         result = 31 * result + indexName.hashCode();
         return result;
     }

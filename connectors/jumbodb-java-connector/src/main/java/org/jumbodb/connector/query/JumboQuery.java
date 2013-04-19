@@ -12,8 +12,8 @@ import java.util.*;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class JumboQuery {
-    private List<IndexQuery> indexQuery;
-    private List<JsonValueComparision> jsonComparision;
+    private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
+    private List<JsonValueComparision> jsonComparision = new LinkedList<JsonValueComparision>();
 
 
     public boolean addIndexQuery(IndexQuery indexComparision) {

@@ -4,6 +4,9 @@ import com.google.common.collect.HashMultimap;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.query.JumboQuery;
+import org.jumbodb.database.service.query.definition.CollectionDefinition;
+import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
+import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +36,7 @@ public class JumboSearcher {
         this.dataPath = dataPath;
         this.indexPath = indexPath;
         this.indexStrategyManager = indexStrategyManager;
-        // CARSTEN initialize executors in spring
+        // CARSTEN onInitialize executors in spring
         this.retrieveDataSetsExecutor = Executors.newFixedThreadPool(20);
         this.chunkExecutor = Executors.newCachedThreadPool();
         this.indexExecutor = Executors.newCachedThreadPool();
@@ -42,7 +45,7 @@ public class JumboSearcher {
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         log.info("IndexedFileSearcher initialized for " + indexPath.getAbsolutePath());
-        indexStrategyManager.initialize(collectionDefinition);
+        indexStrategyManager.onInitialize(collectionDefinition);
 
     }
 

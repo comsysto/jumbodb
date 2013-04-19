@@ -69,7 +69,7 @@ public class IndexLoader {
 //
 //    private static DeliveryChunkDefinition createDeliveryChunk(String collectionName, String chunkKey, File collectionIndexFolder, File collectionDataFolder) {
 //        File[] indexFolders = collectionIndexFolder.listFiles(FOLDER_INSTANCE);
-//        HashMultimap<String, IndexFile> resIndexFiles = HashMultimap.create();
+//        HashMultimap<String, HashCodeSnappyIndexFile> resIndexFiles = HashMultimap.create();
 //        Map<Integer, File> resDataFiles = new HashMap<Integer, File>();
 //        if(indexFolders != null) {
 //            for (File indexFolder : indexFolders) {
@@ -93,15 +93,15 @@ public class IndexLoader {
 //    }
 //
 //
-//    private static IndexFile createIndexFileDescription(File indexFile, SnappyChunks snappyChunks) {
+//    private static HashCodeSnappyIndexFile createIndexFileDescription(File indexFile, SnappyChunks snappyChunks) {
 //        RandomAccessFile raf = null;
 //        try {
 //            raf = new RandomAccessFile(indexFile, "r");
-//            byte[] uncompressed = SearchIndexUtils.getUncompressed(raf, snappyChunks, 0);
-//            int fromHash = SearchIndexUtils.readFirstHash(uncompressed);
-//            uncompressed = SearchIndexUtils.getUncompressed(raf, snappyChunks, snappyChunks.getNumberOfChunks() - 1);
-//            int toHash = SearchIndexUtils.readLastHash(uncompressed);
-//            return new IndexFile(fromHash, toHash, indexFile);
+//            byte[] uncompressed = HashCodeSnappySearchIndexUtils.getUncompressed(raf, snappyChunks, 0);
+//            int fromHash = HashCodeSnappySearchIndexUtils.readFirstHash(uncompressed);
+//            uncompressed = HashCodeSnappySearchIndexUtils.getUncompressed(raf, snappyChunks, snappyChunks.getNumberOfChunks() - 1);
+//            int toHash = HashCodeSnappySearchIndexUtils.readLastHash(uncompressed);
+//            return new HashCodeSnappyIndexFile(fromHash, toHash, indexFile);
 //        } catch (FileNotFoundException e) {
 //            throw new RuntimeException(e);
 //        } catch (IOException e) {

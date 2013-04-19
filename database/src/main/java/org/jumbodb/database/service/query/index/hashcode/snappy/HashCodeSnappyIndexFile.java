@@ -1,13 +1,13 @@
-package org.jumbodb.database.service.query;
+package org.jumbodb.database.service.query.index.hashcode.snappy;
 
 import java.io.File;
 
-public class IndexFile {
+public class HashCodeSnappyIndexFile {
     private int fromHash;
     private int toHash;
     private File indexFile;
 
-    public IndexFile(int fromHash, int toHash, File indexFile) {
+    public HashCodeSnappyIndexFile(int fromHash, int toHash, File indexFile) {
         this.fromHash = fromHash;
         this.toHash = toHash;
         this.indexFile = indexFile;
@@ -30,11 +30,11 @@ public class IndexFile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        IndexFile indexFile1 = (IndexFile) o;
+        HashCodeSnappyIndexFile hashCodeSnappyIndexFile1 = (HashCodeSnappyIndexFile) o;
 
-        if (fromHash != indexFile1.fromHash) return false;
-        if (toHash != indexFile1.toHash) return false;
-        if (indexFile != null ? !indexFile.equals(indexFile1.indexFile) : indexFile1.indexFile != null) return false;
+        if (fromHash != hashCodeSnappyIndexFile1.fromHash) return false;
+        if (toHash != hashCodeSnappyIndexFile1.toHash) return false;
+        if (indexFile != null ? !indexFile.equals(hashCodeSnappyIndexFile1.indexFile) : hashCodeSnappyIndexFile1.indexFile != null) return false;
 
         return true;
     }
@@ -49,7 +49,7 @@ public class IndexFile {
 
     @Override
     public String toString() {
-        return "IndexFile{" +
+        return "HashCodeSnappyIndexFile{" +
                 "fromHash=" + fromHash +
                 ", toHash=" + toHash +
                 ", indexFile=" + indexFile +

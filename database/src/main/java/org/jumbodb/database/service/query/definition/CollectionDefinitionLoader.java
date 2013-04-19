@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query;
+package org.jumbodb.database.service.query.definition;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.AndFileFilter;

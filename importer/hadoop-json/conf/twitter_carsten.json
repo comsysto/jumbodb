@@ -12,7 +12,6 @@
         "indexStrategy": "HASHCODE_SNAPPY_V1"
     }],
     "hosts": [
-        {"host": "localhost", "port": 12001},
         {"host": "localhost", "port": 12001}
 
     ],

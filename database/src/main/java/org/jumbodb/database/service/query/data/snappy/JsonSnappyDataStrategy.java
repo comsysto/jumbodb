@@ -33,7 +33,7 @@ public class JsonSnappyDataStrategy implements DataStrategy {
 
     @Override
     public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
-        String absoluteImportPath = absoluteImportPathFile.getAbsolutePath();
+        String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/";
         OutputStream sos = null;
         DataOutputStream dos = null;
         BufferedOutputStream bos = null;

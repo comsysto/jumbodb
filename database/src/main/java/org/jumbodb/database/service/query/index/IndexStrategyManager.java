@@ -19,10 +19,10 @@ public class IndexStrategyManager {
 
 
     public void onInitialize(CollectionDefinition collectionDefinition) {
-        indexLocationsAndStrategies = buildIndexStrategies(collectionDefinition);
         for (IndexStrategy strategy : strategies) {
             strategy.onInitialize(collectionDefinition);
         }
+        indexLocationsAndStrategies = buildIndexStrategies(collectionDefinition);
     }
 
 

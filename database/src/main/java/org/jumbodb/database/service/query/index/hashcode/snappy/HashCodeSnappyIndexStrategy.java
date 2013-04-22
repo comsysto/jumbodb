@@ -151,14 +151,13 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
 
     @Override
     public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
-
         OutputStream sos = null;
         DataOutputStream dos = null;
         BufferedOutputStream bos = null;
         FileOutputStream snappyChunksFos = null;
         DataOutputStream snappyChunksDos = null;
         try {
-            String absoluteImportPath = absoluteImportPathFile.getAbsolutePath();
+            String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/";
             File storageFolderFile = new File(absoluteImportPath);
             if (!storageFolderFile.exists()) {
                 storageFolderFile.mkdirs();
@@ -170,7 +169,6 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
             }
             log.info("ImportServer - " + filePlacePath);
 
-//                        if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
             String filePlaceChunksPath = filePlacePath + ".chunks.snappy";
             File filePlaceChunksFile = new File(filePlaceChunksPath);
             if (filePlaceChunksFile.exists()) {

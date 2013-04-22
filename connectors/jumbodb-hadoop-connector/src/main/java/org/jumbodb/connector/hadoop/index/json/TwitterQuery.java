@@ -19,7 +19,7 @@ public class TwitterQuery {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
 //        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
         JumboQuery query = new JumboQuery();
-        query.addIndexQuery("screen_name", Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
+        query.addIndexQuery("screen_name", Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29"), new QueryClause(QueryOperation.EQ, "andreav521")));
 //        List<Object> alexjenkins29 = new ArrayList<Object>(Arrays.asList("alexjenkins29"));
 //        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS,"user.screen_name", alexjenkins29);
 //        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS, "_id.date", Arrays.asList((Object)new Long(20121002)));

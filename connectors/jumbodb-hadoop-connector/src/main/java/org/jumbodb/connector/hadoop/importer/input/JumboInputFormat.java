@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.*;
+import org.jumbodb.connector.hadoop.index.json.IndexJson;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -45,8 +46,10 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
         context.getConfiguration().set(JumboConstants.JUMBO_DATA_STRATEGY, dataStrategy);
     }
 
-    public static void setIndexStrategy(JobContext context, String indexStrategy) {
-        context.getConfiguration().set(JumboConstants.JUMBO_INDEX_STRATEGY, indexStrategy);
+    public static void setIndexStrategy(JobContext context, IndexJson indexStrategy) {
+        if(indexStrategy != null) {
+            context.getConfiguration().set(JumboConstants.JUMBO_INDEX_STRATEGY, indexStrategy.getIndexStrategy());
+        }
     }
 
     public static void setMaximumParallelImports(JobContext context, int max) {

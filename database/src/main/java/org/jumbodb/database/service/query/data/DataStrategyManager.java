@@ -21,10 +21,10 @@ public class DataStrategyManager {
 
 
     public void onInitialize(CollectionDefinition collectionDefinition) {
-        dataLocationsAndStrategies = buildDataStrategies(collectionDefinition);
         for (DataStrategy strategy : strategies) {
             strategy.onInitialize(collectionDefinition);
         }
+        dataLocationsAndStrategies = buildDataStrategies(collectionDefinition);
     }
 
 

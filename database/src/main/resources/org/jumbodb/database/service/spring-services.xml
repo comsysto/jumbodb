@@ -44,6 +44,7 @@
                 <bean class="org.jumbodb.database.service.query.index.hashcode.snappy.HashCodeSnappyIndexStrategy">
                     <property name="indexFileExecutor" ref="indexFileExecutor"/>
                 </bean>
+                <bean class="org.jumbodb.database.service.query.index.notfound.NotFoundIndexStrategy"/>
             </list>
         </property>
 

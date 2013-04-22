@@ -41,7 +41,6 @@ public class JumboSearcher {
         this.retrieveDataSetsExecutor = Executors.newFixedThreadPool(20);
         this.chunkExecutor = Executors.newCachedThreadPool();
         this.indexExecutor = Executors.newCachedThreadPool();
-        // CARSTEN fix, load without index ranges
         this.collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(dataPath, indexPath);
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -52,7 +51,6 @@ public class JumboSearcher {
 
     public void restart() {
         log.info("IndexedFileSearcher restarting for " + indexPath.getAbsolutePath());
-        // CARSTEN fix, load without index ranges
         this.collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(dataPath, indexPath);
         indexStrategyManager.onDataChanged(collectionDefinition);
         log.info("IndexedFileSearcher restarted for " + indexPath.getAbsolutePath());

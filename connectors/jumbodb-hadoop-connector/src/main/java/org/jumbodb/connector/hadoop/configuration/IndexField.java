@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.json;
+package org.jumbodb.connector.hadoop.configuration;
 
 import java.util.List;
 
@@ -7,15 +7,15 @@ import java.util.List;
  * Date: 4/17/13
  * Time: 3:49 PM
  */
-public class IndexJson {
+public class IndexField {
     private String indexName;
     private List<String> fields;
     private String indexStrategy;
 
-    public IndexJson() {
+    public IndexField() {
     }
 
-    public IndexJson(String indexName, List<String> fields, String indexStrategy) {
+    public IndexField(String indexName, List<String> fields, String indexStrategy) {
         this.indexName = indexName;
         this.fields = fields;
         this.indexStrategy = indexStrategy;
@@ -47,7 +47,7 @@ public class IndexJson {
 
     @Override
     public String toString() {
-        return "IndexJson{" +
+        return "IndexField{" +
                 "indexName='" + indexName + '\'' +
                 ", fields=" + fields +
                 ", indexStrategy='" + indexStrategy + '\'' +

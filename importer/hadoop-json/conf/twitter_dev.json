@@ -1,22 +1,28 @@
 {
-    "input": "maprfs:///twitter/input-20130417",
-    "output": "maprfs:///twitter/output",
     "description": "Carstens Twitter Test Import",
-    "collectionName": "twitter",
-    "deliveryChunk": "first_delivery",
-    "dataStrategy": "JSON_SNAPPY_V1",
-    "sort": ["user.screen_name"],
-    "indexes": [{
-        "indexName": "screen_name",
-        "fields" : ["user.screen_name"],
-        "indexStrategy": "HASHCODE_SNAPPY_V1"
-    }],
+    "deliveryChunkKey": "first_delivery",
     "hosts": [
         {"host": "ex4s-dev01.devproof.org", "port": 12001},
         {"host": "ex4s-dev02.devproof.org", "port": 12001},
         {"host": "ex4s-dev03.devproof.org", "port": 12001},
         {"host": "ex10-dev01.devproof.org", "port": 12001}
     ],
+    "output": "maprfs:///twitter/output",
     "numberOfOutputFiles": 10,
-    "hadoop": []
+    "hadoop": [],
+    "importCollection": [
+        {
+            "input": "maprfs:///twitter/input-20130417",
+            "collectionName": "twitter",
+            "sort": ["user.screen_name"],
+            "dataStrategy": "JSON_SNAPPY_V1",
+            "indexes": [
+                {
+                    "indexName": "screen_name",
+                    "fields": ["user.screen_name"],
+                    "indexStrategy": "HASHCODE_SNAPPY_V1"
+                }
+            ]
+        }
+    ]
 }

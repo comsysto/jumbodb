@@ -3,8 +3,8 @@ package org.jumbodb.connector.hadoop.index.map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.codehaus.jackson.JsonNode;
-import org.jumbodb.connector.hadoop.HadoopConfigurationUtil;
-import org.jumbodb.connector.hadoop.index.json.IndexJson;
+import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
+import org.jumbodb.connector.hadoop.configuration.IndexField;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -16,15 +16,15 @@ import java.util.List;
  * Time: 4:52 PM
  */
 public class GenericJsonHashCodeIndexMapper extends AbstractHashCodeIndexMapper<JsonNode> {
-    public static final String JUMBO_INDEX_JSON_CONF = "jumbo.index.json";
+    public static final String JUMBO_INDEX_JSON_CONF = "jumbo.index.configuration";
 
-    private IndexJson indexJson;
+    private IndexField indexField;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         super.setup(context);
         Configuration configuration = context.getConfiguration();
-        indexJson = HadoopConfigurationUtil.loadIndexJson(configuration);
+        indexField = JumboConfigurationUtil.loadIndexJson(configuration);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class GenericJsonHashCodeIndexMapper extends AbstractHashCodeIndexMapper<
 
     @Override
     public String getIndexName() {
-        return indexJson.getIndexName();
+        return indexField.getIndexName();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class GenericJsonHashCodeIndexMapper extends AbstractHashCodeIndexMapper<
 
     private String getIndexKey(JsonNode jsonNode) {
         List<String> keys = new LinkedList<String>();
-        for (String indexField : indexJson.getFields()) {
+        for (String indexField : this.indexField.getFields()) {
             String valueFor = getValueFor(indexField, jsonNode);
             if(valueFor != null) {
                 keys.add(valueFor);

@@ -7,8 +7,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jumbodb.connector.hadoop.HadoopConfigurationUtil;
-import org.jumbodb.connector.hadoop.index.json.ImportJson;
+import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
+import org.jumbodb.connector.hadoop.configuration.ImportCollection;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -22,14 +22,14 @@ import java.util.List;
 public class GenericJsonSortMapper extends Mapper<LongWritable, Text, Text, Text> {
     private ObjectMapper jsonMapper;
     private Text keyW = new Text();
-    private ImportJson importJson;
+    private List<String> sortFields;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         super.setup(context);
         jsonMapper = new ObjectMapper();
         jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        importJson = HadoopConfigurationUtil.loadImportJson(context.getConfiguration());
+        sortFields = JumboConfigurationUtil.loadSortConfig(context.getConfiguration());
     }
 
     @Override
@@ -41,7 +41,7 @@ public class GenericJsonSortMapper extends Mapper<LongWritable, Text, Text, Text
 
     private String getSortKey(JsonNode jsonNode) {
         List<String> keys = new LinkedList<String>();
-        for (String sort : importJson.getSort()) {
+        for (String sort : sortFields) {
             String valueFor = getValueFor(sort, jsonNode);
             if(valueFor != null) {
                 keys.add(valueFor);

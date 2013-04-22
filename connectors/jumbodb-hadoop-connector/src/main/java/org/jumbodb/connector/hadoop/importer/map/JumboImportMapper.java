@@ -41,7 +41,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         this.host = conf.get(JumboConstants.HOST);
         this.port = conf.getInt(JumboConstants.PORT, JumboConstants.PORT_DEFAULT);
         this.type = conf.get(JumboConstants.DATA_TYPE);
-        this.deliveryKey = conf.get(JumboConstants.DELIVERY_KEY);
+        this.deliveryKey = conf.get(JumboConstants.DELIVERY_CHUNK_KEY);
         this.deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
         this.collection = conf.get(JumboConstants.COLLECTION_NAME);
         this.indexName = conf.get(JumboConstants.INDEX_NAME);

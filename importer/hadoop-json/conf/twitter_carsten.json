@@ -1,20 +1,28 @@
 {
-    "input": "/Users/carsten/smhadoop/input/twitter",
-    "output": "/Users/carsten/smhadoop/output/twitter",
     "description": "Carstens Twitter Test Import",
-    "collectionName": "carsten.twitter",
-    "deliveryChunk": "first_delivery",
-    "sort": ["user.screen_name"],
-    "dataStrategy": "JSON_SNAPPY_V1",
-    "indexes": [{
-        "indexName": "screen_name",
-        "fields" : ["user.screen_name"],
-        "indexStrategy": "HASHCODE_SNAPPY_V1"
-    }],
+    "deliveryChunkKey": "first_delivery",
     "hosts": [
-        {"host": "localhost", "port": 12001}
-
+        {
+            "host": "localhost",
+            "port": 12001
+        }
     ],
+    "output": "/Users/carsten/smhadoop/output/twitter",
     "numberOfOutputFiles": 5,
-    "hadoop": []
+    "hadoop": [],
+    "importCollection": [
+        {
+            "input": "/Users/carsten/smhadoop/input/twitter",
+            "collectionName": "carsten.twitter",
+            "sort": ["user.screen_name"],
+            "dataStrategy": "JSON_SNAPPY_V1",
+            "indexes": [
+                {
+                    "indexName": "screen_name",
+                    "fields": ["user.screen_name"],
+                    "indexStrategy": "HASHCODE_SNAPPY_V1"
+                }
+            ]
+        }
+    ]
 }

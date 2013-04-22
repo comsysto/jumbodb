@@ -1,18 +1,18 @@
-package org.jumbodb.connector.hadoop.index.json;
+package org.jumbodb.connector.hadoop.configuration;
 
 /**
  * User: carsten
  * Date: 4/17/13
  * Time: 4:01 PM
  */
-public class HadoopJsonConfig {
+public class HadoopConfig {
     private String key;
     private String value;
 
-    public HadoopJsonConfig() {
+    public HadoopConfig() {
     }
 
-    public HadoopJsonConfig(String key, String value) {
+    public HadoopConfig(String key, String value) {
         this.key = key;
         this.value = value;
     }
@@ -35,7 +35,7 @@ public class HadoopJsonConfig {
 
     @Override
     public String toString() {
-        return "HadoopJsonConfig{" +
+        return "HadoopConfig{" +
                 "key='" + key + '\'' +
                 ", value='" + value + '\'' +
                 '}';

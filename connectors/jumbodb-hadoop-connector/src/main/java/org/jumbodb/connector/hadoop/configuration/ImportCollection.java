@@ -1,6 +1,4 @@
-package org.jumbodb.connector.hadoop.index.json;
-
-import org.jumbodb.connector.hadoop.JumboConstants;
+package org.jumbodb.connector.hadoop.configuration;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,21 +9,21 @@ import java.util.List;
  * Time: 3:47 PM
  *
  */
-public class ImportJson {
+public class ImportCollection {
     private String input;
     private String output;
     private String description;
     private String collectionName;
-    private String deliveryChunk;
+    private String deliveryChunkKey;
     private String dataStrategy;
     private List<String> sort = new LinkedList<String>();
-    private List<IndexJson> indexes = new LinkedList<IndexJson>();
-    private List<HostsJson> hosts;
-    private int numberOfOutputFiles = 50;
-    private boolean activateDelivery = JumboConstants.DELIVERY_ACTIVATE_DEFAULT;
-    private List<HadoopJsonConfig> hadoop = new LinkedList<HadoopJsonConfig>();
+    private List<IndexField> indexes = new LinkedList<IndexField>();
+    private List<ImportHost> hosts;
+    private Integer numberOfOutputFiles = null;
+    private Boolean activateDelivery = null;
 
-    public ImportJson() {
+
+    public ImportCollection() {
     }
 
     public String getDescription() {
@@ -36,35 +34,27 @@ public class ImportJson {
         this.description = description;
     }
 
-    public boolean isActivateDelivery() {
+    public Boolean getActivateDelivery() {
         return activateDelivery;
     }
 
-    public void setActivateDelivery(boolean activateDelivery) {
+    public void setActivateDelivery(Boolean activateDelivery) {
         this.activateDelivery = activateDelivery;
     }
 
-    public List<HostsJson> getHosts() {
+    public List<ImportHost> getHosts() {
         return hosts;
     }
 
-    public void setHosts(List<HostsJson> hosts) {
+    public void setHosts(List<ImportHost> hosts) {
         this.hosts = hosts;
     }
 
-    public List<HadoopJsonConfig> getHadoop() {
-        return hadoop;
-    }
-
-    public void setHadoop(List<HadoopJsonConfig> hadoop) {
-        this.hadoop = hadoop;
-    }
-
-    public int getNumberOfOutputFiles() {
+    public Integer getNumberOfOutputFiles() {
         return numberOfOutputFiles;
     }
 
-    public void setNumberOfOutputFiles(int numberOfOutputFiles) {
+    public void setNumberOfOutputFiles(Integer numberOfOutputFiles) {
         this.numberOfOutputFiles = numberOfOutputFiles;
     }
 
@@ -92,12 +82,12 @@ public class ImportJson {
         this.collectionName = collectionName;
     }
 
-    public String getDeliveryChunk() {
-        return deliveryChunk;
+    public String getDeliveryChunkKey() {
+        return deliveryChunkKey;
     }
 
-    public void setDeliveryChunk(String deliveryChunk) {
-        this.deliveryChunk = deliveryChunk;
+    public void setDeliveryChunkKey(String deliveryChunkKey) {
+        this.deliveryChunkKey = deliveryChunkKey;
     }
 
     public List<String> getSort() {
@@ -108,11 +98,11 @@ public class ImportJson {
         this.sort = sort;
     }
 
-    public List<IndexJson> getIndexes() {
+    public List<IndexField> getIndexes() {
         return indexes;
     }
 
-    public void setIndexes(List<IndexJson> indexes) {
+    public void setIndexes(List<IndexField> indexes) {
         this.indexes = indexes;
     }
 
@@ -127,19 +117,18 @@ public class ImportJson {
 
     @Override
     public String toString() {
-        return "ImportJson{" +
+        return "ImportCollection{" +
                 "input='" + input + '\'' +
                 ", output='" + output + '\'' +
                 ", description='" + description + '\'' +
                 ", collectionName='" + collectionName + '\'' +
-                ", deliveryChunk='" + deliveryChunk + '\'' +
+                ", deliveryChunk='" + deliveryChunkKey + '\'' +
                 ", dataStrategy='" + dataStrategy + '\'' +
                 ", sort=" + sort +
                 ", indexes=" + indexes +
                 ", hosts=" + hosts +
                 ", numberOfOutputFiles=" + numberOfOutputFiles +
                 ", activateDelivery=" + activateDelivery +
-                ", hadoop=" + hadoop +
                 '}';
     }
 }

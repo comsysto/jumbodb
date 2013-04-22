@@ -3,7 +3,9 @@ package org.jumbodb.connector.hadoop.index;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
-import org.jumbodb.connector.hadoop.index.json.IndexJson;
+import org.jumbodb.connector.hadoop.configuration.IndexField;
+import org.jumbodb.connector.hadoop.configuration.JumboCustomImportJob;
+import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.map.GenericJsonHashCodeIndexMapper;
 import org.jumbodb.connector.hadoop.index.output.BinaryIndexOutputFormat;
@@ -39,18 +41,18 @@ public class IndexJobCreator {
         return Collections.unmodifiableMap(indexMapper);
     }
 
-    public static IndexControlledJob createGenericIndexJob(Configuration conf, IndexJson indexJson, Path jsonDataToIndex, Path outputPath) throws IOException {
+    public static IndexControlledJob createGenericIndexJob(Configuration conf, JumboGenericImportJob genericImportJob, IndexField indexField) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        Path output = new Path(outputPath.toString() + "/" + indexJson.getIndexName());
-        Job job = new Job(conf, "Index " + indexJson.getIndexName() + " Job " + jsonDataToIndex);
-        FileInputFormat.addInputPath(job, jsonDataToIndex);
+        Path output = new Path(genericImportJob.getIndexOutputPath().toString() + "/" + indexField.getIndexName());
+        Job job = new Job(conf, "Index " + indexField.getIndexName() + " Job " + genericImportJob.getInputPath());
+        FileInputFormat.addInputPath(job, genericImportJob.getSortedInputPath());
         FileOutputFormat.setOutputPath(job, output);
         FileOutputFormat.setCompressOutput(job, false);
-        job.getConfiguration().set(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexJson));
+        job.getConfiguration().set(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
         job.setJarByClass(IndexJobCreator.class);
-        Class<? extends Mapper> indexMapper = GENERIC_INDEX_MAPPER_STRATEGIES.get(indexJson.getIndexStrategy());
+        Class<? extends Mapper> indexMapper = GENERIC_INDEX_MAPPER_STRATEGIES.get(indexField.getIndexStrategy());
         if(indexMapper == null) {
-            throw new IllegalStateException("Index mapper strategy is not available " + indexJson.getIndexStrategy());
+            throw new IllegalStateException("Index mapper strategy is not available " + indexField.getIndexStrategy());
         }
         job.setMapperClass(indexMapper);
         job.setMapOutputKeyClass(IntWritable.class);
@@ -62,12 +64,12 @@ public class IndexJobCreator {
         return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
     }
 
-    public static IndexControlledJob createIndexJob(Configuration conf, Class<? extends AbstractIndexMapper> mapper, Path jsonDataToIndex, Path outputPath) throws IOException {
+    public static IndexControlledJob createCustomIndexJob(Configuration conf, JumboCustomImportJob customImportJob, Class<? extends AbstractIndexMapper> mapper) throws IOException {
         AbstractIndexMapper abstractIndexMapper = createInstance(mapper);
         String indexName = abstractIndexMapper.getIndexName();
-        Path output = new Path(outputPath.toString() + "/" + indexName);
-        Job job = new Job(conf, "Index " + mapper.getSimpleName() + " Job " + jsonDataToIndex);
-        FileInputFormat.addInputPath(job, jsonDataToIndex);
+        Path output = new Path(customImportJob.getIndexOutputPath().toString() + "/" + indexName);
+        Job job = new Job(conf, "Index " + mapper.getSimpleName() + " Job " + customImportJob.getSortedInputPath());
+        FileInputFormat.addInputPath(job, customImportJob.getSortedInputPath());
         FileOutputFormat.setOutputPath(job, output);
         FileOutputFormat.setCompressOutput(job, false);
         job.setJarByClass(IndexJobCreator.class);
@@ -81,9 +83,9 @@ public class IndexJobCreator {
         return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
     }
 
-    public static IndexJson getIndexInformation(Class<? extends AbstractIndexMapper> mapper) {
+    public static IndexField getIndexInformation(Class<? extends AbstractIndexMapper> mapper) {
         AbstractIndexMapper instance = createInstance(mapper);
-        return new IndexJson(instance.getIndexName(), new ArrayList<String>(), instance.getStrategy());
+        return new IndexField(instance.getIndexName(), new ArrayList<String>(), instance.getStrategy());
     }
 
     private static AbstractIndexMapper createInstance(Class<? extends AbstractIndexMapper> mapper)  {

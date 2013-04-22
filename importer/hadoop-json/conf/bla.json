@@ -45,7 +45,7 @@
     "coordinates": [-73.97948742, 40.76186973]
 }, "place": {
     "id": "c7e4c5fd5318d016",
-    "url": "http:\/\/api.twitter.com\/1\/geo\/id\/c7e4c5fd5318d016.json",
+    "url": "http:\/\/api.twitter.com\/1\/geo\/id\/c7e4c5fd5318d016.configuration",
     "place_type": "poi",
     "name": "Halal guys ",
     "full_name": "Halal guys , Manhattan",

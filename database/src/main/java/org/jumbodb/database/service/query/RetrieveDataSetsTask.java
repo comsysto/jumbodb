@@ -4,9 +4,10 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jumbodb.common.query.JsonComparisionType;
-import org.jumbodb.common.query.JsonValueComparision;
+import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
@@ -191,15 +192,15 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
     }
 
     private boolean matchingFilter(String s, JSONParser jsonParser) throws IOException, ParseException {
-        if (searchQuery.getJsonComparision().size() == 0) {
+        if (searchQuery.getJsonQuery().size() == 0) {
             return true;
         }
 //        JSONObject cl = new JSONObject();
 
         boolean matching = true;
-        for (JsonValueComparision jsonValueComparision : searchQuery.getJsonComparision()) {
+        for (JsonQuery jsonQuery : searchQuery.getJsonQuery()) {
 //            cl.clear();
-            String[] split = StringUtils.split(jsonValueComparision.getName(), '.');
+            String[] split = StringUtils.split(jsonQuery.getFieldName(), '.');
 //            UpdaterMapper<JSONObject> mapper = new UpdaterMapper<JSONObject>(cl);
             Object lastObj = jsonParser.parse(s);
             for (String key : split) {
@@ -208,17 +209,18 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
                     lastObj = map.get(key);
                 }
             }
-            if (jsonValueComparision.getComparisionType() == JsonComparisionType.EQUALS) {
-                if(lastObj != null) {
-                    matching &= jsonValueComparision.getValues().contains(lastObj);
-                } else {
-                    matching = false;
+            boolean queryClauseMatch = false;
+            for (QueryClause queryClause : jsonQuery.getClauses()) {
+                if (queryClause.getQueryOperation() == QueryOperation.EQ) {
+                    if(lastObj != null) {
+                        queryClauseMatch |= queryClause.equals(lastObj);
+                    }
+                }  else {
+                    throw new IllegalArgumentException("Unsupported comparision type " + queryClause.getQueryOperation().getClass());
                 }
-            } else if (jsonValueComparision.getComparisionType() == JsonComparisionType.EQUALS_IGNORE_CASE) {
-                throw new IllegalArgumentException("Not yet implemented " + jsonValueComparision.getComparisionType());
-            } else {
-                throw new IllegalArgumentException("Unsupported comparision type " + jsonValueComparision.getComparisionType().getClass() + " " + jsonValueComparision.getComparisionType());
             }
+            matching &= queryClauseMatch;
+
         }
         return matching;
     }

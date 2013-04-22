@@ -5,24 +5,24 @@ import org.codehaus.jackson.annotate.JsonAutoDetect;
 import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class IndexQuery {
-    private String name;
+public class JsonQuery {
+    private String fieldName;
     private List<QueryClause> clauses;
 
-    public IndexQuery() {
+    public JsonQuery() {
     }
 
-    public IndexQuery(String name, List<QueryClause> clauses) {
-        this.name = name;
+    public JsonQuery(String fieldName, List<QueryClause> clauses) {
+        this.fieldName = fieldName;
         this.clauses = clauses;
     }
 
-    public String getName() {
-        return name;
+    public String getFieldName() {
+        return fieldName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
     public List<QueryClause> getClauses() {
@@ -35,8 +35,8 @@ public class IndexQuery {
 
     @Override
     public String toString() {
-        return "IndexQuery{" +
-                "name='" + name + '\'' +
+        return "JsonQuery{" +
+                "name='" + fieldName + '\'' +
                 ", values='" + clauses + '\'' +
                 '}';
     }

@@ -3,14 +3,14 @@ package org.jumbodb.common.query;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class IndexClause {
+public class QueryClause {
     private QueryOperation queryOperation;
     private Object value;
 
-    public IndexClause() {
+    public QueryClause() {
     }
 
-    public IndexClause(QueryOperation queryOperation, String value) {
+    public QueryClause(QueryOperation queryOperation, String value) {
         this.queryOperation = queryOperation;
         this.value = value;
     }
@@ -33,7 +33,7 @@ public class IndexClause {
 
     @Override
     public String toString() {
-        return "IndexClause{" +
+        return "QueryClause{" +
                 "queryOperation=" + queryOperation +
                 ", value='" + value + '\'' +
                 '}';

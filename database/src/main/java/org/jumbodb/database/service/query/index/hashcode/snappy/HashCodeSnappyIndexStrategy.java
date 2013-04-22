@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang.UnhandledException;
-import org.jumbodb.common.query.IndexClause;
+import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.*;
@@ -116,7 +116,7 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
         List<HashCodeSnappyIndexFile> indexFiles = getIndexFiles(collection, chunkKey, query);
         MultiValueMap<File, Integer> groupByIndexFile = new LinkedMultiValueMap<File, Integer>();
         for (HashCodeSnappyIndexFile hashCodeSnappyIndexFile : indexFiles) {
-            for (IndexClause obj : query.getClauses()) {
+            for (QueryClause obj : query.getClauses()) {
                 int hash = obj.getValue().hashCode();
                 if (hash >= hashCodeSnappyIndexFile.getFromHash() && hash <= hashCodeSnappyIndexFile.getToHash()) {
                     groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), hash);

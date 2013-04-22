@@ -13,23 +13,23 @@ import java.util.*;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class JumboQuery {
     private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
-    private List<JsonValueComparision> jsonComparision = new LinkedList<JsonValueComparision>();
+    private List<JsonQuery> jsonQuery = new LinkedList<JsonQuery>();
 
 
     public boolean addIndexQuery(IndexQuery indexComparision) {
         return this.indexQuery.add(indexComparision);
     }
 
-    public boolean addJsonComparision(JsonValueComparision indexComparision) {
-        return this.jsonComparision.add(indexComparision);
-    }
-
-    public boolean addIndexQuery(String indexName, List<IndexClause> indexValues) {
+    public boolean addIndexQuery(String indexName, List<QueryClause> indexValues) {
         return addIndexQuery(new IndexQuery(indexName, indexValues));
     }
 
-    public boolean addJsonComparision(JsonComparisionType comparisionType, String jsonPropertyName, List<Object> jsonValues) {
-        return addJsonComparision(new JsonValueComparision(comparisionType, jsonPropertyName, jsonValues));
+    public boolean addJsonQuery(JsonQuery jsonQuery) {
+        return this.jsonQuery.add(jsonQuery);
+    }
+
+    public boolean addJsonQuery(String fieldName, List<QueryClause> indexValues) {
+        return addJsonQuery(new JsonQuery(fieldName, indexValues));
     }
 
     public List<IndexQuery> getIndexQuery() {
@@ -40,19 +40,19 @@ public class JumboQuery {
         this.indexQuery = indexQuery;
     }
 
-    public List<JsonValueComparision> getJsonComparision() {
-        return jsonComparision;
+    public List<JsonQuery> getJsonQuery() {
+        return jsonQuery;
     }
 
-    public void setJsonComparision(List<JsonValueComparision> jsonComparision) {
-        this.jsonComparision = jsonComparision;
+    public void setJsonQuery(List<JsonQuery> jsonQuery) {
+        this.jsonQuery = jsonQuery;
     }
 
     @Override
     public String toString() {
         return "JumboQuery{" +
                 "indexQuery=" + indexQuery +
-                ", jsonComparision=" + jsonComparision +
+                ", jsonQuery=" + jsonQuery +
                 '}';
     }
 }

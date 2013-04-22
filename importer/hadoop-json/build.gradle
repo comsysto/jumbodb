@@ -10,7 +10,7 @@ sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 group = 'org.jumbodb.importer'
-archivesBaseName = 'hadoop-configuration'
+archivesBaseName = 'hadoop-json'
 version = "0.0.1-SNAPSHOT"
 
 repositories {
@@ -54,7 +54,7 @@ jar {
         it.isDirectory() ? it : zipTree(it)
     }
     manifest {
-        attributes("Main-Class": "org.jumbodb.importer.hadoop.configuration.JsonImporterJob")
+        attributes("Main-Class": "org.jumbodb.importer.hadoop.json.JsonImporterJob")
     }
 }
 

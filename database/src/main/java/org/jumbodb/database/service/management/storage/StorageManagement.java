@@ -20,7 +20,10 @@ import org.jumbodb.database.service.management.storage.dto.collections.DeliveryV
 import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
 import org.jumbodb.database.service.management.storage.dto.deliveries.VersionedJumboCollection;
-import org.jumbodb.database.service.query.Restartable;
+import org.jumbodb.database.service.query.data.DataStrategyManager;
+import org.jumbodb.database.service.query.definition.CollectionDefinition;
+import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
+import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -37,18 +40,26 @@ public class StorageManagement {
     private final Logger log = LoggerFactory.getLogger(StorageManagement.class);
 
     private JumboConfiguration config;
-    private Restartable queryServer;
+    private DataStrategyManager dataStrategyManager;
+    private IndexStrategyManager indexStrategyManager;
 
-    public StorageManagement(JumboConfiguration config, Restartable queryServer) {
+    public StorageManagement(JumboConfiguration config, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager) {
         this.config = config;
-        this.queryServer = queryServer;
+        this.dataStrategyManager = dataStrategyManager;
+        this.indexStrategyManager = indexStrategyManager;
+    }
+
+    private void onDataChanged() {
+        CollectionDefinition collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(config.getDataPath(), config.getIndexPath());
+        indexStrategyManager.onDataChanged(collectionDefinition);
+        dataStrategyManager.onDataChanged(collectionDefinition);
     }
 
     public void deleteCompleteCollection(String collectionName) {
         log.info("deleteCompleteCollection (" + collectionName + ")");
         // nothing to activate, because collection is away
         deleteCompleteCollectionWithoutRestart(collectionName);
-        queryServer.restart();
+        onDataChanged();
     }
 
     private void deleteCompleteCollectionWithoutRestart(String collectionName) {
@@ -73,13 +84,13 @@ public class StorageManagement {
         for (String collection : collectionsWithChunkAndVersion) {
             deleteChunkedVersionInCollectionWithoutRestart(collection, chunkedDeliveryKey, version);
         }
-        queryServer.restart();
+        onDataChanged();
     }
 
     public void deleteChunkedVersionInCollection(String collection, String chunkDeliveryKey, String version) {
         log.info("deleteChunkedVersionInCollection (" + collection + ", " + chunkDeliveryKey + ", " + version + ")");
         deleteChunkedVersionInCollectionWithoutRestart(collection, chunkDeliveryKey, version);
-        queryServer.restart();
+        onDataChanged();
 
     }
 
@@ -128,7 +139,7 @@ public class StorageManagement {
         for (String matchingCollection : matchingCollections) {
             activateChunkedVersionInCollectionWithoutRestart(matchingCollection, chunkedDeliveryKey, version);
         }
-        queryServer.restart();
+        onDataChanged();
     }
 
     private List<String> findCollectionsWithChunkAndVersion(String chunkedDeliveryKey, String version) {
@@ -160,7 +171,7 @@ public class StorageManagement {
         log.info("activateChunkedVersionInCollection (" + collection + ", " + chunkDeliveryKey + ", " + version + ")");
 
         activateChunkedVersionInCollectionWithoutRestart(collection, chunkDeliveryKey, version);
-        queryServer.restart();
+        onDataChanged();
     }
 
     private void activateChunkedVersionInCollectionWithoutRestart(String collection, String chunkDeliveryKey, String version) {

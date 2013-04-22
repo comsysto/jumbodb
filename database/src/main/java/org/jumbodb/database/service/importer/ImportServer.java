@@ -2,7 +2,8 @@ package org.jumbodb.database.service.importer;
 
 
 import org.jumbodb.database.service.configuration.JumboConfiguration;
-import org.jumbodb.database.service.query.Restartable;
+import org.jumbodb.database.service.query.data.DataStrategyManager;
+import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,14 +23,16 @@ public class ImportServer {
 
     private boolean serverActive = false;
     private ExecutorService executorService = Executors.newCachedThreadPool();
-    private Restartable queryServer;
     private JumboConfiguration config;
+    private DataStrategyManager dataStrategyManager;
+    private IndexStrategyManager indexStrategyManager;
     private ServerSocket serverSocket;
 
 
-    public ImportServer(JumboConfiguration config, Restartable queryServer) {
+    public ImportServer(JumboConfiguration config, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager) {
         this.config = config;
-        this.queryServer = queryServer;
+        this.dataStrategyManager = dataStrategyManager;
+        this.indexStrategyManager = indexStrategyManager;
     }
 
     public void start() throws Exception {
@@ -43,7 +46,7 @@ public class ImportServer {
                     log.info("ImportServer started");
                     while (isServerActive()) {
                         Socket clientSocket = serverSocket.accept();
-                        executorService.submit(new ImportTask(clientSocket, id++, config.getDataPath(), config.getIndexPath(), queryServer));
+                        executorService.submit(new ImportTask(clientSocket, id++, config.getDataPath(), config.getIndexPath(), dataStrategyManager, indexStrategyManager));
                     }
 //                    serverSocket.close();
                     log.info("ImportServer stopped");

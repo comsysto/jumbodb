@@ -2,9 +2,12 @@ package org.jumbodb.database.service.query.index;
 
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.*;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -20,4 +23,5 @@ public interface IndexStrategy {
     List<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);
+    void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile);
 }

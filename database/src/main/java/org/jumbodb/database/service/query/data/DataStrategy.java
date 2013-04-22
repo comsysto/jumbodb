@@ -3,11 +3,14 @@ package org.jumbodb.database.service.query.data;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -24,4 +27,5 @@ public interface DataStrategy {
         List<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);
+    void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPath);
 }

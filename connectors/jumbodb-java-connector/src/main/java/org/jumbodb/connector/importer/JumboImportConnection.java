@@ -47,6 +47,7 @@ public class JumboImportConnection implements Closeable {
             dos.writeLong(indexInfo.getFileLength());
             dos.writeUTF(indexInfo.getDeliveryKey());
             dos.writeUTF(indexInfo.getDeliveryVersion());
+            dos.writeUTF(indexInfo.getIndexStrategy());
             dos.flush();
             callback.onCopy(snappyOutputStream);
         } catch (IOException e) {
@@ -62,6 +63,7 @@ public class JumboImportConnection implements Closeable {
             dos.writeLong(dataInfo.getFileLength());
             dos.writeUTF(dataInfo.getDeliveryKey());
             dos.writeUTF(dataInfo.getDeliveryVersion());
+            dos.writeUTF(dataInfo.getDataStrategy());
             dos.flush();
             callback.onCopy(snappyOutputStream);
         } catch (IOException e) {
@@ -76,7 +78,7 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(metaIndex.getDeliveryKey());
             dos.writeUTF(metaIndex.getDeliveryVersion());
             dos.writeUTF(metaIndex.getIndexName());
-            dos.writeUTF(metaIndex.getStrategy());
+            dos.writeUTF(metaIndex.getIndexStrategy());
             dos.flush();
         } catch (IOException e) {
             throw new UnhandledException(e);

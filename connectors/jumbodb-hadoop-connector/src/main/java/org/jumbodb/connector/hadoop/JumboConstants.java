@@ -13,6 +13,8 @@ public class JumboConstants {
     public static final String DELIVERY_KEY = "jumbo.delivery.key";
     public static final String COLLECTION_NAME = "jumbo.collection.name";
     public static final String INDEX_NAME = "jumbo.index.name";
+    public static final String JUMBO_DATA_STRATEGY = "jumbo.data.strategy";
+    public static final String JUMBO_INDEX_STRATEGY = "jumbo.index.strategy";
 //    public static final String DELIVERY_INFO = "jumbo.delivery.info";
 //    public static final String DELIVERY_ACTIVATE = "jumbo.delivery.activate";
     public static final boolean DELIVERY_ACTIVATE_DEFAULT = true;

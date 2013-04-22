@@ -12,14 +12,16 @@ public class IndexInfo {
     private long fileLength;
     private String deliveryKey;
     private String deliveryVersion;
+    private String indexStrategy;
 
-    public IndexInfo(String collection, String indexName, String filename, long fileLength, String deliveryKey, String deliveryVersion) {
+    public IndexInfo(String collection, String indexName, String filename, long fileLength, String deliveryKey, String deliveryVersion, String indexStrategy) {
         this.collection = collection;
         this.indexName = indexName;
         this.filename = filename;
         this.fileLength = fileLength;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
+        this.indexStrategy = indexStrategy;
     }
 
     public String getCollection() {
@@ -46,6 +48,11 @@ public class IndexInfo {
         return deliveryVersion;
     }
 
+    public String getIndexStrategy() {
+        return indexStrategy;
+    }
+
+
     @Override
     public String toString() {
         return "IndexInfo{" +
@@ -55,6 +62,7 @@ public class IndexInfo {
                 ", fileLength=" + fileLength +
                 ", deliveryKey='" + deliveryKey + '\'' +
                 ", deliveryVersion='" + deliveryVersion + '\'' +
+                ", indexStrategy='" + indexStrategy + '\'' +
                 '}';
     }
 }

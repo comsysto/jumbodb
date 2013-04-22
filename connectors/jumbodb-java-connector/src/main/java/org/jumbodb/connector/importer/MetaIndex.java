@@ -10,14 +10,14 @@ public class MetaIndex {
     private String deliveryKey;
     private String deliveryVersion;
     private String indexName;
-    private String strategy;
+    private String indexStrategy;
 
-    public MetaIndex(String collection, String deliveryKey, String deliveryVersion, String indexName, String strategy) {
+    public MetaIndex(String collection, String deliveryKey, String deliveryVersion, String indexName, String indexStrategy) {
         this.collection = collection;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
         this.indexName = indexName;
-        this.strategy = strategy;
+        this.indexStrategy = indexStrategy;
     }
 
     public String getCollection() {
@@ -52,12 +52,12 @@ public class MetaIndex {
         this.indexName = indexName;
     }
 
-    public String getStrategy() {
-        return strategy;
+    public String getIndexStrategy() {
+        return indexStrategy;
     }
 
-    public void setStrategy(String strategy) {
-        this.strategy = strategy;
+    public void setIndexStrategy(String indexStrategy) {
+        this.indexStrategy = indexStrategy;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class MetaIndex {
                 ", deliveryKey='" + deliveryKey + '\'' +
                 ", deliveryVersion='" + deliveryVersion + '\'' +
                 ", indexName='" + indexName + '\'' +
-                ", strategy='" + strategy + '\'' +
+                ", indexStrategy='" + indexStrategy + '\'' +
                 '}';
     }
 }

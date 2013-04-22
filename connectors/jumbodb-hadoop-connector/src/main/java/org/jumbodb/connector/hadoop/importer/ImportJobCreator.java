@@ -36,6 +36,8 @@ public class ImportJobCreator {
         JumboInputFormat.setImportPath(job, importPath);
         JumboInputFormat.setIndexName(job, indexJson != null ? indexJson.getIndexName() : "not_set");
         JumboInputFormat.setCollectionName(job, importJson.getCollectionName());
+        JumboInputFormat.setDataStrategy(job, importJson.getDataStrategy());
+        JumboInputFormat.setIndexStrategy(job, indexJson.getIndexStrategy());
         FileOutputFormat.setOutputPath(job, reportOutputPath);
         FileInputFormat.addInputPath(job, importPath);
         job.setJarByClass(ImportJobCreator.class);

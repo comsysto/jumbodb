@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * Date: 1/8/13
  * Time: 3:41 PM
  */
-public class QueryServer implements Restartable {
+public class QueryServer {
     private Logger log = LoggerFactory.getLogger(QueryServer.class);
 
     private boolean serverActive = false;
@@ -31,7 +31,7 @@ public class QueryServer implements Restartable {
     private JumboConfiguration config;
     private  ServerSocket serverSocket;
 
-    public QueryServer(JumboConfiguration config, IndexStrategyManager indexStrategyManager, DataStrategyManager dataStrategyManager) {
+    public QueryServer(JumboConfiguration config, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager) {
         this.config = config;
         this.jumboSearcher = new JumboSearcher(config.getDataPath(), config.getIndexPath(), indexStrategyManager, dataStrategyManager);
         this.jsonMapper = new ObjectMapper();
@@ -62,10 +62,10 @@ public class QueryServer implements Restartable {
         });
     }
 
-    @Override
-    public void restart() {
-        jumboSearcher.restart();
-    }
+//    @Override
+//    public void restart() {
+//        jumboSearcher.restart();
+//    }
 
     public void stop() throws IOException {
         serverSocket.close();

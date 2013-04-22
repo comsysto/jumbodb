@@ -68,17 +68,20 @@
 
     <bean id="queryServer" class="org.jumbodb.database.service.query.QueryServer" init-method="start" destroy-method="stop">
         <constructor-arg ref="jumboConfig"/>
+        <constructor-arg ref="dataStrategyManager"/>
         <constructor-arg ref="indexStrategyManager"/>
     </bean>
 
     <bean id="importServer" class="org.jumbodb.database.service.importer.ImportServer" init-method="start" destroy-method="stop">
         <constructor-arg ref="jumboConfig"/>
-        <constructor-arg ref="queryServer"/>
+        <constructor-arg ref="dataStrategyManager"/>
+        <constructor-arg ref="indexStrategyManager"/>
     </bean>
 
     <bean id="storageManagement" class="org.jumbodb.database.service.management.storage.StorageManagement">
         <constructor-arg ref="jumboConfig"/>
-        <constructor-arg ref="queryServer"/>
+        <constructor-arg ref="dataStrategyManager"/>
+        <constructor-arg ref="indexStrategyManager"/>
     </bean>
 
     <bean id="statusService" class="org.jumbodb.database.service.management.status.StatusService">

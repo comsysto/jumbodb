@@ -11,13 +11,15 @@ public class DataInfo {
     private long fileLength;
     private String deliveryKey;
     private String deliveryVersion;
+    private String dataStrategy;
 
-    public DataInfo(String collection, String filename, long fileLength, String deliveryKey, String deliveryVersion) {
+    public DataInfo(String collection, String filename, long fileLength, String deliveryKey, String deliveryVersion, String dataStrategy) {
         this.collection = collection;
         this.filename = filename;
         this.fileLength = fileLength;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
+        this.dataStrategy = dataStrategy;
     }
 
     public String getCollection() {
@@ -40,6 +42,10 @@ public class DataInfo {
         return deliveryVersion;
     }
 
+    public String getDataStrategy() {
+        return dataStrategy;
+    }
+
     @Override
     public String toString() {
         return "DataInfo{" +
@@ -48,6 +54,7 @@ public class DataInfo {
                 ", fileLength=" + fileLength +
                 ", deliveryKey='" + deliveryKey + '\'' +
                 ", deliveryVersion='" + deliveryVersion + '\'' +
+                ", dataStrategy='" + dataStrategy + '\'' +
                 '}';
     }
 }

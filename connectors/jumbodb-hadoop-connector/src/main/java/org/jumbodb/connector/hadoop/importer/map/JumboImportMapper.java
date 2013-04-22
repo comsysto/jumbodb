@@ -31,6 +31,8 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
     private String deliveryVersion;
     private String collection;
     private String indexName;
+    private String dataStrategy;
+    private String indexStrategy;
     private long bytesReadAll = 0l;
 
     @Override
@@ -43,6 +45,8 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         this.deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
         this.collection = conf.get(JumboConstants.COLLECTION_NAME);
         this.indexName = conf.get(JumboConstants.INDEX_NAME);
+        this.dataStrategy = conf.get(JumboConstants.JUMBO_DATA_STRATEGY);
+        this.indexStrategy = conf.get(JumboConstants.JUMBO_INDEX_STRATEGY);
         this.bytesReadAll = 0l;
         super.setup(context);
     }
@@ -60,14 +64,14 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
 //                String collection = path.getParent().getParent().getName();
                 String fileName = path.getName();
 //                String indexName = path.getParent().getName();
-                IndexInfo indexInfo = new IndexInfo(collection, indexName, fileName, fileLength, deliveryKey, deliveryVersion);
+                IndexInfo indexInfo = new IndexInfo(collection, indexName, fileName, fileLength, deliveryKey, deliveryVersion, indexStrategy);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
                 jumboImportConnection.importIndex(indexInfo, copyDataCallback);
             }
             else if(JumboConstants.DATA_TYPE_DATA.equals(type)) {
 //                String collection = path.getParent().getName();
                 String fileName = path.getName();
-                DataInfo dataInfo = new DataInfo(collection, fileName, fileLength, deliveryKey, deliveryVersion);
+                DataInfo dataInfo = new DataInfo(collection, fileName, fileLength, deliveryKey, deliveryVersion, dataStrategy);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
                 jumboImportConnection.importData(dataInfo, copyDataCallback);
             } else {

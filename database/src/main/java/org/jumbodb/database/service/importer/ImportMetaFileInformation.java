@@ -10,8 +10,9 @@ public class ImportMetaFileInformation {
     private long fileLength;
     private String deliveryKey;
     private String deliveryVersion;
+    private String strategy;
 
-    public ImportMetaFileInformation(FileType fileType, String fileName, String collection, String indexName, long fileLength, String deliveryKey, String deliveryVersion) {
+    public ImportMetaFileInformation(FileType fileType, String fileName, String collection, String indexName, long fileLength, String deliveryKey, String deliveryVersion, String strategy) {
         this.fileType = fileType;
         this.fileName = fileName;
         this.collection = collection;
@@ -19,6 +20,7 @@ public class ImportMetaFileInformation {
         this.fileLength = fileLength;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
+        this.strategy = strategy;
     }
 
     public FileType getFileType() {
@@ -49,6 +51,11 @@ public class ImportMetaFileInformation {
         return deliveryVersion;
     }
 
+    public String getStrategy() {
+        return strategy;
+    }
+
+
     @Override
     public String toString() {
         return "ImportMetaFileInformation{" +
@@ -59,6 +66,7 @@ public class ImportMetaFileInformation {
                 ", fileLength=" + fileLength +
                 ", deliveryKey='" + deliveryKey + '\'' +
                 ", deliveryVersion='" + deliveryVersion + '\'' +
+                ", strategy='" + strategy + '\'' +
                 '}';
     }
 }

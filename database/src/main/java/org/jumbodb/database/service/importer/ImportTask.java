@@ -3,8 +3,12 @@ package org.jumbodb.database.service.importer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.jumbodb.database.service.query.Restartable;
-import org.jumbodb.database.service.query.data.snappy.JsonSnappyDataStrategy;
+import org.jumbodb.database.service.query.data.DataStrategy;
+import org.jumbodb.database.service.query.data.DataStrategyManager;
+import org.jumbodb.database.service.query.definition.CollectionDefinition;
+import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
+import org.jumbodb.database.service.query.index.IndexStrategy;
+import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyOutputStream;
@@ -18,20 +22,20 @@ import java.util.Properties;
 public class ImportTask implements Runnable {
     private Logger log = LoggerFactory.getLogger(ImportTask.class);
 
-    public static final int SNAPPY_DATA_CHUNK_SIZE = 32 * 1024;
-    public static final int SNAPPY_INDEX_CHUNK_SIZE = 32 * 1024; // must be a multiple of 16! (4 byte data hash, 4 byte file name hash, 8 byte offset)
     private Socket clientSocket;
     private int clientID;
     private File dataPath;
     private File indexPath;
-    private Restartable queryServer;
+    private DataStrategyManager dataStrategyManager;
+    private IndexStrategyManager indexStrategyManager;
 
-    public ImportTask(Socket s, int i, File dataPath, File indexPath, Restartable queryServer) {
+    public ImportTask(Socket s, int i, File dataPath, File indexPath, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager) {
         this.clientSocket = s;
         this.clientID = i;
         this.dataPath = dataPath;
         this.indexPath = indexPath;
-        this.queryServer = queryServer;
+        this.dataStrategyManager = dataStrategyManager;
+        this.indexStrategyManager = indexStrategyManager;
     }
 
     public void run() {
@@ -42,57 +46,21 @@ public class ImportTask implements Runnable {
             databaseImportSession.runImport(new ImportHandler() {
                 @Override
                 public void onImport(ImportMetaFileInformation information, InputStream dataInputStream) {
-                    OutputStream sos = null;
-                    DataOutputStream dos = null;
-                    BufferedOutputStream bos = null;
-                    FileOutputStream snappyChunksFos = null;
-                    DataOutputStream snappyChunksDos = null;
                     try {
-                        String absoluteImportPath = getTemporaryImportAbsolutePathByType(information);
-                        File storageFolderFile = new File(absoluteImportPath);
-                        if (!storageFolderFile.exists()) {
-                            storageFolderFile.mkdirs();
+                        File absoluteImportPath = new File(getTemporaryImportAbsolutePathByType(information));
+                        if(information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
+                            DataStrategy strategy = dataStrategyManager.getStrategy(information.getStrategy());
+                            strategy.onImport(information, dataInputStream, absoluteImportPath);
                         }
-                        String filePlacePath = absoluteImportPath + information.getFileName();
-                        File filePlacePathFile = new File(filePlacePath);
-                        if (filePlacePathFile.exists()) {
-                            filePlacePathFile.delete();
+                        else if(information.getFileType() == ImportMetaFileInformation.FileType.INDEX) {
+                            IndexStrategy strategy = indexStrategyManager.getStrategy(information.getStrategy());
+                            strategy.onImport(information, dataInputStream, absoluteImportPath);
                         }
-                        log.info("ImportServer - " + filePlacePath);
-
-//                        if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
-                        String filePlaceChunksPath = filePlacePath + ".chunks.snappy";
-                        File filePlaceChunksFile = new File(filePlaceChunksPath);
-                        if (filePlaceChunksFile.exists()) {
-                            filePlaceChunksFile.delete();
+                        else {
+                            throw new RuntimeException("Unsupported file type: "+ information.getFileType());
                         }
-                        int chunkSize = information.getFileType() == ImportMetaFileInformation.FileType.DATA ? SNAPPY_DATA_CHUNK_SIZE : SNAPPY_INDEX_CHUNK_SIZE;
-                        snappyChunksFos = new FileOutputStream(filePlaceChunksFile);
-                        snappyChunksDos = new DataOutputStream(snappyChunksFos);
-                        final DataOutputStream finalSnappyChunksDos = snappyChunksDos;
-
-                        snappyChunksDos.writeLong(information.getFileLength());
-                        snappyChunksDos.writeInt(chunkSize);
-                        // CARSTEN pfui, cleanup when time!
-                        bos = new BufferedOutputStream(new FileOutputStream(filePlacePathFile)) {
-                            @Override
-                            public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
-                                finalSnappyChunksDos.writeInt(i2);
-                                super.write(bytes, i, i2);
-                            }
-                        };
-                        sos = new SnappyOutputStream(bos, chunkSize);
-                        IOUtils.copy(dataInputStream, sos);
-                        sos.flush();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
-                    } finally {
-                        IOUtils.closeQuietly(dos);
-                        IOUtils.closeQuietly(bos);
-                        IOUtils.closeQuietly(sos);
-                        IOUtils.closeQuietly(snappyChunksDos);
-                        IOUtils.closeQuietly(snappyChunksFos);
-                        IOUtils.closeQuietly(clientSocket);
                     }
                 }
 
@@ -187,9 +155,14 @@ public class ImportTask implements Runnable {
                         throw new RuntimeException(e);
                     }
                     log.info("Temporary stuff cleaned up");
-                    log.info("Restarting Query Server");
-                    queryServer.restart();
-                    log.info("Restarted Query Server");
+                    log.info("Notifying indexStrategyManager onDataChanged");
+                    log.info("Notifying dataStrategyManager onDataChanged");
+                    CollectionDefinition collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(dataPath, indexPath);
+                    indexStrategyManager.onDataChanged(collectionDefinition);
+                    dataStrategyManager.onDataChanged(collectionDefinition);
+                    log.info("Finished indexStrategyManager onDataChanged");
+                    log.info("Finished dataStrategyManager onDataChanged");
+                    log.info("Data was reloaded");
                 }
 
                 private void moveActivationFiles(String deliveryKey, String deliveryVersion) {
@@ -293,13 +266,4 @@ public class ImportTask implements Runnable {
         }
         throw new IllegalArgumentException("Type " + information.getFileType() + " is not allowed, only data and index.");
     }
-
-//    private String getImportAbsolutePathByType(String deliveryKey, String deliveryVersion, ) throws IOException {
-//        if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
-//            return dataPath.getAbsolutePath() + "/" + information.getCollection() + "/" + information.getDeliveryKey() + "/" + information.getDeliveryVersion() + "/";
-//        } else if (information.getFileType() == ImportMetaFileInformation.FileType.INDEX) {
-//            return indexPath.getAbsolutePath() + "/" + information.getCollection() + "/" + information.getDeliveryKey() + "/" + information.getDeliveryVersion() + "/" + information.getIndexName() + "/";
-//        }
-//        throw new IllegalArgumentException("Type " + information.getFileType() + " is not allowed, only data and index.");
-//    }
 }

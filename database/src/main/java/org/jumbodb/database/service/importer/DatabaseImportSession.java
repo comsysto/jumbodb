@@ -48,7 +48,8 @@ public class DatabaseImportSession implements Closeable {
             long fileLength = dataInputStream.readLong();
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();
-            ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, null, fileLength, deliveryKey, deliveryVersion);
+            String dataStrategy = dataInputStream.readUTF();
+            ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, null, fileLength, deliveryKey, deliveryVersion, dataStrategy);
             bufferedInputStream = new BufferedInputStream(inputStream, 32768);
             snappyInputStream = new SnappyInputStream(bufferedInputStream);
             importHandler.onImport(meta, snappyInputStream);
@@ -61,7 +62,8 @@ public class DatabaseImportSession implements Closeable {
             long fileLength = dataInputStream.readLong();
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();
-            ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, indexName, fileLength, deliveryKey, deliveryVersion);
+            String indexStrategy = dataInputStream.readUTF();
+            ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, indexName, fileLength, deliveryKey, deliveryVersion, indexStrategy);
             bufferedInputStream = new BufferedInputStream(inputStream, 32768);
             snappyInputStream = new SnappyInputStream(bufferedInputStream);
             importHandler.onImport(meta, snappyInputStream);

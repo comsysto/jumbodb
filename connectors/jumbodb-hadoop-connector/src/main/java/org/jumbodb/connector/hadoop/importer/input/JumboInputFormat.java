@@ -41,6 +41,14 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
         context.getConfiguration().set(JumboConstants.INDEX_NAME, indexName);
     }
 
+    public static void setDataStrategy(JobContext context, String dataStrategy) {
+        context.getConfiguration().set(JumboConstants.JUMBO_DATA_STRATEGY, dataStrategy);
+    }
+
+    public static void setIndexStrategy(JobContext context, String indexStrategy) {
+        context.getConfiguration().set(JumboConstants.JUMBO_INDEX_STRATEGY, indexStrategy);
+    }
+
     public static void setMaximumParallelImports(JobContext context, int max) {
         context.getConfiguration().setInt(JumboConstants.MAX_PARALLEL_IMPORTS, max);
     }

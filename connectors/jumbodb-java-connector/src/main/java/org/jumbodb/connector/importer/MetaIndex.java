@@ -11,53 +11,39 @@ public class MetaIndex {
     private String deliveryVersion;
     private String indexName;
     private String indexStrategy;
+    private String indexSourceFields;
 
-    public MetaIndex(String collection, String deliveryKey, String deliveryVersion, String indexName, String indexStrategy) {
+    public MetaIndex(String collection, String deliveryKey, String deliveryVersion, String indexName, String indexStrategy, String indexSourceFields) {
         this.collection = collection;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
         this.indexName = indexName;
         this.indexStrategy = indexStrategy;
+        this.indexSourceFields = indexSourceFields;
     }
 
     public String getCollection() {
         return collection;
     }
 
-    public void setCollection(String collection) {
-        this.collection = collection;
-    }
-
     public String getDeliveryKey() {
         return deliveryKey;
-    }
-
-    public void setDeliveryKey(String deliveryKey) {
-        this.deliveryKey = deliveryKey;
     }
 
     public String getDeliveryVersion() {
         return deliveryVersion;
     }
 
-    public void setDeliveryVersion(String deliveryVersion) {
-        this.deliveryVersion = deliveryVersion;
-    }
-
     public String getIndexName() {
         return indexName;
-    }
-
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
     }
 
     public String getIndexStrategy() {
         return indexStrategy;
     }
 
-    public void setIndexStrategy(String indexStrategy) {
-        this.indexStrategy = indexStrategy;
+    public String getIndexSourceFields() {
+        return indexSourceFields;
     }
 
     @Override
@@ -68,6 +54,7 @@ public class MetaIndex {
                 ", deliveryVersion='" + deliveryVersion + '\'' +
                 ", indexName='" + indexName + '\'' +
                 ", indexStrategy='" + indexStrategy + '\'' +
+                ", indexSourceFields='" + indexSourceFields + '\'' +
                 '}';
     }
 }

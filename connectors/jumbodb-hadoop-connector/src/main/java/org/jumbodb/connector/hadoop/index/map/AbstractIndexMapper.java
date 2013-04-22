@@ -11,6 +11,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * User: carsten
@@ -44,6 +46,10 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
                 throw ex;
             }
         }
+    }
+
+    public List<String> getIndexSourceFields() {
+        return Collections.emptyList();
     }
 
     public abstract void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException;

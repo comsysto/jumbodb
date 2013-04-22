@@ -109,6 +109,7 @@ public class ImportTask implements Runnable {
                     deliveryInfo.setProperty("date", sdf.format(new Date()));
                     deliveryInfo.setProperty("indexName", information.getIndexName());
                     deliveryInfo.setProperty("strategy", information.getStrategy());
+                    deliveryInfo.setProperty("indexSourceFields", information.getIndexSourceFields());
 
 
                     File deliveryVersionFilePath = new File(deliveryKeyPath);

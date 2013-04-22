@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumbodb.connector.hadoop.importer.ImportJobCreator;
 import org.jumbodb.connector.hadoop.index.IndexJobCreator;
 import org.jumbodb.connector.hadoop.configuration.*;
@@ -85,7 +86,7 @@ public class JumboJobCreator {
             try {
                 jumbo = new JumboImportConnection(importHost.getHost(), importHost.getPort());
                 String collection = genericImportJob.getCollectionName();
-                MetaIndex metaData = new MetaIndex(collection, conf.get(JumboConstants.DELIVERY_CHUNK_KEY), conf.get(JumboConstants.DELIVERY_VERSION), indexField.getIndexName(), indexField.getIndexStrategy());
+                MetaIndex metaData = new MetaIndex(collection, genericImportJob.getDeliveryChunkKey(), conf.get(JumboConstants.DELIVERY_VERSION), indexField.getIndexName(), indexField.getIndexStrategy(), StringUtils.join(indexField.getFields(), ";"));
                 jumbo.sendMetaIndex(metaData);
             } finally {
                 IOUtils.closeStream(jumbo);

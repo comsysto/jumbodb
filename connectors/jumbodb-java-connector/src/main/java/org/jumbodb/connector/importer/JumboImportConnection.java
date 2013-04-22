@@ -79,6 +79,7 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(metaIndex.getDeliveryVersion());
             dos.writeUTF(metaIndex.getIndexName());
             dos.writeUTF(metaIndex.getIndexStrategy());
+            dos.writeUTF(metaIndex.getIndexSourceFields());
             dos.flush();
         } catch (IOException e) {
             throw new UnhandledException(e);

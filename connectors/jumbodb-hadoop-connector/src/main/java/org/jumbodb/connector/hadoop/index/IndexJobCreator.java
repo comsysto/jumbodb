@@ -85,7 +85,7 @@ public class IndexJobCreator {
 
     public static IndexField getIndexInformation(Class<? extends AbstractIndexMapper> mapper) {
         AbstractIndexMapper instance = createInstance(mapper);
-        return new IndexField(instance.getIndexName(), new ArrayList<String>(), instance.getStrategy());
+        return new IndexField(instance.getIndexName(), instance.getIndexSourceFields(), instance.getStrategy());
     }
 
     private static AbstractIndexMapper createInstance(Class<? extends AbstractIndexMapper> mapper)  {

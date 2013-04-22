@@ -11,13 +11,15 @@ public class ImportMetaIndex {
     private String deliveryVersion;
     private String indexName;
     private String strategy;
+    private String indexSourceFields;
 
-    public ImportMetaIndex(String collection, String deliveryKey, String deliveryVersion, String indexName, String strategy) {
+    public ImportMetaIndex(String collection, String deliveryKey, String deliveryVersion, String indexName, String strategy, String indexSourceFields) {
         this.collection = collection;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
         this.indexName = indexName;
         this.strategy = strategy;
+        this.indexSourceFields = indexSourceFields;
     }
 
     public String getCollection() {
@@ -40,6 +42,10 @@ public class ImportMetaIndex {
         return strategy;
     }
 
+    public String getIndexSourceFields() {
+        return indexSourceFields;
+    }
+
     @Override
     public String toString() {
         return "ImportMetaIndex{" +
@@ -48,6 +54,7 @@ public class ImportMetaIndex {
                 ", deliveryVersion='" + deliveryVersion + '\'' +
                 ", indexName='" + indexName + '\'' +
                 ", strategy='" + strategy + '\'' +
+                ", indexSourceFields='" + indexSourceFields + '\'' +
                 '}';
     }
 }

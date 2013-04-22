@@ -10,6 +10,7 @@ import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
+import org.jumbodb.database.service.query.snappy.SnappyStreamToFileCopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -33,57 +34,8 @@ public class JsonSnappyDataStrategy implements DataStrategy {
 
     @Override
     public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
-        String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/";
-        OutputStream sos = null;
-        DataOutputStream dos = null;
-        BufferedOutputStream bos = null;
-        FileOutputStream snappyChunksFos = null;
-        DataOutputStream snappyChunksDos = null;
-        try {
-            File storageFolderFile = new File(absoluteImportPath);
-            if (!storageFolderFile.exists()) {
-                storageFolderFile.mkdirs();
-            }
-            String filePlacePath = absoluteImportPath + information.getFileName();
-            File filePlacePathFile = new File(filePlacePath);
-            if (filePlacePathFile.exists()) {
-                filePlacePathFile.delete();
-            }
-            log.info("ImportServer - " + filePlacePath);
-
-//                        if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
-            String filePlaceChunksPath = filePlacePath + ".chunks.snappy";
-            File filePlaceChunksFile = new File(filePlaceChunksPath);
-            if (filePlaceChunksFile.exists()) {
-                filePlaceChunksFile.delete();
-            }
-            snappyChunksFos = new FileOutputStream(filePlaceChunksFile);
-            snappyChunksDos = new DataOutputStream(snappyChunksFos);
-            final DataOutputStream finalSnappyChunksDos = snappyChunksDos;
-
-            snappyChunksDos.writeLong(information.getFileLength());
-            snappyChunksDos.writeInt(SNAPPY_DATA_CHUNK_SIZE);
-            // CARSTEN pfui, cleanup when time!
-            bos = new BufferedOutputStream(new FileOutputStream(filePlacePathFile)) {
-                @Override
-                public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
-                    finalSnappyChunksDos.writeInt(i2);
-                    super.write(bytes, i, i2);
-                }
-            };
-            sos = new SnappyOutputStream(bos, SNAPPY_DATA_CHUNK_SIZE);
-            IOUtils.copy(dataInputStream, sos);
-            sos.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            IOUtils.closeQuietly(dos);
-            IOUtils.closeQuietly(bos);
-            IOUtils.closeQuietly(sos);
-            IOUtils.closeQuietly(snappyChunksDos);
-            IOUtils.closeQuietly(snappyChunksFos);
-            IOUtils.closeQuietly(dataInputStream);
-        }
+        String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/" + information.getFileName();
+        SnappyStreamToFileCopy.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), SNAPPY_DATA_CHUNK_SIZE);
     }
 
     @Override

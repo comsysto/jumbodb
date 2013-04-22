@@ -5,6 +5,7 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.DataStrategyManager;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
@@ -13,6 +14,7 @@ import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Required;
 
 import java.io.*;
 import java.util.*;
@@ -26,8 +28,7 @@ import java.util.concurrent.*;
 public class JumboSearcher {
     private Logger log = LoggerFactory.getLogger(JumboSearcher.class);
 
-    private final File dataPath;
-    private final File indexPath;
+    private JumboConfiguration jumboConfiguration;
     private IndexStrategyManager indexStrategyManager;
     private DataStrategyManager dataStrategyManager;
     private CollectionDefinition collectionDefinition;
@@ -35,26 +36,17 @@ public class JumboSearcher {
     private ExecutorService chunkExecutor;
     private ObjectMapper jsonMapper;
 
-    public JumboSearcher(File dataPath, File indexPath, IndexStrategyManager indexStrategyManager, DataStrategyManager dataStrategyManager) {
-        this.dataPath = dataPath;
-        this.indexPath = indexPath;
-        this.indexStrategyManager = indexStrategyManager;
-        this.dataStrategyManager = dataStrategyManager;
-        // CARSTEN onInitialize executors in spring
-        this.chunkExecutor = Executors.newCachedThreadPool();
-        this.indexExecutor = Executors.newCachedThreadPool();
-        this.collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(dataPath, indexPath);
+
+    public void onInitialize() {
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        log.info("IndexedFileSearcher initialized for " + indexPath.getAbsolutePath());
-        indexStrategyManager.onInitialize(collectionDefinition);
-        dataStrategyManager.onInitialize(collectionDefinition);
-
+        onDataChanged();
     }
 
-    public void stop() {
-        chunkExecutor.shutdown();
-        indexExecutor.shutdown();
+    public void onDataChanged() {
+        this.collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(jumboConfiguration.getDataPath(), jumboConfiguration.getIndexPath());
+        this.indexStrategyManager.onInitialize(collectionDefinition);
+        this.dataStrategyManager.onInitialize(collectionDefinition);
     }
 
     public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery, ResultCallback resultCallback) {
@@ -130,5 +122,31 @@ public class JumboSearcher {
             DataStrategy strategy = dataStrategyManager.getStrategy(deliveryChunk.getCollection(), deliveryChunk.getChunkKey());
             return strategy.findDataSetsByFileOffsets(deliveryChunk, fileOffsets, resultCallback, searchQuery);
         }
+    }
+
+
+    @Required
+    public void setJumboConfiguration(JumboConfiguration jumboConfiguration) {
+        this.jumboConfiguration = jumboConfiguration;
+    }
+
+    @Required
+    public void setIndexStrategyManager(IndexStrategyManager indexStrategyManager) {
+        this.indexStrategyManager = indexStrategyManager;
+    }
+
+    @Required
+    public void setDataStrategyManager(DataStrategyManager dataStrategyManager) {
+        this.dataStrategyManager = dataStrategyManager;
+    }
+
+    @Required
+    public void setIndexExecutor(ExecutorService indexExecutor) {
+        this.indexExecutor = indexExecutor;
+    }
+
+    @Required
+    public void setChunkExecutor(ExecutorService chunkExecutor) {
+        this.chunkExecutor = chunkExecutor;
     }
 }

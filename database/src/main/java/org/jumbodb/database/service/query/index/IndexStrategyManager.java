@@ -39,10 +39,10 @@ public class IndexStrategyManager {
     }
 
     public void onDataChanged(CollectionDefinition collectionDefinition) {
-        indexLocationsAndStrategies = buildIndexStrategies(collectionDefinition);
         for (IndexStrategy strategy : strategies) {
             strategy.onDataChanged(collectionDefinition);
         }
+        indexLocationsAndStrategies = buildIndexStrategies(collectionDefinition);
     }
 
     @Required

@@ -20,6 +20,7 @@ import org.jumbodb.database.service.management.storage.dto.collections.DeliveryV
 import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
 import org.jumbodb.database.service.management.storage.dto.deliveries.VersionedJumboCollection;
+import org.jumbodb.database.service.query.JumboSearcher;
 import org.jumbodb.database.service.query.data.DataStrategyManager;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
@@ -40,19 +41,15 @@ public class StorageManagement {
     private final Logger log = LoggerFactory.getLogger(StorageManagement.class);
 
     private JumboConfiguration config;
-    private DataStrategyManager dataStrategyManager;
-    private IndexStrategyManager indexStrategyManager;
+    private JumboSearcher jumboSearcher;
 
-    public StorageManagement(JumboConfiguration config, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager) {
+    public StorageManagement(JumboConfiguration config, JumboSearcher jumboSearcher) {
         this.config = config;
-        this.dataStrategyManager = dataStrategyManager;
-        this.indexStrategyManager = indexStrategyManager;
+        this.jumboSearcher = jumboSearcher;
     }
 
     private void onDataChanged() {
-        CollectionDefinition collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(config.getDataPath(), config.getIndexPath());
-        indexStrategyManager.onDataChanged(collectionDefinition);
-        dataStrategyManager.onDataChanged(collectionDefinition);
+        jumboSearcher.onDataChanged();
     }
 
     public void deleteCompleteCollection(String collectionName) {

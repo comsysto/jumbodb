@@ -3,6 +3,7 @@ package org.jumbodb.database.service.importer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.jumbodb.database.service.query.JumboSearcher;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.DataStrategyManager;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
@@ -26,14 +27,16 @@ public class ImportTask implements Runnable {
     private int clientID;
     private File dataPath;
     private File indexPath;
+    private JumboSearcher jumboSearcher;
     private DataStrategyManager dataStrategyManager;
     private IndexStrategyManager indexStrategyManager;
 
-    public ImportTask(Socket s, int i, File dataPath, File indexPath, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager) {
+    public ImportTask(Socket s, int i, File dataPath, File indexPath, JumboSearcher jumboSearcher, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager) {
         this.clientSocket = s;
         this.clientID = i;
         this.dataPath = dataPath;
         this.indexPath = indexPath;
+        this.jumboSearcher = jumboSearcher;
         this.dataStrategyManager = dataStrategyManager;
         this.indexStrategyManager = indexStrategyManager;
     }
@@ -155,13 +158,9 @@ public class ImportTask implements Runnable {
                         throw new RuntimeException(e);
                     }
                     log.info("Temporary stuff cleaned up");
-                    log.info("Notifying indexStrategyManager onDataChanged");
-                    log.info("Notifying dataStrategyManager onDataChanged");
-                    CollectionDefinition collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(dataPath, indexPath);
-                    indexStrategyManager.onDataChanged(collectionDefinition);
-                    dataStrategyManager.onDataChanged(collectionDefinition);
-                    log.info("Finished indexStrategyManager onDataChanged");
-                    log.info("Finished dataStrategyManager onDataChanged");
+                    log.info("Notifying JumboSearcher onDataChanged");
+                    jumboSearcher.onDataChanged();
+                    log.info("Finished JumboSearcher onDataChanged");
                     log.info("Data was reloaded");
                 }
 

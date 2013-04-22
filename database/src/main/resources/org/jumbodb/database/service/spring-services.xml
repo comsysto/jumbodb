@@ -66,22 +66,35 @@
 
     </bean>
 
+    <bean id="chunkExecutor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" destroy-method="shutdown">
+    </bean>
+
+    <bean id="indexExecutor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" destroy-method="shutdown">
+    </bean>
+
+    <bean id="jumboSearcher" class="org.jumbodb.database.service.query.JumboSearcher" init-method="onInitialize">
+        <property name="chunkExecutor" ref="chunkExecutor"/>
+        <property name="indexExecutor" ref="indexExecutor"/>
+        <property name="dataStrategyManager" ref="dataStrategyManager"/>
+        <property name="indexStrategyManager" ref="indexStrategyManager"/>
+        <property name="jumboConfiguration" ref="jumboConfig"/>
+    </bean>
+
     <bean id="queryServer" class="org.jumbodb.database.service.query.QueryServer" init-method="start" destroy-method="stop">
         <constructor-arg ref="jumboConfig"/>
-        <constructor-arg ref="dataStrategyManager"/>
-        <constructor-arg ref="indexStrategyManager"/>
+        <constructor-arg ref="jumboSearcher"/>
     </bean>
 
     <bean id="importServer" class="org.jumbodb.database.service.importer.ImportServer" init-method="start" destroy-method="stop">
         <constructor-arg ref="jumboConfig"/>
+        <constructor-arg ref="jumboSearcher"/>
         <constructor-arg ref="dataStrategyManager"/>
         <constructor-arg ref="indexStrategyManager"/>
     </bean>
 
     <bean id="storageManagement" class="org.jumbodb.database.service.management.storage.StorageManagement">
         <constructor-arg ref="jumboConfig"/>
-        <constructor-arg ref="dataStrategyManager"/>
-        <constructor-arg ref="indexStrategyManager"/>
+        <constructor-arg ref="jumboSearcher"/>
     </bean>
 
     <bean id="statusService" class="org.jumbodb.database.service.management.status.StatusService">

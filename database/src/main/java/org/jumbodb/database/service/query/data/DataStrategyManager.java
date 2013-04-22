@@ -41,10 +41,10 @@ public class DataStrategyManager {
     }
 
     public void onDataChanged(CollectionDefinition collectionDefinition) {
-        dataLocationsAndStrategies = buildDataStrategies(collectionDefinition);
         for (DataStrategy strategy : strategies) {
             strategy.onDataChanged(collectionDefinition);
         }
+        dataLocationsAndStrategies = buildDataStrategies(collectionDefinition);
     }
 
     @Required

@@ -31,9 +31,9 @@ public class QueryServer {
     private JumboConfiguration config;
     private  ServerSocket serverSocket;
 
-    public QueryServer(JumboConfiguration config, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager) {
+    public QueryServer(JumboConfiguration config, JumboSearcher jumboSearcher) {
+        this.jumboSearcher = jumboSearcher;
         this.config = config;
-        this.jumboSearcher = new JumboSearcher(config.getDataPath(), config.getIndexPath(), indexStrategyManager, dataStrategyManager);
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -70,7 +70,6 @@ public class QueryServer {
     public void stop() throws IOException {
         serverSocket.close();
         serverActive = false;
-        jumboSearcher.stop();
         serverSocketExecutor.shutdown();
     }
 

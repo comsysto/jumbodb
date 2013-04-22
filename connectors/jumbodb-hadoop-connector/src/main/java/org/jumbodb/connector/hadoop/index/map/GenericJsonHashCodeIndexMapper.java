@@ -46,30 +46,18 @@ public class GenericJsonHashCodeIndexMapper extends AbstractHashCodeIndexMapper<
     private String getIndexKey(JsonNode jsonNode) {
         List<String> keys = new LinkedList<String>();
         for (String indexField : this.indexField.getFields()) {
-            String valueFor = getValueFor(indexField, jsonNode);
+            JsonNode valueFor = getValueFor(indexField, jsonNode);
             if(valueFor != null) {
-                keys.add(valueFor);
+                keys.add(valueFor.getValueAsText());
             }
         }
 
         if(keys.size() > 0) {
             return StringUtils.join(keys, "-");
         }
-        return "default";
+        return null;
     }
 
-    private String getValueFor(String key, JsonNode jsonNode) {
-        String[] split = StringUtils.split(key, ".");
-        for (String s : split) {
-            jsonNode = jsonNode.path(s);
-        }
-        if(jsonNode.isValueNode()) {
-            String s = jsonNode.getValueAsText();
-            return s;
-        }
-        // CARSTEN omg fix
-        return "null";
-    }
 
     @Override
     public boolean throwErrorOnInvalidDataset() {

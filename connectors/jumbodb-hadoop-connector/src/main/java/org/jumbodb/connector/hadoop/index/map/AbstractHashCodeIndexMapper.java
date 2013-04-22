@@ -18,19 +18,20 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractHashCodeIndexMapper<T> extends AbstractIndexMapper<T> {
+    public static final String HASHCODE_SNAPPY_V_1 = "HASHCODE_SNAPPY_V1";
+
     @Override
     public void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException {
         String indexableValue = getIndexableValue(input);
-        int hashCode = 0;
         if(indexableValue != null) {
-            hashCode = indexableValue.hashCode();
+            int hashCode = indexableValue.hashCode();
+            context.write(new IntWritable(hashCode), new FileOffsetWritable(fileNameHashCode, offset.get()));
         }
-        context.write(new IntWritable(hashCode), new FileOffsetWritable(fileNameHashCode, offset.get()));
     }
 
     @Override
     public String getStrategy() {
-        return IndexJobCreator.HASHCODE_SNAPPY_V_1;
+        return HASHCODE_SNAPPY_V_1;
     }
 
     public abstract String getIndexableValue(T input);

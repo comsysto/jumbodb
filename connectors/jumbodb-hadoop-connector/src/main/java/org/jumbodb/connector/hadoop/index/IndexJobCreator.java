@@ -6,8 +6,10 @@ import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 import org.jumbodb.connector.hadoop.configuration.JumboCustomImportJob;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
+import org.jumbodb.connector.hadoop.index.map.AbstractHashCodeIndexMapper;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.map.GenericJsonHashCodeIndexMapper;
+import org.jumbodb.connector.hadoop.index.map.GenericJsonIntegerIndexMapper;
 import org.jumbodb.connector.hadoop.index.output.BinaryIndexOutputFormat;
 import org.jumbodb.connector.hadoop.index.output.HashRangePartitioner;
 import org.apache.hadoop.conf.Configuration;
@@ -31,13 +33,12 @@ import java.util.Map;
  */
 public class IndexJobCreator {
 
-    public static final String HASHCODE_SNAPPY_V_1 = "HASHCODE_SNAPPY_V1";
-
     public static Map<String, Class<? extends Mapper>> GENERIC_INDEX_MAPPER_STRATEGIES = createIndexMapper();
 
     private static Map<String, Class<? extends Mapper>> createIndexMapper() {
         Map<String, Class<? extends Mapper>> indexMapper = new HashMap<String, Class<? extends Mapper>>();
-        indexMapper.put(HASHCODE_SNAPPY_V_1, GenericJsonHashCodeIndexMapper.class);
+        indexMapper.put(GenericJsonHashCodeIndexMapper.HASHCODE_SNAPPY_V_1, GenericJsonHashCodeIndexMapper.class);
+        indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V_1, GenericJsonIntegerIndexMapper.class);
         return Collections.unmodifiableMap(indexMapper);
     }
 

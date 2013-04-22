@@ -1,5 +1,5 @@
 package org.jumbodb.common.query;
 
 public enum QueryOperation {
-    EQ, LT, GT
+    EQ, NE, LT, GT, BETWEEN
 }

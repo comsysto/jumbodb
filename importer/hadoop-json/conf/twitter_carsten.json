@@ -21,6 +21,11 @@
                     "indexName": "screen_name",
                     "fields": ["user.screen_name"],
                     "indexStrategy": "HASHCODE_SNAPPY_V1"
+                },
+                {
+                    "indexName": "followers_count",
+                    "fields": ["user.followers_count"],
+                    "indexStrategy": "INTEGER_SNAPPY_V1"
                 }
             ]
         }

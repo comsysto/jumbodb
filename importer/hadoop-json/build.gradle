@@ -49,6 +49,10 @@ dependencies {
     bundle 'commons-io:commons-io:2.3'
 }
 
+
+mainClassName = "org.jumbodb.importer.hadoop.json.JsonImporterJob"
+
+
 jar {
     from configurations.bundle.collect {
         it.isDirectory() ? it : zipTree(it)

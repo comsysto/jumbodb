@@ -1,10 +1,12 @@
 package org.jumbodb.connector.hadoop.index.map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -46,6 +48,24 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
                 throw ex;
             }
         }
+    }
+
+    public JsonNode getValueFor(String key, JsonNode jsonNode) {
+        String[] split = StringUtils.split(key, ".");
+        for (String s : split) {
+            if(jsonNode == null) {
+                break;
+            }
+            jsonNode = jsonNode.path(s);
+        }
+        return jsonNode;
+
+//        if(jsonNode.isValueNode()) {
+//            return jsonNode;
+//            String s = jsonNode.getValueAsText();
+//            return s;
+//        }
+//        return null;
     }
 
     public List<String> getIndexSourceFields() {

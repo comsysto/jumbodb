@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.jumbodb.database.service.query.Restartable;
+import org.jumbodb.database.service.query.data.snappy.JsonSnappyDataStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyOutputStream;
@@ -20,7 +21,6 @@ public class ImportTask implements Runnable {
     public static final int SNAPPY_DATA_CHUNK_SIZE = 32 * 1024;
     public static final int SNAPPY_INDEX_CHUNK_SIZE = 32 * 1024; // must be a multiple of 16! (4 byte data hash, 4 byte file name hash, 8 byte offset)
     private Socket clientSocket;
-    public static final String STORAGE_VERSION = "1";
     private int clientID;
     private File dataPath;
     private File indexPath;
@@ -105,7 +105,7 @@ public class ImportTask implements Runnable {
                     deliveryInfo.setProperty("sourcePath", information.getSourcePath());
                     deliveryInfo.setProperty("date", sdf.format(new Date()));
                     deliveryInfo.setProperty("info", information.getInfo());
-                    deliveryInfo.setProperty("storageVersion", STORAGE_VERSION);
+                    deliveryInfo.setProperty("strategy", information.getDataStrategy());
 
 
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
@@ -136,7 +136,6 @@ public class ImportTask implements Runnable {
                     Properties deliveryInfo = new Properties();
                     deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
                     deliveryInfo.setProperty("date", sdf.format(new Date()));
-                    deliveryInfo.setProperty("storageVersion", STORAGE_VERSION);
                     deliveryInfo.setProperty("indexName", information.getIndexName());
                     deliveryInfo.setProperty("strategy", information.getStrategy());
 

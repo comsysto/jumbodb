@@ -70,10 +70,11 @@ public class DatabaseImportSession implements Closeable {
             String collection = dataInputStream.readUTF();
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();
+            String dataStrategy = dataInputStream.readUTF();
             String sourcePath = dataInputStream.readUTF();
             boolean activate = dataInputStream.readBoolean();
             String info = dataInputStream.readUTF();
-            ImportMetaData meta = new ImportMetaData(collection, deliveryKey, deliveryVersion, sourcePath, info);
+            ImportMetaData meta = new ImportMetaData(collection, deliveryKey, deliveryVersion, dataStrategy, sourcePath, info);
             importHandler.onCollectionMetaData(meta);
             if(activate) {
                 importHandler.onActivateDelivery(meta);

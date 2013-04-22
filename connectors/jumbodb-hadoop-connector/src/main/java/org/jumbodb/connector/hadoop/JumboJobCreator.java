@@ -5,7 +5,6 @@ import org.jumbodb.connector.hadoop.index.IndexJobCreator;
 import org.jumbodb.connector.hadoop.index.json.HostsJson;
 import org.jumbodb.connector.hadoop.index.json.ImportJson;
 import org.jumbodb.connector.hadoop.index.json.IndexJson;
-import org.jumbodb.connector.hadoop.index.map.AbstractHashCodeIndexMapper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
@@ -91,7 +90,7 @@ public class JumboJobCreator {
             try {
                 jumbo = new JumboImportConnection(hostsJson.getHost(), hostsJson.getPort());
                 String collection = importJson.getCollectionName();
-                MetaIndex metaData = new MetaIndex(collection, importJson.getDeliveryChunk(), conf.get(JumboConstants.DELIVERY_VERSION), indexJson.getIndexName(), indexJson.getStrategy());
+                MetaIndex metaData = new MetaIndex(collection, importJson.getDeliveryChunk(), conf.get(JumboConstants.DELIVERY_VERSION), indexJson.getIndexName(), indexJson.getIndexStrategy());
                 jumbo.sendMetaIndex(metaData);
             } finally {
                 IOUtils.closeStream(jumbo);
@@ -136,7 +135,7 @@ public class JumboJobCreator {
 //                String collection = importPath.getName();
                 String collection = importJson.getCollectionName();
                 boolean activate = importJson.isActivateDelivery();
-                MetaData metaData = new MetaData(collection, importJson.getDeliveryChunk(), conf.get(JumboConstants.DELIVERY_VERSION), importPath.toString(), activate, importJson.getDescription());
+                MetaData metaData = new MetaData(collection, importJson.getDeliveryChunk(), conf.get(JumboConstants.DELIVERY_VERSION), importJson.getDataStrategy(),importPath.toString(), activate, importJson.getDescription());
                 jumbo.sendMetaData(metaData);
             } finally {
                 IOUtils.closeStream(jumbo);

@@ -4,11 +4,12 @@
     "description": "Carstens Twitter Test Import",
     "collectionName": "twitter",
     "deliveryChunk": "first_delivery",
+    "dataStrategy": "JSON_SNAPPY_V1",
     "sort": ["user.screen_name"],
     "indexes": [{
         "indexName": "screen_name",
         "fields" : ["user.screen_name"],
-        "strategy": "HASHCODE_SNAPPY_V1"
+        "indexStrategy": "HASHCODE_SNAPPY_V1"
     }],
     "hosts": [
         {"host": "ex4s-dev01.devproof.org", "port": 12001},

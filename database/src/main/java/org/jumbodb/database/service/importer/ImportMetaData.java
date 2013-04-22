@@ -9,15 +9,21 @@ public class ImportMetaData {
     private String collection;
     private String deliveryKey;
     private String deliveryVersion;
+    private String dataStrategy;
     private String sourcePath;
     private String info;
 
-    public ImportMetaData(String collection, String deliveryKey, String deliveryVersion, String sourcePath, String info) {
+    public ImportMetaData(String collection, String deliveryKey, String deliveryVersion, String dataStrategy, String sourcePath, String info) {
         this.collection = collection;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
+        this.dataStrategy = dataStrategy;
         this.sourcePath = sourcePath;
         this.info = info;
+    }
+
+    public String getDataStrategy() {
+        return dataStrategy;
     }
 
     public String getDeliveryKey() {
@@ -40,12 +46,14 @@ public class ImportMetaData {
         return collection;
     }
 
+
     @Override
     public String toString() {
         return "ImportMetaData{" +
                 "collection='" + collection + '\'' +
                 ", deliveryKey='" + deliveryKey + '\'' +
                 ", deliveryVersion='" + deliveryVersion + '\'' +
+                ", dataStrategy='" + dataStrategy + '\'' +
                 ", sourcePath='" + sourcePath + '\'' +
                 ", info='" + info + '\'' +
                 '}';

@@ -4,7 +4,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.index.json.IndexJson;
-import org.jumbodb.connector.hadoop.index.map.AbstractHashCodeIndexMapper;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.map.GenericJsonHashCodeIndexMapper;
 import org.jumbodb.connector.hadoop.index.output.BinaryIndexOutputFormat;
@@ -49,9 +48,9 @@ public class IndexJobCreator {
         FileOutputFormat.setCompressOutput(job, false);
         job.getConfiguration().set(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexJson));
         job.setJarByClass(IndexJobCreator.class);
-        Class<? extends Mapper> indexMapper = GENERIC_INDEX_MAPPER_STRATEGIES.get(indexJson.getStrategy());
+        Class<? extends Mapper> indexMapper = GENERIC_INDEX_MAPPER_STRATEGIES.get(indexJson.getIndexStrategy());
         if(indexMapper == null) {
-            throw new IllegalStateException("Index mapper strategy is not available " + indexJson.getStrategy());
+            throw new IllegalStateException("Index mapper strategy is not available " + indexJson.getIndexStrategy());
         }
         job.setMapperClass(indexMapper);
         job.setMapOutputKeyClass(IntWritable.class);

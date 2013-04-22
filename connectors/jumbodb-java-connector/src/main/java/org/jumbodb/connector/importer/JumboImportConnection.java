@@ -89,6 +89,7 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(metaData.getCollection());
             dos.writeUTF(metaData.getDeliveryKey());
             dos.writeUTF(metaData.getDeliveryVersion());
+            dos.writeUTF(metaData.getDataStrategy());
             dos.writeUTF(metaData.getPath());
             dos.writeBoolean(metaData.isActivate());
             dos.writeUTF(metaData.getInfo());

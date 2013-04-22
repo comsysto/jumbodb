@@ -5,10 +5,11 @@
     "collectionName": "carsten.twitter",
     "deliveryChunk": "first_delivery",
     "sort": ["user.screen_name"],
+    "dataStrategy": "JSON_SNAPPY_V1",
     "indexes": [{
         "indexName": "screen_name",
         "fields" : ["user.screen_name"],
-        "strategy": "HASHCODE_SNAPPY_V1"
+        "indexStrategy": "HASHCODE_SNAPPY_V1"
     }],
     "hosts": [
         {"host": "localhost", "port": 12001},

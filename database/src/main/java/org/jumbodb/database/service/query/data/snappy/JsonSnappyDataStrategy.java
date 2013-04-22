@@ -22,6 +22,7 @@ import java.util.concurrent.Future;
  * @author Carsten Hufe
  */
 public class JsonSnappyDataStrategy implements DataStrategy {
+    public static final String JSON_SNAPPY_V1 = "JSON_SNAPPY_V1";
     private Logger log = LoggerFactory.getLogger(JsonSnappyDataStrategy.class);
 
     private ExecutorService retrieveDataExecutor;
@@ -33,7 +34,7 @@ public class JsonSnappyDataStrategy implements DataStrategy {
 
     @Override
     public String getStrategyName() {
-        return "JSON_SNAPPY_V1";
+        return JSON_SNAPPY_V1;
     }
 
     @Override

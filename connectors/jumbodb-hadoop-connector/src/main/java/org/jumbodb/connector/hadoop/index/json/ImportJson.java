@@ -17,6 +17,7 @@ public class ImportJson {
     private String description;
     private String collectionName;
     private String deliveryChunk;
+    private String dataStrategy;
     private List<String> sort = new LinkedList<String>();
     private List<IndexJson> indexes = new LinkedList<IndexJson>();
     private List<HostsJson> hosts;
@@ -115,6 +116,13 @@ public class ImportJson {
         this.indexes = indexes;
     }
 
+    public String getDataStrategy() {
+        return dataStrategy;
+    }
+
+    public void setDataStrategy(String dataStrategy) {
+        this.dataStrategy = dataStrategy;
+    }
 
 
     @Override
@@ -122,12 +130,15 @@ public class ImportJson {
         return "ImportJson{" +
                 "input='" + input + '\'' +
                 ", output='" + output + '\'' +
+                ", description='" + description + '\'' +
                 ", collectionName='" + collectionName + '\'' +
                 ", deliveryChunk='" + deliveryChunk + '\'' +
+                ", dataStrategy='" + dataStrategy + '\'' +
                 ", sort=" + sort +
                 ", indexes=" + indexes +
                 ", hosts=" + hosts +
                 ", numberOfOutputFiles=" + numberOfOutputFiles +
+                ", activateDelivery=" + activateDelivery +
                 ", hadoop=" + hadoop +
                 '}';
     }

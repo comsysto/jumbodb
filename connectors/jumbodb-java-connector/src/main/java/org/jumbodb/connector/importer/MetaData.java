@@ -9,14 +9,16 @@ public class MetaData {
     private String collection;
     private String deliveryKey;
     private String deliveryVersion;
+    private String dataStrategy;
     private String path;
     private boolean activate;
     private String info;
 
-    public MetaData(String collection, String deliveryKey, String deliveryVersion, String path, boolean activate, String info) {
+    public MetaData(String collection, String deliveryKey, String deliveryVersion, String dataStrategy, String path, boolean activate, String info) {
         this.collection = collection;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
+        this.dataStrategy = dataStrategy;
         this.path = path;
         this.activate = activate;
         this.info = info;
@@ -46,12 +48,17 @@ public class MetaData {
         return info;
     }
 
+    public String getDataStrategy() {
+        return dataStrategy;
+    }
+
     @Override
     public String toString() {
         return "MetaData{" +
                 "collection='" + collection + '\'' +
                 ", deliveryKey='" + deliveryKey + '\'' +
                 ", deliveryVersion='" + deliveryVersion + '\'' +
+                ", dataStrategy='" + dataStrategy + '\'' +
                 ", path='" + path + '\'' +
                 ", activate=" + activate +
                 ", info='" + info + '\'' +

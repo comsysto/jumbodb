@@ -10,23 +10,23 @@ import java.util.List;
 public class IndexJson {
     private String indexName;
     private List<String> fields;
-    private String strategy;
+    private String indexStrategy;
 
     public IndexJson() {
     }
 
-    public IndexJson(String indexName, List<String> fields, String strategy) {
+    public IndexJson(String indexName, List<String> fields, String indexStrategy) {
         this.indexName = indexName;
         this.fields = fields;
-        this.strategy = strategy;
+        this.indexStrategy = indexStrategy;
     }
 
-    public String getStrategy() {
-        return strategy;
+    public String getIndexStrategy() {
+        return indexStrategy;
     }
 
-    public void setStrategy(String strategy) {
-        this.strategy = strategy;
+    public void setIndexStrategy(String indexStrategy) {
+        this.indexStrategy = indexStrategy;
     }
 
     public String getIndexName() {
@@ -50,7 +50,7 @@ public class IndexJson {
         return "IndexJson{" +
                 "indexName='" + indexName + '\'' +
                 ", fields=" + fields +
-                ", strategy='" + strategy + '\'' +
+                ", indexStrategy='" + indexStrategy + '\'' +
                 '}';
     }
 }

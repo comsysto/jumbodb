@@ -51,7 +51,6 @@ public class StatusService {
         status.setTotalFreeMemory(format.format((freeMemory + (maxMemory - allocatedMemory)) / divideMB) + " MB");
         status.setQueryProtocolVersion(String.valueOf(DatabaseQuerySession.PROTOCOL_VERSION));
         status.setImportProtocolVersion(String.valueOf(DatabaseImportSession.PROTOCOL_VERSION));
-        status.setStorageFormatVersion(ImportTask.STORAGE_VERSION);
         status.setDataDiskFreeSpace(format.format(dataDiskFreeSpace / divideMB) + " MB");
         status.setDataDiskTotalSpace(format.format(dataDiskTotalSpace / divideMB) + " MB");
         status.setDataDiskUsedSpacePerc((double)(((dataDiskTotalSpace - dataDiskFreeSpace) * 100) / dataDiskTotalSpace));

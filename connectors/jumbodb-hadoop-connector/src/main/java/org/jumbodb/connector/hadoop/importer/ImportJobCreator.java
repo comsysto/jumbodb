@@ -72,7 +72,7 @@ public class ImportJobCreator {
     public static List<ControlledJob> createIndexImportJobs(Configuration conf, BaseJumboImportJob genericImportJob, IndexField indexField) throws IOException {
         List<ControlledJob> jobs = new ArrayList<ControlledJob>();
         for (ImportHost host : genericImportJob.getHosts()) {
-            jobs.add(createJumboJob(conf, genericImportJob.getIndexOutputPath(), new Path(genericImportJob.getLogOutputPath().toString() + "/" + host.getHost() + "/index/"), JumboConstants.DATA_TYPE_INDEX, genericImportJob, host, indexField));
+            jobs.add(createJumboJob(conf, genericImportJob.getIndexOutputPath(), new Path(genericImportJob.getLogOutputPath().toString() + "/" + host.getHost() + "/index/" + indexField.getIndexName() + "/"), JumboConstants.DATA_TYPE_INDEX, genericImportJob, host, indexField));
         }
         return jobs;
     }

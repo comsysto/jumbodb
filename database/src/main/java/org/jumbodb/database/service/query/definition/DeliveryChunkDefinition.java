@@ -8,14 +8,15 @@ public class DeliveryChunkDefinition {
     private String collection;
     private String chunkKey;
     private List<IndexDefinition> indexes;
-    // CARSTEN do the same for datafiles  -> dataPath and strategies
     private Map<Integer, File> dataFiles;
+    private String dataStrategy;
 
-    public DeliveryChunkDefinition(String collection, String chunkKey, List<IndexDefinition> indexes, Map<Integer, File> dataFiles) {
+    public DeliveryChunkDefinition(String collection, String chunkKey, List<IndexDefinition> indexes, Map<Integer, File> dataFiles, String dataStrategy) {
         this.collection = collection;
         this.chunkKey = chunkKey;
         this.indexes = indexes;
         this.dataFiles = dataFiles;
+        this.dataStrategy = dataStrategy;
     }
 
     public List<IndexDefinition> getIndexes() {
@@ -34,6 +35,10 @@ public class DeliveryChunkDefinition {
         return collection;
     }
 
+    public String getDataStrategy() {
+        return dataStrategy;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -44,6 +49,7 @@ public class DeliveryChunkDefinition {
         if (chunkKey != null ? !chunkKey.equals(that.chunkKey) : that.chunkKey != null) return false;
         if (collection != null ? !collection.equals(that.collection) : that.collection != null) return false;
         if (dataFiles != null ? !dataFiles.equals(that.dataFiles) : that.dataFiles != null) return false;
+        if (dataStrategy != null ? !dataStrategy.equals(that.dataStrategy) : that.dataStrategy != null) return false;
         if (indexes != null ? !indexes.equals(that.indexes) : that.indexes != null) return false;
 
         return true;
@@ -55,6 +61,7 @@ public class DeliveryChunkDefinition {
         result = 31 * result + (chunkKey != null ? chunkKey.hashCode() : 0);
         result = 31 * result + (indexes != null ? indexes.hashCode() : 0);
         result = 31 * result + (dataFiles != null ? dataFiles.hashCode() : 0);
+        result = 31 * result + (dataStrategy != null ? dataStrategy.hashCode() : 0);
         return result;
     }
 
@@ -66,6 +73,7 @@ public class DeliveryChunkDefinition {
                 ", chunkKey='" + chunkKey + '\'' +
                 ", indexes=" + indexes +
                 ", dataFiles=" + dataFiles +
+                ", dataStrategy='" + dataStrategy + '\'' +
                 '}';
     }
 }

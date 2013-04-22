@@ -50,6 +50,22 @@
 
     </bean>
 
+    <bean id="retrieveDataExecutor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool" destroy-method="shutdown">
+        <constructor-arg value="20" />
+    </bean>
+
+    <bean id="dataStrategyManager" class="org.jumbodb.database.service.query.data.DataStrategyManager">
+        <property name="strategies">
+            <list>
+                <bean class="org.jumbodb.database.service.query.data.snappy.JsonSnappyDataStrategy">
+                    <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
+                </bean>
+                <bean class="org.jumbodb.database.service.query.data.notfound.NotFoundDataStrategy"/>
+            </list>
+        </property>
+
+    </bean>
+
     <bean id="queryServer" class="org.jumbodb.database.service.query.QueryServer" init-method="start" destroy-method="stop">
         <constructor-arg ref="jumboConfig"/>
         <constructor-arg ref="indexStrategyManager"/>

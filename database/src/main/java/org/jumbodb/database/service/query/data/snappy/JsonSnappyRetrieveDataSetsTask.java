@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query;
+package org.jumbodb.database.service.query.data.snappy;
 
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -8,6 +8,7 @@ import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
@@ -18,8 +19,8 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-public class RetrieveDataSetsTask implements Callable<Integer> {
-    private Logger log = LoggerFactory.getLogger(RetrieveDataSetsTask.class);
+public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
+    private Logger log = LoggerFactory.getLogger(JsonSnappyRetrieveDataSetsTask.class);
 
     public static final byte[] EMPTY_BUFFER = new byte[0];
     private final File file;
@@ -31,7 +32,7 @@ public class RetrieveDataSetsTask implements Callable<Integer> {
     private final byte[] defaultBuffer = new byte[bufferSize]; // for reuse
 
 
-    public RetrieveDataSetsTask(File file, Set<Long> offsets, JumboQuery searchQuery, ResultCallback resultCallback) {
+    public JsonSnappyRetrieveDataSetsTask(File file, Set<Long> offsets, JumboQuery searchQuery, ResultCallback resultCallback) {
         this.file = file;
         this.searchQuery = searchQuery;
         this.resultCallback = resultCallback;

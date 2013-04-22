@@ -82,11 +82,16 @@ public class CollectionDefinitionLoader {
         for (File dataFile : dataFiles) {
             resDataFiles.put(dataFile.getName().hashCode(), dataFile);
         }
-        return new DeliveryChunkDefinition(collectionName, chunkKey, resIndexFiles, resDataFiles);
+        return new DeliveryChunkDefinition(collectionName, chunkKey, resIndexFiles, resDataFiles, getDataStrategy(collectionDataFolder));
     }
 
     private static String getIndexStrategy(File indexFolder) {
         Properties properties = loadProperties(new File(indexFolder.getAbsolutePath() + "/index.properties"));
+        return properties.getProperty("strategy");
+    }
+
+    private static String getDataStrategy(File dataFolder) {
+        Properties properties = loadProperties(new File(dataFolder.getAbsolutePath() + "/delivery.properties"));
         return properties.getProperty("strategy");
     }
 }

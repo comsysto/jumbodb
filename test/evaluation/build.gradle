@@ -50,7 +50,7 @@ dependencies {
     compile 'com.google.guava:guava:13.0'
     compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
     compile 'org.msgpack:msgpack:0.6.7'
-    compile 'net.minidev:configuration-smart:2.0-RC2'
+    compile 'net.minidev:json-smart:2.0-RC2'
     compile project(':connectors:jumbodb-java-connector')
 
 //    compile 'de.undercouch:bson4jackson:2.0.0'

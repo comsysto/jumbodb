@@ -2,10 +2,8 @@ package org.jumbodb.database.service.management.status;
 
 import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.importer.DatabaseImportSession;
-import org.jumbodb.database.service.importer.ImportTask;
 import org.jumbodb.database.service.management.status.dto.ServerInformation;
 import org.jumbodb.database.service.query.DatabaseQuerySession;
-import org.jumbodb.database.service.query.Restartable;
 import org.jumbodb.database.service.statistics.GlobalStatistics;
 
 import java.text.DateFormat;

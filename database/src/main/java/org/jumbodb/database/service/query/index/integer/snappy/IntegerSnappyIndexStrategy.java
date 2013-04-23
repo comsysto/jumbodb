@@ -15,8 +15,6 @@ import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.definition.IndexDefinition;
 import org.jumbodb.database.service.query.index.IndexKey;
 import org.jumbodb.database.service.query.index.IndexStrategy;
-import org.jumbodb.database.service.query.index.hashcode.snappy.HashCodeSnappyIndexFile;
-import org.jumbodb.database.service.query.index.hashcode.snappy.HashCodeSnappyIndexTask;
 import org.jumbodb.database.service.query.index.hashcode.snappy.HashCodeSnappySearchIndexUtils;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
@@ -87,7 +85,6 @@ public class IntegerSnappyIndexStrategy implements IndexStrategy {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(indexFile, "r");
-            // CARSTEN fix use other libraries
             byte[] uncompressed = HashCodeSnappySearchIndexUtils.getUncompressed(raf, snappyChunks, 0);
             int fromHash = HashCodeSnappySearchIndexUtils.readFirstHash(uncompressed);
             uncompressed = HashCodeSnappySearchIndexUtils.getUncompressed(raf, snappyChunks, snappyChunks.getNumberOfChunks() - 1);
@@ -136,17 +133,20 @@ public class IntegerSnappyIndexStrategy implements IndexStrategy {
                         groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), obj);
                     }
                 }
-                else if(QueryOperation.BETWEEN == obj.getQueryOperation()) {
-                    throw new NotImplementedException("Not yet implemented");
-                }
-                else if(QueryOperation.GT == obj.getQueryOperation()) {
-                    throw new NotImplementedException("Not yet implemented");
+                else if(QueryOperation.NE == obj.getQueryOperation()) {
+                    if (intValue != hashCodeSnappyIndexFile.getFromInt() && intValue != hashCodeSnappyIndexFile.getToInt()) {
+                        groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), obj);
+                    }
                 }
                 else if(QueryOperation.LT == obj.getQueryOperation()) {
-                    throw new NotImplementedException("Not yet implemented");
+                    if (intValue < hashCodeSnappyIndexFile.getToInt()) {
+                        groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), obj);
+                    }
                 }
-                else if(QueryOperation.NE == obj.getQueryOperation()) {
-                    throw new NotImplementedException("Not yet implemented");
+                else if(QueryOperation.GT == obj.getQueryOperation()) {
+                    if (intValue > hashCodeSnappyIndexFile.getFromInt()) {
+                        groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), obj);
+                    }
                 }
             }
         }
@@ -159,7 +159,7 @@ public class IntegerSnappyIndexStrategy implements IndexStrategy {
 
     @Override
     public List<QueryOperation> getSupportedOperations() {
-        return Arrays.asList(QueryOperation.EQ, QueryOperation.BETWEEN, QueryOperation.NE, QueryOperation.GT, QueryOperation.LT);
+        return Arrays.asList(QueryOperation.EQ, QueryOperation.NE, QueryOperation.GT, QueryOperation.LT);
     }
 
     @Override

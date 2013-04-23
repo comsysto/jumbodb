@@ -1,12 +1,13 @@
 package org.jumbodb.connector.hadoop.index;
 
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 import org.jumbodb.connector.hadoop.configuration.JumboCustomImportJob;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
-import org.jumbodb.connector.hadoop.index.map.AbstractHashCodeIndexMapper;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.map.GenericJsonHashCodeIndexMapper;
 import org.jumbodb.connector.hadoop.index.map.GenericJsonIntegerIndexMapper;
@@ -19,6 +20,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.jumbodb.connector.hadoop.index.output.IntegerRangePartitioner;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,13 +35,29 @@ import java.util.Map;
  */
 public class IndexJobCreator {
 
-    public static Map<String, Class<? extends Mapper>> GENERIC_INDEX_MAPPER_STRATEGIES = createIndexMapper();
+    public static Map<String, Class<? extends Mapper>> INDEX_MAPPER_STRATEGIES = createIndexMapper();
+    public static Map<String, Class<? extends Partitioner>> INDEX_PARTITIONER_STRATEGIES = createIndexPartitioner();
+    public static Map<String, Class<? extends Writable>> INDEX_OUTPUT_KEY_STRATEGIES = createOutputKeyClasses();
 
     private static Map<String, Class<? extends Mapper>> createIndexMapper() {
         Map<String, Class<? extends Mapper>> indexMapper = new HashMap<String, Class<? extends Mapper>>();
         indexMapper.put(GenericJsonHashCodeIndexMapper.HASHCODE_SNAPPY_V_1, GenericJsonHashCodeIndexMapper.class);
         indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V_1, GenericJsonIntegerIndexMapper.class);
         return Collections.unmodifiableMap(indexMapper);
+    }
+
+    private static Map<String, Class<? extends Partitioner>> createIndexPartitioner() {
+        Map<String, Class<? extends Partitioner>> indexPartitioner = new HashMap<String, Class<? extends Partitioner>>();
+        indexPartitioner.put(GenericJsonHashCodeIndexMapper.HASHCODE_SNAPPY_V_1, HashRangePartitioner.class);
+        indexPartitioner.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V_1, IntegerRangePartitioner.class);
+        return Collections.unmodifiableMap(indexPartitioner);
+    }
+
+    private static Map<String, Class<? extends Writable>> createOutputKeyClasses() {
+        Map<String, Class<? extends Writable>> outputKeyClasses = new HashMap<String, Class<? extends Writable>>();
+        outputKeyClasses.put(GenericJsonHashCodeIndexMapper.HASHCODE_SNAPPY_V_1, IntWritable.class);
+        outputKeyClasses.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V_1, IntWritable.class);
+        return Collections.unmodifiableMap(outputKeyClasses);
     }
 
     public static IndexControlledJob createGenericIndexJob(Configuration conf, JumboGenericImportJob genericImportJob, IndexField indexField) throws IOException {
@@ -51,18 +69,38 @@ public class IndexJobCreator {
         FileOutputFormat.setCompressOutput(job, false);
         job.getConfiguration().set(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
         job.setJarByClass(IndexJobCreator.class);
-        Class<? extends Mapper> indexMapper = GENERIC_INDEX_MAPPER_STRATEGIES.get(indexField.getIndexStrategy());
-        if(indexMapper == null) {
-            throw new IllegalStateException("Index mapper strategy is not available " + indexField.getIndexStrategy());
-        }
-        job.setMapperClass(indexMapper);
+        job.setMapperClass(getMapperStrategy(indexField));
         job.setMapOutputKeyClass(IntWritable.class);
         job.setMapOutputValueClass(FileOffsetWritable.class);
         job.setOutputFormatClass(BinaryIndexOutputFormat.class);
-        job.setOutputKeyClass(IntWritable.class);
+        job.setOutputKeyClass(getOutputKeyClassStrategy(indexField));
         job.setOutputValueClass(FileOffsetWritable.class);
-        job.setPartitionerClass(HashRangePartitioner.class);
+        job.setPartitionerClass(getPartitionerStrategy(indexField));
         return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
+    }
+
+    private static Class<? extends Partitioner> getPartitionerStrategy(IndexField indexField) {
+        Class<? extends Partitioner> indexPartitioner = INDEX_PARTITIONER_STRATEGIES.get(indexField.getIndexStrategy());
+        if(indexPartitioner == null) {
+            throw new IllegalStateException("Index partitioner strategy is not available " + indexField.getIndexStrategy());
+        }
+        return indexPartitioner;
+    }
+
+    private static Class<? extends Writable> getOutputKeyClassStrategy(IndexField indexField) {
+        Class<? extends Writable> outputKeyClass = INDEX_OUTPUT_KEY_STRATEGIES.get(indexField.getIndexStrategy());
+        if(outputKeyClass == null) {
+            throw new IllegalStateException("Index Output Key Class strategy is not available " + indexField.getIndexStrategy());
+        }
+        return outputKeyClass;
+    }
+
+    private static Class<? extends Mapper> getMapperStrategy(IndexField indexField) {
+        Class<? extends Mapper> indexMapper = INDEX_MAPPER_STRATEGIES.get(indexField.getIndexStrategy());
+        if(indexMapper == null) {
+            throw new IllegalStateException("Index mapper strategy is not available " + indexField.getIndexStrategy());
+        }
+        return indexMapper;
     }
 
     public static IndexControlledJob createCustomIndexJob(Configuration conf, JumboCustomImportJob customImportJob, Class<? extends AbstractIndexMapper> mapper) throws IOException {

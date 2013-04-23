@@ -12,10 +12,10 @@ import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 public class IntegerRangePartitioner extends Partitioner<IntWritable, FileOffsetWritable> {
     @Override
     public int getPartition(IntWritable intWritable, FileOffsetWritable writables, int i) {
-        long maxHash = ((long)Integer.MAX_VALUE) * 2;
-        long section = (maxHash / ((long)i));
-        long hash = (long)intWritable.get() + Integer.MAX_VALUE;
-        int partition = (int) (hash / section);
+        long maxValue = ((long)Integer.MAX_VALUE) * 2;
+        long section = (maxValue / ((long)i));
+        long value = (long)intWritable.get() + Integer.MAX_VALUE;
+        int partition = (int) (value / section);
         return partition;
     }
 }

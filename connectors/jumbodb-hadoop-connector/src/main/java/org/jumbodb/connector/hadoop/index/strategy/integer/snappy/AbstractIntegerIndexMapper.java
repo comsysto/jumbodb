@@ -1,9 +1,10 @@
-package org.jumbodb.connector.hadoop.index.map;
+package org.jumbodb.connector.hadoop.index.strategy.integer.snappy;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.jumbodb.connector.hadoop.index.IndexJobCreator;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
+import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 
 import java.io.IOException;
 

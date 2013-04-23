@@ -1,6 +1,5 @@
 package org.jumbodb.connector.hadoop;
 
-import org.apache.commons.collections.MultiMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -11,7 +10,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.configuration.*;
-import org.jumbodb.connector.hadoop.index.map.GenericJsonHashCodeIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy.GenericJsonHashCodeIndexMapper;
 
 import java.io.IOException;
 import java.net.URI;

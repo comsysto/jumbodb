@@ -1,7 +1,11 @@
-package org.jumbodb.connector.hadoop.index.map;
+package org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.codehaus.jackson.JsonNode;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
@@ -58,6 +62,20 @@ public class GenericJsonHashCodeIndexMapper extends AbstractHashCodeIndexMapper<
         return null;
     }
 
+    @Override
+    public Class<? extends Partitioner> getPartitioner() {
+        return HashRangePartitioner.class;
+    }
+
+    @Override
+    public Class<? extends WritableComparable> getOutputKeyClass() {
+        return IntWritable.class;
+    }
+
+    @Override
+    public Class<? extends OutputFormat> getOutputFormat() {
+        return HashCodeIndexOutputFormat.class;
+    }
 
     @Override
     public boolean throwErrorOnInvalidDataset() {

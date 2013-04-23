@@ -1,22 +1,22 @@
 package org.jumbodb.connector.hadoop.index.output;
 
-import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class BinaryIndexOutputFormat extends FileOutputFormat<IntWritable, FileOffsetWritable> {
+public abstract class AbstractIndexOutputFormat<T extends WritableComparable> extends FileOutputFormat<T, FileOffsetWritable> {
 
     @Override
-    public RecordWriter<IntWritable, FileOffsetWritable> getRecordWriter(
+    public RecordWriter<T, FileOffsetWritable> getRecordWriter(
             TaskAttemptContext context) throws IOException,
                   InterruptedException {
         Configuration conf = context.getConfiguration();
@@ -26,7 +26,7 @@ public class BinaryIndexOutputFormat extends FileOutputFormat<IntWritable, FileO
         return new BinaryIndexRecordWriter(fileOut);
     }
 
-    private class BinaryIndexRecordWriter extends RecordWriter<IntWritable, FileOffsetWritable>{
+    private class BinaryIndexRecordWriter extends RecordWriter<T, FileOffsetWritable>{
         private final DataOutputStream out;
         public BinaryIndexRecordWriter(DataOutputStream out)
                 throws IOException{
@@ -34,10 +34,8 @@ public class BinaryIndexOutputFormat extends FileOutputFormat<IntWritable, FileO
         }
 
         @Override
-        public synchronized void write(IntWritable k, FileOffsetWritable v) throws IOException, InterruptedException {
-            out.writeInt(k.get());
-            out.writeInt(v.getFileNameHashCode());
-            out.writeLong(v.getOffset());
+        public synchronized void write(T k, FileOffsetWritable v) throws IOException, InterruptedException {
+            AbstractIndexOutputFormat.this.write(k, v, out);
         }
 
         @Override
@@ -45,5 +43,7 @@ public class BinaryIndexOutputFormat extends FileOutputFormat<IntWritable, FileO
             out.close();
         }
     }
+
+    protected abstract void write(T k, FileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException;
 
 }

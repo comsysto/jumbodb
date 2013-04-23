@@ -22,7 +22,8 @@ public class TwitterQuery {
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 100000)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
-        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.LT, 200)));
+        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 3000)));
+        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.LT, 4000)));
 
 //        List<Object> alexjenkins29 = new ArrayList<Object>(Arrays.asList("alexjenkins29"));
 //        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS,"user.screen_name", alexjenkins29);

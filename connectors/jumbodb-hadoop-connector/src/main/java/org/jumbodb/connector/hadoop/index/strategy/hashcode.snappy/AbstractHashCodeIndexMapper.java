@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.map;
+package org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy;
 
 import org.jumbodb.connector.hadoop.index.IndexJobCreator;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
@@ -9,6 +9,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 
 import java.io.IOException;
 

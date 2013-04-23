@@ -1,6 +1,11 @@
-package org.jumbodb.connector.hadoop.index.map;
+package org.jumbodb.connector.hadoop.index.strategy.integer.snappy;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.codehaus.jackson.JsonNode;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
@@ -15,7 +20,7 @@ public class GenericJsonIntegerIndexMapper extends AbstractIntegerIndexMapper<Js
     private IndexField indexField;
 
     @Override
-    protected void setup(Context context) throws IOException, InterruptedException {
+    protected void setup(Mapper.Context context) throws IOException, InterruptedException {
         super.setup(context);
         Configuration configuration = context.getConfiguration();
         indexField = JumboConfigurationUtil.loadIndexJson(configuration);
@@ -31,6 +36,21 @@ public class GenericJsonIntegerIndexMapper extends AbstractIntegerIndexMapper<Js
             return valueFor.getValueAsInt();
         }
         return null;
+    }
+
+    @Override
+    public Class<? extends Partitioner> getPartitioner() {
+        return IntegerRangePartitioner.class;
+    }
+
+    @Override
+    public Class<? extends WritableComparable> getOutputKeyClass() {
+        return IntWritable.class;
+    }
+
+    @Override
+    public Class<? extends OutputFormat> getOutputFormat() {
+        return IntegerIndexOutputFormat.class;
     }
 
     @Override

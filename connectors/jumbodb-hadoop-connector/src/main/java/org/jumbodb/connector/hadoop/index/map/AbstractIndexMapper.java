@@ -4,7 +4,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
@@ -71,6 +74,11 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
     public List<String> getIndexSourceFields() {
         return Collections.emptyList();
     }
+
+
+    public abstract Class<? extends Partitioner> getPartitioner();
+    public abstract Class<? extends WritableComparable> getOutputKeyClass();
+    public abstract Class<? extends OutputFormat> getOutputFormat();
 
     public abstract void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException;
     public abstract String getIndexName();

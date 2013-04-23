@@ -3,7 +3,6 @@ package org.jumbodb.database.service.query.index.integer.snappy;
 
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.FileOffset;
-import org.jumbodb.database.service.query.index.hashcode.snappy.HashCodeSnappySearchIndexUtils;
 
 import java.io.File;
 import java.util.Set;
@@ -20,7 +19,6 @@ public class IntegerSnappyIndexTask implements Callable<Set<FileOffset>> {
 
     @Override
     public Set<FileOffset> call() throws Exception {
-        return null;
-//        return HashCodeSnappySearchIndexUtils.searchOffsetsByHashes(indexFile, hashes);
+        return IntegerSnappySearchIndexUtils.searchOffsetsByClauses(indexFile, clauses);
     }
 }

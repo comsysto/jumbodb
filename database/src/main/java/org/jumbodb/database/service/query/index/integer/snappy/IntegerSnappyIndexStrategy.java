@@ -15,10 +15,10 @@ import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.definition.IndexDefinition;
 import org.jumbodb.database.service.query.index.IndexKey;
 import org.jumbodb.database.service.query.index.IndexStrategy;
-import org.jumbodb.database.service.query.index.hashcode.snappy.HashCodeSnappySearchIndexUtils;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
 import org.jumbodb.database.service.query.snappy.SnappyStreamToFileCopy;
+import org.jumbodb.database.service.query.snappy.SnappyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -35,7 +35,7 @@ import java.util.concurrent.Future;
  */
 public class IntegerSnappyIndexStrategy implements IndexStrategy {
 
-    public static final int SNAPPY_INDEX_CHUNK_SIZE = 32 * 1024; // must be a multiple of 16! (4 byte data hash, 4 byte file name hash, 8 byte offset)
+    public static final int SNAPPY_INDEX_CHUNK_SIZE = 32 * 1024; // must be a multiple of 16! (4 byte integer data, 4 byte file name hash, 8 byte offset)
 
     private Logger log = LoggerFactory.getLogger(IntegerSnappyIndexStrategy.class);
 
@@ -85,10 +85,10 @@ public class IntegerSnappyIndexStrategy implements IndexStrategy {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(indexFile, "r");
-            byte[] uncompressed = HashCodeSnappySearchIndexUtils.getUncompressed(raf, snappyChunks, 0);
-            int fromHash = HashCodeSnappySearchIndexUtils.readFirstHash(uncompressed);
-            uncompressed = HashCodeSnappySearchIndexUtils.getUncompressed(raf, snappyChunks, snappyChunks.getNumberOfChunks() - 1);
-            int toHash = HashCodeSnappySearchIndexUtils.readLastHash(uncompressed);
+            byte[] uncompressed = SnappyUtil.getUncompressed(raf, snappyChunks, 0);
+            int fromHash = IntegerSnappySearchIndexUtils.readFirstInt(uncompressed);
+            uncompressed = SnappyUtil.getUncompressed(raf, snappyChunks, snappyChunks.getNumberOfChunks() - 1);
+            int toHash = IntegerSnappySearchIndexUtils.readLastInt(uncompressed);
             return new IntegerSnappyIndexFile(fromHash, toHash, indexFile);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -134,7 +134,7 @@ public class IntegerSnappyIndexStrategy implements IndexStrategy {
                     }
                 }
                 else if(QueryOperation.NE == obj.getQueryOperation()) {
-                    if (intValue != hashCodeSnappyIndexFile.getFromInt() && intValue != hashCodeSnappyIndexFile.getToInt()) {
+                    if (intValue != hashCodeSnappyIndexFile.getFromInt() || intValue != hashCodeSnappyIndexFile.getToInt()) {
                         groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), obj);
                     }
                 }

@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
+import org.jumbodb.database.service.query.snappy.SnappyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
@@ -50,7 +51,7 @@ public class HashCodeSnappySearchIndexUtils {
             int chunkDiff = (toChunk - fromChunk) / 2;
             int currentChunk = chunkDiff + fromChunk;
 
-            byte[] uncompressed = getUncompressed(indexRaf, snappyChunks, currentChunk);
+            byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
             int firstHash = readFirstHash(uncompressed);
             int lastHash = readLastHash(uncompressed);
 
@@ -60,7 +61,7 @@ public class HashCodeSnappySearchIndexUtils {
                 // ok ist gleich ein block weiter zurück ... da es bereits da beginnen könnte
                 while(currentChunk > 0) {
                     currentChunk--;
-                    uncompressed = getUncompressed(indexRaf, snappyChunks, currentChunk);
+                    uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
                     firstHash = readFirstHash(uncompressed);
                     if(firstHash < searchHash) {
                         return currentChunk;
@@ -91,11 +92,11 @@ public class HashCodeSnappySearchIndexUtils {
     }
 
     public static int readLastHash(byte[] uncompressed) {
-        return readInt(uncompressed, uncompressed.length - 16);
+        return SnappyUtil.readInt(uncompressed, uncompressed.length - 16);
     }
 
     public static int readFirstHash(byte[] uncompressed) {
-        return readInt(uncompressed, 0);
+        return SnappyUtil.readInt(uncompressed, 0);
     }
 
     private static Set<FileOffset> findOffsetForHashCode(RandomAccessFile indexRaf, int searchHash, SnappyChunks snappyChunks) throws IOException {
@@ -104,7 +105,7 @@ public class HashCodeSnappySearchIndexUtils {
         if(currentChunk >= 0) {
             Set<FileOffset> result = new HashSet<FileOffset>();
             while(currentChunk < numberOfChunks) {
-                byte[] uncompressed = getUncompressed(indexRaf, snappyChunks, currentChunk);
+                byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
                 ByteArrayInputStream bais = null;
                 DataInputStream dis = null;
                 try {
@@ -188,30 +189,6 @@ public class HashCodeSnappySearchIndexUtils {
 //        return Collections.emptySet();
     }
 
-    public static byte[] getUncompressed(RandomAccessFile indexRaf, SnappyChunks snappyChunks, long currentChunk) throws IOException {
-//        Logger.info("currentChunk " + currentChunk);
-        long offsetForChunk = snappyChunks.getOffsetForChunk(currentChunk);
-//        Logger.info("offsetForChunk" + offsetForChunk);
-        indexRaf.seek(offsetForChunk);
-        int snappyBlockLength = indexRaf.readInt();
-//        Logger.info("snappyBlockLength" + snappyBlockLength);
-//        Logger.info("from meta" + snappyChunks.getChunks().get(0));
-        byte[] compressed = new byte[snappyBlockLength];
-        indexRaf.read(compressed);
-//        int uncompressedLength = Snappy.uncompressedLength(compressed, 0, snappyChunks.getChunkSize());
-//        byte[] uncompressed = new byte[uncompressedLength];
-//        int actualUncompressedLength = Snappy.uncompress(compressed, 0, snappyChunks.getChunkSize(), uncompressed, 0);
 
-//        return uncompressed;
-        return Snappy.uncompress(compressed);
-    }
-
-    public static int readInt(byte[] buffer, int pos) {
-        int b1 = (buffer[pos] & 0xFF) << 24;
-        int b2 = (buffer[pos + 1] & 0xFF) << 16;
-        int b3 = (buffer[pos + 2] & 0xFF) << 8;
-        int b4 = buffer[pos + 3] & 0xFF;
-        return b1 | b2 | b3 | b4;
-    }
 
 }

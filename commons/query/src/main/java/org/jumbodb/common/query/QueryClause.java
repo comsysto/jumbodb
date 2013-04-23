@@ -10,7 +10,7 @@ public class QueryClause {
     public QueryClause() {
     }
 
-    public QueryClause(QueryOperation queryOperation, String value) {
+    public QueryClause(QueryOperation queryOperation, Object value) {
         this.queryOperation = queryOperation;
         this.value = value;
     }

@@ -22,13 +22,14 @@ import java.util.concurrent.Callable;
 public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private Logger log = LoggerFactory.getLogger(JsonSnappyRetrieveDataSetsTask.class);
 
-    public static final byte[] EMPTY_BUFFER = new byte[0];
     private final File file;
     private final JumboQuery searchQuery;
     private final ResultCallback resultCallback;
     private final List<Long> offsets;
-//    private final int bufferSize = 10;
+    //    private final int bufferSize = 10;
     private final int bufferSize = 16 * 1024; // CARSTEN make the buffer size learnable by collection
+    private final int maximumOffsetGroupSize = 1000;
+    public static final byte[] EMPTY_BUFFER = new byte[0];
     private final byte[] defaultBuffer = new byte[bufferSize]; // for reuse
 
 
@@ -114,17 +115,22 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     // CARSTEN reuse buffer and let grow
                     byte[] readBuffer = getBufferByOffsetGroup(offsetGroup);
                     byte[] resultBuffer = getResultBuffer(lastBuffer, toSkip);
+
                     boolean foundEnd =  false; // line break or EOF
                     while(!foundEnd) {
                         int read = sis.read(readBuffer);
-                        currentOffset += read;
+                        if(read != -1) {
+                        }
                         if(readBuffer.length == read) {
                             foundEnd = findDatasetLengthByLineBreak(readBuffer, 0) != -1;
 
                         } else {
                             foundEnd = true;
                         }
-                        resultBuffer = concat(readBuffer, resultBuffer, read);
+                        if(read != -1) {
+                            currentOffset += read;
+                            resultBuffer = concat(readBuffer, resultBuffer, read);
+                        }
 //                        System.out.println(new String(resultBuffer) + " read " + read + " readBuffer.length " + readBuffer.length);
                     }
                     lastBuffer = resultBuffer;
@@ -133,7 +139,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         int fromOffset = (int) (offset - firstOffset);
                         int datasetLength = findDatasetLengthByLineBreak(resultBuffer, fromOffset);
                         byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, fromOffset, datasetLength);
-
                         if (matchingFilter(dataSetFromOffsetsGroup, jsonParser)) {
                             resultCallback.writeResult(dataSetFromOffsetsGroup);
                             results++;
@@ -267,7 +272,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         long lastOffset = initialOffset;
         for (Long offset : offsets) {
 
-            if ((offset - lastOffset) <= bufSize) {
+            if ((offset - lastOffset) <= bufSize && group.size() < maximumOffsetGroupSize) {
                 group.add(offset);
             } else {
                 if (lastOffset != initialOffset) {

@@ -39,21 +39,6 @@ public class GenericJsonIntegerIndexMapper extends AbstractIntegerIndexMapper<Js
     }
 
     @Override
-    public Class<? extends Partitioner> getPartitioner() {
-        return IntegerRangePartitioner.class;
-    }
-
-    @Override
-    public Class<? extends WritableComparable> getOutputKeyClass() {
-        return IntWritable.class;
-    }
-
-    @Override
-    public Class<? extends OutputFormat> getOutputFormat() {
-        return IntegerIndexOutputFormat.class;
-    }
-
-    @Override
     public String getIndexName() {
         return indexField.getIndexName();
     }

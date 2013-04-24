@@ -24,7 +24,7 @@ import java.util.List;
  * Date: 11/3/12
  * Time: 3:26 PM
  */
-public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, IntWritable, FileOffsetWritable> {
+public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, WritableComparable, FileOffsetWritable> {
     private ObjectMapper jsonMapper;
 
     @Override

@@ -31,7 +31,10 @@ public class TwitterQuery {
 //        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS, "_id.toCell", Arrays.asList((Object)"11211422244", "1121332341112"));
         long start = System.currentTimeMillis();
         List<Map> daily = jumboDriver.find("carsten.twitter", Map.class, query);
-        System.out.println(daily);
+        for (Map map : daily) {
+            System.out.println(map.get("text"));
+            System.out.println("==========");
+        }
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }
 }

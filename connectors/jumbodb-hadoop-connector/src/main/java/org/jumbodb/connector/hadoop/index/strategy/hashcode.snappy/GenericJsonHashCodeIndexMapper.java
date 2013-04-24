@@ -63,21 +63,6 @@ public class GenericJsonHashCodeIndexMapper extends AbstractHashCodeIndexMapper<
     }
 
     @Override
-    public Class<? extends Partitioner> getPartitioner() {
-        return HashRangePartitioner.class;
-    }
-
-    @Override
-    public Class<? extends WritableComparable> getOutputKeyClass() {
-        return IntWritable.class;
-    }
-
-    @Override
-    public Class<? extends OutputFormat> getOutputFormat() {
-        return HashCodeIndexOutputFormat.class;
-    }
-
-    @Override
     public boolean throwErrorOnInvalidDataset() {
         return false;
     }

@@ -1,5 +1,8 @@
 package org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy;
 
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.IndexJobCreator;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.apache.hadoop.io.IntWritable;
@@ -33,6 +36,21 @@ public abstract class AbstractHashCodeIndexMapper<T> extends AbstractIndexMapper
     @Override
     public String getStrategy() {
         return HASHCODE_SNAPPY_V_1;
+    }
+
+    @Override
+    public Class<? extends Partitioner> getPartitioner() {
+        return HashRangePartitioner.class;
+    }
+
+    @Override
+    public Class<? extends WritableComparable> getOutputKeyClass() {
+        return IntWritable.class;
+    }
+
+    @Override
+    public Class<? extends OutputFormat> getOutputFormat() {
+        return HashCodeIndexOutputFormat.class;
     }
 
     public abstract String getIndexableValue(T input);

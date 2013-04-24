@@ -64,7 +64,7 @@ public class ImportJobCreator {
     public static List<ControlledJob> createDataImportJobs(Configuration conf, BaseJumboImportJob genericImportJob) throws IOException {
         List<ControlledJob> jobs = new ArrayList<ControlledJob>();
         for (ImportHost host : genericImportJob.getHosts()) {
-            jobs.add(createJumboJob(conf, genericImportJob.getSortedInputPath(), new Path(genericImportJob.getLogOutputPath().toString() + "/" + host.getHost() + "/data/"), JumboConstants.DATA_TYPE_DATA, genericImportJob, host, null));
+            jobs.add(createJumboJob(conf, genericImportJob.getSortedInputPath(), new Path(genericImportJob.getLogOutputPath().toString() + "/" + host.getHost() + "_" + host.getPort() + "/data/"), JumboConstants.DATA_TYPE_DATA, genericImportJob, host, null));
         }
         return jobs;
     }
@@ -72,7 +72,7 @@ public class ImportJobCreator {
     public static List<ControlledJob> createIndexImportJobs(Configuration conf, BaseJumboImportJob genericImportJob, IndexField indexField) throws IOException {
         List<ControlledJob> jobs = new ArrayList<ControlledJob>();
         for (ImportHost host : genericImportJob.getHosts()) {
-            jobs.add(createJumboJob(conf, new Path(genericImportJob.getIndexOutputPath().toString() + "/" + indexField.getIndexName() + "/"), new Path(genericImportJob.getLogOutputPath().toString() + "/" + host.getHost() + "/index/" + indexField.getIndexName() + "/"), JumboConstants.DATA_TYPE_INDEX, genericImportJob, host, indexField));
+            jobs.add(createJumboJob(conf, new Path(genericImportJob.getIndexOutputPath().toString() + "/" + indexField.getIndexName() + "/"), new Path(genericImportJob.getLogOutputPath().toString() + "/" + host.getHost() + "_" + host.getPort() + "/index/" + indexField.getIndexName() + "/"), JumboConstants.DATA_TYPE_INDEX, genericImportJob, host, indexField));
         }
         return jobs;
     }

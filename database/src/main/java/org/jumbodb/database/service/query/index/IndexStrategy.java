@@ -20,7 +20,7 @@ public interface IndexStrategy {
     boolean isResponsibleFor(String collection, String chunkKey, String indexName);
     String getStrategyName();
     Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query);
-    List<QueryOperation> getSupportedOperations();
+    Set<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);
     void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile);

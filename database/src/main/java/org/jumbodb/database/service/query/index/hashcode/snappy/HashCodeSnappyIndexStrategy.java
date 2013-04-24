@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.index.hashcode.snappy;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang.UnhandledException;
@@ -142,8 +143,8 @@ public class HashCodeSnappyIndexStrategy implements IndexStrategy {
     }
 
     @Override
-    public List<QueryOperation> getSupportedOperations() {
-        return Arrays.asList(QueryOperation.EQ);
+    public Set<QueryOperation> getSupportedOperations() {
+        return Sets.newHashSet(QueryOperation.EQ);
     }
 
     @Override

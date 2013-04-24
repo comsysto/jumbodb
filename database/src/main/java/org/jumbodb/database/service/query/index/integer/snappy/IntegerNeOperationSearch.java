@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
 import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.database.service.query.index.basic.numeric.*;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyUtil;
 
@@ -10,41 +11,26 @@ import java.io.RandomAccessFile;
 /**
  * @author Carsten Hufe
  */
-public class IntegerNeOperationSearch implements OperationSearch<Integer> {
-    @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryClause queryClause, SnappyChunks snappyChunks) throws IOException {
-        int searchValue = (Integer)queryClause.getValue();
-        int numberOfChunks = snappyChunks.getNumberOfChunks();
-        int fromChunk = 0;
-        int toChunk = numberOfChunks;
-        // TODO verify snappy version
-        while(toChunk != 0) {
-            int currentChunk = (toChunk - fromChunk) / 2;
+public class IntegerNeOperationSearch extends NumberNeOperationSearch<Integer, NumberSnappyIndexFile<Integer>> {
 
-            byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
-            int firstInt = IntegerSnappySearchIndexUtils.readFirstInt(uncompressed);
-            int lastInt = IntegerSnappySearchIndexUtils.readLastInt(uncompressed);
-
-            // just going up
-            if(firstInt != searchValue || lastInt != searchValue) {
-                toChunk = currentChunk;
-            } else {
-                return currentChunk;
-            }
-
-        }
-        return 0;
+    public IntegerNeOperationSearch(NumberSnappyIndexStrategy<Integer, NumberSnappyIndexFile<Integer>> strategy) {
+        super(strategy);
     }
 
     @Override
+    public boolean ne(Integer val1, Integer val2) {
+        return val1 != val2;
+    }
+
+    @Override
+    public boolean acceptIndexFile(QueryClause queryClause, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
+        int searchValue = (Integer)queryClause.getValue();
+        return searchValue != hashCodeSnappyIndexFile.getFrom() || searchValue != hashCodeSnappyIndexFile.getTo();
+    }
+
+     @Override
     public boolean matching(Integer currentValue, QueryClause queryClause) {
         int searchValue = (Integer)queryClause.getValue();
         return currentValue != searchValue;
-    }
-
-    @Override
-    public boolean acceptIndexFile(QueryClause queryClause, IntegerSnappyIndexFile hashCodeSnappyIndexFile) {
-        int searchValue = (Integer)queryClause.getValue();
-        return searchValue != hashCodeSnappyIndexFile.getFromInt() || searchValue != hashCodeSnappyIndexFile.getToInt();
     }
 }

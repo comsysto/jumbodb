@@ -33,8 +33,8 @@ public class NotFoundIndexStrategy implements IndexStrategy {
     }
 
     @Override
-    public List<QueryOperation> getSupportedOperations() {
-        return Collections.emptyList();
+    public Set<QueryOperation> getSupportedOperations() {
+        return Collections.emptySet();
     }
 
     @Override

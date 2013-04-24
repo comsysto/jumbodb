@@ -1,8 +1,11 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
 import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.database.service.query.index.basic.numeric.NumberLtOperationSearch;
+import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
+import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
+import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
-import org.jumbodb.database.service.query.snappy.SnappyUtil;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -10,11 +13,9 @@ import java.io.RandomAccessFile;
 /**
  * @author Carsten Hufe
  */
-public class IntegerLtOperationSearch implements OperationSearch<Integer> {
-    @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryClause queryClause, SnappyChunks snappyChunks) throws IOException {
-        // wow that was easy .... file has already matched, everything from beginning must be smaller
-        return 0;
+public class IntegerLtOperationSearch extends NumberLtOperationSearch<Integer, NumberSnappyIndexFile<Integer>> {
+    public IntegerLtOperationSearch(NumberSnappyIndexStrategy<Integer, NumberSnappyIndexFile<Integer>> strategy) {
+        super(strategy);
     }
 
     @Override
@@ -24,8 +25,8 @@ public class IntegerLtOperationSearch implements OperationSearch<Integer> {
     }
 
     @Override
-    public boolean acceptIndexFile(QueryClause queryClause, IntegerSnappyIndexFile hashCodeSnappyIndexFile) {
+    public boolean acceptIndexFile(QueryClause queryClause, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
         int searchValue = (Integer)queryClause.getValue();
-        return searchValue < hashCodeSnappyIndexFile.getToInt();
+        return searchValue < hashCodeSnappyIndexFile.getTo();
     }
 }

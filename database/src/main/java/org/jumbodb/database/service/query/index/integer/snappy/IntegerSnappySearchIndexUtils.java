@@ -29,6 +29,7 @@ public class IntegerSnappySearchIndexUtils {
         operations.put(QueryOperation.NE, new IntegerNeOperationSearch());
         operations.put(QueryOperation.LT, new IntegerLtOperationSearch());
         operations.put(QueryOperation.GT, new IntegerGtOperationSearch());
+        operations.put(QueryOperation.BETWEEN, new IntegerBetweenOperationSearch());
         return operations;
     }
 
@@ -64,8 +65,7 @@ public class IntegerSnappySearchIndexUtils {
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + clause.getQueryOperation());
         }
-        Integer searchValue = (Integer) clause.getValue();
-        long currentChunk = integerOperationSearch.findFirstMatchingChunk(indexRaf, searchValue, snappyChunks);
+        long currentChunk = integerOperationSearch.findFirstMatchingChunk(indexRaf, clause, snappyChunks);
         long numberOfChunks = snappyChunks.getNumberOfChunks();
         if(currentChunk >= 0) {
             Set<FileOffset> result = new HashSet<FileOffset>();
@@ -80,7 +80,7 @@ public class IntegerSnappySearchIndexUtils {
                         int currentIntValue = dis.readInt();
                         int fileNameHash = dis.readInt();
                         long offset = dis.readLong();
-                        if(integerOperationSearch.matching(currentIntValue, searchValue)) {
+                        if(integerOperationSearch.matching(currentIntValue, clause)) {
                             result.add(new FileOffset(fileNameHash, offset));
                         } else if(!result.isEmpty()) {
                             // found some results, but here it isnt equal, that means end of results
@@ -97,5 +97,13 @@ public class IntegerSnappySearchIndexUtils {
             return result;
         }
         return Collections.emptySet();
+    }
+
+    public static boolean acceptIndexFile(QueryClause queryClause, IntegerSnappyIndexFile hashCodeSnappyIndexFile) {
+        OperationSearch<Integer> integerOperationSearch = OPERATIONS.get(queryClause.getQueryOperation());
+        if(integerOperationSearch == null) {
+            throw new UnsupportedOperationException("QueryOperation is not supported: " + queryClause.getQueryOperation());
+        }
+        return integerOperationSearch.acceptIndexFile(queryClause, hashCodeSnappyIndexFile);
     }
 }

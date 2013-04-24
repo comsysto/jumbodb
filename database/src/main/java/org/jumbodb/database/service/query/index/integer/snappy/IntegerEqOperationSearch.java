@@ -12,7 +12,12 @@ import java.io.RandomAccessFile;
  */
 public class IntegerEqOperationSearch implements OperationSearch<Integer> {
     @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, Integer searchValue, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryClause queryClause, SnappyChunks snappyChunks) throws IOException {
+        int searchValue = (Integer)queryClause.getValue();
+        return findFirstMatchingChunk(indexRaf, snappyChunks, searchValue);
+    }
+
+    protected long findFirstMatchingChunk(RandomAccessFile indexRaf, SnappyChunks snappyChunks, int searchValue) throws IOException {
         int numberOfChunks = snappyChunks.getNumberOfChunks();
         int fromChunk = 0;
         int toChunk = numberOfChunks;
@@ -60,7 +65,14 @@ public class IntegerEqOperationSearch implements OperationSearch<Integer> {
     }
 
     @Override
-    public boolean matching(Integer currentValue, Integer searchValue) {
-        return currentValue.equals(searchValue);
+    public boolean matching(Integer currentValue, QueryClause queryClause) {
+        int searchValue = (Integer)queryClause.getValue();
+        return currentValue == searchValue;
+    }
+
+    @Override
+    public boolean acceptIndexFile(QueryClause queryClause, IntegerSnappyIndexFile hashCodeSnappyIndexFile) {
+        int searchValue = (Integer)queryClause.getValue();
+        return searchValue >= hashCodeSnappyIndexFile.getFromInt() && searchValue <= hashCodeSnappyIndexFile.getToInt();
     }
 }

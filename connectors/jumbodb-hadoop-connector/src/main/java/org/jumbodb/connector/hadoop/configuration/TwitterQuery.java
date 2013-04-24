@@ -19,7 +19,8 @@ public class TwitterQuery {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
 //        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
         JumboQuery query = new JumboQuery();
-        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 1000000)));
+        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(150, 200))));
+//        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 1000000)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 3000)));

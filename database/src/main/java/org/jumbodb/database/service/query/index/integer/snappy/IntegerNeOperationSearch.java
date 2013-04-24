@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
+import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyUtil;
 
@@ -11,7 +12,8 @@ import java.io.RandomAccessFile;
  */
 public class IntegerNeOperationSearch implements OperationSearch<Integer> {
     @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, Integer searchValue, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryClause queryClause, SnappyChunks snappyChunks) throws IOException {
+        int searchValue = (Integer)queryClause.getValue();
         int numberOfChunks = snappyChunks.getNumberOfChunks();
         int fromChunk = 0;
         int toChunk = numberOfChunks;
@@ -35,7 +37,14 @@ public class IntegerNeOperationSearch implements OperationSearch<Integer> {
     }
 
     @Override
-    public boolean matching(Integer currentValue, Integer searchValue) {
-        return !currentValue.equals(searchValue);
+    public boolean matching(Integer currentValue, QueryClause queryClause) {
+        int searchValue = (Integer)queryClause.getValue();
+        return currentValue != searchValue;
+    }
+
+    @Override
+    public boolean acceptIndexFile(QueryClause queryClause, IntegerSnappyIndexFile hashCodeSnappyIndexFile) {
+        int searchValue = (Integer)queryClause.getValue();
+        return searchValue != hashCodeSnappyIndexFile.getFromInt() || searchValue != hashCodeSnappyIndexFile.getToInt();
     }
 }

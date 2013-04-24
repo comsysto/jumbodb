@@ -126,27 +126,9 @@ public class IntegerSnappyIndexStrategy implements IndexStrategy {
         List<IntegerSnappyIndexFile> indexFiles = getIndexFiles(collection, chunkKey, query);
         MultiValueMap<File, QueryClause> groupByIndexFile = new LinkedMultiValueMap<File, QueryClause>();
         for (IntegerSnappyIndexFile hashCodeSnappyIndexFile : indexFiles) {
-            for (QueryClause obj : query.getClauses()) {
-                int intValue = (Integer)obj.getValue();
-                if(QueryOperation.EQ == obj.getQueryOperation()) {
-                    if (intValue >= hashCodeSnappyIndexFile.getFromInt() && intValue <= hashCodeSnappyIndexFile.getToInt()) {
-                        groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), obj);
-                    }
-                }
-                else if(QueryOperation.NE == obj.getQueryOperation()) {
-                    if (intValue != hashCodeSnappyIndexFile.getFromInt() || intValue != hashCodeSnappyIndexFile.getToInt()) {
-                        groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), obj);
-                    }
-                }
-                else if(QueryOperation.LT == obj.getQueryOperation()) {
-                    if (intValue < hashCodeSnappyIndexFile.getToInt()) {
-                        groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), obj);
-                    }
-                }
-                else if(QueryOperation.GT == obj.getQueryOperation()) {
-                    if (intValue > hashCodeSnappyIndexFile.getFromInt()) {
-                        groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), obj);
-                    }
+            for (QueryClause queryClause : query.getClauses()) {
+                if(IntegerSnappySearchIndexUtils.acceptIndexFile(queryClause, hashCodeSnappyIndexFile)) {
+                    groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), queryClause);
                 }
             }
         }

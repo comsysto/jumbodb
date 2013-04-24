@@ -27,14 +27,14 @@ public class SnappyTestIn {
 //        bis.close();
 //        fis.close();
 
-        FileInputStream fis = new FileInputStream("/Users/carsten/smhadoop/output/twitter/2013-04-23-14-01-47/index/carsten.twitter/followers_count/part-r-00000.odx");
+        FileInputStream fis = new FileInputStream("/Users/carsten/smhadoop/output/twitter/2013-04-24-10-00-16/index/carsten.twitter/followers_count/part-r-00000.odx");
         BufferedInputStream bis = new BufferedInputStream(fis);
         DataInputStream dis = new DataInputStream(bis);
 
         int count = 0;
         while (dis.available() > 0) {
             int value = dis.readInt();
-            if(value < 200) {
+            if(value > 150 && value < 200) {
                 count++;
                 System.out.println(value);
             }

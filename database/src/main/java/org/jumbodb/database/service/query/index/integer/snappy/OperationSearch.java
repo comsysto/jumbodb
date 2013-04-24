@@ -10,6 +10,7 @@ import java.io.RandomAccessFile;
  * @author Carsten Hufe
  */
 public interface OperationSearch<T> {
-    long findFirstMatchingChunk(RandomAccessFile indexRaf, Integer searchValue, SnappyChunks snappyChunks) throws IOException;
-    boolean matching(T currentValue, T searchValue);
+    public boolean acceptIndexFile(QueryClause queryClause, IntegerSnappyIndexFile hashCodeSnappyIndexFile);
+    long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryClause clause, SnappyChunks snappyChunks) throws IOException;
+    boolean matching(T currentValue, QueryClause clause);
 }

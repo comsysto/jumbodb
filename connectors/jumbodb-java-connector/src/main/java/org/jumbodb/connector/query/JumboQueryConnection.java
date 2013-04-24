@@ -146,7 +146,6 @@ public class JumboQueryConnection {
                     jsonByteArray = new byte[byteArrayLength];
                 }
                 dis.readFully(jsonByteArray, 0, byteArrayLength);
-                String aaaa = new String(jsonByteArray);
                 T result = jsonMapper.readValue(jsonByteArray, 0, byteArrayLength, jsonClazz);
                 resultHandler.onResult(result);
                 results++;

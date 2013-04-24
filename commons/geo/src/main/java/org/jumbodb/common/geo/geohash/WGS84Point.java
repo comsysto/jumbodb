@@ -2,6 +2,14 @@ package org.jumbodb.common.geo.geohash;
 
 import java.io.Serializable;
 
+/*
+* Copyright 2010, Silvio Heuberger @ IFS www.ifs.hsr.ch
+*
+* This code is release under the LGPL license.
+* You should have received a copy of the license
+* in the LICENSE file. If you have not, see
+* http://www.gnu.org/licenses/lgpl-3.0.txt
+*/
 public class WGS84Point implements Serializable {
     private static final long serialVersionUID = 7457963026513014856L;
     private double longitude;

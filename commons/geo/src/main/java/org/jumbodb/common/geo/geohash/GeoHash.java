@@ -4,6 +4,16 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/*
+* Copyright 2010, Silvio Heuberger @ IFS www.ifs.hsr.ch
+*
+* This code is release under the LGPL license.
+* You should have received a copy of the license
+* in the LICENSE file. If you have not, see
+* http://www.gnu.org/licenses/lgpl-3.0.txt
+*/
+// from https://github.com/kungfoo/geohash-java/
 @SuppressWarnings({"JavaDoc"})
 public final class GeoHash implements Comparable<GeoHash>, Serializable {
     public static void main(String[] args) {

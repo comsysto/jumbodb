@@ -1,20 +1,62 @@
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.BitSet;
 
 public class Testen {
     public static void main(String[] args) {
-//        Double pi = Math.PI;
-//        Double pi2 = Math.PI + 1d;
-//        Double pi3 = Math.PI + 100d;
-//        Double pi4 = 0.000008246924;
-//        System.out.println(Double.doubleToLongBits(pi));
-//        System.out.println(Double.doubleToLongBits(pi2));
-//        System.out.println(Double.doubleToLongBits(pi3));
-//        System.out.println(Double.doubleToLongBits(pi4));
-        System.out.println(new Long(1).hashCode() == new Long(-2).hashCode());
-        System.out.println(new Long(0).hashCode() == new Long(-1).hashCode());
+        int v1 = Integer.MAX_VALUE - 8437589;
+        int v2 = Integer.MAX_VALUE - 7894375;
+        int v3 = 252;
+
+//        BitSet b1 = convert(v1);
+//        System.out.println(Integer.toBinaryString(convert(b1)));
+        System.out.println(Integer.toBinaryString(v1));
+//        BitSet b2 = convert(v2);
+//        System.out.println(Integer.toBinaryString(convert(b2)));
+        System.out.println(Integer.toBinaryString(v2));
+        System.out.println(getBitsToShift(v1, v2));
+
+        System.out.println(Integer.toBinaryString(v1 >>> 24));
+//        System.out.println(Integer.toBinaryString(convert(b1.intersects(b2)));
     }
+
+
+//    public class Bits {
+
+        public static int getBoundaryBoxComparistionValue(int point1, int point2) {
+            int bitsToShift = getBitsToShift(point1, point2);
+            return point1 >>> bitsToShift;
+        }
+
+        public static int getBitsToShift(int b1, int b2) {
+            int max = Math.min(Integer.highestOneBit(b1), Integer.highestOneBit(b2));
+            for (int i = 0; i < max; i++) {
+                if(b1 == b2) {
+                    return i;
+                }
+                System.out.println("B1 " + i + " -> " + Integer.toBinaryString(b1));
+                System.out.println("B2 " + i + " -> " + Integer.toBinaryString(b2));
+                b1 = b1 >>> 1;
+                b2 = b2 >>> 1;
+            }
+            return 0;
+        }
+
+        public static BitSet convert(int value) {
+            BitSet bits = new BitSet();
+            for(int i = 31; i >= 0; i--) {
+                if(value % 2 != 0) {
+                    bits.set(i);
+                }
+                value = value >>> 1;
+            }
+            return bits;
+        }
+
+        public static int convert(BitSet bits) {
+            int value = 0;
+            for (int i = 0; i < bits.length(); ++i) {
+                value += bits.get(i) ? (1 << i) : 0;
+            }
+            return value;
+        }
+//    }
 }

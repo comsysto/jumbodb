@@ -68,6 +68,7 @@ dependencies {
     compile 'commons-fileupload:commons-fileupload:1.2.2'
     compile 'ch.qos.logback:logback-classic:1.0.10'
     compile project(':commons:query')
+    compile project(':commons:geo')
 
 //    providedCompile 'javax.servlet:servlet-api:2.5'
 

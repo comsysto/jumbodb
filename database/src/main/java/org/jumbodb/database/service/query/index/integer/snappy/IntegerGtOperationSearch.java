@@ -1,10 +1,7 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
 import org.jumbodb.common.query.QueryClause;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberEqOperationSearch;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberGtOperationSearch;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
+import org.jumbodb.database.service.query.index.basic.numeric.*;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyUtil;
 
@@ -20,14 +17,14 @@ public class IntegerGtOperationSearch extends IntegerEqOperationSearch {
     }
 
     @Override
-    public boolean acceptIndexFile(QueryClause queryClause, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
-        int searchValue = (Integer)queryClause.getValue();
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
+        Integer searchValue = queryValueRetriever.getValue();
         return searchValue > hashCodeSnappyIndexFile.getFrom();
     }
 
     @Override
-    public boolean matching(Integer currentValue, QueryClause queryClause) {
-        int searchValue = (Integer)queryClause.getValue();
+    public boolean matching(Integer currentValue, QueryValueRetriever queryValueRetriever) {
+        Integer searchValue = queryValueRetriever.getValue();
         return currentValue > searchValue;
     }
 }

@@ -4,11 +4,7 @@ import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberLtOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
-import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch;
-import org.jumbodb.database.service.query.snappy.SnappyChunks;
-
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
 /**
  * @author Carsten Hufe
@@ -19,14 +15,19 @@ public class IntegerLtOperationSearch extends NumberLtOperationSearch<Integer, N
     }
 
     @Override
-    public boolean matching(Integer currentValue, QueryClause queryClause) {
-        int searchValue = (Integer)queryClause.getValue();
+    public boolean matching(Integer currentValue, QueryValueRetriever queryValueRetriever) {
+        Integer searchValue = queryValueRetriever.getValue();
         return currentValue < searchValue;
     }
 
     @Override
-    public boolean acceptIndexFile(QueryClause queryClause, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
-        int searchValue = (Integer)queryClause.getValue();
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
+        Integer searchValue = queryValueRetriever.getValue();
         return searchValue < hashCodeSnappyIndexFile.getTo();
+    }
+
+    @Override
+    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
+        return new IntegerQueryValueRetriever(queryClause);
     }
 }

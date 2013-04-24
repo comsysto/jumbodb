@@ -1,10 +1,7 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
 import org.jumbodb.common.query.QueryClause;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberEqOperationSearch;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
-import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch;
+import org.jumbodb.database.service.query.index.basic.numeric.*;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyUtil;
 
@@ -22,14 +19,14 @@ public class IntegerEqOperationSearch extends NumberEqOperationSearch<Integer, N
     }
 
     @Override
-    public boolean matching(Integer currentValue, QueryClause queryClause) {
-        int searchValue = (Integer)queryClause.getValue();
-        return currentValue == searchValue;
+    public boolean matching(Integer currentValue, QueryValueRetriever queryValueRetriever) {
+        Integer searchValue = queryValueRetriever.getValue();
+        return currentValue.equals(searchValue);
     }
 
     @Override
     public boolean eq(Integer val1, Integer val2) {
-        return val1 == val2;
+        return val1.equals(val2);
     }
 
     @Override
@@ -53,8 +50,13 @@ public class IntegerEqOperationSearch extends NumberEqOperationSearch<Integer, N
     }
 
     @Override
-    public boolean acceptIndexFile(QueryClause queryClause, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
-        int searchValue = (Integer)queryClause.getValue();
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
+        Integer searchValue = queryValueRetriever.getValue();
         return searchValue >= hashCodeSnappyIndexFile.getFrom() && searchValue <= hashCodeSnappyIndexFile.getTo();
+    }
+
+    @Override
+    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
+        return new IntegerQueryValueRetriever(queryClause);
     }
 }

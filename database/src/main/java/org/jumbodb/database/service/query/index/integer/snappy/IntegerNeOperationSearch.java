@@ -1,12 +1,10 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
 import org.jumbodb.common.query.QueryClause;
-import org.jumbodb.database.service.query.index.basic.numeric.*;
-import org.jumbodb.database.service.query.snappy.SnappyChunks;
-import org.jumbodb.database.service.query.snappy.SnappyUtil;
-
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import org.jumbodb.database.service.query.index.basic.numeric.NumberNeOperationSearch;
+import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
+import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
+import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
 /**
  * @author Carsten Hufe
@@ -23,14 +21,21 @@ public class IntegerNeOperationSearch extends NumberNeOperationSearch<Integer, N
     }
 
     @Override
-    public boolean acceptIndexFile(QueryClause queryClause, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
-        int searchValue = (Integer)queryClause.getValue();
-        return searchValue != hashCodeSnappyIndexFile.getFrom() || searchValue != hashCodeSnappyIndexFile.getTo();
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
+        Integer searchValue = queryValueRetriever.getValue();
+        boolean fromNe = !searchValue.equals(hashCodeSnappyIndexFile.getFrom());
+        boolean toNe = !searchValue.equals(hashCodeSnappyIndexFile.getTo());
+        return fromNe || toNe;
     }
 
      @Override
-    public boolean matching(Integer currentValue, QueryClause queryClause) {
-        int searchValue = (Integer)queryClause.getValue();
-        return currentValue != searchValue;
+    public boolean matching(Integer currentValue, QueryValueRetriever queryValueRetriever) {
+         Integer searchValue = queryValueRetriever.getValue();
+        return !currentValue.equals(searchValue);
+    }
+
+    @Override
+    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
+        return new IntegerQueryValueRetriever(queryClause);
     }
 }

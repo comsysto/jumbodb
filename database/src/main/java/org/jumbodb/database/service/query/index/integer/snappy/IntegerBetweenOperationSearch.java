@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.integer.snappy;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
+import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 
 import java.io.IOException;
@@ -19,24 +20,29 @@ public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
     }
 
     @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryClause queryClause, SnappyChunks snappyChunks) throws IOException {
-        List<Integer> value = (List<Integer>) queryClause.getValue();
+    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException {
+        List<Integer> value = queryValueRetriever.getValue();
         Integer from = value.get(0);
         return super.findFirstMatchingChunk(indexRaf, snappyChunks, from);
     }
 
     @Override
-    public boolean matching(Integer currentValue, QueryClause queryClause) {
-        List<Integer> value = (List<Integer>) queryClause.getValue();
+    public boolean matching(Integer currentValue, QueryValueRetriever queryValueRetriever) {
+        List<Integer> value = queryValueRetriever.getValue();
         Integer from = value.get(0);
         Integer to = value.get(1);
         return from < currentValue && to > currentValue;
     }
 
     @Override
-    public boolean acceptIndexFile(QueryClause queryClause, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
-        List<Integer> value = (List<Integer>) queryClause.getValue();
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
+        List<Integer> value = queryValueRetriever.getValue();
         Integer from = value.get(0);
         return from > hashCodeSnappyIndexFile.getFrom();
+    }
+
+    @Override
+    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
+        return new IntegerBetweenQueryValueRetriever(queryClause);
     }
 }

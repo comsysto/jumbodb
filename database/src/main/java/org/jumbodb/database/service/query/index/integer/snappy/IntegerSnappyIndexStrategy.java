@@ -1,37 +1,18 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
-import com.google.common.collect.Maps;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.SuffixFileFilter;
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.lang.UnhandledException;
-import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
-import org.jumbodb.database.service.importer.ImportMetaFileInformation;
-import org.jumbodb.database.service.query.FileOffset;
-import org.jumbodb.database.service.query.definition.CollectionDefinition;
-import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
-import org.jumbodb.database.service.query.definition.IndexDefinition;
-import org.jumbodb.database.service.query.index.IndexKey;
-import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch;
-import org.jumbodb.database.service.query.snappy.SnappyChunks;
-import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
-import org.jumbodb.database.service.query.snappy.SnappyStreamToFileCopy;
 import org.jumbodb.database.service.query.snappy.SnappyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Carsten Hufe

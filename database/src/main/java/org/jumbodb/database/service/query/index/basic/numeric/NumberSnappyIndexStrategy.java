@@ -164,7 +164,8 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + clause.getQueryOperation());
         }
-        long currentChunk = integerOperationSearch.findFirstMatchingChunk(indexRaf, clause, snappyChunks);
+        QueryValueRetriever queryValueRetriever = integerOperationSearch.getQueryValueRetriever(clause);
+        long currentChunk = integerOperationSearch.findFirstMatchingChunk(indexRaf, queryValueRetriever, snappyChunks);
         long numberOfChunks = snappyChunks.getNumberOfChunks();
         if(currentChunk >= 0) {
             Set<FileOffset> result = new HashSet<FileOffset>();
@@ -179,7 +180,7 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
                         T currentIntValue = readValueFromDataInputStream(dis);
                         int fileNameHash = dis.readInt();
                         long offset = dis.readLong();
-                        if(integerOperationSearch.matching(currentIntValue, clause)) {
+                        if(integerOperationSearch.matching(currentIntValue, queryValueRetriever)) {
                             result.add(new FileOffset(fileNameHash, offset));
                         } else if(!result.isEmpty()) {
                             // found some results, but here it isnt equal, that means end of results
@@ -203,7 +204,7 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + queryClause.getQueryOperation());
         }
-        return integerOperationSearch.acceptIndexFile(queryClause, hashCodeSnappyIndexFile);
+        return integerOperationSearch.acceptIndexFile(integerOperationSearch.getQueryValueRetriever(queryClause), hashCodeSnappyIndexFile);
     }
 
     @Override

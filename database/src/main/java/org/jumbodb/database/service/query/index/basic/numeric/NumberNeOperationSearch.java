@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.index.basic.numeric;
 
 import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.database.service.query.index.integer.snappy.IntegerQueryValueRetriever;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyUtil;
 
@@ -18,7 +19,7 @@ public abstract class NumberNeOperationSearch<T extends Number, IF extends Numbe
     }
 
     @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryClause queryClause, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
         T searchValue = (T)queryClause.getValue();
         int numberOfChunks = snappyChunks.getNumberOfChunks();
         int fromChunk = 0;

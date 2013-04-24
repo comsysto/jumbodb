@@ -34,7 +34,7 @@ public class SnappyTestIn {
         int count = 0;
         while (dis.available() > 0) {
             int value = dis.readInt();
-            if(value > 100000) {
+            if(value < 100000) {
 //            if(value > 150 && value < 200) {
                 count++;
                 System.out.println(value);

@@ -1,9 +1,5 @@
 package org.jumbodb.database.service.query.index.basic.numeric;
 
-import org.jumbodb.common.query.QueryClause;
-import org.jumbodb.database.service.query.index.integer.snappy.IntegerEqOperationSearch;
-import org.jumbodb.database.service.query.index.integer.snappy.IntegerSnappyIndexFile;
-
 /**
  * @author Carsten Hufe
  */

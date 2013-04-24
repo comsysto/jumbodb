@@ -1,7 +1,5 @@
 package org.jumbodb.database.service.query.index.basic.numeric;
 
-import org.jumbodb.common.query.QueryClause;
-import org.jumbodb.database.service.query.index.integer.snappy.IntegerSnappyIndexFile;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 
 import java.io.IOException;
@@ -18,8 +16,9 @@ public abstract class NumberLtOperationSearch<T extends Number, IF extends Numbe
     }
 
     @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryClause queryClause, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
         // wow that was easy .... file has already matched, everything from beginning must be smaller
         return 0;
     }
+
 }

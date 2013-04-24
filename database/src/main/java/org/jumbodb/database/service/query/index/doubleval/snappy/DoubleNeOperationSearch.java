@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.longval.snappy;
+package org.jumbodb.database.service.query.index.doubleval.snappy;
 
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberNeOperationSearch;
@@ -9,33 +9,33 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
 /**
  * @author Carsten Hufe
  */
-public class LongNeOperationSearch extends NumberNeOperationSearch<Long, NumberSnappyIndexFile<Long>> {
+public class DoubleNeOperationSearch extends NumberNeOperationSearch<Double, NumberSnappyIndexFile<Double>> {
 
-    public LongNeOperationSearch(NumberSnappyIndexStrategy<Long, NumberSnappyIndexFile<Long>> strategy) {
+    public DoubleNeOperationSearch(NumberSnappyIndexStrategy<Double, NumberSnappyIndexFile<Double>> strategy) {
         super(strategy);
     }
 
     @Override
-    public boolean ne(Long val1, Long val2) {
+    public boolean ne(Double val1, Double val2) {
         return !val1.equals(val2);
     }
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Long> snappyIndexFile) {
-        Long searchValue = queryValueRetriever.getValue();
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Double> snappyIndexFile) {
+        Double searchValue = queryValueRetriever.getValue();
         boolean fromNe = !searchValue.equals(snappyIndexFile.getFrom());
         boolean toNe = !searchValue.equals(snappyIndexFile.getTo());
         return fromNe || toNe;
     }
 
      @Override
-    public boolean matching(Long currentValue, QueryValueRetriever queryValueRetriever) {
-        Long searchValue = queryValueRetriever.getValue();
+    public boolean matching(Double currentValue, QueryValueRetriever queryValueRetriever) {
+        Double searchValue = queryValueRetriever.getValue();
         return !currentValue.equals(searchValue);
     }
 
     @Override
     public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new LongQueryValueRetriever(queryClause);
+        return new DoubleQueryValueRetriever(queryClause);
     }
 }

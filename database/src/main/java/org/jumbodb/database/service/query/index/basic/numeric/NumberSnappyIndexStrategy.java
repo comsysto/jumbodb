@@ -177,10 +177,10 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
                     bais = new ByteArrayInputStream(uncompressed);
                     dis = new DataInputStream(bais);
                     while(bais.available() > 0) {
-                        T currentIntValue = readValueFromDataInputStream(dis);
+                        T currentValue = readValueFromDataInputStream(dis);
                         int fileNameHash = dis.readInt();
                         long offset = dis.readLong();
-                        if(integerOperationSearch.matching(currentIntValue, queryValueRetriever)) {
+                        if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
                             result.add(new FileOffset(fileNameHash, offset));
                         } else if(!result.isEmpty()) {
                             // found some results, but here it isnt equal, that means end of results
@@ -199,12 +199,12 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
         return Collections.emptySet();
     }
 
-    public boolean acceptIndexFile(QueryClause queryClause, IF hashCodeSnappyIndexFile) {
+    public boolean acceptIndexFile(QueryClause queryClause, IF indexFile) {
         OperationSearch<T, IF> integerOperationSearch = OPERATIONS.get(queryClause.getQueryOperation());
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + queryClause.getQueryOperation());
         }
-        return integerOperationSearch.acceptIndexFile(integerOperationSearch.getQueryValueRetriever(queryClause), hashCodeSnappyIndexFile);
+        return integerOperationSearch.acceptIndexFile(integerOperationSearch.getQueryValueRetriever(queryClause), indexFile);
     }
 
     @Override

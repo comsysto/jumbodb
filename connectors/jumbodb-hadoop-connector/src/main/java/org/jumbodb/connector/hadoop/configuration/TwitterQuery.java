@@ -29,11 +29,16 @@ public class TwitterQuery {
 
 
 //        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(150, 200))));
-//        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.GT, 10)));
 //        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
 //        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
 //        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.GT, 100000)));
-        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.LT, 10)));
+//        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.LT, 10)));
+
+//        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(150, 200))));
+        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
+//        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
+//        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.GT, 100000)));
+//        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.LT, 10)));
 
 //        List<Object> alexjenkins29 = new ArrayList<Object>(Arrays.asList("alexjenkins29"));
 //        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS,"user.screen_name", alexjenkins29);

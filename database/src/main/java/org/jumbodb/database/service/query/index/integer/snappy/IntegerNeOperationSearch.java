@@ -17,7 +17,7 @@ public class IntegerNeOperationSearch extends NumberNeOperationSearch<Integer, N
 
     @Override
     public boolean ne(Integer val1, Integer val2) {
-        return val1 != val2;
+        return !val1.equals(val2);
     }
 
     @Override

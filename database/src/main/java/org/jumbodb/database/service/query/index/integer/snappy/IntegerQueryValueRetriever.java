@@ -10,7 +10,7 @@ public class IntegerQueryValueRetriever implements QueryValueRetriever {
     private Integer value;
 
     public IntegerQueryValueRetriever(QueryClause queryClause) {
-        value = (Integer) queryClause.getValue();
+        value = ((Number) queryClause.getValue()).intValue();
     }
 
     @Override

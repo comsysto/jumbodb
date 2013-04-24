@@ -27,19 +27,23 @@ public class SnappyUtil {
     }
 
     public static long readLong(byte[] buffer, int pos) {
-        long b1 = (buffer[pos] & 0xFF) << 56;
-        long b2 = (buffer[pos + 1] & 0xFF) << 48;
-        long b3 = (buffer[pos + 2] & 0xFF) << 40;
-        long b4 = (buffer[pos + 3] & 0xFF) << 32;
-        long b5 = (buffer[pos + 4] & 0xFF) << 24;
-        long b6 = (buffer[pos + 5] & 0xFF) << 16;
-        long b7 = (buffer[pos + 6] & 0xFF) << 8;
-        long b8 = buffer[pos + 7] & 0xFF;
-        return b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8;
+        return (((long)buffer[pos] << 56) +
+                ((long)(buffer[pos + 1] & 255) << 48) +
+                ((long)(buffer[pos + 2] & 255) << 40) +
+                ((long)(buffer[pos + 3] & 255) << 32) +
+                ((long)(buffer[pos + 4] & 255) << 24) +
+                ((buffer[pos + 5] & 255) << 16) +
+                ((buffer[pos + 6] & 255) <<  8) +
+                ((buffer[pos + 7] & 255) <<  0));
     }
 
     public static double readDouble(byte[] buffer, int pos) {
         long val = readLong(buffer, pos);
         return Double.longBitsToDouble(val);
+    }
+
+    public static float readFloat(byte[] buffer, int pos) {
+        long val = readInt(buffer, pos);
+        return Float.floatToIntBits(val);
     }
 }

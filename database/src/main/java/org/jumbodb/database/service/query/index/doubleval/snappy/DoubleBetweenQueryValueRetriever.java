@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.integer.snappy;
+package org.jumbodb.database.service.query.index.doubleval.snappy;
 
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
@@ -9,14 +9,14 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
-public class IntegerBetweenQueryValueRetriever implements QueryValueRetriever {
-    private List<Integer> value;
+public class DoubleBetweenQueryValueRetriever implements QueryValueRetriever {
+    private List<Double> value;
 
-    public IntegerBetweenQueryValueRetriever(QueryClause queryClause) {
-        value = new ArrayList<Integer>(2);
+    public DoubleBetweenQueryValueRetriever(QueryClause queryClause) {
+        value = new ArrayList<Double>(2);
         List<? extends Number> vals = (List<? extends Number>) queryClause.getValue();
         for (Number val : vals) {
-            value.add(val.intValue());
+            value.add(val.doubleValue());
         }
     }
 

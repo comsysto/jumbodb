@@ -46,7 +46,7 @@ public class LongSnappyIndexStrategy extends NumberSnappyIndexStrategy<Long, Num
 
     @Override
     public Long readLastValue(byte[] uncompressed) {
-        return SnappyUtil.readLong(uncompressed, uncompressed.length - 16);
+        return SnappyUtil.readLong(uncompressed, uncompressed.length - 20);
     }
 
     @Override

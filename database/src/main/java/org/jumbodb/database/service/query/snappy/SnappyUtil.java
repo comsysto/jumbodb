@@ -37,4 +37,9 @@ public class SnappyUtil {
         long b8 = buffer[pos + 7] & 0xFF;
         return b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8;
     }
+
+    public static double readDouble(byte[] buffer, int pos) {
+        long val = readLong(buffer, pos);
+        return Double.longBitsToDouble(val);
+    }
 }

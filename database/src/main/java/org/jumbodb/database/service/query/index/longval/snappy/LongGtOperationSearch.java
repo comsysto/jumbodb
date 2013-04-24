@@ -14,13 +14,13 @@ public class LongGtOperationSearch extends LongEqOperationSearch {
 
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Long> hashCodeSnappyIndexFile) {
-        Integer searchValue = queryValueRetriever.getValue();
+        Long searchValue = queryValueRetriever.getValue();
         return searchValue > hashCodeSnappyIndexFile.getFrom();
     }
 
     @Override
     public boolean matching(Long currentValue, QueryValueRetriever queryValueRetriever) {
-        Integer searchValue = queryValueRetriever.getValue();
+        Long searchValue = queryValueRetriever.getValue();
         return currentValue > searchValue;
     }
 }

@@ -10,7 +10,7 @@ public class LongQueryValueRetriever implements QueryValueRetriever {
     private Long value;
 
     public LongQueryValueRetriever(QueryClause queryClause) {
-        value = (Long) queryClause.getValue();
+        value = ((Number) queryClause.getValue()).longValue();
     }
 
     @Override

@@ -144,10 +144,10 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
     public MultiValueMap<File, QueryClause> groupByIndexFile(String collection, String chunkKey, IndexQuery query) {
         List<IF> indexFiles = getIndexFiles(collection, chunkKey, query);
         MultiValueMap<File, QueryClause> groupByIndexFile = new LinkedMultiValueMap<File, QueryClause>();
-        for (IF hashCodeSnappyIndexFile : indexFiles) {
+        for (IF indexFile : indexFiles) {
             for (QueryClause queryClause : query.getClauses()) {
-                if(acceptIndexFile(queryClause, hashCodeSnappyIndexFile)) {
-                    groupByIndexFile.add(hashCodeSnappyIndexFile.getIndexFile(), queryClause);
+                if(acceptIndexFile(queryClause, indexFile)) {
+                    groupByIndexFile.add(indexFile.getIndexFile(), queryClause);
                 }
             }
         }

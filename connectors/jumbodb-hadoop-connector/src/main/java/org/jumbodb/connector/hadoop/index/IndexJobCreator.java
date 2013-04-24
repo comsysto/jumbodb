@@ -59,8 +59,8 @@ public class IndexJobCreator {
         job.getConfiguration().set(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
-        job.setMapOutputKeyClass(IntWritable.class);
         job.setMapOutputValueClass(FileOffsetWritable.class);
+        job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setOutputFormatClass(abstractIndexMapper.getOutputFormat());
         job.setOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setOutputValueClass(FileOffsetWritable.class);

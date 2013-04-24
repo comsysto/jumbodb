@@ -23,9 +23,9 @@
                     "indexStrategy": "HASHCODE_SNAPPY_V1"
                 },
                 {
-                    "indexName": "followers_count",
+                    "indexName": "followers_count_long",
                     "fields": ["user.followers_count"],
-                    "indexStrategy": "INTEGER_SNAPPY_V1"
+                    "indexStrategy": "LONG_SNAPPY_V1"
                 }
             ]
         }

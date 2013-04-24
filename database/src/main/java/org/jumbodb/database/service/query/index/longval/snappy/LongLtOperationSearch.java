@@ -16,13 +16,13 @@ public class LongLtOperationSearch extends NumberLtOperationSearch<Long, NumberS
 
     @Override
     public boolean matching(Long currentValue, QueryValueRetriever queryValueRetriever) {
-        Integer searchValue = queryValueRetriever.getValue();
+        Long searchValue = queryValueRetriever.getValue();
         return currentValue < searchValue;
     }
 
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Long> snappyIndexFile) {
-        Integer searchValue = queryValueRetriever.getValue();
+        Long searchValue = queryValueRetriever.getValue();
         return searchValue < snappyIndexFile.getTo();
     }
 

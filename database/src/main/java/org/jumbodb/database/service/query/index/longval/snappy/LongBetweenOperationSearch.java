@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.integer.snappy;
+package org.jumbodb.database.service.query.index.longval.snappy;
 
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
@@ -13,36 +13,36 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
-public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
+public class LongBetweenOperationSearch extends LongEqOperationSearch {
 
-    protected IntegerBetweenOperationSearch(NumberSnappyIndexStrategy<Integer, NumberSnappyIndexFile<Integer>> strategy) {
+    protected LongBetweenOperationSearch(NumberSnappyIndexStrategy<Long, NumberSnappyIndexFile<Long>> strategy) {
         super(strategy);
     }
 
     @Override
     public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException {
-        List<Integer> value = queryValueRetriever.getValue();
-        Integer from = value.get(0);
+        List<Long> value = queryValueRetriever.getValue();
+        Long from = value.get(0);
         return super.findFirstMatchingChunk(indexRaf, snappyChunks, from);
     }
 
     @Override
-    public boolean matching(Integer currentValue, QueryValueRetriever queryValueRetriever) {
-        List<Integer> value = queryValueRetriever.getValue();
-        Integer from = value.get(0);
-        Integer to = value.get(1);
+    public boolean matching(Long currentValue, QueryValueRetriever queryValueRetriever) {
+        List<Long> value = queryValueRetriever.getValue();
+        Long from = value.get(0);
+        Long to = value.get(1);
         return from < currentValue && to > currentValue;
     }
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> snappyIndexFile) {
-        List<Integer> value = queryValueRetriever.getValue();
-        Integer from = value.get(0);
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Long> snappyIndexFile) {
+        List<Long> value = queryValueRetriever.getValue();
+        Long from = value.get(0);
         return from > snappyIndexFile.getFrom();
     }
 
     @Override
     public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new IntegerBetweenQueryValueRetriever(queryClause);
+        return new LongBetweenQueryValueRetriever(queryClause);
     }
 }

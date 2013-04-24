@@ -17,9 +17,9 @@ public class IntegerGtOperationSearch extends IntegerEqOperationSearch {
     }
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> hashCodeSnappyIndexFile) {
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> snappyIndexFile) {
         Integer searchValue = queryValueRetriever.getValue();
-        return searchValue > hashCodeSnappyIndexFile.getFrom();
+        return searchValue > snappyIndexFile.getFrom();
     }
 
     @Override

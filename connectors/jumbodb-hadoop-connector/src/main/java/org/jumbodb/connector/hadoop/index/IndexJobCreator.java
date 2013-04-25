@@ -8,18 +8,14 @@ import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonDoubleIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.floatval.snappy.GenericJsonFloatIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy.GenericJsonHashCodeIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy.HashCodeIndexOutputFormat;
-import org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy.HashRangePartitioner;
+import org.jumbodb.connector.hadoop.index.strategy.hashcode32.snappy.GenericJsonHashCode32IndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.integer.snappy.GenericJsonIntegerIndexMapper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.jumbodb.connector.hadoop.index.strategy.integer.snappy.IntegerRangePartitioner;
 import org.jumbodb.connector.hadoop.index.strategy.longval.snappy.GenericJsonLongIndexMapper;
 
 import java.io.IOException;
@@ -39,7 +35,7 @@ public class IndexJobCreator {
 
     private static Map<String, Class<? extends AbstractIndexMapper>> createIndexMapper() {
         Map<String, Class<? extends AbstractIndexMapper>> indexMapper = new HashMap<String, Class<? extends AbstractIndexMapper>>();
-        indexMapper.put(GenericJsonHashCodeIndexMapper.HASHCODE_SNAPPY_V_1, GenericJsonHashCodeIndexMapper.class);
+        indexMapper.put(GenericJsonHashCode32IndexMapper.HASHCODE32_SNAPPY_V_1, GenericJsonHashCode32IndexMapper.class);
         indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V_1, GenericJsonIntegerIndexMapper.class);
         indexMapper.put(GenericJsonLongIndexMapper.LONG_SNAPPY_V1, GenericJsonLongIndexMapper.class);
         indexMapper.put(GenericJsonFloatIndexMapper.FLOAT_SNAPPY_V_1, GenericJsonFloatIndexMapper.class);
@@ -56,7 +52,7 @@ public class IndexJobCreator {
         FileOutputFormat.setCompressOutput(job, false);
         Class<? extends AbstractIndexMapper> mapper = getIndexStrategy(indexField);
         AbstractIndexMapper abstractIndexMapper = createInstance(mapper);
-        job.getConfiguration().set(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
+        job.getConfiguration().set(GenericJsonHashCode32IndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
         job.setMapOutputValueClass(FileOffsetWritable.class);

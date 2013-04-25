@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.hashcode.snappy;
+package org.jumbodb.database.service.query.index.hashcode32.snappy;
 
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
@@ -6,10 +6,10 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
 /**
  * @author Carsten Hufe
  */
-public class HashCodeQueryValueRetriever implements QueryValueRetriever {
+public class HashCode32QueryValueRetriever implements QueryValueRetriever {
     private Integer value;
 
-    public HashCodeQueryValueRetriever(QueryClause queryClause) {
+    public HashCode32QueryValueRetriever(QueryClause queryClause) {
         value = queryClause.getValue().hashCode();
     }
 

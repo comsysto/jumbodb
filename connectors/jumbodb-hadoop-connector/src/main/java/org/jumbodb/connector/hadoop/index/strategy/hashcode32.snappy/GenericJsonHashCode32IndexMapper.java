@@ -1,11 +1,7 @@
-package org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy;
+package org.jumbodb.connector.hadoop.index.strategy.hashcode32.snappy;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.Partitioner;
 import org.codehaus.jackson.JsonNode;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
@@ -19,7 +15,7 @@ import java.util.List;
  * Date: 4/17/13
  * Time: 4:52 PM
  */
-public class GenericJsonHashCodeIndexMapper extends AbstractHashCodeIndexMapper<JsonNode> {
+public class GenericJsonHashCode32IndexMapper extends AbstractHashCode32IndexMapper<JsonNode> {
     public static final String JUMBO_INDEX_JSON_CONF = "jumbo.index.configuration";
 
     private IndexField indexField;

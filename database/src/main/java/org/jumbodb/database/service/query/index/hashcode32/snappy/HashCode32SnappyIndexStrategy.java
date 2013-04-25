@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.hashcode.snappy;
+package org.jumbodb.database.service.query.index.hashcode32.snappy;
 
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
@@ -13,20 +13,20 @@ import java.util.Map;
 /**
  * @author Carsten Hufe
  */
-public class HashCodeSnappyIndexStrategy extends IntegerSnappyIndexStrategy {
+public class HashCode32SnappyIndexStrategy extends IntegerSnappyIndexStrategy {
 
 
-    private Logger log = LoggerFactory.getLogger(HashCodeSnappyIndexStrategy.class);
+    private Logger log = LoggerFactory.getLogger(HashCode32SnappyIndexStrategy.class);
 
     @Override
     public Map<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>> getQueryOperationsStrategies() {
         Map<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>> operations = new HashMap<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>>();
-        operations.put(QueryOperation.EQ, new HashCodeEqOperationSearch(this));
+        operations.put(QueryOperation.EQ, new HashCode32EqOperationSearch(this));
         return operations;
     }
 
     @Override
     public String getStrategyName() {
-        return "HASHCODE_SNAPPY_V1";
+        return "HASHCODE32_SNAPPY_V1";
     }
 }

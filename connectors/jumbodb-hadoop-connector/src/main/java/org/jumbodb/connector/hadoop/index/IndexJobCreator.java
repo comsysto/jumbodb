@@ -63,7 +63,7 @@ public class IndexJobCreator {
         job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setOutputFormatClass(abstractIndexMapper.getOutputFormat());
         job.setOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
-        job.setOutputValueClass(FileOffsetWritable.class);
+        job.setOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setPartitionerClass(abstractIndexMapper.getPartitioner());
         return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
     }
@@ -90,7 +90,7 @@ public class IndexJobCreator {
         job.setMapOutputValueClass(FileOffsetWritable.class);
         job.setOutputFormatClass(abstractIndexMapper.getOutputFormat());
         job.setOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
-        job.setOutputValueClass(FileOffsetWritable.class);
+        job.setOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setPartitionerClass(abstractIndexMapper.getPartitioner());
         return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
     }

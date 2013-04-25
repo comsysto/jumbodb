@@ -75,6 +75,9 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
         return Collections.emptyList();
     }
 
+    public Class<?> getOutputValueClass() {
+        return FileOffsetWritable.class;
+    }
 
     public abstract Class<? extends Partitioner> getPartitioner();
     public abstract Class<? extends WritableComparable> getOutputKeyClass();

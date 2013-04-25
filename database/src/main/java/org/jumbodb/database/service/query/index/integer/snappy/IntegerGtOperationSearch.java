@@ -12,7 +12,7 @@ import java.io.RandomAccessFile;
  * @author Carsten Hufe
  */
 public class IntegerGtOperationSearch extends IntegerEqOperationSearch {
-    public IntegerGtOperationSearch(NumberSnappyIndexStrategy<Integer, NumberSnappyIndexFile<Integer>> strategy) {
+    public IntegerGtOperationSearch(NumberSnappyIndexStrategy<Integer, Integer, NumberSnappyIndexFile<Integer>> strategy) {
         super(strategy);
     }
 

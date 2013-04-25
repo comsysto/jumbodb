@@ -17,15 +17,15 @@ import java.util.Map;
 /**
  * @author Carsten Hufe
  */
-public class DoubleSnappyIndexStrategy extends NumberSnappyIndexStrategy<Double, NumberSnappyIndexFile<Double>> {
+public class DoubleSnappyIndexStrategy extends NumberSnappyIndexStrategy<Double, Double, NumberSnappyIndexFile<Double>> {
 
     public static final int SNAPPY_INDEX_CHUNK_SIZE = 32 * 1020; // must be a multiple of 20! (8 byte double data, 4 byte file name hash, 8 byte offset)
 
     private Logger log = LoggerFactory.getLogger(DoubleSnappyIndexStrategy.class);
 
     @Override
-    public Map<QueryOperation, OperationSearch<Double, NumberSnappyIndexFile<Double>>> getQueryOperationsStrategies() {
-        Map<QueryOperation, OperationSearch<Double, NumberSnappyIndexFile<Double>>> operations = new HashMap<QueryOperation, OperationSearch<Double, NumberSnappyIndexFile<Double>>>();
+    public Map<QueryOperation, OperationSearch<Double, Double, NumberSnappyIndexFile<Double>>> getQueryOperationsStrategies() {
+        Map<QueryOperation, OperationSearch<Double, Double, NumberSnappyIndexFile<Double>>> operations = new HashMap<QueryOperation, OperationSearch<Double, Double, NumberSnappyIndexFile<Double>>>();
         operations.put(QueryOperation.EQ, new DoubleEqOperationSearch(this));
         operations.put(QueryOperation.NE, new DoubleNeOperationSearch(this));
         operations.put(QueryOperation.GT, new DoubleGtOperationSearch(this));

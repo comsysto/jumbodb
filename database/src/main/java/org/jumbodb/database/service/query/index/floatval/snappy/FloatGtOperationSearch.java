@@ -8,7 +8,7 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
  * @author Carsten Hufe
  */
 public class FloatGtOperationSearch extends FloatEqOperationSearch {
-    public FloatGtOperationSearch(NumberSnappyIndexStrategy<Float, NumberSnappyIndexFile<Float>> strategy) {
+    public FloatGtOperationSearch(NumberSnappyIndexStrategy<Float, Float, NumberSnappyIndexFile<Float>> strategy) {
         super(strategy);
     }
 

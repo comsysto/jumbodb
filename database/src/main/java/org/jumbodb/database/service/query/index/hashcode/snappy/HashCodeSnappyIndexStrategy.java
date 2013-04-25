@@ -19,8 +19,8 @@ public class HashCodeSnappyIndexStrategy extends IntegerSnappyIndexStrategy {
     private Logger log = LoggerFactory.getLogger(HashCodeSnappyIndexStrategy.class);
 
     @Override
-    public Map<QueryOperation, OperationSearch<Integer, NumberSnappyIndexFile<Integer>>> getQueryOperationsStrategies() {
-        Map<QueryOperation, OperationSearch<Integer, NumberSnappyIndexFile<Integer>>> operations = new HashMap<QueryOperation, OperationSearch<Integer, NumberSnappyIndexFile<Integer>>>();
+    public Map<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>> getQueryOperationsStrategies() {
+        Map<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>> operations = new HashMap<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>>();
         operations.put(QueryOperation.EQ, new HashCodeEqOperationSearch(this));
         return operations;
     }

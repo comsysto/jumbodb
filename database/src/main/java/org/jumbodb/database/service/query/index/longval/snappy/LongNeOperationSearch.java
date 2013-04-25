@@ -9,9 +9,9 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
 /**
  * @author Carsten Hufe
  */
-public class LongNeOperationSearch extends NumberNeOperationSearch<Long, NumberSnappyIndexFile<Long>> {
+public class LongNeOperationSearch extends NumberNeOperationSearch<Long, Long, NumberSnappyIndexFile<Long>> {
 
-    public LongNeOperationSearch(NumberSnappyIndexStrategy<Long, NumberSnappyIndexFile<Long>> strategy) {
+    public LongNeOperationSearch(NumberSnappyIndexStrategy<Long, Long, NumberSnappyIndexFile<Long>> strategy) {
         super(strategy);
     }
 

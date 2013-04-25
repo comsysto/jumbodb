@@ -8,12 +8,12 @@ import java.io.File;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-public class NumberSnappyIndexTask<T extends Number, IF extends NumberSnappyIndexFile<T>> implements Callable<Set<FileOffset>> {
-    private NumberSnappyIndexStrategy<T, IF> tifNumberSnappyIndexStrategy;
+public class NumberSnappyIndexTask<T, IFV, IF extends NumberSnappyIndexFile<IFV>> implements Callable<Set<FileOffset>> {
+    private NumberSnappyIndexStrategy<T, IFV, IF> tifNumberSnappyIndexStrategy;
     private final File indexFile;
     private Set<QueryClause> clauses;
 
-    public NumberSnappyIndexTask(NumberSnappyIndexStrategy<T, IF> tifNumberSnappyIndexStrategy, File indexFile, Set<QueryClause> clauses) {
+    public NumberSnappyIndexTask(NumberSnappyIndexStrategy<T, IFV, IF> tifNumberSnappyIndexStrategy, File indexFile, Set<QueryClause> clauses) {
         this.tifNumberSnappyIndexStrategy = tifNumberSnappyIndexStrategy;
         this.indexFile = indexFile;
         this.clauses = clauses;

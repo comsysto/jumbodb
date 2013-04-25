@@ -8,10 +8,10 @@ import java.io.RandomAccessFile;
 /**
  * @author Carsten Hufe
  */
-public abstract class NumberLtOperationSearch<T extends Number, IF extends NumberSnappyIndexFile<T>> implements OperationSearch<T, IF> {
-    private NumberSnappyIndexStrategy<T, IF> strategy;
+public abstract class NumberLtOperationSearch<T, IFV, IF extends NumberSnappyIndexFile<IFV>> implements OperationSearch<T, IFV, IF> {
+    private NumberSnappyIndexStrategy<T, IFV, IF> strategy;
 
-    public NumberLtOperationSearch(NumberSnappyIndexStrategy<T, IF> strategy) {
+    public NumberLtOperationSearch(NumberSnappyIndexStrategy<T, IFV, IF> strategy) {
         this.strategy = strategy;
     }
 

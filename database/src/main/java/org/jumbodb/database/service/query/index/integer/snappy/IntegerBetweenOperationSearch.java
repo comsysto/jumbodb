@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
 
-    protected IntegerBetweenOperationSearch(NumberSnappyIndexStrategy<Integer, NumberSnappyIndexFile<Integer>> strategy) {
+    protected IntegerBetweenOperationSearch(NumberSnappyIndexStrategy<Integer, Integer, NumberSnappyIndexFile<Integer>> strategy) {
         super(strategy);
     }
 

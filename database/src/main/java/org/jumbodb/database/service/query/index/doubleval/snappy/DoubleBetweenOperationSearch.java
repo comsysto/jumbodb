@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class DoubleBetweenOperationSearch extends DoubleEqOperationSearch {
 
-    protected DoubleBetweenOperationSearch(NumberSnappyIndexStrategy<Double, NumberSnappyIndexFile<Double>> strategy) {
+    protected DoubleBetweenOperationSearch(NumberSnappyIndexStrategy<Double, Double, NumberSnappyIndexFile<Double>> strategy) {
         super(strategy);
     }
 

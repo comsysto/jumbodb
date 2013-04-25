@@ -33,7 +33,7 @@ import java.util.concurrent.Future;
 /**
  * @author Carsten Hufe
  */
-public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends NumberSnappyIndexFile<T>> implements IndexStrategy {
+public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyIndexFile<IFV>> implements IndexStrategy {
 
     private Logger log = LoggerFactory.getLogger(NumberSnappyIndexStrategy.class);
 
@@ -41,10 +41,10 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
     private CollectionDefinition collectionDefinition;
     private Map<IndexKey, List<IF>> indexFiles;
 
-    private final Map<QueryOperation, OperationSearch<T, IF>> OPERATIONS = createOperations();
+    private final Map<QueryOperation, OperationSearch<T, IFV, IF>> OPERATIONS = createOperations();
 
-    private Map<QueryOperation, OperationSearch<T, IF>> createOperations() {
-        Map<QueryOperation, OperationSearch<T, IF>> operations = getQueryOperationsStrategies();
+    private Map<QueryOperation, OperationSearch<T, IFV, IF>> createOperations() {
+        Map<QueryOperation, OperationSearch<T, IFV, IF>> operations = getQueryOperationsStrategies();
         return operations;
     }
 
@@ -160,7 +160,7 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
 
 
     private Set<FileOffset> findOffsetForClause(RandomAccessFile indexRaf, QueryClause clause, SnappyChunks snappyChunks) throws IOException {
-        OperationSearch<T, IF> integerOperationSearch = OPERATIONS.get(clause.getQueryOperation());
+        OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(clause.getQueryOperation());
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + clause.getQueryOperation());
         }
@@ -200,7 +200,7 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
     }
 
     public boolean acceptIndexFile(QueryClause queryClause, IF indexFile) {
-        OperationSearch<T, IF> integerOperationSearch = OPERATIONS.get(queryClause.getQueryOperation());
+        OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(queryClause.getQueryOperation());
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + queryClause.getQueryOperation());
         }
@@ -223,7 +223,7 @@ public abstract class NumberSnappyIndexStrategy<T extends Number, IF extends Num
         SnappyStreamToFileCopy.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), getSnappyChunkSize());
     }
 
-    public abstract Map<QueryOperation, OperationSearch<T, IF>> getQueryOperationsStrategies();
+    public abstract Map<QueryOperation, OperationSearch<T, IFV, IF>> getQueryOperationsStrategies();
     public abstract int getSnappyChunkSize();
     public abstract T readValueFromDataInputStream(DataInputStream dis) throws IOException;
     public abstract T readLastValue(byte[] uncompressed);

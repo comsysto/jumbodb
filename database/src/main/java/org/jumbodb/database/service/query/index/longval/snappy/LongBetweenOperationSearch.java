@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class LongBetweenOperationSearch extends LongEqOperationSearch {
 
-    protected LongBetweenOperationSearch(NumberSnappyIndexStrategy<Long, NumberSnappyIndexFile<Long>> strategy) {
+    protected LongBetweenOperationSearch(NumberSnappyIndexStrategy<Long, Long, NumberSnappyIndexFile<Long>> strategy) {
         super(strategy);
     }
 

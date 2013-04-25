@@ -2,7 +2,7 @@ package org.jumbodb.database.service.query.index.basic.numeric;
 
 import java.io.File;
 
-public class NumberSnappyIndexFile<T extends Number> {
+public class NumberSnappyIndexFile<T> {
     private T from;
     private T to;
     private File indexFile;

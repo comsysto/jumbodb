@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class FloatBetweenOperationSearch extends FloatEqOperationSearch {
 
-    protected FloatBetweenOperationSearch(NumberSnappyIndexStrategy<Float, NumberSnappyIndexFile<Float>> strategy) {
+    protected FloatBetweenOperationSearch(NumberSnappyIndexStrategy<Float, Float, NumberSnappyIndexFile<Float>> strategy) {
         super(strategy);
     }
 

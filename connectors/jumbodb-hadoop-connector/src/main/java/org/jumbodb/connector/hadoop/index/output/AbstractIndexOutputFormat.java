@@ -13,10 +13,10 @@ import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public abstract class AbstractIndexOutputFormat<T extends WritableComparable> extends FileOutputFormat<T, FileOffsetWritable> {
+public abstract class AbstractIndexOutputFormat<T extends WritableComparable, OV> extends FileOutputFormat<T, OV> {
 
     @Override
-    public RecordWriter<T, FileOffsetWritable> getRecordWriter(
+    public RecordWriter<T, OV> getRecordWriter(
             TaskAttemptContext context) throws IOException,
                   InterruptedException {
         Configuration conf = context.getConfiguration();
@@ -26,7 +26,7 @@ public abstract class AbstractIndexOutputFormat<T extends WritableComparable> ex
         return new BinaryIndexRecordWriter(fileOut);
     }
 
-    private class BinaryIndexRecordWriter extends RecordWriter<T, FileOffsetWritable>{
+    private class BinaryIndexRecordWriter extends RecordWriter<T, OV>{
         private final DataOutputStream out;
         public BinaryIndexRecordWriter(DataOutputStream out)
                 throws IOException{
@@ -34,7 +34,7 @@ public abstract class AbstractIndexOutputFormat<T extends WritableComparable> ex
         }
 
         @Override
-        public synchronized void write(T k, FileOffsetWritable v) throws IOException, InterruptedException {
+        public synchronized void write(T k, OV v) throws IOException, InterruptedException {
             AbstractIndexOutputFormat.this.write(k, v, out);
         }
 
@@ -44,6 +44,6 @@ public abstract class AbstractIndexOutputFormat<T extends WritableComparable> ex
         }
     }
 
-    protected abstract void write(T k, FileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException;
+    protected abstract void write(T k, OV v, DataOutputStream out) throws IOException, InterruptedException;
 
 }

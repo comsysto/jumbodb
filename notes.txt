@@ -1,1 +1,3 @@
 http://docstore.mik.ua/orelly/java-ent/dist/ch08_04.htm for data monitoring
+
+26.2935656, 44.7995718

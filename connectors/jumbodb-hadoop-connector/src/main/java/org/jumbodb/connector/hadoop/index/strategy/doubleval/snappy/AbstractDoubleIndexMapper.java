@@ -19,11 +19,17 @@ import java.io.IOException;
 public abstract class AbstractDoubleIndexMapper<T> extends AbstractIndexMapper<T> {
     public static final String DOUBLE_SNAPPY_V_1 = "DOUBLE_SNAPPY_V1";
 
+    private DoubleWritable keyW = new DoubleWritable();
+    private FileOffsetWritable valueW = new FileOffsetWritable();
+
     @Override
     public void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException {
         Double indexableValue = getIndexableValue(input);
         if(indexableValue != null) {
-            context.write(new DoubleWritable(indexableValue), new FileOffsetWritable(fileNameHashCode, offset.get()));
+            keyW.set(indexableValue);
+            valueW.setFileNameHashCode(fileNameHashCode);
+            valueW.setOffset(offset.get());
+            context.write(keyW, valueW);
         }
     }
 

@@ -20,12 +20,12 @@
                 {
                     "indexName": "screen_name",
                     "fields": ["user.screen_name"],
-                    "indexStrategy": "HASHCODE_SNAPPY_V1"
+                    "indexStrategy": "HASHCODE32_SNAPPY_V1"
                 },
                 {
-                    "indexName": "followers_count_float",
-                    "fields": ["user.followers_count"],
-                    "indexStrategy": "FLOAT_SNAPPY_V1"
+                    "indexName": "coordinates",
+                    "fields": ["geo.coordinates"],
+                    "indexStrategy": "GEOHASH_SNAPPY_V1"
                 }
             ]
         }

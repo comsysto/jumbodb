@@ -8,7 +8,7 @@ import org.jumbodb.connector.hadoop.index.output.AbstractIndexOutputFormat;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class LongIndexOutputFormat extends AbstractIndexOutputFormat<LongWritable> {
+public class LongIndexOutputFormat extends AbstractIndexOutputFormat<LongWritable, FileOffsetWritable> {
 
     @Override
     protected void write(LongWritable k, FileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException {

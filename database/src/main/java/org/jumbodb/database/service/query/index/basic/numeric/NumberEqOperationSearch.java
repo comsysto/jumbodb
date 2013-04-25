@@ -11,7 +11,7 @@ import java.io.RandomAccessFile;
 /**
  * @author Carsten Hufe
  */
-public abstract class NumberEqOperationSearch<T, IFV, IF extends NumberSnappyIndexFile<IFV>> implements OperationSearch<T, IFV, IF> {
+public abstract class NumberEqOperationSearch<T, S, IFV, IF extends NumberSnappyIndexFile<IFV>> implements OperationSearch<T, IFV, IF> {
     private NumberSnappyIndexStrategy<T, IFV, IF> strategy;
 
     public NumberEqOperationSearch(NumberSnappyIndexStrategy<T, IFV, IF> strategy) {
@@ -20,11 +20,11 @@ public abstract class NumberEqOperationSearch<T, IFV, IF extends NumberSnappyInd
 
     @Override
     public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
-        T searchValue = queryClause.getValue();
+        S searchValue = queryClause.getValue();
         return findFirstMatchingChunk(indexRaf, snappyChunks, searchValue);
     }
 
-    protected long findFirstMatchingChunk(RandomAccessFile indexRaf, SnappyChunks snappyChunks, T searchValue) throws IOException {
+    protected long findFirstMatchingChunk(RandomAccessFile indexRaf, SnappyChunks snappyChunks, S searchValue) throws IOException {
         int numberOfChunks = snappyChunks.getNumberOfChunks();
         int fromChunk = 0;
         int toChunk = numberOfChunks;
@@ -77,9 +77,9 @@ public abstract class NumberEqOperationSearch<T, IFV, IF extends NumberSnappyInd
         return 0;
     }
 
-    public abstract boolean eq(T val1, T val2);
-    public abstract boolean lt(T val1, T val2);
-    public abstract boolean gt(T val1, T val2);
-    public abstract boolean ltEq(T val1, T val2);
-    public abstract boolean gtEq(T val1, T val2);
+    public abstract boolean eq(T val1, S val2);
+    public abstract boolean lt(T val1, S val2);
+    public abstract boolean gt(T val1, S val2);
+    public abstract boolean ltEq(T val1, S val2);
+    public abstract boolean gtEq(T val1, S val2);
 }

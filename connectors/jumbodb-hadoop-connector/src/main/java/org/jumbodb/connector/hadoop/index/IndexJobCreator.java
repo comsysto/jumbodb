@@ -8,6 +8,7 @@ import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonDoubleIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.floatval.snappy.GenericJsonFloatIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.geohash.snappy.GenericJsonGeohashIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.hashcode32.snappy.GenericJsonHashCode32IndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.integer.snappy.GenericJsonIntegerIndexMapper;
 import org.apache.hadoop.conf.Configuration;
@@ -35,11 +36,12 @@ public class IndexJobCreator {
 
     private static Map<String, Class<? extends AbstractIndexMapper>> createIndexMapper() {
         Map<String, Class<? extends AbstractIndexMapper>> indexMapper = new HashMap<String, Class<? extends AbstractIndexMapper>>();
-        indexMapper.put(GenericJsonHashCode32IndexMapper.HASHCODE32_SNAPPY_V_1, GenericJsonHashCode32IndexMapper.class);
-        indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V_1, GenericJsonIntegerIndexMapper.class);
+        indexMapper.put(GenericJsonHashCode32IndexMapper.HASHCODE32_SNAPPY_V1, GenericJsonHashCode32IndexMapper.class);
+        indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V1, GenericJsonIntegerIndexMapper.class);
         indexMapper.put(GenericJsonLongIndexMapper.LONG_SNAPPY_V1, GenericJsonLongIndexMapper.class);
         indexMapper.put(GenericJsonFloatIndexMapper.FLOAT_SNAPPY_V_1, GenericJsonFloatIndexMapper.class);
         indexMapper.put(GenericJsonDoubleIndexMapper.DOUBLE_SNAPPY_V_1, GenericJsonDoubleIndexMapper.class);
+        indexMapper.put(GenericJsonGeohashIndexMapper.GEOHASH_SNAPPY_V1, GenericJsonGeohashIndexMapper.class);
         return Collections.unmodifiableMap(indexMapper);
     }
 
@@ -55,7 +57,7 @@ public class IndexJobCreator {
         job.getConfiguration().set(GenericJsonHashCode32IndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
-        job.setMapOutputValueClass(FileOffsetWritable.class);
+        job.setMapOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setOutputFormatClass(abstractIndexMapper.getOutputFormat());
         job.setOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
@@ -83,7 +85,7 @@ public class IndexJobCreator {
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
         job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
-        job.setMapOutputValueClass(FileOffsetWritable.class);
+        job.setMapOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setOutputFormatClass(abstractIndexMapper.getOutputFormat());
         job.setOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setOutputValueClass(abstractIndexMapper.getOutputValueClass());

@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop.index.strategy.longval.snappy;
 
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -17,11 +18,17 @@ import java.io.IOException;
 public abstract class AbstractLongIndexMapper<T> extends AbstractIndexMapper<T> {
     public static final String LONG_SNAPPY_V1 = "LONG_SNAPPY_V1";
 
+    private LongWritable keyW = new LongWritable();
+    private FileOffsetWritable valueW = new FileOffsetWritable();
+
     @Override
     public void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException {
         Long indexableValue = getIndexableValue(input);
         if(indexableValue != null) {
-            context.write(new LongWritable(indexableValue), new FileOffsetWritable(fileNameHashCode, offset.get()));
+            keyW.set(indexableValue);
+            valueW.setFileNameHashCode(fileNameHashCode);
+            valueW.setOffset(offset.get());
+            context.write(keyW, valueW);
         }
     }
 

@@ -9,7 +9,7 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
 /**
  * @author Carsten Hufe
  */
-public class DoubleEqOperationSearch extends NumberEqOperationSearch<Double, Double, NumberSnappyIndexFile<Double>> {
+public class DoubleEqOperationSearch extends NumberEqOperationSearch<Double, Double, Double, NumberSnappyIndexFile<Double>> {
 
 
     public DoubleEqOperationSearch(NumberSnappyIndexStrategy<Double, Double, NumberSnappyIndexFile<Double>> strategy) {

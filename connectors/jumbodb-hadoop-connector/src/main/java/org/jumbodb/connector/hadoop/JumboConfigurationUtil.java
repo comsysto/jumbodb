@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.configuration.*;
-import org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy.GenericJsonHashCodeIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.hashcode32.snappy.GenericJsonHashCode32IndexMapper;
 
 import java.io.IOException;
 import java.net.URI;
@@ -86,9 +86,9 @@ public class JumboConfigurationUtil {
     }
 
     public static IndexField loadIndexJson(Configuration conf) throws IOException {
-        String importJson = conf.get(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF);
+        String importJson = conf.get(GenericJsonHashCode32IndexMapper.JUMBO_INDEX_JSON_CONF);
         if(StringUtils.isBlank(importJson)) {
-            throw new IllegalStateException(GenericJsonHashCodeIndexMapper.JUMBO_INDEX_JSON_CONF + " is not set.");
+            throw new IllegalStateException(GenericJsonHashCode32IndexMapper.JUMBO_INDEX_JSON_CONF + " is not set.");
         }
 
         ObjectMapper mapper = new ObjectMapper();

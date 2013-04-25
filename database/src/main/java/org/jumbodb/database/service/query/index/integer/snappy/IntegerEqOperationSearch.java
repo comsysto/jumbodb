@@ -11,7 +11,7 @@ import java.io.RandomAccessFile;
 /**
  * @author Carsten Hufe
  */
-public class IntegerEqOperationSearch extends NumberEqOperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>> {
+public class IntegerEqOperationSearch extends NumberEqOperationSearch<Integer, Integer, Integer, NumberSnappyIndexFile<Integer>> {
 
 
     public IntegerEqOperationSearch(NumberSnappyIndexStrategy<Integer, Integer, NumberSnappyIndexFile<Integer>> strategy) {

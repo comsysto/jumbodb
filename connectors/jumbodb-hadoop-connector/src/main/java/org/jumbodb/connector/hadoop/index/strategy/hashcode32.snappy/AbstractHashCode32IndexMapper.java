@@ -16,20 +16,26 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractHashCode32IndexMapper<T> extends AbstractIndexMapper<T> {
-    public static final String HASHCODE32_SNAPPY_V_1 = "HASHCODE32_SNAPPY_V1";
+    public static final String HASHCODE32_SNAPPY_V1 = "HASHCODE32_SNAPPY_V1";
+
+    private IntWritable keyW = new IntWritable();
+    private FileOffsetWritable valueW = new FileOffsetWritable();
 
     @Override
     public void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException {
         String indexableValue = getIndexableValue(input);
         if(indexableValue != null) {
             int hashCode = indexableValue.hashCode();
-            context.write(new IntWritable(hashCode), new FileOffsetWritable(fileNameHashCode, offset.get()));
+            keyW.set(hashCode);
+            valueW.setFileNameHashCode(fileNameHashCode);
+            valueW.setOffset(offset.get());
+            context.write(keyW, valueW);
         }
     }
 
     @Override
     public String getStrategy() {
-        return HASHCODE32_SNAPPY_V_1;
+        return HASHCODE32_SNAPPY_V1;
     }
 
     @Override

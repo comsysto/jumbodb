@@ -1,0 +1,51 @@
+{
+    "description": "Carstens Twitter Test Import",
+    "deliveryChunkKey": "first_delivery",
+    "hosts": [
+        {"host": "ex10-dev01.devproof.org", "port": 12001}
+    ],
+    "datePattern": "EEE MMM dd HH:mm:ss Z yyyy",
+    "output": "maprfs:///twitter/output",
+    "numberOfOutputFiles": 10,
+    "hadoop": [],
+    "importCollection": [
+        {
+            "input": "maprfs:///twitter/input-20130417",
+            "collectionName": "twitter",
+            "sort": ["user.screen_name"],
+            "dataStrategy": "JSON_SNAPPY_V1",
+            "indexes": [
+                {
+                    "indexName": "screen_name",
+                    "fields": ["user.screen_name"],
+                    "indexStrategy": "HASHCODE32_SNAPPY_V1"
+                },
+                {
+                    "indexName": "created_at",
+                    "fields": ["created_at"],
+                    "indexStrategy": "DATETIME_SNAPPY_V1"
+                },
+                {
+                    "indexName": "user_created_at",
+                    "fields": ["user_created_at"],
+                    "indexStrategy": "DATETIME_SNAPPY_V1"
+                },
+                {
+                    "indexName": "coordinates",
+                    "fields": ["geo.coordinates"],
+                    "indexStrategy": "GEOHASH_SNAPPY_V1"
+                },
+                {
+                    "indexName": "user_followers_count",
+                    "fields": ["user.followers_count"],
+                    "indexStrategy": "INTEGER_SNAPPY_V1"
+                },
+                {
+                    "indexName": "user_statuses_count",
+                    "fields": ["user.statuses_count"],
+                    "indexStrategy": "INTEGER_SNAPPY_V1"
+                }
+            ]
+        }
+    ]
+}

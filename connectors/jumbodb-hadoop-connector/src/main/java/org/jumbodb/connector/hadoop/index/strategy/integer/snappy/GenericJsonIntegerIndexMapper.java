@@ -33,7 +33,7 @@ public class GenericJsonIntegerIndexMapper extends AbstractIntegerIndexMapper<Js
     public Integer getIndexableValue(JsonNode input) {
         JsonNode valueFor = getValueFor(indexField.getFields().get(0), input);
         if(valueFor != null) {
-            return valueFor.getValueAsInt();
+            return valueFor.getIntValue();
         }
         return null;
     }

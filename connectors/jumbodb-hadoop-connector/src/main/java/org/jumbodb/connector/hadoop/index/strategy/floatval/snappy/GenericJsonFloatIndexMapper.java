@@ -28,7 +28,7 @@ public class GenericJsonFloatIndexMapper extends AbstractFloatIndexMapper<JsonNo
     public Float getIndexableValue(JsonNode input) {
         JsonNode valueFor = getValueFor(indexField.getFields().get(0), input);
         if(valueFor != null) {
-            return (float)valueFor.getValueAsDouble();
+            return (float)valueFor.getDoubleValue();
         }
         return null;
     }

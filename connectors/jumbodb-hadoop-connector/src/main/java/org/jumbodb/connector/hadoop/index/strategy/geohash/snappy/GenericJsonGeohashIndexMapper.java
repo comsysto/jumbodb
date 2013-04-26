@@ -34,7 +34,7 @@ public class GenericJsonGeohashIndexMapper extends AbstractGeohashIndexMapper<Js
 //            Iterator<JsonNode> elements = valueFor.getElements();
             List<Double> result = new ArrayList<Double>(2);
             for (JsonNode jsonNode : valueFor) {
-                result.add(jsonNode.getValueAsDouble());
+                result.add(jsonNode.getDoubleValue());
             }
             return result;
         }

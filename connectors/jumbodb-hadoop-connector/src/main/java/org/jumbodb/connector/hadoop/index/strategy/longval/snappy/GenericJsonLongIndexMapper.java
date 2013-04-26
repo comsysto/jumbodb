@@ -28,7 +28,7 @@ public class GenericJsonLongIndexMapper extends AbstractLongIndexMapper<JsonNode
     public Long getIndexableValue(JsonNode input) {
         JsonNode valueFor = getValueFor(indexField.getFields().get(0), input);
         if(valueFor != null) {
-            return valueFor.getValueAsLong();
+            return valueFor.getLongValue();
         }
         return null;
     }

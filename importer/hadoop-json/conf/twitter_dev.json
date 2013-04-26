@@ -7,6 +7,7 @@
         {"host": "ex4s-dev03.devproof.org", "port": 12001},
         {"host": "ex10-dev01.devproof.org", "port": 12001}
     ],
+    "datePattern": "EEE MMM dd HH:mm:ss Z yyyy",
     "output": "maprfs:///twitter/output",
     "numberOfOutputFiles": 10,
     "hadoop": [],

@@ -28,7 +28,7 @@ public class GenericJsonDoubleIndexMapper extends AbstractDoubleIndexMapper<Json
     public Double getIndexableValue(JsonNode input) {
         JsonNode valueFor = getValueFor(indexField.getFields().get(0), input);
         if(valueFor != null) {
-            return valueFor.getValueAsDouble();
+            return valueFor.getDoubleValue();
         }
         return null;
     }

@@ -89,6 +89,6 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
     public abstract Class<T> getJsonClass();
 
     public boolean throwErrorOnInvalidDataset() {
-        return true;
+        return false;
     }
 }

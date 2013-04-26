@@ -18,6 +18,7 @@ public class ImportHelper {
 
     public static void writeActiveFile(File activeDeliveryFile, String deliveryVersion) {
         Properties active = new Properties();
+        active.setProperty("active", "true");
         active.setProperty("deliveryVersion", deliveryVersion);
 
         FileOutputStream activeDeliveryFos = null;

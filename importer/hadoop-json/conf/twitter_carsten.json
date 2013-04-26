@@ -7,6 +7,7 @@
             "port": 12001
         }
     ],
+    "datePattern": "EEE MMM dd HH:mm:ss Z yyyy",
     "output": "/Users/carsten/smhadoop/output/twitter",
     "numberOfOutputFiles": 5,
     "hadoop": [],
@@ -23,9 +24,9 @@
                     "indexStrategy": "HASHCODE32_SNAPPY_V1"
                 },
                 {
-                    "indexName": "coordinates",
-                    "fields": ["geo.coordinates"],
-                    "indexStrategy": "GEOHASH_SNAPPY_V1"
+                    "indexName": "created_at",
+                    "fields": ["created_at"],
+                    "indexStrategy": "DATETIME_SNAPPY_V1"
                 }
             ]
         }

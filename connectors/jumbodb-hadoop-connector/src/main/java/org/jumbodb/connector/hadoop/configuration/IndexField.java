@@ -11,6 +11,7 @@ public class IndexField {
     private String indexName;
     private List<String> fields;
     private String indexStrategy;
+    private String datePattern;
 
     public IndexField() {
     }
@@ -19,6 +20,13 @@ public class IndexField {
         this.indexName = indexName;
         this.fields = fields;
         this.indexStrategy = indexStrategy;
+    }
+
+    public IndexField(String indexName, List<String> fields, String indexStrategy, String datePattern) {
+        this.indexName = indexName;
+        this.fields = fields;
+        this.indexStrategy = indexStrategy;
+        this.datePattern = datePattern;
     }
 
     public String getIndexStrategy() {
@@ -45,12 +53,22 @@ public class IndexField {
         this.fields = fields;
     }
 
+    public String getDatePattern() {
+        return datePattern;
+    }
+
+    public void setDatePattern(String datePattern) {
+        this.datePattern = datePattern;
+    }
+
+
     @Override
     public String toString() {
         return "IndexField{" +
                 "indexName='" + indexName + '\'' +
                 ", fields=" + fields +
                 ", indexStrategy='" + indexStrategy + '\'' +
+                ", datePattern='" + datePattern + '\'' +
                 '}';
     }
 }

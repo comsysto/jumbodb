@@ -117,6 +117,11 @@ public class JumboConfigurationUtil {
             job.setDeliveryChunkKey(importCollection.getDeliveryChunkKey() != null ? importCollection.getDeliveryChunkKey() : importDefinition.getDeliveryChunkKey());
             job.setDescription(importCollection.getDescription() != null ? importCollection.getDescription() : importDefinition.getDescription());
             job.setHosts(importCollection.getHosts() != null && importCollection.getHosts().size() > 0 ? importCollection.getHosts() : importDefinition.getHosts());
+            for (IndexField indexField : job.getIndexes()) {
+                if(indexField.getDatePattern() == null) {
+                    indexField.setDatePattern(importDefinition.getDatePattern());
+                }
+            }
 
             String output = StringUtils.isNotBlank(importCollection.getOutput()) ? importCollection.getOutput() : importDefinition.getOutput();
             String outputWithDate = output + "/" + dateStamp + "/";

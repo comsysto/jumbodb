@@ -56,6 +56,9 @@
                 <bean class="org.jumbodb.database.service.query.index.longval.snappy.LongSnappyIndexStrategy">
                     <property name="indexFileExecutor" ref="indexFileExecutor"/>
                 </bean>
+                <bean class="org.jumbodb.database.service.query.index.datetime.snappy.DateTimeSnappyIndexStrategy">
+                    <property name="indexFileExecutor" ref="indexFileExecutor"/>
+                </bean>
                 <bean class="org.jumbodb.database.service.query.index.geohash.snappy.GeohashSnappyIndexStrategy">
                     <property name="indexFileExecutor" ref="indexFileExecutor"/>
                 </bean>

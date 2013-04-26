@@ -1,11 +1,11 @@
 package org.jumbodb.connector.hadoop.index;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 import org.jumbodb.connector.hadoop.configuration.JumboCustomImportJob;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.datetime.snappy.GenericJsonDateTimeIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonDoubleIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.floatval.snappy.GenericJsonFloatIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.geohash.snappy.GenericJsonGeohashIndexMapper;
@@ -42,6 +42,7 @@ public class IndexJobCreator {
         indexMapper.put(GenericJsonFloatIndexMapper.FLOAT_SNAPPY_V_1, GenericJsonFloatIndexMapper.class);
         indexMapper.put(GenericJsonDoubleIndexMapper.DOUBLE_SNAPPY_V_1, GenericJsonDoubleIndexMapper.class);
         indexMapper.put(GenericJsonGeohashIndexMapper.GEOHASH_SNAPPY_V1, GenericJsonGeohashIndexMapper.class);
+        indexMapper.put(GenericJsonDateTimeIndexMapper.DATETIME_SNAPPY_V1, GenericJsonDateTimeIndexMapper.class);
         return Collections.unmodifiableMap(indexMapper);
     }
 

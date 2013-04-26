@@ -17,6 +17,15 @@ public class ImportDefinition {
     private List<HadoopConfig> hadoop = new LinkedList<HadoopConfig>();
     private String output;
     private Integer numberOfOutputFiles = 50;
+    private String datePattern = "yyyy-MM-dd HH:mm:ss";
+
+    public String getDatePattern() {
+        return datePattern;
+    }
+
+    public void setDatePattern(String datePattern) {
+        this.datePattern = datePattern;
+    }
 
     public Integer getNumberOfOutputFiles() {
         return numberOfOutputFiles;

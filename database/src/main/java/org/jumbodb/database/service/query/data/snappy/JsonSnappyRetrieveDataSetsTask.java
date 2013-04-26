@@ -140,6 +140,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         int datasetLength = findDatasetLengthByLineBreak(resultBuffer, fromOffset);
                         byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, fromOffset, datasetLength);
                         if (matchingFilter(dataSetFromOffsetsGroup, jsonParser)) {
+                            String aaa = new String(dataSetFromOffsetsGroup);
                             resultCallback.writeResult(dataSetFromOffsetsGroup);
                             results++;
                         }

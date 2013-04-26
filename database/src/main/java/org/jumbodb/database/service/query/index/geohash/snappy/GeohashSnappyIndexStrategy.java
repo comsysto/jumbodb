@@ -28,6 +28,7 @@ public class GeohashSnappyIndexStrategy extends NumberSnappyIndexStrategy<Geohas
     public Map<QueryOperation, OperationSearch<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>>> getQueryOperationsStrategies() {
         Map<QueryOperation, OperationSearch<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>>> operations = new HashMap<QueryOperation, OperationSearch<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>>>();
         operations.put(QueryOperation.GEO_BOUNDARY_BOX, new GeohashBoundaryBoxOperationSearch(this));
+        operations.put(QueryOperation.GEO_WITHIN_RANGE_METER, new GeohashWithinRangeMeterBoxOperationSearch(this));
         return operations;
     }
 

@@ -17,12 +17,31 @@ import java.util.Map;
 @SuppressWarnings({"JavaDoc"})
 public final class GeoHash implements Comparable<GeoHash>, Serializable {
     public static void main(String[] args) {
-        GeoHash geoHash1 = withBitPrecision(48.2119d, 11.3401d, 32);
-        GeoHash geoHash2 = withBitPrecision(48.2437d, 11.4312d, 32);
-        System.out.println(Integer.toBinaryString(geoHash1.intValue()));
-        System.out.println(Integer.toBinaryString(geoHash2.intValue()));
-        System.out.println(Integer.toBinaryString(getBoundaryBoxComparistionValue(geoHash1.intValue(), geoHash2.intValue())));
+//        GeoHash geoHash1 = withBitPrecision(48.2119d, 11.3401d, 32);
+//        GeoHash geoHash2 = withBitPrecision(48.2437d, 11.4312d, 32);
+//        System.out.println(Integer.toBinaryString(geoHash1.intValue()));
+//        System.out.println(Integer.toBinaryString(geoHash2.intValue()));
+//        System.out.println(Integer.toBinaryString(getBoundaryBoxComparistionValue(geoHash1.intValue(), geoHash2.intValue())));
 
+//        int from = -1827780956;
+//        int to = 2074707281;
+//        int search = -960776553;
+//
+//        System.out.println(Integer.toBinaryString(from));
+//        System.out.println(Integer.toBinaryString(to));
+//        System.out.println(Integer.toBinaryString(search));
+//        System.out.println(Integer.toBinaryString(from >> 6));
+//        System.out.println(Integer.toBinaryString(to >> 6));
+//        System.out.println(Integer.toBinaryString(search >> 6));
+////        System.out.println(Integer.toBinaryString(from1));
+////        System.out.println(Integer.toBinaryString(from1 >> 6));
+//        System.out.println(from >> 6);
+//        System.out.println(to >> 6);
+//        System.out.println(search >> 6);
+
+        GeoHash geoHash = withUnprecisionOfDistanceInMeter(48.2119d, 11.3401d, 10000);
+        System.out.println(geoHash.significantBits());
+        System.out.println(geoHash.toBinaryString());
     }
 
 
@@ -53,10 +72,10 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
     }
 
 
-    public static int getBoundaryBoxComparistionValue(int point1, int point2) {
-        int bitsToShift = getBitsToShift(point1, point2);
-        return point1 >>> bitsToShift;
-    }
+//    public static int getBoundaryBoxComparistionValue(int point1, int point2) {
+//        int bitsToShift = getBitsToShift(point1, point2);
+//        return point1 >>> bitsToShift;
+//    }
 
     public static int getBitsToShift(int b1, int b2) {
         int max = 32;
@@ -72,6 +91,25 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
         return 0;
     }
 
+
+    public static GeoHash withUnprecisionOfDistanceInMeter(double centerLat, double centerLong, double distanceInMeter) {
+        int prec = 32;
+        double distLat = centerLat;
+        double distLong = centerLong;
+        GeoHash geoHash = withBitPrecision(centerLat, centerLong, prec);
+        double distInMeter = distFromInMeter(centerLat, centerLong, distLat, distLong);
+        while(distInMeter < distanceInMeter) {
+            double latitudeSize = geoHash.getBoundingBox().getLatitudeSize();
+//            double longitudeSize = geoHash.getBoundingBox().getLongitudeSize();
+            distLat += latitudeSize;
+//            distLong += longitudeSize;
+            distInMeter = distFromInMeter(centerLat, centerLong, distLat, distLong);
+            prec = prec - 2;
+            geoHash = withBitPrecision(centerLat, centerLong, prec);
+            System.out.println("dist in " + distInMeter);
+        }
+        return geoHash;
+    }
     /**
      * This method uses the given number of characters as the desired precision
      * value. The hash can only be 64bits long, thus a maximum precision of 12
@@ -529,5 +567,19 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
     @Override
     public int compareTo(GeoHash o) {
         return new Long(bits).compareTo(o.bits);
+    }
+
+
+    public static double distFromInMeter(double lat1, double lng1, double lat2, double lng2) {
+        double earthRadius = 3958.75;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLng = Math.toRadians(lng2 - lng1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double dist = earthRadius * c;
+        double meterConversion = 1609;
+        return dist * meterConversion;
     }
 }

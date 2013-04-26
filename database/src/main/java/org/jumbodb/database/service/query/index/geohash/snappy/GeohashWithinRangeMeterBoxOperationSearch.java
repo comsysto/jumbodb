@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.geohash.snappy;
 
+import org.jumbodb.common.geo.geohash.GeoHash;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberEqOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
@@ -9,57 +10,58 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
 /**
  * @author Carsten Hufe
  */
-public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<GeohashCoords, GeohashBoundaryBox, Integer, NumberSnappyIndexFile<Integer>> {
+public class GeohashWithinRangeMeterBoxOperationSearch extends NumberEqOperationSearch<GeohashCoords, GeohashRangeMeterBox, Integer, NumberSnappyIndexFile<Integer>> {
 
 
-    public GeohashBoundaryBoxOperationSearch(NumberSnappyIndexStrategy<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>> strategy) {
+    public GeohashWithinRangeMeterBoxOperationSearch(NumberSnappyIndexStrategy<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>> strategy) {
         super(strategy);
     }
 
     @Override
     public boolean matching(GeohashCoords currentValue, QueryValueRetriever queryValueRetriever) {
-        GeohashBoundaryBox searchValue = queryValueRetriever.getValue();
+        GeohashRangeMeterBox searchValue = queryValueRetriever.getValue();
         int searchedGeohash = searchValue.getGeohashFirstMatchingBits();
         int bitsToShift = searchValue.getBitsToShift();
         if((currentValue.getGeohash() >> bitsToShift) == searchedGeohash) {
-            return searchValue.contains(currentValue.getLatitude(), currentValue.getLongitude());
+            double distance = GeoHash.distFromInMeter(searchValue.getLatitude(), searchValue.getLongitude(), currentValue.getLatitude(), currentValue.getLongitude());
+            return distance < searchValue.getRangeInMeter();
         }
         return false;
     }
 
     @Override
-    public boolean eq(GeohashCoords val1, GeohashBoundaryBox val2) {
+    public boolean eq(GeohashCoords val1, GeohashRangeMeterBox val2) {
         int geohash = val1.getGeohash() >> val2.getBitsToShift();
         return geohash == val2.getGeohashFirstMatchingBits();
     }
 
     @Override
-    public boolean lt(GeohashCoords val1, GeohashBoundaryBox val2) {
+    public boolean lt(GeohashCoords val1, GeohashRangeMeterBox val2) {
         int geohash = val1.getGeohash() >> val2.getBitsToShift();
         return geohash < val2.getGeohashFirstMatchingBits();
     }
 
     @Override
-    public boolean gt(GeohashCoords val1, GeohashBoundaryBox val2) {
+    public boolean gt(GeohashCoords val1, GeohashRangeMeterBox val2) {
         int geohash = val1.getGeohash() >> val2.getBitsToShift();
         return geohash > val2.getGeohashFirstMatchingBits();
     }
 
     @Override
-    public boolean ltEq(GeohashCoords val1, GeohashBoundaryBox val2) {
+    public boolean ltEq(GeohashCoords val1, GeohashRangeMeterBox val2) {
         int geohash = val1.getGeohash() >> val2.getBitsToShift();
         return geohash <= val2.getGeohashFirstMatchingBits();
     }
 
     @Override
-    public boolean gtEq(GeohashCoords val1, GeohashBoundaryBox val2) {
+    public boolean gtEq(GeohashCoords val1, GeohashRangeMeterBox val2) {
         int geohash = val1.getGeohash() >> val2.getBitsToShift();
         return geohash >= val2.getGeohashFirstMatchingBits();
     }
 
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> snappyIndexFile) {
-        GeohashBoundaryBox searchValue = queryValueRetriever.getValue();
+        GeohashRangeMeterBox searchValue = queryValueRetriever.getValue();
         int geohash = searchValue.getGeohashFirstMatchingBits();
         int bitsToShift = searchValue.getBitsToShift();
         int from = snappyIndexFile.getFrom() >> bitsToShift;
@@ -74,6 +76,6 @@ public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<G
 
     @Override
     public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new GeohashBoundaryBoxQueryValueRetriever(queryClause);
+        return new GeohashWithingRangeMeterQueryValueRetriever(queryClause);
     }
 }

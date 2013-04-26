@@ -20,12 +20,12 @@ public class TwitterQuery {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
 //        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
         JumboQuery query = new JumboQuery();
-//        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
+        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.EQ, "2013-04-17 22:13:59")));
-        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.LT, sdf.parse("2013-04-17 22:15:59").getTime())));
-        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(sdf.parse("2013-04-17 22:13:59").getTime(), sdf.parse("2013-04-17 22:14:59").getTime()))));
+//        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.LT, sdf.parse("2013-04-17 22:15:59").getTime())));
+//        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(sdf.parse("2013-04-17 22:13:59").getTime(), sdf.parse("2013-04-17 22:14:59").getTime()))));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.LT, "2013-04-17 22:15:59")));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.GT, "2013-04-17 22:15:59")));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.NE, "2013-04-17 22:13:59")));

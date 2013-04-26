@@ -10,6 +10,7 @@ import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonD
 import org.jumbodb.connector.hadoop.index.strategy.floatval.snappy.GenericJsonFloatIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.geohash.snappy.GenericJsonGeohashIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.hashcode32.snappy.GenericJsonHashCode32IndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.hashcode64.snappy.GenericJsonHashCode64IndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.integer.snappy.GenericJsonIntegerIndexMapper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -37,6 +38,7 @@ public class IndexJobCreator {
     private static Map<String, Class<? extends AbstractIndexMapper>> createIndexMapper() {
         Map<String, Class<? extends AbstractIndexMapper>> indexMapper = new HashMap<String, Class<? extends AbstractIndexMapper>>();
         indexMapper.put(GenericJsonHashCode32IndexMapper.HASHCODE32_SNAPPY_V1, GenericJsonHashCode32IndexMapper.class);
+        indexMapper.put(GenericJsonHashCode64IndexMapper.HASHCODE64_SNAPPY_V1, GenericJsonHashCode64IndexMapper.class);
         indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V1, GenericJsonIntegerIndexMapper.class);
         indexMapper.put(GenericJsonLongIndexMapper.LONG_SNAPPY_V1, GenericJsonLongIndexMapper.class);
         indexMapper.put(GenericJsonFloatIndexMapper.FLOAT_SNAPPY_V_1, GenericJsonFloatIndexMapper.class);

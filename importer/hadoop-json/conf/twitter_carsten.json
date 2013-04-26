@@ -21,7 +21,7 @@
                 {
                     "indexName": "screen_name",
                     "fields": ["user.screen_name"],
-                    "indexStrategy": "HASHCODE32_SNAPPY_V1"
+                    "indexStrategy": "HASHCODE64_SNAPPY_V1"
                 },
                 {
                     "indexName": "created_at",

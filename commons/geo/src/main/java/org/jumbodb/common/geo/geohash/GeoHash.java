@@ -106,7 +106,7 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
             distInMeter = distFromInMeter(centerLat, centerLong, distLat, distLong);
             prec = prec - 2;
             geoHash = withBitPrecision(centerLat, centerLong, prec);
-            System.out.println("dist in " + distInMeter);
+//            System.out.println("dist in " + distInMeter);
         }
         return geoHash;
     }

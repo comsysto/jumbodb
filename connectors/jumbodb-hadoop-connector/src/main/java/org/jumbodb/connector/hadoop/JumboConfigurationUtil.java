@@ -177,6 +177,7 @@ public class JumboConfigurationUtil {
         sortMapper.put(GenericJsonFloatSortMapper.SORT_KEY, GenericJsonFloatSortMapper.class);
         sortMapper.put(GenericJsonIntegerSortMapper.SORT_KEY, GenericJsonIntegerSortMapper.class);
         sortMapper.put(GenericJsonLongSortMapper.SORT_KEY, GenericJsonLongSortMapper.class);
+        sortMapper.put(GenericJsonGeohashSortMapper.SORT_KEY, GenericJsonGeohashSortMapper.class);
         Class<? extends Mapper> aClass = sortMapper.get(type);
         if(aClass != null) {
             return aClass;
@@ -192,6 +193,7 @@ public class JumboConfigurationUtil {
         sortMapper.put(GenericJsonFloatSortMapper.SORT_KEY, FloatWritable.class);
         sortMapper.put(GenericJsonIntegerSortMapper.SORT_KEY, IntWritable.class);
         sortMapper.put(GenericJsonLongSortMapper.SORT_KEY, LongWritable.class);
+        sortMapper.put(GenericJsonGeohashSortMapper.SORT_KEY, IntWritable.class);
         Class<? extends WritableComparable> aClass = sortMapper.get(type);
         if(aClass != null) {
             return aClass;

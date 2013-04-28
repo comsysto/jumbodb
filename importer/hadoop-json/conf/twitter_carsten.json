@@ -15,8 +15,8 @@
         {
             "input": "/Users/carsten/smhadoop/input/twitter",
             "collectionName": "carsten.twitter",
-            "sort": ["created_at"],
-            "sortType": "DATETIME",
+            "sort": ["geo.coordinates"],
+            "sortType": "GEOHASH",
             "dataStrategy": "JSON_SNAPPY_V1",
             "indexes": [
                 {

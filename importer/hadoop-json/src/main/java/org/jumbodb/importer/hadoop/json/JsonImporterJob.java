@@ -16,7 +16,7 @@ import org.jumbodb.connector.hadoop.JumboJobCreator;
 import org.jumbodb.connector.hadoop.configuration.FinishedNotification;
 import org.jumbodb.connector.hadoop.configuration.ImportDefinition;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
-import org.jumbodb.connector.hadoop.index.map.GenericJsonSortMapper;
+import org.jumbodb.connector.hadoop.index.map.GenericJsonStringSortMapper;
 import org.jumbodb.connector.hadoop.index.output.TextValueOutputFormat;
 
 import java.util.Collections;
@@ -55,13 +55,14 @@ public class JsonImporterJob extends Configured implements Tool {
             if(importJob.getSort() != null && importJob.getSort().size() > 0) {
                 Job sortJob = new Job(conf, "Sort Job " + importJob.getCollectionName());
                 JumboConfigurationUtil.setSortConfig(sortJob, importJob.getSort());
+                JumboConfigurationUtil.setSortDatePatternConfig(sortJob, importJob.getSortDatePattern());
                 FileInputFormat.addInputPath(sortJob, importJob.getInputPath());
                 FileOutputFormat.setOutputPath(sortJob, importJob.getSortedOutputPath());
                 sortJob.setJarByClass(JsonImporterJob.class);
-                sortJob.setMapperClass(GenericJsonSortMapper.class);
-                sortJob.setMapOutputKeyClass(Text.class);
+                sortJob.setMapperClass(JumboConfigurationUtil.getSortMapperByType(importJob.getSortType()));
+                sortJob.setMapOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
                 sortJob.setMapOutputValueClass(Text.class);
-                sortJob.setOutputKeyClass(Text.class);
+                sortJob.setOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
                 sortJob.setOutputValueClass(Text.class);
                 sortJob.setNumReduceTasks(importJob.getNumberOfOutputFiles());
                 sortJob.setOutputFormatClass(TextValueOutputFormat.class);

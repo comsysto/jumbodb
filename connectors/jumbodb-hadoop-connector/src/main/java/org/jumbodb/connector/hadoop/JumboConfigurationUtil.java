@@ -6,10 +6,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.configuration.*;
+import org.jumbodb.connector.hadoop.index.map.*;
+import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonDoubleIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.hashcode32.snappy.GenericJsonHashCode32IndexMapper;
 
 import java.io.IOException;
@@ -74,6 +78,18 @@ public class JumboConfigurationUtil {
         conf.getConfiguration().set(JumboConstants.JUMBO_SORT_CONFIG, mapper.writeValueAsString(sort));
     }
 
+    public static void setSortDatePatternConfig(Job conf, String sort) throws IOException {
+        conf.getConfiguration().set(JumboConstants.JUMBO_SORT_DATEPATTERN_CONFIG, sort);
+    }
+
+    public static String loadSortDatePatternConfig(Configuration conf) throws IOException {
+        String importJson = conf.get(JumboConstants.JUMBO_SORT_DATEPATTERN_CONFIG);
+        if(StringUtils.isBlank(importJson)) {
+            throw new IllegalStateException(JumboConstants.JUMBO_SORT_DATEPATTERN_CONFIG + " is not set.");
+        }
+        return importJson;
+    }
+
     public static List<String> loadSortConfig(Configuration conf) throws IOException {
         String importJson = conf.get(JumboConstants.JUMBO_SORT_CONFIG);
         if(StringUtils.isBlank(importJson)) {
@@ -128,7 +144,8 @@ public class JumboConfigurationUtil {
             String outputData = outputWithDate + "data/" + importCollection.getCollectionName() + "/";
             String outputIndex = outputWithDate + "index/" + importCollection.getCollectionName() + "/";
             String outputLog = outputWithDate + "log/" + importCollection.getCollectionName() + "/";
-
+            job.setSortDatePattern(importCollection.getSortDatePattern() != null ? importCollection.getSortDatePattern() : importDefinition.getDatePattern());
+            job.setSortType(importCollection.getSortType());
             job.setInputPath(new Path(importCollection.getInput()));
             job.setSortedOutputPath(importCollection.getSort() != null && importCollection.getSort().size() > 0 ? new Path(outputData) : null);
             job.setIndexOutputPath(new Path(outputIndex));
@@ -150,5 +167,35 @@ public class JumboConfigurationUtil {
             }
         }
         return result;
+    }
+
+    public static Class<? extends Mapper> getSortMapperByType(String type) {
+        Map<String, Class<? extends Mapper>> sortMapper = new HashMap<String, Class<? extends Mapper>>();
+        sortMapper.put(GenericJsonStringSortMapper.SORT_KEY, GenericJsonStringSortMapper.class);
+        sortMapper.put(GenericJsonDateTimeSortMapper.SORT_KEY, GenericJsonDateTimeSortMapper.class);
+        sortMapper.put(GenericJsonDoubleSortMapper.SORT_KEY, GenericJsonDoubleSortMapper.class);
+        sortMapper.put(GenericJsonFloatSortMapper.SORT_KEY, GenericJsonFloatSortMapper.class);
+        sortMapper.put(GenericJsonIntegerSortMapper.SORT_KEY, GenericJsonIntegerSortMapper.class);
+        sortMapper.put(GenericJsonLongSortMapper.SORT_KEY, GenericJsonLongSortMapper.class);
+        Class<? extends Mapper> aClass = sortMapper.get(type);
+        if(aClass != null) {
+            return aClass;
+        }
+        throw new IllegalArgumentException("Sort type " + type + " is not supported.");
+    }
+
+    public static Class<? extends WritableComparable> getSortOutputKeyClassByType(String type) {
+        Map<String, Class<? extends WritableComparable>> sortMapper = new HashMap<String, Class<? extends WritableComparable>>();
+        sortMapper.put(GenericJsonStringSortMapper.SORT_KEY, Text.class);
+        sortMapper.put(GenericJsonDateTimeSortMapper.SORT_KEY, LongWritable.class);
+        sortMapper.put(GenericJsonDoubleSortMapper.SORT_KEY, DoubleWritable.class);
+        sortMapper.put(GenericJsonFloatSortMapper.SORT_KEY, FloatWritable.class);
+        sortMapper.put(GenericJsonIntegerSortMapper.SORT_KEY, IntWritable.class);
+        sortMapper.put(GenericJsonLongSortMapper.SORT_KEY, LongWritable.class);
+        Class<? extends WritableComparable> aClass = sortMapper.get(type);
+        if(aClass != null) {
+            return aClass;
+        }
+        throw new IllegalArgumentException("Sort type " + type + " is not supported.");
     }
 }

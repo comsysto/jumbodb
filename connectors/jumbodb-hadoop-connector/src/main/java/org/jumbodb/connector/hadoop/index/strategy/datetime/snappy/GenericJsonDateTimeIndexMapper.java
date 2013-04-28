@@ -34,7 +34,7 @@ public class GenericJsonDateTimeIndexMapper extends AbstractDateTimeIndexMapper<
     public Date getIndexableValue(JsonNode input) {
         JsonNode valueFor = getValueFor(indexField.getFields().get(0), input);
         if(valueFor != null) {
-            String valueAsText = valueFor.getValueAsText();
+            String valueAsText = valueFor.getTextValue();
             if(StringUtils.isNotBlank(valueAsText)) {
                 try {
                     return sdf.parse(valueAsText);

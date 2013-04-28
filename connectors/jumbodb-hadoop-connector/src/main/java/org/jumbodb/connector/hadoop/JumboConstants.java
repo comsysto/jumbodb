@@ -16,6 +16,7 @@ public class JumboConstants {
     public static final String JUMBO_DATA_STRATEGY = "jumbo.data.strategy";
     public static final String JUMBO_INDEX_STRATEGY = "jumbo.index.strategy";
     public static final String JUMBO_SORT_CONFIG = "jumbo.sort.config";
+    public static final String JUMBO_SORT_DATEPATTERN_CONFIG = "jumbo.sort.datepattern.config";
 //    public static final String DELIVERY_INFO = "jumbo.delivery.info";
 //    public static final String DELIVERY_ACTIVATE = "jumbo.delivery.activate";
     public static final boolean DELIVERY_ACTIVATE_DEFAULT = true;

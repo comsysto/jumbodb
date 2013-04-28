@@ -45,6 +45,7 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
             onDataset(key, name.hashCode(), input, context);
         }
         catch(JsonParseException ex) {
+            context.getCounter("json.index", "parse_exception").increment(1);
             System.err.println("Json " + ((FileSplit) context.getInputSplit()).getPath().toString());
             System.err.println("Json " + value.toString());
             if(throwErrorOnInvalidDataset()) {

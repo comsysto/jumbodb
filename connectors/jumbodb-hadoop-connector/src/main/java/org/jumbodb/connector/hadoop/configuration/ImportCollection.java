@@ -1,5 +1,7 @@
 package org.jumbodb.connector.hadoop.configuration;
 
+import org.jumbodb.connector.hadoop.index.map.GenericJsonStringSortMapper;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +19,8 @@ public class ImportCollection {
     private String deliveryChunkKey;
     private String dataStrategy;
     private List<String> sort = new LinkedList<String>();
+    private String sortDatePattern;
+    private String sortType = GenericJsonStringSortMapper.SORT_KEY;
     private List<IndexField> indexes = new LinkedList<IndexField>();
     private List<ImportHost> hosts;
     private Integer numberOfOutputFiles = null;
@@ -24,6 +28,22 @@ public class ImportCollection {
 
 
     public ImportCollection() {
+    }
+
+    public String getSortDatePattern() {
+        return sortDatePattern;
+    }
+
+    public void setSortDatePattern(String sortDatePattern) {
+        this.sortDatePattern = sortDatePattern;
+    }
+
+    public String getSortType() {
+        return sortType;
+    }
+
+    public void setSortType(String sortType) {
+        this.sortType = sortType;
     }
 
     public String getDescription() {

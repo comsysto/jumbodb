@@ -15,7 +15,8 @@
         {
             "input": "/Users/carsten/smhadoop/input/twitter",
             "collectionName": "carsten.twitter",
-            "sort": ["user.screen_name"],
+            "sort": ["created_at"],
+            "sortType": "DATETIME",
             "dataStrategy": "JSON_SNAPPY_V1",
             "indexes": [
                 {

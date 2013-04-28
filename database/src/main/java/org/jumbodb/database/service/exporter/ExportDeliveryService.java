@@ -25,7 +25,7 @@ public class ExportDeliveryService {
         exportDelivery.setCurrentBytes(1000);
         exportDelivery.setTotalBytes(10000);
         exportDelivery.setPercentage(50d);
-        exportDelivery.setRunning(true);
+        exportDelivery.setState(ExportDelivery.State.WAITING);
         exportDelivery.setStatus("Copying file");
         return Arrays.asList(exportDelivery);
     }

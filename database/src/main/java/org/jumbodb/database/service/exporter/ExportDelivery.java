@@ -4,17 +4,25 @@ package org.jumbodb.database.service.exporter;
  * @author Carsten Hufe
  */
 public class ExportDelivery {
+    public enum State {WAITING, RUNNING, FINISHED, FAILED, ABORTED}
     private String id;
     private String host;
     private int port;
     private boolean activate;
-    private boolean running;
-    private boolean finishedSuccessful;
+    private State state;
     private String status;
     private double percentage;
     private long currentBytes;
     private long totalBytes;
     private long copyRateInBytes;
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
 
     public String getFormattedCopyRate() {
         return (copyRateInBytes / 1024 / 1024) + "MB/s";
@@ -66,22 +74,6 @@ public class ExportDelivery {
 
     public void setActivate(boolean activate) {
         this.activate = activate;
-    }
-
-    public boolean isRunning() {
-        return running;
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
-
-    public boolean isFinishedSuccessful() {
-        return finishedSuccessful;
-    }
-
-    public void setFinishedSuccessful(boolean finishedSuccessful) {
-        this.finishedSuccessful = finishedSuccessful;
     }
 
     public String getStatus() {

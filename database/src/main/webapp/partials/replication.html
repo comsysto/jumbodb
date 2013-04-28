@@ -17,7 +17,8 @@
                 <tr>
                     <th>Host</th>
                     <th>Port</th>
-                    <th>Progress</th>
+                    <th>State</th>
+                    <th style="width:50%">Progress</th>
                     <th>&nbsp;</th>
                 </tr>
                 </thead>
@@ -25,6 +26,7 @@
                 <tr ng-repeat="replication in replications">
                     <td>{{replication.host}}</td>
                     <td>{{replication.port}}</td>
+                    <td>{{replication.state}}</td>
                     <td>
                         <div class="progress progress-striped active">
                             <div class="bar" style="width: {{replication.percentage}}%;">{{replication.percentage}}%</div>
@@ -32,7 +34,7 @@
                         <p>
                            {{replication.status}}
                         </p>
-                        <p>{{replication.formattedCurrent}} / {{replication.formattedTotal}} ({{replication.formattedCopyRate}})</p>
+                        <p>{{replication.formattedCurrent}} of {{replication.formattedTotal}} copied - Rate: {{replication.formattedCopyRate}}</p>
                     </td>
                     <td>
                         <button class="btn btn-danger" ng-show="replication.running" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-remove-sign icon-white"></i> Abort</button>

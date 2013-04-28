@@ -1,0 +1,48 @@
+<div class="page-header">
+    <h2>Replication</h2>
+</div>
+
+<div class="row">
+    <div class="span12">
+        <div id="accordion2" class="accordion">
+            <div class="alert alert-error" ng-show="msg.error">
+                {{msg.message}}
+            </div>
+            <div class="alert alert-success" ng-show="msg.success">
+                {{msg.message}}
+            </div>
+
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Host</th>
+                    <th>Port</th>
+                    <th>Progress</th>
+                    <th>&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="replication in replications">
+                    <td>{{replication.host}}</td>
+                    <td>{{replication.port}}</td>
+                    <td>
+                        <div class="progress progress-striped active">
+                            <div class="bar" style="width: {{replication.percentage}}%;">{{replication.percentage}}%</div>
+                        </div>
+                        <p>
+                           {{replication.status}}
+                        </p>
+                        <p>{{replication.formattedCurrent}} / {{replication.formattedTotal}} ({{replication.formattedCopyRate}})</p>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" ng-show="replication.running" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-remove-sign icon-white"></i> Abort</button>
+                        <button class="btn btn-danger" ng-hide="replication.running" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete</button>
+                    </td>
+
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

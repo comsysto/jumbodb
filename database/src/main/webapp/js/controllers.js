@@ -47,9 +47,24 @@ function CollectionsListCtrl($scope, $http) {
 
 function DeliveriesListCtrl($scope, $http) {
     fetchData();
-    $scope.msg = {}
+    $scope.msg = {};
 
     // CARSTEN reuse ?
+    $scope.showReplication = false;
+    $scope.replication = {"port" :12001, "useSameVersion": true, "activate": true};
+
+    $scope.toggleReplication = function() {
+        $scope.showReplication = !$scope.showReplication;
+    }
+
+    $scope.startReplication = function(replication, delivery) {
+        replication.deliveryChunkKey = delivery.chunkKey;
+        replication.version = delivery.version;
+        $http.post('jumbodb/rest/replication', replication).success(function(data) {
+            buildMessage(data)
+            $scope.showReplication = false;
+        });
+    }
 
     $scope.activateChunkedVersionForAllCollections = function(chunkDeliveryKey, version) {
         $http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
@@ -82,7 +97,7 @@ function DeliveriesListCtrl($scope, $http) {
     function buildMessage(data) {
         var msg = {};
         msg.error = (data.type == 'delete')
-        msg.success = (data.type == 'activate')
+        msg.success = (data.type == 'activate' || data.type == 'success')
         msg.message = data.message;
         $scope.msg = msg;
     }
@@ -90,6 +105,23 @@ function DeliveriesListCtrl($scope, $http) {
     function fetchData() {
         $http.get('jumbodb/rest/deliveries').success(function(data) {
             $scope.deliveries = data;
+        });
+    }
+}
+
+function BrowseCtrl($scope, $http) {
+//    $http.get('jumbodb/rest/status').success(function(data) {
+//        $scope.status = data;
+//    });
+
+}
+
+function ReplicationCtrl($scope, $http) {
+    fetchData();
+
+    function fetchData() {
+        $http.get('jumbodb/rest/replication').success(function(data) {
+            $scope.replications = data;
         });
     }
 }

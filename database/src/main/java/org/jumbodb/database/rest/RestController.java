@@ -1,6 +1,9 @@
 package org.jumbodb.database.rest;
 
 import org.jumbodb.database.rest.dto.Message;
+import org.jumbodb.database.service.exporter.ExportDelivery;
+import org.jumbodb.database.service.exporter.ExportDeliveryService;
+import org.jumbodb.database.service.exporter.StartReplication;
 import org.jumbodb.database.service.management.status.StatusService;
 import org.jumbodb.database.service.management.status.dto.ServerInformation;
 import org.jumbodb.database.service.management.storage.StorageManagement;
@@ -8,10 +11,7 @@ import org.jumbodb.database.service.management.storage.dto.collections.JumboColl
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -29,6 +29,8 @@ public class RestController {
     private StatusService statusService;
     @Autowired
     private StorageManagement storageManagement;
+    @Autowired
+    private ExportDeliveryService exportDeliveryService;
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     @ResponseBody
@@ -82,6 +84,20 @@ public class RestController {
     public Message deleteCompleteCollection(@PathVariable String collection) {
         storageManagement.deleteCompleteCollection(collection);
         return new Message("delete", "Complete collection '" + collection + "' has been deleted.");
+    }
+
+    @RequestMapping(value = "/replication", method = RequestMethod.POST)
+    @ResponseBody
+    public Message startReplication(@RequestBody StartReplication startReplication) {
+        exportDeliveryService.startReplication(startReplication);
+        return new Message("success", "Replication started.");
+    }
+
+
+    @RequestMapping(value = "/replication", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ExportDelivery> getReplications() {
+        return exportDeliveryService.getReplications();
     }
 
 

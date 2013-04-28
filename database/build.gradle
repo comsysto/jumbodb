@@ -69,6 +69,7 @@ dependencies {
     compile 'ch.qos.logback:logback-classic:1.0.10'
     compile project(':commons:query')
     compile project(':commons:geo')
+    compile project(':connectors:jumbodb-java-connector')
 
 //    providedCompile 'javax.servlet:servlet-api:2.5'
 

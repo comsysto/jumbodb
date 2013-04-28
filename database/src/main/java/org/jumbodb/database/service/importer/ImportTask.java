@@ -69,6 +69,10 @@ public class ImportTask implements Runnable {
 
                 @Override
                 public void onCollectionMetaData(ImportMetaData information) {
+                    File finalDataPath = getFinalDataPath(information.getCollection(), information.getDeliveryKey(), information.getDeliveryVersion());
+                    if(finalDataPath.exists()) {
+                        throw new IllegalStateException("The delivery version " + information.getDeliveryVersion() + " already exists for the collection " + information.getCollection() + " already exists!");
+                    }
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String deliveryKeyPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/";
                     Properties deliveryInfo = new Properties();

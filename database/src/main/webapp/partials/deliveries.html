@@ -67,7 +67,25 @@
                             </table>
                             <button class="btn btn-inverse" ng-click="activateChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-hand-right icon-white"></i> Activate delivery version</button>
                             &nbsp;&nbsp;
+                            <button class="btn btn-inverse" ng-click="toggleReplication()"><i class="icon-share icon-white"></i> Replicate</button>
+                            &nbsp;&nbsp;
                             <button class="btn btn-danger" ng-click="deleteChunkedVersionForAllCollections(delivery.chunkKey, delivery.version)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete delivery version</button>
+                            <p/>
+                            <div class="alert" ng-show="showReplication">
+                                <h3>Replication</h3>
+                                <form name="replicationForm" class="form-inline">
+                                    <input ng-model="replication.host" type="text" class="input-large" placeholder="Host" required>
+                                    <input ng-model="replication.port" type="number" class="input-small" required>
+                                    <label class="checkbox">
+                                        <input ng-model="replication.activate" type="checkbox"> Activate
+                                    </label>
+                                    <label class="checkbox">
+                                        <input ng-model="replication.useSameVersion" type="checkbox"> Use same version
+                                    </label>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <button type="submit" ng-click="startReplication(replication, delivery)" ng-disabled="replicationForm.$invalid" class="btn">Start replication</button>
+                                </form>
+                            </div>
+
                         </div>
                     </div>
                 </div>

@@ -122,4 +122,7 @@
         <constructor-arg ref="jumboConfig"/>
     </bean>
 
+    <bean id="exportDeliveryService" class="org.jumbodb.database.service.exporter.ExportDeliveryService">
+    </bean>
+
 </beans>

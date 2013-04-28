@@ -9,4 +9,5 @@ import java.io.IOException;
  */
 public interface ResultCallback {
     void writeResult(byte[] result) throws IOException;
+    boolean needsMore() throws IOException;
 }

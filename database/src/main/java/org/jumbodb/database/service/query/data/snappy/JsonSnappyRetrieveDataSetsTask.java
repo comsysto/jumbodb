@@ -7,7 +7,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
-import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
@@ -67,7 +66,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 log.info("Full scan ");
                 long count = 0;
                 String line;
-                while ((line = br.readLine()) != null) {
+                while ((line = br.readLine()) != null && resultCallback.needsMore()) {
                     if (matchingFilter(line, jsonParser)) {
                         resultCallback.writeResult(line.getBytes());
                         results++;
@@ -142,6 +141,9 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         int datasetLength = findDatasetLengthByLineBreak(resultBuffer, fromOffset);
                         byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, fromOffset, datasetLength);
                         if (matchingFilter(dataSetFromOffsetsGroup, jsonParser)) {
+                            if(!resultCallback.needsMore()) {
+                                return results;
+                            }
                             resultCallback.writeResult(dataSetFromOffsetsGroup);
                             results++;
                         }

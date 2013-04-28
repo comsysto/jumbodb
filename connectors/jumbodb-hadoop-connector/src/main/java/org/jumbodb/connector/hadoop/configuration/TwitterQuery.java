@@ -20,6 +20,7 @@ public class TwitterQuery {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
 //        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
         JumboQuery query = new JumboQuery();
+        query.setLimit(10);
 //        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
 //        query.addJsonQuery("user.screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
 
@@ -40,7 +41,7 @@ public class TwitterQuery {
 //        query.addJsonQuery("geo.coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
 
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(150, 200))));
-//        query.addJsonQuery("user.followers_count", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(150, 200))));
+        query.addJsonQuery("user.followers_count", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(150, 200))));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 10)));
 //        query.addJsonQuery("user.followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 10)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));

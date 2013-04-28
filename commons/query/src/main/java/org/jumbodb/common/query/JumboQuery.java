@@ -14,7 +14,15 @@ import java.util.*;
 public class JumboQuery {
     private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
     private List<JsonQuery> jsonQuery = new LinkedList<JsonQuery>();
+    private int limit = -1;
 
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
 
     public boolean addIndexQuery(IndexQuery indexComparision) {
         return this.indexQuery.add(indexComparision);

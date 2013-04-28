@@ -17,6 +17,7 @@ public class QueryTask implements Runnable {
     private JumboSearcher jumboSearcher;
     private final ObjectMapper jsonMapper;
     private DatabaseQuerySession databaseQuerySession;
+    private int numberOfResults = 0;
 
     public QueryTask(Socket s, int clientID, JumboSearcher jumboSearcher, ObjectMapper jsonMapper) {
         clientSocket = s;
@@ -36,10 +37,20 @@ public class QueryTask implements Runnable {
                 public int onQuery(String collection, byte[] query, final DatabaseQuerySession.ResultWriter resultWriter) {
                     try {
                         JumboQuery searchQuery = jsonMapper.readValue(query, JumboQuery.class);
+                        final int limit = searchQuery.getLimit();
                         return jumboSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {
                             @Override
-                            public void writeResult(byte[] result) throws IOException {
+                            public synchronized void writeResult(byte[] result) throws IOException {
                                 resultWriter.writeResult(result);
+                                numberOfResults++;
+                            }
+
+                            @Override
+                            public boolean needsMore() throws IOException {
+                                if(limit == -1) {
+                                    return true;
+                                }
+                                return numberOfResults < limit;
                             }
                         });
                     } catch (IOException e) {

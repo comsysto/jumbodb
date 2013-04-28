@@ -3,8 +3,15 @@ import java.util.BitSet;
 
 public class Testen {
     public static void main(String[] args) throws Exception {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
-        System.out.println(simpleDateFormat.parse("Thu Apr 18 01:12:17 +0000 2013"));
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
+//        System.out.println(simpleDateFormat.parse("Thu Apr 18 01:12:17 +0000 2013"));
+
+        int a = 0;
+        long b = 1;
+        if(a > b) {
+
+        }
+
 
 //        int v1 = Integer.MAX_VALUE - 8437589;
 //        int v2 = Integer.MAX_VALUE - 7894375;

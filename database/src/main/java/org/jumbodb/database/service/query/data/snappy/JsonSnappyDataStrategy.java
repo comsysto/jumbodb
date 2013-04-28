@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.data.snappy;
 import com.google.common.collect.HashMultimap;
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
@@ -10,6 +11,7 @@ import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
+import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch;
 import org.jumbodb.database.service.query.snappy.SnappyStreamToFileCopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +27,27 @@ import java.util.concurrent.Future;
 /**
  * @author Carsten Hufe
  */
-public class JsonSnappyDataStrategy implements DataStrategy {
+public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch {
     public static final int SNAPPY_DATA_CHUNK_SIZE = 32 * 1024;
     public static final String JSON_SNAPPY_V1 = "JSON_SNAPPY_V1";
     private Logger log = LoggerFactory.getLogger(JsonSnappyDataStrategy.class);
 
     private ExecutorService retrieveDataExecutor;
+
+    private final Map<QueryOperation, JsonOperationSearch> OPERATIONS = createOperations();
+
+    private Map<QueryOperation, JsonOperationSearch> createOperations() {
+        Map<QueryOperation, JsonOperationSearch> operations = new HashMap<QueryOperation, JsonOperationSearch>();
+        operations.put(QueryOperation.EQ, new EqJsonOperationSearch());
+        operations.put(QueryOperation.NE, new NeJsonOperationSearch());
+        operations.put(QueryOperation.GT, new GtJsonOperationSearch());
+        operations.put(QueryOperation.LT, new LtJsonOperationSearch());
+        operations.put(QueryOperation.BETWEEN, new BetweenJsonOperationSearch());
+        operations.put(QueryOperation.GEO_BOUNDARY_BOX, new GeoBoundaryBoxJsonOperationSearch());
+        operations.put(QueryOperation.GEO_WITHIN_RANGE_METER, new GeoWithinRangeInMeterJsonOperationSearch());
+        return operations;
+    }
+
 
     @Override
     public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
@@ -57,7 +74,7 @@ public class JsonSnappyDataStrategy implements DataStrategy {
         if (searchQuery.getIndexQuery().size() == 0) {
             log.info("Running scanned search");
             for (File file : deliveryChunkDefinition.getDataFiles().values()) {
-                tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<Long>emptySet(), searchQuery, resultCallback)));
+                tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<Long>emptySet(), searchQuery, resultCallback, this)));
             }
         } else {
             log.info("Running indexed search");
@@ -68,7 +85,7 @@ public class JsonSnappyDataStrategy implements DataStrategy {
                 }
                 Set<Long> offsets = fileOffsetsMap.get(fileNameHash);
                 if (offsets.size() > 0) {
-                    tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback)));
+                    tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this)));
                 }
             }
         }
@@ -111,5 +128,14 @@ public class JsonSnappyDataStrategy implements DataStrategy {
     @Required
     public void setRetrieveDataExecutor(ExecutorService retrieveDataExecutor) {
         this.retrieveDataExecutor = retrieveDataExecutor;
+    }
+
+    @Override
+    public boolean matches(QueryClause queryClause, Object value) {
+        JsonOperationSearch jsonOperationSearch = OPERATIONS.get(queryClause.getQueryOperation());
+        if(jsonOperationSearch == null) {
+            throw new UnsupportedOperationException("OperationSearch is not supported: " + queryClause.getQueryOperation());
+        }
+        return jsonOperationSearch.matches(queryClause, value);
     }
 }

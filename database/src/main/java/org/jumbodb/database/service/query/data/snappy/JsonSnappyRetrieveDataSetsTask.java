@@ -25,6 +25,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private final File file;
     private final JumboQuery searchQuery;
     private final ResultCallback resultCallback;
+    private JsonSnappyDataStrategy strategy;
     private final List<Long> offsets;
     //    private final int bufferSize = 10;
     private final int bufferSize = 16 * 1024; // CARSTEN make the buffer size learnable by collection
@@ -33,10 +34,11 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private final byte[] defaultBuffer = new byte[bufferSize]; // for reuse
 
 
-    public JsonSnappyRetrieveDataSetsTask(File file, Set<Long> offsets, JumboQuery searchQuery, ResultCallback resultCallback) {
+    public JsonSnappyRetrieveDataSetsTask(File file, Set<Long> offsets, JumboQuery searchQuery, ResultCallback resultCallback, JsonSnappyDataStrategy strategy) {
         this.file = file;
         this.searchQuery = searchQuery;
         this.resultCallback = resultCallback;
+        this.strategy = strategy;
         this.offsets = new LinkedList<Long>(offsets);
     }
 
@@ -140,7 +142,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         int datasetLength = findDatasetLengthByLineBreak(resultBuffer, fromOffset);
                         byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, fromOffset, datasetLength);
                         if (matchingFilter(dataSetFromOffsetsGroup, jsonParser)) {
-                            String aaa = new String(dataSetFromOffsetsGroup);
                             resultCallback.writeResult(dataSetFromOffsetsGroup);
                             results++;
                         }
@@ -206,7 +207,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
         boolean matching = true;
         for (JsonQuery jsonQuery : searchQuery.getJsonQuery()) {
-//            cl.clear();
             String[] split = StringUtils.split(jsonQuery.getFieldName(), '.');
 //            UpdaterMapper<JSONObject> mapper = new UpdaterMapper<JSONObject>(cl);
             Object lastObj = jsonParser.parse(s);
@@ -218,13 +218,16 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             }
             boolean queryClauseMatch = false;
             for (QueryClause queryClause : jsonQuery.getClauses()) {
-                if (queryClause.getQueryOperation() == QueryOperation.EQ) {
-                    if(lastObj != null) {
-                        queryClauseMatch |= queryClause.equals(lastObj);
-                    }
-                }  else {
-                    throw new IllegalArgumentException("Unsupported comparision type " + queryClause.getQueryOperation().getClass());
+                if(lastObj != null) {
+                    queryClauseMatch |= strategy.matches(queryClause, lastObj);
                 }
+//                if (queryClause.getQueryOperation() == QueryOperation.EQ) {
+//                    if(lastObj != null) {
+//                        queryClauseMatch |= queryClause.equals(lastObj);
+//                    }
+//                }  else {
+//                    throw new IllegalArgumentException("Unsupported comparision type " + queryClause.getQueryOperation().getClass());
+//                }
             }
             matching &= queryClauseMatch;
 

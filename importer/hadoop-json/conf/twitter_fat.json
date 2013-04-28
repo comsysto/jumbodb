@@ -27,7 +27,7 @@
                 },
                 {
                     "indexName": "user_created_at",
-                    "fields": ["user_created_at"],
+                    "fields": ["user.created_at"],
                     "indexStrategy": "DATETIME_SNAPPY_V1"
                 },
                 {

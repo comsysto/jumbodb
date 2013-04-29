@@ -28,9 +28,12 @@
                     <td>{{replication.port}}</td>
                     <td>{{replication.state}}</td>
                     <td>
-                        <div class="progress progress-striped active">
+                        <div class="progress progress-striped {{replication.state == 'RUNNING' && 'active'||''}}">
                             <div class="bar" style="width: {{replication.percentage}}%;">{{replication.percentage}}%</div>
                         </div>
+                        <p>
+                            {{replication.deliveryChunkKey}} - {{replication.version}}
+                        </p>
                         <p>
                            {{replication.status}}
                         </p>
@@ -39,8 +42,8 @@
                         <p>Compressed Rate: {{replication.formattedCopyRateCompressed}}</p>
                     </td>
                     <td>
-                        <button class="btn btn-danger" ng-show="replication.state == 'WAITING' || replication.state == 'RUNNING'" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-remove-sign icon-white"></i> Abort</button>
-                        <button class="btn btn-danger" ng-show="replication.state != 'WAITING' && replication.state != 'RUNNING'" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete</button>
+                        <button class="btn btn-danger" ng-show="replication.state == 'WAITING' || replication.state == 'RUNNING'" ng-click="abortReplication(replication.id)" onclick="return confirm('Are you sure?');"><i class="icon-remove-sign icon-white"></i> Abort</button>
+                        <button class="btn btn-danger" ng-show="replication.state != 'WAITING' && replication.state != 'RUNNING'" ng-click="deleteReplication(replication.id)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete</button>
                     </td>
 
                 </tr>

@@ -118,6 +118,28 @@ function BrowseCtrl($scope, $http) {
 
 function ReplicationCtrl($scope, $http, $timeout) {
     fetchData();
+
+    $scope.abortReplication = function(id) {
+        $http.put('jumbodb/rest/replication/' + id).success(function(data) {
+            fetchData();
+            buildMessage(data);
+        });
+    }
+
+    $scope.deleteReplication = function(id) {
+        $http.delete('jumbodb/rest/replication/' + id).success(function(data) {
+            fetchData();
+            buildMessage(data);
+        });
+    }
+
+    function buildMessage(data) {
+        var msg = {};
+        msg.error = (data.type == 'delete')
+        msg.message = data.message;
+        $scope.msg = msg;
+    }
+
     $scope.fetch = function() {
         $timeout(function() {
             fetchData();

@@ -102,14 +102,16 @@ public class RestController {
 
     @RequestMapping(value = "/replication/{id}", method = RequestMethod.PUT)
     @ResponseBody
-    public void abortReplications(@PathVariable String id) {
+    public Message abortReplications(@PathVariable String id) {
         exportDeliveryService.stopReplication(id);
+        return new Message("delete", "Replication was aborted.");
     }
 
     @RequestMapping(value = "/replication/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void deleteReplications(@PathVariable String id) {
+    public Message deleteReplications(@PathVariable String id) {
         exportDeliveryService.deleteReplication(id);
+        return new Message("delete", "Replication was deleted.");
     }
 
 

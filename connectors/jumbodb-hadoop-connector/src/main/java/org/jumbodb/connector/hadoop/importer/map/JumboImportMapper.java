@@ -121,7 +121,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         }
 
         // TODO make this nicer dont need the params ... because it's in the member variables
-        public void copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, double fileSize, Context context, String filename, String collection)
+        public void copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, long fileSize, Context context, String filename, String collection)
                 throws IOException
         {
             try
@@ -135,11 +135,11 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             }
         }
 
-        public void copyBytes(InputStream in, OutputStream out, int buffSize, double fileSize, Context context, String filename, String collection)  throws IOException {
+        public void copyBytes(InputStream in, OutputStream out, int buffSize, long fileSize, Context context, String filename, String collection)  throws IOException {
             PrintStream ps = (out instanceof PrintStream) ? (PrintStream)out : null;
             byte[] buf = new byte[buffSize];
             int bytesRead = in.read(buf);
-            int currentFileBytes = 0;
+            long currentFileBytes = 0;
             while (bytesRead >= 0) {
                 out.write(buf, 0, bytesRead);
                 if ((ps != null) && (ps.checkError())) {
@@ -147,7 +147,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
                 }
                 bytesReadAll += bytesRead;
                 currentFileBytes += bytesRead;
-                long percentage = Math.round((currentFileBytes / fileSize) * 100);
+                long percentage = (currentFileBytes * 100l) / fileSize;
                 StringBuilder statusBuf = new StringBuilder();
                 statusBuf.append("COPYING [");
                 statusBuf.append(percentage);
@@ -164,7 +164,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             }
         }
 
-        public void copyBytes(InputStream in, OutputStream out, double fileSize, Context context, String filename, String collection)
+        public void copyBytes(InputStream in, OutputStream out, long fileSize, Context context, String filename, String collection)
                 throws IOException  {
             copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), true, fileSize, context, filename, collection);
         }

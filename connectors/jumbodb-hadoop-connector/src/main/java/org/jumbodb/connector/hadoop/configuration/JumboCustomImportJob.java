@@ -9,14 +9,18 @@ import java.util.List;
  * @author Carsten Hufe
  */
 public class JumboCustomImportJob extends BaseJumboImportJob {
-    private List<Class<? extends AbstractIndexMapper<?>>> mapper = new LinkedList<Class<? extends AbstractIndexMapper<?>>>();
+    private List<Class<? extends AbstractIndexMapper>> mapper = new LinkedList<Class<? extends AbstractIndexMapper>>();
 
-    public List<Class<? extends AbstractIndexMapper<?>>> getMapper() {
+    public List<Class<? extends AbstractIndexMapper>> getMapper() {
         return mapper;
     }
 
-    public void setMapper(List<Class<? extends AbstractIndexMapper<?>>> mapper) {
+    public void setMapper(List<Class<? extends AbstractIndexMapper>> mapper) {
         this.mapper = mapper;
+    }
+
+    public void addMapper(Class<? extends AbstractIndexMapper> aClass) {
+        mapper.add(aClass);
     }
 
     @Override

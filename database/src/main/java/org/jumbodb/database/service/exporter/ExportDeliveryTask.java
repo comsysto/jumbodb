@@ -41,6 +41,14 @@ public class ExportDeliveryTask implements Runnable {
             long dataSize = getDataSize(dataInfoForDelivery);
             exportDelivery.setTotalBytes(indexSize + dataSize);
 
+            imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
+            if(imp.existsDeliveryVersion(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion())) {
+                exportDelivery.setState(ExportDelivery.State.FAILED);
+                exportDelivery.setStatus("Delivery version already exists on host, please delete it, before replicating.");
+                return;
+            }
+            IOUtils.closeQuietly(imp);
+
             for (MetaData metaData : metaDatas) {
                 imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
                 imp.sendMetaData(metaData);

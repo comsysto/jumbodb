@@ -3,6 +3,7 @@ package org.jumbodb.database.service.importer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.query.JumboSearcher;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.DataStrategyManager;
@@ -48,6 +49,18 @@ public class ImportTask implements Runnable {
             databaseImportSession = new DatabaseImportSession(clientSocket, clientID);
             databaseImportSession.runImport(new ImportHandler() {
                 @Override
+                public boolean existsDeliveryVersion(String deliveryKey, String deliveryVersion) {
+                    File[] collectionFolders = dataPath.listFiles(StorageManagement.FOLDER_FILTER);
+                    for (File collectionFolder : collectionFolders) {
+                        String versionFolder = collectionFolder.getAbsolutePath() + "/" + deliveryKey + "/" + deliveryVersion + "/";
+                        if(new File(versionFolder).exists()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                @Override
                 public void onImport(ImportMetaFileInformation information, InputStream dataInputStream) {
                     try {
                         File absoluteImportPath = new File(getTemporaryImportAbsolutePathByType(information));
@@ -69,11 +82,6 @@ public class ImportTask implements Runnable {
 
                 @Override
                 public void onCollectionMetaData(ImportMetaData information) {
-//                    File finalDataPath = getFinalDataPath(information.getCollection(), information.getDeliveryKey(), information.getDeliveryVersion());
-//                    if(finalDataPath.exists()) {
-//                        log.info("The delivery version " + information.getDeliveryVersion() + " for the collection " + information.getCollection() + " already exists!");
-//                        throw new IllegalStateException("The delivery version " + information.getDeliveryVersion() + " for the collection " + information.getCollection() + " already exists!");
-//                    }
                     File temporaryDataPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion());
                     if(temporaryDataPath.exists()) {
                         temporaryDataPath.delete();

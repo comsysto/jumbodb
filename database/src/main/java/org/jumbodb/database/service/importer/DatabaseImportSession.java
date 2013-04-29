@@ -90,6 +90,13 @@ public class DatabaseImportSession implements Closeable {
             String indexSourceFields = dataInputStream.readUTF();
             ImportMetaIndex meta = new ImportMetaIndex(collection, deliveryKey, deliveryVersion, indexName, strategy, indexSourceFields);
             importHandler.onCollectionMetaIndex(meta);
+        } else if(":cmd:import:delivery:version:exists".equals(cmd)) {
+//            String collection = dataInputStream.readUTF();
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
+            boolean b = importHandler.existsDeliveryVersion(deliveryKey, deliveryVersion);
+            dataOutputStream.writeBoolean(b);
+            dataOutputStream.flush();
         } else if(":cmd:import:finished".equals(cmd)) {
             log.info(":cmd:import:finished");
             importHandler.onFinished(dataInputStream.readUTF(), dataInputStream.readUTF());

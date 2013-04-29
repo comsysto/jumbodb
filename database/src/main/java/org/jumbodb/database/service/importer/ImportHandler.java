@@ -8,4 +8,5 @@ public interface ImportHandler {
     void onCollectionMetaIndex(ImportMetaIndex information);
     void onActivateDelivery(ImportMetaData information);
     void onFinished(String deliveryKey, String deliveryVersion);
+    boolean existsDeliveryVersion(String deliveryKey, String deliveryVersion);
 }

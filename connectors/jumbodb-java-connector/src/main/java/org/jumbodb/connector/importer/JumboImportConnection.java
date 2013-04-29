@@ -58,6 +58,18 @@ public class JumboImportConnection implements Closeable {
         return mcos.getRateInBytesPerSecond();
     }
 
+    public boolean existsDeliveryVersion(String deliveryChunkKey, String version) {
+        try {
+            dos.writeUTF(":cmd:import:delivery:version:exists");
+            dos.writeUTF(deliveryChunkKey);
+            dos.writeUTF(version);
+            dos.flush();
+            return dis.readBoolean();
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
     public void importIndex(IndexInfo indexInfo, OnCopyCallback callback) {
         try {
             dos.writeUTF(":cmd:import:collection:index");

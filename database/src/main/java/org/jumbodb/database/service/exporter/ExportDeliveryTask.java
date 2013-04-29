@@ -111,6 +111,7 @@ public class ExportDeliveryTask implements Runnable {
             imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
             imp.sendFinishedNotification(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion());
 
+            exportDelivery.setCurrentBytes(exportDelivery.getTotalBytes());
             exportDelivery.setState(ExportDelivery.State.FINISHED);
             exportDelivery.setStatus("Finished");
         } catch(Exception ex) {

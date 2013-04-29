@@ -41,7 +41,7 @@ public class JumboImportConnection implements Closeable {
     }
 
     private MonitorCountingOutputStream createMonitorCountingOutputStream(final OutputStream outputStream) {
-        return new MonitorCountingOutputStream(outputStream, 5000) {
+        return new MonitorCountingOutputStream(outputStream, 2000) {
             @Override
             protected void onInterval(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
                 super.onInterval(rateInBytesPerSecond, copiedBytesSinceLastCall);

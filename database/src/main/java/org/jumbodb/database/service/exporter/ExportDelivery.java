@@ -1,5 +1,7 @@
 package org.jumbodb.database.service.exporter;
 
+import org.apache.commons.io.FileUtils;
+
 /**
  * @author Carsten Hufe
  */
@@ -19,11 +21,11 @@ public class ExportDelivery {
     private long copyRateInBytesUncompressed;
 
     public String getFormattedCopyRateUncompressed() {
-        return (copyRateInBytesUncompressed / 1024 / 1024) + " MB/s";
+        return FileUtils.byteCountToDisplaySize(copyRateInBytesUncompressed) + " /s";
     }
 
     public String getFormattedCopyRateCompressed() {
-        return (copyRateInBytesCompressed / 1024 / 1024) + " MB/s";
+        return FileUtils.byteCountToDisplaySize(copyRateInBytesCompressed) + " /s";
     }
 
     public String getFormattedCurrent() {

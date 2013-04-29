@@ -70,8 +70,9 @@ public class ImportTask implements Runnable {
                 @Override
                 public void onCollectionMetaData(ImportMetaData information) {
                     File finalDataPath = getFinalDataPath(information.getCollection(), information.getDeliveryKey(), information.getDeliveryVersion());
+                    log.info("Import on " + finalDataPath);
                     if(finalDataPath.exists()) {
-                        throw new IllegalStateException("The delivery version " + information.getDeliveryVersion() + " already exists for the collection " + information.getCollection() + " already exists!");
+                        throw new IllegalStateException("The delivery version " + information.getDeliveryVersion() + " for the collection " + information.getCollection() + " already exists!");
                     }
                     File temporaryDataPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion());
                     if(temporaryDataPath.exists()) {

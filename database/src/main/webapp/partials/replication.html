@@ -37,8 +37,8 @@
                         <p>{{replication.formattedCurrent}} of {{replication.formattedTotal}} copied - Rate: {{replication.formattedCopyRate}}</p>
                     </td>
                     <td>
-                        <button class="btn btn-danger" ng-show="replication.running" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-remove-sign icon-white"></i> Abort</button>
-                        <button class="btn btn-danger" ng-hide="replication.running" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete</button>
+                        <button class="btn btn-danger" ng-show="replication.state == 'WAITING' || replication.state == 'RUNNING'" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-remove-sign icon-white"></i> Abort</button>
+                        <button class="btn btn-danger" ng-show="replication.state != 'WAITING' && replication.state != 'RUNNING'" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete</button>
                     </td>
 
                 </tr>

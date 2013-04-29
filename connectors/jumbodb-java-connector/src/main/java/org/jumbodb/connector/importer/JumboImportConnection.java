@@ -17,6 +17,7 @@ public class JumboImportConnection implements Closeable {
     private Socket socket;
     private OutputStream outputStream;
     private BufferedOutputStream bufferedOutputStream;
+    private MonitorCountingOutputStream mcos;
     private SnappyOutputStream snappyOutputStream;
     private DataOutputStream dos;
     private DataInputStream dis;
@@ -25,8 +26,9 @@ public class JumboImportConnection implements Closeable {
         try {
             socket = new Socket(host, port);
             outputStream = socket.getOutputStream();
-            dos = new DataOutputStream(outputStream);
-            bufferedOutputStream = new BufferedOutputStream(outputStream, JumboConstants.BUFFER_SIZE);   // make configurable
+            mcos = createMonitorCountingOutputStream(outputStream);
+            dos = new DataOutputStream(mcos);
+            bufferedOutputStream = new BufferedOutputStream(mcos, JumboConstants.BUFFER_SIZE);   // make configurable
             snappyOutputStream = new SnappyOutputStream(bufferedOutputStream);
             dis = new DataInputStream(socket.getInputStream());
             int protocolVersion = dis.readInt();
@@ -36,6 +38,24 @@ public class JumboImportConnection implements Closeable {
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
+    }
+
+    private MonitorCountingOutputStream createMonitorCountingOutputStream(final OutputStream outputStream) {
+        return new MonitorCountingOutputStream(outputStream, 5000) {
+            @Override
+            protected void onInterval(long rateInBytesPerSecond) {
+                super.onInterval(rateInBytesPerSecond);
+                onCopyRateUpdate(rateInBytesPerSecond);
+            }
+        };
+    }
+
+    protected void onCopyRateUpdate(long rateInBytesPerSecond) {
+
+    }
+
+    public long getCopyRateInBytesPerSecond() {
+        return mcos.getRateInBytesPerSecond();
     }
 
     public void importIndex(IndexInfo indexInfo, OnCopyCallback callback) {
@@ -117,6 +137,7 @@ public class JumboImportConnection implements Closeable {
     public void close() throws IOException {
         IOUtils.closeQuietly(bufferedOutputStream);
         IOUtils.closeQuietly(snappyOutputStream);
+        IOUtils.closeQuietly(mcos);
         IOUtils.closeQuietly(outputStream);
         IOUtils.closeQuietly(dos);
         IOUtils.closeQuietly(dis);

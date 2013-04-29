@@ -9,7 +9,6 @@ public class StartReplication {
     private String host;
     private int port;
     private boolean activate;
-    private boolean useSameVersion;
 
     public String getDeliveryChunkKey() {
         return deliveryChunkKey;
@@ -51,14 +50,6 @@ public class StartReplication {
         this.activate = activate;
     }
 
-    public boolean isUseSameVersion() {
-        return useSameVersion;
-    }
-
-    public void setUseSameVersion(boolean useSameVersion) {
-        this.useSameVersion = useSameVersion;
-    }
-
     @Override
     public String toString() {
         return "StartReplication{" +
@@ -67,7 +58,6 @@ public class StartReplication {
                 ", host='" + host + '\'' +
                 ", port=" + port +
                 ", activate=" + activate +
-                ", useSameVersion=" + useSameVersion +
                 '}';
     }
 }

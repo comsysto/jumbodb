@@ -9,12 +9,53 @@ public class ExportDelivery {
     private String host;
     private int port;
     private boolean activate;
+    private String deliveryChunkKey;
+    private String version;
     private State state;
     private String status;
-    private double percentage;
     private long currentBytes;
     private long totalBytes;
-    private long copyRateInBytes;
+    private long copyRateInBytesCompressed;
+    private long copyRateInBytesUncompressed;
+
+    public String getFormattedCopyRateUncompressed() {
+        return (copyRateInBytesUncompressed / 1024 / 1024) + " MB/s";
+    }
+
+    public String getFormattedCopyRateCompressed() {
+        return (copyRateInBytesCompressed / 1024 / 1024) + " MB/s";
+    }
+
+    public String getFormattedCurrent() {
+        return (currentBytes / 1024 / 1024) + " MB";
+    }
+
+    public String getFormattedTotal() {
+        return (totalBytes / 1024 / 1024) + " MB";
+    }
+
+    public long getPercentage() {
+        if(totalBytes == 0l) {
+            return 0l;
+        }
+        return (currentBytes * 100) / totalBytes;
+    }
+
+    public String getDeliveryChunkKey() {
+        return deliveryChunkKey;
+    }
+
+    public void setDeliveryChunkKey(String deliveryChunkKey) {
+        this.deliveryChunkKey = deliveryChunkKey;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
     public State getState() {
         return state;
@@ -24,24 +65,20 @@ public class ExportDelivery {
         this.state = state;
     }
 
-    public String getFormattedCopyRate() {
-        return (copyRateInBytes / 1024 / 1024) + "MB/s";
+    public long getCopyRateInBytesUncompressed() {
+        return copyRateInBytesUncompressed;
     }
 
-    public String getFormattedCurrent() {
-        return (copyRateInBytes / 1024 / 1024) + "MB";
+    public void setCopyRateInBytesUncompressed(long copyRateInBytesUncompressed) {
+        this.copyRateInBytesUncompressed = copyRateInBytesUncompressed;
     }
 
-    public String getFormattedTotal() {
-        return (copyRateInBytes / 1024 / 1024) + "MB";
+    public long getCopyRateInBytesCompressed() {
+        return copyRateInBytesCompressed;
     }
 
-    public long getCopyRateInBytes() {
-        return copyRateInBytes;
-    }
-
-    public void setCopyRateInBytes(long copyRateInBytes) {
-        this.copyRateInBytes = copyRateInBytes;
+    public void setCopyRateInBytesCompressed(long copyRateInBytesCompressed) {
+        this.copyRateInBytesCompressed = copyRateInBytesCompressed;
     }
 
     public String getId() {
@@ -82,14 +119,6 @@ public class ExportDelivery {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public double getPercentage() {
-        return percentage;
-    }
-
-    public void setPercentage(double percentage) {
-        this.percentage = percentage;
     }
 
     public long getCurrentBytes() {

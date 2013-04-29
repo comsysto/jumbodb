@@ -37,7 +37,7 @@ public class TwitterEx10Query {
 //        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
 
 //        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(500000, 1000000))));
-        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 10000000)));
+//        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 10000000)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
 //        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 100000)));

@@ -51,7 +51,7 @@ function DeliveriesListCtrl($scope, $http) {
 
     // CARSTEN reuse ?
     $scope.showReplication = false;
-    $scope.replication = {"port" :12001, "useSameVersion": true, "activate": true};
+    $scope.replication = {"port" :12001, "activate": true};
 
     $scope.toggleReplication = function() {
         $scope.showReplication = !$scope.showReplication;
@@ -116,9 +116,15 @@ function BrowseCtrl($scope, $http) {
 
 }
 
-function ReplicationCtrl($scope, $http) {
+function ReplicationCtrl($scope, $http, $timeout) {
     fetchData();
-
+    $scope.fetch = function() {
+        $timeout(function() {
+            fetchData();
+            $scope.fetch();
+        }, 3000);
+    }
+    $scope.fetch();
     function fetchData() {
         $http.get('jumbodb/rest/replication').success(function(data) {
             $scope.replications = data;

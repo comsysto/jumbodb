@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.UnhandledException;
 
@@ -13,6 +14,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.jumbodb.connector.importer.DataInfo;
+import org.jumbodb.connector.importer.IndexInfo;
+import org.jumbodb.connector.importer.MetaData;
+import org.jumbodb.connector.importer.MetaIndex;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.importer.ImportHelper;
 import org.jumbodb.database.service.management.storage.dto.collections.DeliveryChunk;
@@ -20,21 +25,20 @@ import org.jumbodb.database.service.management.storage.dto.collections.DeliveryV
 import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
 import org.jumbodb.database.service.management.storage.dto.deliveries.VersionedJumboCollection;
+import org.jumbodb.database.service.management.storage.dto.index.CollectionIndex;
 import org.jumbodb.database.service.query.JumboSearcher;
-import org.jumbodb.database.service.query.data.DataStrategyManager;
-import org.jumbodb.database.service.query.definition.CollectionDefinition;
-import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
-import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.xerial.snappy.SnappyInputStream;
 
 /**
  * User: carsten
  * Date: 3/22/13
  * Time: 2:12 PM
  */
+// CARSTEN clean up... contains implementation details of the strategies, like fetching size from compressed files!
 public class StorageManagement {
     public static final FileFilter FOLDER_FILTER = FileFilterUtils.makeDirectoryOnly(FileFilterUtils.notFileFilter(FileFilterUtils.prefixFileFilter(".")));
 
@@ -42,6 +46,7 @@ public class StorageManagement {
 
     private JumboConfiguration config;
     private JumboSearcher jumboSearcher;
+
 
     public StorageManagement(JumboConfiguration config, JumboSearcher jumboSearcher) {
         this.config = config;
@@ -216,6 +221,15 @@ public class StorageManagement {
     private String getDate(File versionFolder) {
         Properties activeProps = getDeliveryProperties(versionFolder);
         return activeProps.getProperty("date");
+    }
+
+    private Properties getIndexProperties(File indexFolder) {
+        try {
+            String deliveryPropsPath = indexFolder.getAbsolutePath() + "/index.properties";
+            return PropertiesLoaderUtils.loadProperties(new FileSystemResource(deliveryPropsPath));
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
     }
 
     private Properties getDeliveryProperties(File versionFolder) {
@@ -399,11 +413,13 @@ public class StorageManagement {
                     Properties deliveryProperties = getDeliveryProperties(versionFolder);
                     String info = deliveryProperties.getProperty("info");
                     String date = deliveryProperties.getProperty("date");
+                    String sourcePath = deliveryProperties.getProperty("sourcePath");
+                    String strategy = deliveryProperties.getProperty("strategy");
                     boolean active = activeVersion.equals(version);
                     long compressedSize = calculateCompressedSize(versionFolder);
                     long uncompressedSize = getUncompressedSize(versionFolder);
                     long indexSize = getIndexSize(collectionName, chunkKey, version);
-                    versionedJumboCollections.add(new VersionedJumboCollection(collectionName, version, chunkKey, info, date, active, compressedSize, uncompressedSize, indexSize));
+                    versionedJumboCollections.add(new VersionedJumboCollection(collectionName, version, chunkKey, info, date, sourcePath, strategy, active, compressedSize, uncompressedSize, indexSize));
                 }
             }
 
@@ -415,6 +431,95 @@ public class StorageManagement {
         return FileUtils.sizeOfDirectory(versionFolder);
     }
 
+    public List<MetaData> getMetaDataForDelivery(String deliveryChunkKey, String version, boolean activate) {
+        List<VersionedJumboCollection> allVersionedJumboCollections = getAllVersionedJumboCollections();
+        List<MetaData> result = new LinkedList<MetaData>();
+        for (VersionedJumboCollection collection : allVersionedJumboCollections) {
+            if(deliveryChunkKey.equals(collection.getChunkKey()) && version.equals(collection.getCollectionName())) {
+                result.add(new MetaData(collection.getCollectionName(), deliveryChunkKey, version, collection.getStrategy(), collection.getSourcePath(), activate, collection.getInfo()));
+            }
+        }
+        return result;
+    }
+
+    public List<MetaIndex> getMetaIndexForDelivery(String deliveryChunkKey, String version) {
+        List<VersionedJumboCollection> allVersionedJumboCollections = getAllVersionedJumboCollections();
+        List<MetaIndex> result = new LinkedList<MetaIndex>();
+        for (VersionedJumboCollection collection : allVersionedJumboCollections) {
+            if(deliveryChunkKey.equals(collection.getChunkKey()) && version.equals(collection.getCollectionName())) {
+                List<CollectionIndex> collectionIndexes = getCollectionIndexes(collection.getCollectionName(), deliveryChunkKey, version);
+                for (CollectionIndex collectionIndex : collectionIndexes) {
+                    result.add(new MetaIndex(collection.getCollectionName(), deliveryChunkKey, version, collectionIndex.getIndexName(), collectionIndex.getStrategy(), collectionIndex.getIndexSourceFields()));
+                }
+            }
+        }
+        return result;
+    }
+
+    private List<CollectionIndex> getCollectionIndexes(String collectionName, String deliveryChunkKey, String version) {
+        File collectionVersionIndexPath = findCollectionChunkedVersionIndexFolder(collectionName, deliveryChunkKey, version);
+        File[] indexFolders = collectionVersionIndexPath.listFiles(FOLDER_FILTER);
+        List<CollectionIndex> result = new LinkedList<CollectionIndex>();
+        for (File indexFolder : indexFolders) {
+            Properties props = getIndexProperties(indexFolder);
+            result.add(new CollectionIndex(indexFolder.getName(), props.getProperty("date"), props.getProperty("indexSourceFields"), props.getProperty("strategy")));
+        }
+        return result;
+    }
+
+    private File findCollectionChunkedVersionIndexFolder(String collectionName, String deliveryChunkKey, String version) {
+        return new File(getIndexPath().getAbsolutePath() + "/" + collectionName + "/" + deliveryChunkKey + "/" + version + "/");
+    }
+
+    private File findCollectionChunkedVersionIndexFolder(String collectionName, String deliveryChunkKey, String version, String indexName) {
+        return new File(getIndexPath().getAbsolutePath() + "/" + collectionName + "/" + deliveryChunkKey + "/" + version + "/" + indexName + "/");
+    }
+
+    private File findCollectionChunkedVersionDataFolder(String collectionName, String deliveryChunkKey, String version) {
+        return new File(getDataPath().getAbsolutePath() + "/" + collectionName + "/" + deliveryChunkKey + "/" + version + "/");
+    }
+
+    public List<IndexInfo> getIndexInfoForDelivery(List<MetaIndex> metaIndex) {
+        List<IndexInfo> result = new LinkedList<IndexInfo>();
+        for (MetaIndex index : metaIndex) {
+            File indexFolder = findCollectionChunkedVersionIndexFolder(index.getCollection(), index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexName());
+            FilenameFilter ioFileFilter = FileFilterUtils.suffixFileFilter(".odx");
+            File[] files = indexFolder.listFiles(ioFileFilter);
+            for (File indexFile : files) {
+                long fileLength = getSizeFromSnappyChunk(new File(indexFile.getAbsolutePath() + ".chunks.snappy"));
+                result.add(new IndexInfo(index.getCollection(), index.getIndexName(), indexFile.getName(), fileLength, index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexStrategy()));
+            }
+        }
+        return result;
+    }
+
+    public List<DataInfo> getDataInfoForDelivery(List<MetaData> metaDatas) {
+        List<DataInfo> result = new LinkedList<DataInfo>();
+        IOFileFilter notChunksSnappy = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".chunks.snappy"));
+        IOFileFilter notProperties = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".properties"));
+        FilenameFilter ioFileFilter = FileFilterUtils.and(notChunksSnappy, notProperties);
+        for (MetaData data : metaDatas) {
+            File dataFolder = findCollectionChunkedVersionDataFolder(data.getCollection(), data.getDeliveryKey(), data.getDeliveryVersion());
+            File[] files = dataFolder.listFiles(ioFileFilter);
+            for (File dataFile : files) {
+                long fileLength = getSizeFromSnappyChunk(new File(dataFile.getAbsolutePath() + ".chunks.snappy"));
+                result.add(new DataInfo(data.getCollection(), dataFile.getName(), fileLength, data.getDeliveryKey(), data.getDeliveryVersion(), data.getDataStrategy()));
+            }
+        }
+        return result;
+    }
+
+    public InputStream getInputStream(IndexInfo index) throws IOException {
+        File indexFolder = findCollectionChunkedVersionIndexFolder(index.getCollection(), index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexName());
+        File indexFile = new File(indexFolder.getAbsolutePath() + "/" + index.getFilename());
+        return new SnappyInputStream(new BufferedInputStream(new FileInputStream(indexFile)));
+    }
+
+    public InputStream getInputStream(DataInfo data) throws IOException {
+        File dataFolder = findCollectionChunkedVersionDataFolder(data.getCollection(), data.getDeliveryKey(), data.getDeliveryVersion());
+        File dataFile = new File(dataFolder.getAbsolutePath() + "/" + data.getFilename());
+        return new SnappyInputStream(new BufferedInputStream(new FileInputStream(dataFile)));
+    }
 
     private static class ChunkKeyVersion {
         final String chunkKey;

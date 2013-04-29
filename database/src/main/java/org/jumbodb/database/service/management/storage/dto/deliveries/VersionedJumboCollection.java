@@ -13,21 +13,33 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     private String chunkKey;
     private String info;
     private String date;
+    private String sourcePath;
+    private String strategy;
     private boolean active;
     private long compressedSize;
     private long uncompressedSize;
     private long indexSize;
 
-    public VersionedJumboCollection(String collectionName, String version, String chunkKey, String info, String date, boolean active, long compressedSize, long uncompressedSize, long indexSize) {
+    public VersionedJumboCollection(String collectionName, String version, String chunkKey, String info, String date, String sourcePath, String strategy, boolean active, long compressedSize, long uncompressedSize, long indexSize) {
         this.collectionName = collectionName;
         this.version = version;
         this.chunkKey = chunkKey;
         this.info = info;
         this.date = date;
+        this.sourcePath = sourcePath;
+        this.strategy = strategy;
         this.active = active;
         this.compressedSize = compressedSize;
         this.uncompressedSize = uncompressedSize;
         this.indexSize = indexSize;
+    }
+
+    public String getSourcePath() {
+        return sourcePath;
+    }
+
+    public String getStrategy() {
+        return strategy;
     }
 
     public String getCollectionName() {

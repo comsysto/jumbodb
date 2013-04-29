@@ -122,7 +122,13 @@
         <constructor-arg ref="jumboConfig"/>
     </bean>
 
+    <bean id="exportDeliveryExecutor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool" destroy-method="shutdown">
+        <constructor-arg value="3" />
+    </bean>
+
     <bean id="exportDeliveryService" class="org.jumbodb.database.service.exporter.ExportDeliveryService">
+        <property name="executorService" ref="exportDeliveryExecutor"/>
+        <property name="storageManagement" ref="storageManagement"/>
     </bean>
 
 </beans>

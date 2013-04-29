@@ -16,7 +16,7 @@ public class ExportDeliveryCountOutputStream extends MonitorCountingOutputStream
      * @param out the OutputStream to write to
      */
     public ExportDeliveryCountOutputStream(OutputStream out, ExportDelivery exportDelivery) {
-        super(out, 5000);
+        super(out, 2000);
         this.exportDelivery = exportDelivery;
     }
 

@@ -57,6 +57,9 @@ public class ExportDeliveryTask implements Runnable {
                 imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort()) {
                     @Override
                     protected void onCopyRateUpdate(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
+                        if(exportDelivery.getState() != ExportDelivery.State.RUNNING) {
+                            throw new IllegalStateException("State is not RUNNING -> aborted");
+                        }
                         exportDelivery.setCopyRateInBytesCompressed(rateInBytesPerSecond);
                     }
                 };
@@ -85,6 +88,9 @@ public class ExportDeliveryTask implements Runnable {
                 imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort()) {
                     @Override
                     protected void onCopyRateUpdate(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
+                        if(exportDelivery.getState() != ExportDelivery.State.RUNNING) {
+                            throw new IllegalStateException("State is not RUNNING -> aborted");
+                        }
                         exportDelivery.setCopyRateInBytesCompressed(rateInBytesPerSecond);
                     }
                 };

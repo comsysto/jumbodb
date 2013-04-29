@@ -122,7 +122,7 @@ function ReplicationCtrl($scope, $http, $timeout) {
         $timeout(function() {
             fetchData();
             $scope.fetch();
-        }, 3000);
+        }, 1000);
     }
     $scope.fetch();
     function fetchData() {

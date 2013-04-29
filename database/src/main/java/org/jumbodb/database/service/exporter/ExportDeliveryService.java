@@ -33,20 +33,33 @@ public class ExportDeliveryService {
 
     public List<ExportDelivery> getReplications() {
         return replications;
-//        ExportDelivery exportDelivery = new ExportDelivery();
-//        exportDelivery.setHost("host");
-//        exportDelivery.setPort(12001);
-//        exportDelivery.setCurrentBytes(1000);
-//        exportDelivery.setTotalBytes(10000);
-//        exportDelivery.setState(ExportDelivery.State.WAITING);
-//        exportDelivery.setStatus("Copying file");
-//        return Arrays.asList(exportDelivery);
     }
 
     public void deleteReplication(String id) {
+        ExportDelivery exportDelivery = findById(id);
+        if(exportDelivery != null) {
+            if(exportDelivery.getState() == ExportDelivery.State.RUNNING) {
+                stopReplication(id);
+            }
+            replications.remove(exportDelivery);
+        }
     }
 
     public void stopReplication(String id) {
+        ExportDelivery exportDelivery = findById(id);
+        if(exportDelivery != null) {
+            exportDelivery.setState(ExportDelivery.State.ABORTED);
+        }
+
+    }
+
+    private ExportDelivery findById(String id) {
+        for (ExportDelivery replication : replications) {
+            if(replication.getId().equals(id)) {
+                return replication;
+            }
+        }
+        return null;
     }
 
     @Required

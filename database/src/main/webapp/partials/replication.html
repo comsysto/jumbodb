@@ -34,7 +34,9 @@
                         <p>
                            {{replication.status}}
                         </p>
-                        <p>{{replication.formattedCurrent}} of {{replication.formattedTotal}} copied - Rate: {{replication.formattedCopyRate}}</p>
+                        <p>{{replication.formattedCurrent}} of {{replication.formattedTotal}} copied</p>
+                        <p>Uncompressed Rate: {{replication.formattedCopyRateUncompressed}}</p>
+                        <p>Compressed Rate: {{replication.formattedCopyRateCompressed}}</p>
                     </td>
                     <td>
                         <button class="btn btn-danger" ng-show="replication.state == 'WAITING' || replication.state == 'RUNNING'" ng-click="" onclick="return confirm('Are you sure?');"><i class="icon-remove-sign icon-white"></i> Abort</button>

@@ -73,8 +73,13 @@ public class ImportTask implements Runnable {
                     if(finalDataPath.exists()) {
                         throw new IllegalStateException("The delivery version " + information.getDeliveryVersion() + " already exists for the collection " + information.getCollection() + " already exists!");
                     }
+                    File temporaryDataPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion());
+                    if(temporaryDataPath.exists()) {
+                        temporaryDataPath.delete();
+                    }
+
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    String deliveryKeyPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/";
+                    String deliveryKeyPath = temporaryDataPath + "/" + information.getCollection() + "/";
                     Properties deliveryInfo = new Properties();
                     deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
                     deliveryInfo.setProperty("sourcePath", information.getSourcePath());

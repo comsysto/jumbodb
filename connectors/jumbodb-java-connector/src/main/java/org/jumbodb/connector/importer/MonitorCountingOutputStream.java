@@ -32,14 +32,14 @@ public class MonitorCountingOutputStream extends CountingOutputStream {
             long currentBytes = getByteCount();
             long bytesDiff = currentBytes - lastBytes;
             long speed = (bytesDiff * 1000) / timeDiff;
-            onInterval(speed);
+            onInterval(speed, bytesDiff);
             lastBytes = currentBytes;
             lastTime = current;
         }
         super.afterWrite(n);
     }
 
-    protected void onInterval(long rateInBytesPerSecond) {
+    protected void onInterval(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
         this.rateInBytesPerSecond = rateInBytesPerSecond;
     }
 

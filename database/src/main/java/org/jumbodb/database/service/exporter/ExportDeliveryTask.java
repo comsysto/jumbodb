@@ -33,8 +33,7 @@ public class ExportDeliveryTask implements Runnable {
         try {
             exportDelivery.setState(ExportDelivery.State.RUNNING);
             exportDelivery.setStatus("Sending meta data");
-            String version = exportDelivery.getVersion();
-            List<MetaData> metaDatas = storageManagement.getMetaDataForDelivery(exportDelivery.getDeliveryChunkKey(), version, exportDelivery.isActivate());
+            List<MetaData> metaDatas = storageManagement.getMetaDataForDelivery(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion(), exportDelivery.isActivate());
             List<MetaIndex> metaIndexes = storageManagement.getMetaIndexForDelivery(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion());
             List<DataInfo> dataInfoForDelivery = storageManagement.getDataInfoForDelivery(metaDatas);
             List<IndexInfo> indexInfoForDelivery = storageManagement.getIndexInfoForDelivery(metaIndexes);
@@ -57,7 +56,7 @@ public class ExportDeliveryTask implements Runnable {
                 exportDelivery.setStatus("Copying " + countDataFiles + " of " + dataInfoForDelivery.size() + " data files");
                 imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort()) {
                     @Override
-                    protected void onCopyRateUpdate(long rateInBytesPerSecond) {
+                    protected void onCopyRateUpdate(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
                         exportDelivery.setCopyRateInBytesCompressed(rateInBytesPerSecond);
                     }
                 };
@@ -85,7 +84,7 @@ public class ExportDeliveryTask implements Runnable {
                 exportDelivery.setStatus("Copying " + countIndexFiles + " of " + dataInfoForDelivery.size() + " index files");
                 imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort()) {
                     @Override
-                    protected void onCopyRateUpdate(long rateInBytesPerSecond) {
+                    protected void onCopyRateUpdate(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
                         exportDelivery.setCopyRateInBytesCompressed(rateInBytesPerSecond);
                     }
                 };

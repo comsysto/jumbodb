@@ -435,7 +435,7 @@ public class StorageManagement {
         List<VersionedJumboCollection> allVersionedJumboCollections = getAllVersionedJumboCollections();
         List<MetaData> result = new LinkedList<MetaData>();
         for (VersionedJumboCollection collection : allVersionedJumboCollections) {
-            if(deliveryChunkKey.equals(collection.getChunkKey()) && version.equals(collection.getCollectionName())) {
+            if(deliveryChunkKey.equals(collection.getChunkKey()) && version.equals(collection.getVersion())) {
                 result.add(new MetaData(collection.getCollectionName(), deliveryChunkKey, version, collection.getStrategy(), collection.getSourcePath(), activate, collection.getInfo()));
             }
         }
@@ -446,7 +446,7 @@ public class StorageManagement {
         List<VersionedJumboCollection> allVersionedJumboCollections = getAllVersionedJumboCollections();
         List<MetaIndex> result = new LinkedList<MetaIndex>();
         for (VersionedJumboCollection collection : allVersionedJumboCollections) {
-            if(deliveryChunkKey.equals(collection.getChunkKey()) && version.equals(collection.getCollectionName())) {
+            if(deliveryChunkKey.equals(collection.getChunkKey()) && version.equals(collection.getVersion())) {
                 List<CollectionIndex> collectionIndexes = getCollectionIndexes(collection.getCollectionName(), deliveryChunkKey, version);
                 for (CollectionIndex collectionIndex : collectionIndexes) {
                     result.add(new MetaIndex(collection.getCollectionName(), deliveryChunkKey, version, collectionIndex.getIndexName(), collectionIndex.getStrategy(), collectionIndex.getIndexSourceFields()));

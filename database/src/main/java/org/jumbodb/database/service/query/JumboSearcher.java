@@ -82,7 +82,7 @@ public class JumboSearcher {
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
         for (IndexQuery indexQuery : searchQuery.getIndexQuery()) {
-            tasks.add(indexExecutor.submit(new SearchIndexTask(deliveryChunkDefinition, indexQuery, indexStrategyManager)));
+            tasks.add(indexExecutor.submit(new SearchIndexTask(deliveryChunkDefinition, indexQuery, indexStrategyManager, searchQuery.getLimit())));
         }
 
         try {

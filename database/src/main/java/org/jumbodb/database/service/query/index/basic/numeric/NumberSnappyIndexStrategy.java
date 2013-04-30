@@ -48,7 +48,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         return operations;
     }
 
-    public Set<FileOffset> searchOffsetsByClauses(File indexFile, Set<QueryClause> clauses) throws IOException {
+    public Set<FileOffset> searchOffsetsByClauses(File indexFile, Set<QueryClause> clauses, int queryLimit) throws IOException {
         long start = System.currentTimeMillis();
         RandomAccessFile raf = null;
         Set<FileOffset> result = new HashSet<FileOffset>();
@@ -57,7 +57,9 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
             raf = new RandomAccessFile(indexFile, "r");
 
             for (QueryClause clause : clauses) {
-                result.addAll(findOffsetForClause(raf, clause, snappyChunks));
+                if(queryLimit != -1 && queryLimit < result.size()) {
+                    result.addAll(findOffsetForClause(raf, clause, snappyChunks));
+                }
             }
 
         } finally {
@@ -124,12 +126,12 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
     @Override
-    public Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query) {
+    public Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit) {
         try {
             MultiValueMap<File, QueryClause> groupedByIndexFile = groupByIndexFile(collection, chunkKey, query);
             List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
             for (File indexFile : groupedByIndexFile.keySet()) {
-                tasks.add(indexFileExecutor.submit(new NumberSnappyIndexTask(this, indexFile, new HashSet<QueryClause>(groupedByIndexFile.get(indexFile)))));
+                tasks.add(indexFileExecutor.submit(new NumberSnappyIndexTask(this, indexFile, new HashSet<QueryClause>(groupedByIndexFile.get(indexFile)), queryLimit)));
             }
             Set<FileOffset> result = new HashSet<FileOffset>();
             for (Future<Set<FileOffset>> task : tasks) {

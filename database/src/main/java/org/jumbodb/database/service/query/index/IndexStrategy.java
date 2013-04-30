@@ -19,7 +19,7 @@ import java.util.Set;
 public interface IndexStrategy {
     boolean isResponsibleFor(String collection, String chunkKey, String indexName);
     String getStrategyName();
-    Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query);
+    Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit);
     Set<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);

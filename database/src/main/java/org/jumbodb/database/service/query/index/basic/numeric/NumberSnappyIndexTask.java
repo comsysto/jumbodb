@@ -12,15 +12,17 @@ public class NumberSnappyIndexTask<T, IFV, IF extends NumberSnappyIndexFile<IFV>
     private NumberSnappyIndexStrategy<T, IFV, IF> tifNumberSnappyIndexStrategy;
     private final File indexFile;
     private Set<QueryClause> clauses;
+    private int queryLimit;
 
-    public NumberSnappyIndexTask(NumberSnappyIndexStrategy<T, IFV, IF> tifNumberSnappyIndexStrategy, File indexFile, Set<QueryClause> clauses) {
+    public NumberSnappyIndexTask(NumberSnappyIndexStrategy<T, IFV, IF> tifNumberSnappyIndexStrategy, File indexFile, Set<QueryClause> clauses, int queryLimit) {
         this.tifNumberSnappyIndexStrategy = tifNumberSnappyIndexStrategy;
         this.indexFile = indexFile;
         this.clauses = clauses;
+        this.queryLimit = queryLimit;
     }
 
     @Override
     public Set<FileOffset> call() throws Exception {
-        return tifNumberSnappyIndexStrategy.searchOffsetsByClauses(indexFile, clauses);
+        return tifNumberSnappyIndexStrategy.searchOffsetsByClauses(indexFile, clauses, queryLimit);
     }
 }

@@ -58,7 +58,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
 
             for (QueryClause clause : clauses) {
                 if(queryLimit == -1 || queryLimit > result.size()) {
-                    result.addAll(findOffsetForClause(raf, clause, snappyChunks));
+                    result.addAll(findOffsetForClause(raf, clause, snappyChunks, queryLimit));
                 }
             }
 
@@ -161,7 +161,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
 
-    private Set<FileOffset> findOffsetForClause(RandomAccessFile indexRaf, QueryClause clause, SnappyChunks snappyChunks) throws IOException {
+    private Set<FileOffset> findOffsetForClause(RandomAccessFile indexRaf, QueryClause clause, SnappyChunks snappyChunks, int queryLimit) throws IOException {
         OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(clause.getQueryOperation());
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + clause.getQueryOperation());
@@ -182,7 +182,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                         T currentValue = readValueFromDataInputStream(dis);
                         int fileNameHash = dis.readInt();
                         long offset = dis.readLong();
-                        if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
+                        if(integerOperationSearch.matching(currentValue, queryValueRetriever)
+                                && (queryLimit == -1 || queryLimit > result.size())) {
                             result.add(new FileOffset(fileNameHash, offset));
                         } else if(!result.isEmpty()) {
                             // found some results, but here it isnt equal, that means end of results

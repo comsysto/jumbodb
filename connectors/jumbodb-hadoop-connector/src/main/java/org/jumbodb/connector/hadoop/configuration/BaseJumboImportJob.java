@@ -17,7 +17,6 @@ public class BaseJumboImportJob {
     private Path indexOutputPath;
     private Path logOutputPath;
     private List<ImportHost> hosts;
-    private int numberOfOutputFiles = 50;
     private boolean activateDelivery;
 
     public Path getSortedOutputPath() {
@@ -65,14 +64,6 @@ public class BaseJumboImportJob {
 
     public void setHosts(List<ImportHost> hosts) {
         this.hosts = hosts;
-    }
-
-    public int getNumberOfOutputFiles() {
-        return numberOfOutputFiles;
-    }
-
-    public void setNumberOfOutputFiles(int numberOfOutputFiles) {
-        this.numberOfOutputFiles = numberOfOutputFiles;
     }
 
     public boolean isActivateDelivery() {
@@ -123,7 +114,6 @@ public class BaseJumboImportJob {
                 ", deliveryChunk='" + deliveryChunkKey + '\'' +
                 ", dataStrategy='" + dataStrategy + '\'' +
                 ", hosts=" + hosts +
-                ", numberOfOutputFiles=" + numberOfOutputFiles +
                 ", activateDelivery=" + activateDelivery +
                 '}';
     }

@@ -60,6 +60,7 @@ public class IndexJobCreator {
         job.getConfiguration().set(GenericJsonHashCode32IndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
+        job.setNumReduceTasks(indexField.getNumberOfOutputFiles());
         job.setMapOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setOutputFormatClass(abstractIndexMapper.getOutputFormat());
@@ -87,6 +88,7 @@ public class IndexJobCreator {
         FileOutputFormat.setCompressOutput(job, false);
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
+        job.setNumReduceTasks(abstractIndexMapper.getNumberOfOutputFiles());
         job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setMapOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setOutputFormatClass(abstractIndexMapper.getOutputFormat());
@@ -98,7 +100,7 @@ public class IndexJobCreator {
 
     public static IndexField getIndexInformation(Class<? extends AbstractIndexMapper> mapper) {
         AbstractIndexMapper instance = createInstance(mapper);
-        return new IndexField(instance.getIndexName(), instance.getIndexSourceFields(), instance.getStrategy());
+        return new IndexField(instance.getIndexName(), instance.getIndexSourceFields(), instance.getStrategy(), instance.getNumberOfOutputFiles());
     }
 
     private static AbstractIndexMapper createInstance(Class<? extends AbstractIndexMapper> mapper)  {

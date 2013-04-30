@@ -11,22 +11,29 @@ public class IndexField {
     private String indexName;
     private List<String> fields;
     private String indexStrategy;
+    private int numberOfOutputFiles = 64;
     private String datePattern;
 
     public IndexField() {
     }
 
-    public IndexField(String indexName, List<String> fields, String indexStrategy) {
+    public IndexField(String indexName, List<String> fields, String indexStrategy, int numberOfOutputFiles) {
         this.indexName = indexName;
         this.fields = fields;
         this.indexStrategy = indexStrategy;
+        this.numberOfOutputFiles = numberOfOutputFiles;
     }
 
-    public IndexField(String indexName, List<String> fields, String indexStrategy, String datePattern) {
+    public IndexField(String indexName, List<String> fields, String indexStrategy, int numberOfOutputFiles, String datePattern) {
         this.indexName = indexName;
         this.fields = fields;
         this.indexStrategy = indexStrategy;
+        this.numberOfOutputFiles = numberOfOutputFiles;
         this.datePattern = datePattern;
+    }
+
+    public int getNumberOfOutputFiles() {
+        return numberOfOutputFiles;
     }
 
     public String getIndexStrategy() {

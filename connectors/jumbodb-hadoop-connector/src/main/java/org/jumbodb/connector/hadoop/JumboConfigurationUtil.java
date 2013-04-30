@@ -150,7 +150,7 @@ public class JumboConfigurationUtil {
             job.setSortedOutputPath(importCollection.getSort() != null && importCollection.getSort().size() > 0 ? new Path(outputData) : null);
             job.setIndexOutputPath(new Path(outputIndex));
             job.setLogOutputPath(new Path(outputLog));
-            job.setNumberOfOutputFiles(importCollection.getNumberOfOutputFiles() != null ? importCollection.getNumberOfOutputFiles() : importDefinition.getNumberOfOutputFiles());
+//            job.setNumberOfOutputFiles(importCollection.getNumberOfOutputFiles() != null ? importCollection.getNumberOfOutputFiles() : importDefinition.getNumberOfOutputFiles());
             result.add(job);
         }
         return result;

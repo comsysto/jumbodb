@@ -89,6 +89,10 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
     public abstract String getStrategy();
     public abstract Class<T> getJsonClass();
 
+    public int getNumberOfOutputFiles() {
+        return 64;
+    }
+
     public boolean throwErrorOnInvalidDataset() {
         return false;
     }

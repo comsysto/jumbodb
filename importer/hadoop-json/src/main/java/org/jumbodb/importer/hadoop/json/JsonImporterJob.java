@@ -64,7 +64,7 @@ public class JsonImporterJob extends Configured implements Tool {
                 sortJob.setMapOutputValueClass(Text.class);
                 sortJob.setOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
                 sortJob.setOutputValueClass(Text.class);
-                sortJob.setNumReduceTasks(importJob.getNumberOfOutputFiles());
+                sortJob.setNumReduceTasks(importDefinition.getNumberOfOutputFiles());
                 sortJob.setOutputFormatClass(TextValueOutputFormat.class);
                 controlledSortJob = new ControlledJob(sortJob, Collections.<ControlledJob>emptyList());
                 control.addJob(controlledSortJob);

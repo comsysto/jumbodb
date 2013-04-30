@@ -17,10 +17,10 @@ import java.util.Map;
  */
 public class TwitterEx10Query {
     public static void main(String[] args) throws Exception {
-        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex10-dev01.devproof.org", 12002);
+        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
 //        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
         JumboQuery query = new JumboQuery();
-//        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
+        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.EQ, "2013-04-17 22:13:59")));

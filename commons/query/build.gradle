@@ -4,7 +4,8 @@ apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'project-reports'
 apply plugin: 'eclipse'
-apply plugin: 'application'
+apply plugin: 'maven'
+
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -18,10 +19,7 @@ repositories {
 
 
 configurations {
-    // this scope extracts the files and copies it into he same jar file, because ou can just use one jar file in emr
-    bundle {
-        transitive = false
-    }
+    deployerJars
 }
 sourceSets {
     main {
@@ -39,9 +37,65 @@ sourceSets {
 }
 
 dependencies {
+    deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
     compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
 }
 
+task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+task packageSources(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+artifacts {
+    archives(packageJavadoc) {
+        type = 'javadoc'
+        extension = 'jar'
+    }
+    archives(packageSources)
+}
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            configuration = configurations.deployerJars
+            snapshotRepository(id: 'cloudbees', url: uri("dav:https://repository-${project.cloudbeesAccountName}.forge.cloudbees.com/snapshot/")) {
+                authentication(userName: project.cloudbeesUsername, password: project.cloudbeesPassword)
+            }
+            repository(id: 'cloudbees', url: uri("dav:https://repository-${project.cloudbeesAccountName}.forge.cloudbees.com/release/")) {
+                authentication(userName: project.cloudbeesUsername, password: project.cloudbeesPassword)
+            }
+
+            pom.project {
+                name 'jumboDB commons query'
+                packaging 'jar'
+                description 'jumboDB commons query'
+                url 'http://www.jumbodb.org'
+                inceptionYear '2013'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'chufe'
+                        name 'Carsten Hufe'
+                        email 'carsten.hufe@comsysto.com    '
+                        roles {
+                            role 'Developer'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 eclipse {
     classpath {

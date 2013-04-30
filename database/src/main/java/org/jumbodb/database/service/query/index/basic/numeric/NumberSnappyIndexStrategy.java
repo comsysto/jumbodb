@@ -57,7 +57,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
             raf = new RandomAccessFile(indexFile, "r");
 
             for (QueryClause clause : clauses) {
-                if(queryLimit != -1 && queryLimit < result.size()) {
+                if(queryLimit == -1 || queryLimit > result.size()) {
                     result.addAll(findOffsetForClause(raf, clause, snappyChunks));
                 }
             }

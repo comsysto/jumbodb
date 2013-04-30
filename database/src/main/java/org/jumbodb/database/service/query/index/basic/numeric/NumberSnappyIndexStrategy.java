@@ -182,11 +182,13 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                         T currentValue = readValueFromDataInputStream(dis);
                         int fileNameHash = dis.readInt();
                         long offset = dis.readLong();
-                        if(integerOperationSearch.matching(currentValue, queryValueRetriever)
-                                && (queryLimit == -1 || queryLimit > result.size())) {
+                        if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
                             result.add(new FileOffset(fileNameHash, offset));
                         } else if(!result.isEmpty()) {
                             // found some results, but here it isnt equal, that means end of results
+                            return result;
+                        }
+                        if(queryLimit == -1 || queryLimit > result.size()) {
                             return result;
                         }
                     }

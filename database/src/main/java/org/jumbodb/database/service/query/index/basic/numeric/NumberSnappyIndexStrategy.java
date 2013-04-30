@@ -188,7 +188,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                             // found some results, but here it isnt equal, that means end of results
                             return result;
                         }
-                        if(queryLimit == -1 || queryLimit > result.size()) {
+                        if(queryLimit != -1 && queryLimit < result.size()) {
                             return result;
                         }
                     }

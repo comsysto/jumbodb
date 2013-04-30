@@ -122,7 +122,7 @@
         <constructor-arg ref="jumboConfig"/>
     </bean>
 
-    <bean id="exportDeliveryExecutor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool" destroy-method="shutdown">
+    <bean id="exportDeliveryExecutor" class="java.util.concurrent.Executors" factory-method="newSingleThreadExecutor" destroy-method="shutdown">
         <constructor-arg value="3" />
     </bean>
 

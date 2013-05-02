@@ -71,6 +71,7 @@ public class ExportDeliveryTask implements Runnable {
                         exportDelivery.setCopyRateInBytesCompressed(rateInBytesPerSecond);
                     }
                 };
+                long start = System.currentTimeMillis();
                 imp.importData(dataInfo, new OnCopyCallback() {
                     @Override
                     public void onCopy(OutputStream outputStream) {
@@ -82,11 +83,14 @@ public class ExportDeliveryTask implements Runnable {
                         } catch (IOException e) {
                             throw new UnhandledException(e);
                         } finally {
+                            exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
                             IOUtils.closeQuietly(cos);
                             IOUtils.closeQuietly(is);
                         }
                     }
                 });
+                long timeDiff = System.currentTimeMillis() - start;
+                exportDelivery.setCopyRateInBytesCompressed((imp.getByteCount() * 1000) / timeDiff);
                 IOUtils.closeQuietly(imp);
                 countDataFiles++;
             }
@@ -102,6 +106,7 @@ public class ExportDeliveryTask implements Runnable {
                         exportDelivery.setCopyRateInBytesCompressed(rateInBytesPerSecond);
                     }
                 };
+                long start = System.currentTimeMillis();
                 imp.importIndex(indexInfo, new OnCopyCallback() {
                     @Override
                     public void onCopy(OutputStream outputStream) {
@@ -113,11 +118,14 @@ public class ExportDeliveryTask implements Runnable {
                         } catch (IOException e) {
                             throw new UnhandledException(e);
                         } finally {
+                            exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
                             IOUtils.closeQuietly(cos);
                             IOUtils.closeQuietly(is);
                         }
                     }
                 });
+                long timeDiff = System.currentTimeMillis() - start;
+                exportDelivery.setCopyRateInBytesCompressed((imp.getByteCount() * 1000) / timeDiff);
                 IOUtils.closeQuietly(imp);
                 countIndexFiles++;
             }

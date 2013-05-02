@@ -27,14 +27,14 @@ public class TwitterEx10Query {
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.LT, sdf.parse("2013-04-17 22:15:59").getTime())));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(sdf.parse("2013-04-17 22:13:59").getTime(), sdf.parse("2013-04-17 22:14:59").getTime()))));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.LT, "2013-04-17 22:15:59")));
-        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.GT, "2013-04-17 22:15:59")));
+//        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.GT, "2013-04-17 22:15:59")));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.NE, "2013-04-17 22:13:59")));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList("2013-04-17 22:13:59", "2013-04-17 23:14:59"))));
 
-//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.2025, 11.3325), 1000000))));
-        query.setLimit(20);
+//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.2025, 11.3325), 80000))));
+//        query.setLimit(20);
 //        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(26.29859, 44.79119), 1000000))));
-//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
+        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
 //        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
 
 //        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(500000, 1000000))));

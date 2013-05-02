@@ -13,6 +13,7 @@ public class MonitorCountingOutputStream extends CountingOutputStream {
     private long lastBytes = 0l;
     private long intervalMs;
     private long rateInBytesPerSecond = 0l;
+    private long measuredBytes = 0l;
     /**
      * Constructs a new CountingOutputStream.
      *
@@ -33,6 +34,7 @@ public class MonitorCountingOutputStream extends CountingOutputStream {
             long bytesDiff = currentBytes - lastBytes;
             long speed = (bytesDiff * 1000) / timeDiff;
             onInterval(speed, bytesDiff);
+            measuredBytes += bytesDiff;
             lastBytes = currentBytes;
             lastTime = current;
         }
@@ -45,5 +47,13 @@ public class MonitorCountingOutputStream extends CountingOutputStream {
 
     public long getRateInBytesPerSecond() {
         return rateInBytesPerSecond;
+    }
+
+    public long getMeasuredBytes() {
+        return measuredBytes;
+    }
+
+    public long getNotMeasuredBytes() {
+        return getByteCount() - measuredBytes;
     }
 }

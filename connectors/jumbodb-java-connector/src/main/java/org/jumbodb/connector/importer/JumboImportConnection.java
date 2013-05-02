@@ -134,6 +134,10 @@ public class JumboImportConnection implements Closeable {
         }
     }
 
+    public long getByteCount() {
+        return mcos.getByteCount();
+    }
+
     public void sendFinishedNotification(String deliveryKey, String deliveryVersion) {
         try {
             dos.writeUTF(":cmd:import:finished");

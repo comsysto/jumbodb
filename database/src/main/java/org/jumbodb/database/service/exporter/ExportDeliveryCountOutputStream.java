@@ -24,6 +24,6 @@ public class ExportDeliveryCountOutputStream extends MonitorCountingOutputStream
     protected void onInterval(long speedInBytesPerSecond, long copiedBytesSinceLastCall) {
         super.onInterval(speedInBytesPerSecond, copiedBytesSinceLastCall);
         exportDelivery.setCopyRateInBytesUncompressed(speedInBytesPerSecond);
-        exportDelivery.setCurrentBytes(exportDelivery.getCurrentBytes() + copiedBytesSinceLastCall);
+        exportDelivery.addCurrentBytes(copiedBytesSinceLastCall);
     }
 }

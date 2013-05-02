@@ -20,6 +20,10 @@ public class ExportDelivery {
     private long copyRateInBytesCompressed;
     private long copyRateInBytesUncompressed;
 
+    public void addCurrentBytes(long bytes) {
+        currentBytes += bytes;
+    }
+
     public String getFormattedCopyRateUncompressed() {
         return FileUtils.byteCountToDisplaySize(copyRateInBytesUncompressed) + " /s";
     }

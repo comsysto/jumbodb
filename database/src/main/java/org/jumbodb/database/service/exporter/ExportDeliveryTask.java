@@ -95,6 +95,7 @@ public class ExportDeliveryTask implements Runnable {
                 });
                 long timeDiff = System.currentTimeMillis() - start;
                 if(timeDiff > 0) {
+                    exportDelivery.setCopyRateInBytesUncompressed((dataInfo.getFileLength() * 1000) / timeDiff);
                     exportDelivery.setCopyRateInBytesCompressed((imp.getByteCount() * 1000) / timeDiff);
                 }
                 IOUtils.closeQuietly(imp);
@@ -132,6 +133,7 @@ public class ExportDeliveryTask implements Runnable {
                 });
                 long timeDiff = System.currentTimeMillis() - start;
                 if(timeDiff > 0) {
+                    exportDelivery.setCopyRateInBytesUncompressed((indexInfo.getFileLength() * 1000) / timeDiff);
                     exportDelivery.setCopyRateInBytesCompressed((imp.getByteCount() * 1000) / timeDiff);
                 }
                 IOUtils.closeQuietly(imp);

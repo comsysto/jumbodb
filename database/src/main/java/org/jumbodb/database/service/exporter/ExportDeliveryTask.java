@@ -6,6 +6,8 @@ import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.connector.importer.*;
 import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.query.FileOffset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +21,8 @@ import java.util.concurrent.Callable;
  * @author Carsten Hufe
  */
 public class ExportDeliveryTask implements Runnable {
+    private Logger log = LoggerFactory.getLogger(ExportDeliveryTask.class);
+
     private ExportDelivery exportDelivery;
     private StorageManagement storageManagement;
 
@@ -90,7 +94,9 @@ public class ExportDeliveryTask implements Runnable {
                     }
                 });
                 long timeDiff = System.currentTimeMillis() - start;
-                exportDelivery.setCopyRateInBytesCompressed((imp.getByteCount() * 1000) / timeDiff);
+                if(timeDiff > 0) {
+                    exportDelivery.setCopyRateInBytesCompressed((imp.getByteCount() * 1000) / timeDiff);
+                }
                 IOUtils.closeQuietly(imp);
                 countDataFiles++;
             }
@@ -125,7 +131,9 @@ public class ExportDeliveryTask implements Runnable {
                     }
                 });
                 long timeDiff = System.currentTimeMillis() - start;
-                exportDelivery.setCopyRateInBytesCompressed((imp.getByteCount() * 1000) / timeDiff);
+                if(timeDiff > 0) {
+                    exportDelivery.setCopyRateInBytesCompressed((imp.getByteCount() * 1000) / timeDiff);
+                }
                 IOUtils.closeQuietly(imp);
                 countIndexFiles++;
             }
@@ -139,6 +147,7 @@ public class ExportDeliveryTask implements Runnable {
         } catch(Exception ex) {
             exportDelivery.setState(ExportDelivery.State.FAILED);
             exportDelivery.setStatus("Error: " + ex.getMessage());
+            log.error("An error occured: ", ex);
         }
         finally {
             IOUtils.closeQuietly(imp);

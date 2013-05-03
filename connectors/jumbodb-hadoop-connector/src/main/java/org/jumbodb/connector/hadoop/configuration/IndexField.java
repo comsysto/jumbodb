@@ -68,6 +68,9 @@ public class IndexField {
         this.datePattern = datePattern;
     }
 
+    public void setNumberOfOutputFiles(int numberOfOutputFiles) {
+        this.numberOfOutputFiles = numberOfOutputFiles;
+    }
 
     @Override
     public String toString() {

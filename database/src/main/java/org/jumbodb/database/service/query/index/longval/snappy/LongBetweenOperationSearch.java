@@ -38,7 +38,8 @@ public class LongBetweenOperationSearch extends LongEqOperationSearch {
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Long> snappyIndexFile) {
         List<Long> value = queryValueRetriever.getValue();
         Long from = value.get(0);
-        return from > snappyIndexFile.getFrom();
+        Long to = value.get(0);
+        return from < snappyIndexFile.getFrom() && to > snappyIndexFile.getFrom();
     }
 
     @Override

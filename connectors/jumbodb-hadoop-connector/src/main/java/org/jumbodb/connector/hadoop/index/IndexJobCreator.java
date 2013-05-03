@@ -1,6 +1,7 @@
 package org.jumbodb.connector.hadoop.index;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 import org.jumbodb.connector.hadoop.configuration.JumboCustomImportJob;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
@@ -57,7 +58,7 @@ public class IndexJobCreator {
         FileOutputFormat.setCompressOutput(job, false);
         Class<? extends AbstractIndexMapper> mapper = getIndexStrategy(indexField);
         AbstractIndexMapper abstractIndexMapper = createInstance(mapper);
-        job.getConfiguration().set(GenericJsonHashCode32IndexMapper.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
+        job.getConfiguration().set(JumboConfigurationUtil.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
         job.setNumReduceTasks(indexField.getNumberOfOutputFiles());

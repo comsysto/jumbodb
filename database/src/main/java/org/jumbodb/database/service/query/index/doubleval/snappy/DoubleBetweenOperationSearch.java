@@ -38,7 +38,8 @@ public class DoubleBetweenOperationSearch extends DoubleEqOperationSearch {
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Double> snappyIndexFile) {
         List<Double> value = queryValueRetriever.getValue();
         Double from = value.get(0);
-        return from > snappyIndexFile.getFrom();
+        Double to = value.get(0);
+        return from < snappyIndexFile.getFrom() && to > snappyIndexFile.getFrom();
     }
 
     @Override

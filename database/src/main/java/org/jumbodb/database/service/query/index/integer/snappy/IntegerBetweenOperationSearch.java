@@ -38,7 +38,8 @@ public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> snappyIndexFile) {
         List<Integer> value = queryValueRetriever.getValue();
         Integer from = value.get(0);
-        return from > snappyIndexFile.getFrom();
+        Integer to = value.get(0);
+        return from < snappyIndexFile.getFrom() && to > snappyIndexFile.getFrom();
     }
 
     @Override

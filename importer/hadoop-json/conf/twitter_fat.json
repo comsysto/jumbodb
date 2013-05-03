@@ -12,8 +12,10 @@
         {
             "input": "maprfs:///twitter/input-20130417",
             "collectionName": "twitter",
-            "sort": ["user.screen_name"],
+            "sort": ["created_at"],
+            "sortType": "DATETIME",
             "dataStrategy": "JSON_SNAPPY_V1",
+            "sortDatePattern": "EEE MMM dd HH:mm:ss Z yyyy",
             "indexes": [
                 {
                     "indexName": "screen_name",

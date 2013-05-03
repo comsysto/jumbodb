@@ -16,7 +16,6 @@ import java.util.List;
  * Time: 4:52 PM
  */
 public class GenericJsonHashCode32IndexMapper extends AbstractHashCode32IndexMapper<JsonNode> {
-    public static final String JUMBO_INDEX_JSON_CONF = "jumbo.index.configuration";
 
     private IndexField indexField;
 

@@ -38,7 +38,8 @@ public class FloatBetweenOperationSearch extends FloatEqOperationSearch {
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Float> snappyIndexFile) {
         List<Float> value = queryValueRetriever.getValue();
         Float from = value.get(0);
-        return from > snappyIndexFile.getFrom();
+        Float to = value.get(0);
+        return from < snappyIndexFile.getFrom() && to > snappyIndexFile.getFrom();
     }
 
     @Override

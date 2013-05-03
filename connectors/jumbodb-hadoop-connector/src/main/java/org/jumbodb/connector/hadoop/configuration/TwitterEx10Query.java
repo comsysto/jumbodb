@@ -21,47 +21,34 @@ public class TwitterEx10Query {
 //        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
         JumboQuery query = new JumboQuery();
 //        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
+//        query.setLimit(20);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.EQ, "2013-04-17 22:13:59")));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.LT, sdf.parse("2013-04-17 22:15:59").getTime())));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(sdf.parse("2013-04-17 22:13:59").getTime(), sdf.parse("2013-04-17 22:14:59").getTime()))));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.LT, "2013-04-17 22:15:59")));
-//        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.GT, "2013-04-17 22:15:59")));
+        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.GT, "2013-05-03 00:00:59")));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.NE, "2013-04-17 22:13:59")));
-//        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList("2013-04-17 22:13:59", "2013-04-17 23:14:59"))));
+//        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList("2013-04-17 22:12:30", "2013-04-17 22:12:59"))));
 
-//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.2025, 11.3325), 80000))));
-//        query.setLimit(20);
+        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.132, 11.560), 10000))));
+//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.132, 11.560), 10000))));
 //        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(26.29859, 44.79119), 1000000))));
-        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
+//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
 //        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
 
-//        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(500000, 1000000))));
+        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(900000, 1000000))));
 //        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 10000000)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
-//        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 100000)));
+//        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 1000)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.LT, 10)));
 
 
-//        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(150, 200))));
-//        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
-//        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
-//        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.GT, 100000)));
-//        query.addIndexQuery("followers_count_long", Arrays.asList(new QueryClause(QueryOperation.LT, 10)));
+//        query.addJsonQuery("user.followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 1000)));
 
-//        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(150, 200))));
-//        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
-//        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
-//        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.GT, 100000)));
-//        query.addIndexQuery("followers_count_double", Arrays.asList(new QueryClause(QueryOperation.LT, 10)));
 
-//            query.addIndexQuery("followers_count_float", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(150, 200))));
-//        query.addIndexQuery("followers_count_float", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
-//        query.addIndexQuery("followers_count_float", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
-//        query.addIndexQuery("followers_count_float", Arrays.asList(new QueryClause(QueryOperation.GT, 100000)));
-//        query.addIndexQuery("followers_count_float", Arrays.asList(new QueryClause(QueryOperation.LT, 10)));
 
 //        List<Object> alexjenkins29 = new ArrayList<Object>(Arrays.asList("alexjenkins29"));
 //        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS,"user.screen_name", alexjenkins29);

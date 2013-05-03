@@ -27,6 +27,8 @@ import java.util.*;
  * Time: 1:22 PM
  */
 public class JumboConfigurationUtil {
+    public static final String JUMBO_INDEX_JSON_CONF = "jumbo.index.configuration";
+
 
     public static void loadConfigurationFileToHadoop(Configuration conf, String configFileLocation) throws IOException {
         Path configFilePath = new Path(configFileLocation);
@@ -102,9 +104,9 @@ public class JumboConfigurationUtil {
     }
 
     public static IndexField loadIndexJson(Configuration conf) throws IOException {
-        String importJson = conf.get(GenericJsonHashCode32IndexMapper.JUMBO_INDEX_JSON_CONF);
+        String importJson = conf.get(JUMBO_INDEX_JSON_CONF);
         if(StringUtils.isBlank(importJson)) {
-            throw new IllegalStateException(GenericJsonHashCode32IndexMapper.JUMBO_INDEX_JSON_CONF + " is not set.");
+            throw new IllegalStateException(JUMBO_INDEX_JSON_CONF + " is not set.");
         }
 
         ObjectMapper mapper = new ObjectMapper();

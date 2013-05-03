@@ -39,7 +39,7 @@ public class DoubleBetweenOperationSearch extends DoubleEqOperationSearch {
         List<Double> value = queryValueRetriever.getValue();
         Double from = value.get(0);
         Double to = value.get(0);
-        return from < snappyIndexFile.getFrom() && to > snappyIndexFile.getFrom();
+        return from < snappyIndexFile.getTo() && to > snappyIndexFile.getFrom();
     }
 
     @Override

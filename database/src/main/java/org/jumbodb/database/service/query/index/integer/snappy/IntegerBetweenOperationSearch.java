@@ -39,7 +39,7 @@ public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
         List<Integer> value = queryValueRetriever.getValue();
         Integer from = value.get(0);
         Integer to = value.get(0);
-        return from < snappyIndexFile.getFrom() && to > snappyIndexFile.getFrom();
+        return from < snappyIndexFile.getTo() && to > snappyIndexFile.getFrom();
     }
 
     @Override

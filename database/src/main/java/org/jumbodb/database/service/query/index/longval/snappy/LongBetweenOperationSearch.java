@@ -39,6 +39,9 @@ public class LongBetweenOperationSearch extends LongEqOperationSearch {
         List<Long> value = queryValueRetriever.getValue();
         Long from = value.get(0);
         Long to = value.get(0);
+        if(from < snappyIndexFile.getFrom() && from < snappyIndexFile.getTo()) {
+            return true;
+        }
         return from < snappyIndexFile.getTo() && to > snappyIndexFile.getFrom();
     }
 

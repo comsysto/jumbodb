@@ -39,6 +39,9 @@ public class FloatBetweenOperationSearch extends FloatEqOperationSearch {
         List<Float> value = queryValueRetriever.getValue();
         Float from = value.get(0);
         Float to = value.get(0);
+        if(from < snappyIndexFile.getFrom() && from < snappyIndexFile.getTo()) {
+            return true;
+        }
         return from < snappyIndexFile.getTo() && to > snappyIndexFile.getFrom();
     }
 

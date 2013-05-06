@@ -30,16 +30,17 @@ public class TwitterEx10Query {
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.LT, "2013-04-17 22:15:59")));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.GT, "2013-05-03 00:00:59")));
 //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.NE, "2013-04-17 22:13:59")));
-        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList("2013-04-17 22:12:30", "2013-04-18 22:17:59"))));
+        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList("2013-05-02 22:13:00", "2013-05-02 22:15:00"))));
 
-//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.132, 11.560), 10000))));
-//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.132, 11.560), 10000))));
+//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.140, 11.562), 10000))));
+//        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.132, 11.560), 100000))));
 //        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(26.29859, 44.79119), 1000000))));
 //        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
 //        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(26.29859, 44.79119), Arrays.asList(26.2869, 44.8163)))));
 
 //        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList(900000, 1000000))));
 //        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 10000000)));
+
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.EQ, 102100)));
 //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.NE, 0)));
 //        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 1000)));
@@ -49,15 +50,10 @@ public class TwitterEx10Query {
 //        query.addJsonQuery("user.followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 1000)));
 
 
-
-//        List<Object> alexjenkins29 = new ArrayList<Object>(Arrays.asList("alexjenkins29"));
-//        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS,"user.screen_name", alexjenkins29);
-//        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS, "_id.date", Arrays.asList((Object)new Long(20121002)));
-//        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS, "_id.toCell", Arrays.asList((Object)"11211422244", "1121332341112"));
         long start = System.currentTimeMillis();
         List<Map> daily = jumboDriver.find("twitter", Map.class, query);
         for (Map map : daily) {
-            System.out.println(map.get("created_at") + " -> " + map.get("text"));
+            System.out.println(map.get("created_at") + " (" + ((Map)map.get("user")).get("screen_name") + ")" + " -> " + map.get("text"));
 //            System.out.println(map.get("text"));
             System.out.println("==========");
         }

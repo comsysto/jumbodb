@@ -223,6 +223,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 if(lastObj != null) {
                     if(strategy.matches(queryClause, lastObj)) {
                         queryClauseMatch = true;
+                        break;
                     }
                 }
             }

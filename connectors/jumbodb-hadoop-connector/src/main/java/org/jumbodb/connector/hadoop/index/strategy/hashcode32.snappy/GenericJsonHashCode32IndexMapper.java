@@ -47,7 +47,7 @@ public class GenericJsonHashCode32IndexMapper extends AbstractHashCode32IndexMap
         for (String indexField : this.indexField.getFields()) {
             JsonNode valueFor = getValueFor(indexField, jsonNode);
             if(valueFor != null) {
-                keys.add(valueFor.getTextValue());
+                keys.add(valueFor.getValueAsText());
             }
         }
 

@@ -221,15 +221,10 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             boolean queryClauseMatch = false;
             for (QueryClause queryClause : jsonQuery.getClauses()) {
                 if(lastObj != null) {
-                    queryClauseMatch |= strategy.matches(queryClause, lastObj);
+                    if(strategy.matches(queryClause, lastObj)) {
+                        queryClauseMatch = true;
+                    }
                 }
-//                if (queryClause.getQueryOperation() == QueryOperation.EQ) {
-//                    if(lastObj != null) {
-//                        queryClauseMatch |= queryClause.equals(lastObj);
-//                    }
-//                }  else {
-//                    throw new IllegalArgumentException("Unsupported comparision type " + queryClause.getQueryOperation().getClass());
-//                }
             }
             matching &= queryClauseMatch;
 

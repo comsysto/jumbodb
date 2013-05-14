@@ -459,6 +459,9 @@ public class StorageManagement {
     private List<CollectionIndex> getCollectionIndexes(String collectionName, String deliveryChunkKey, String version) {
         File collectionVersionIndexPath = findCollectionChunkedVersionIndexFolder(collectionName, deliveryChunkKey, version);
         File[] indexFolders = collectionVersionIndexPath.listFiles(FOLDER_FILTER);
+        if(indexFolders == null) {
+            return Collections.emptyList();
+        }
         List<CollectionIndex> result = new LinkedList<CollectionIndex>();
         for (File indexFolder : indexFolders) {
             Properties props = getIndexProperties(indexFolder);

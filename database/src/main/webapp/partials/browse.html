@@ -9,11 +9,70 @@
             <div class="alert alert-error" ng-show="msg.error">
                 {{msg.message}}
             </div>
-            <div class="alert alert-success" ng-show="msg.success">
-                {{msg.message}}
-            </div>
+            <form class="form-horizontal" name="searchForm">
+                <div class="control-group">
+                    <label class="control-label" for="collection">Collection</label>
+                    <div class="controls">
+                        <select id="collection" ng-model="collection" ng-required="true" ng-change="setCurrentCollection()">
+                            <option ng-repeat="col in collections">{{col.collection}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="query">Query</label>
+                    <div class="controls">
+                        <textarea id="query" rows="6" class="input-xxlarge" ng-model="query" ng-required="true">
+                        </textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <button type="submit" ng-disabled="searchForm.$invalid" class="btn" ng-click="search(collection, query)">Search</button>
+                    </div>
+                </div>
 
-            content here
+                <div class="control-group" ng-hide="!currentCollection">
+                    <label class="control-label">Collection Information</label>
+                    <div class="controls">
+                        <p><b>Data strategy: </b> {{currentCollection.dataStrategy}}</p>
+                        <p><b>Supported data queries: </b> {{currentCollection.supportedOperations}}</p>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>Index Name</th>
+                                <th>Strategy</th>
+                                <th>Supported operations</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="index in currentCollection.indexes">
+                                    <td>{{index.name}}</td>
+                                    <td>{{index.strategy}}</td>
+                                    <td>{{index.supportedOperations}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </form>
+
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Result</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="result in results.results">
+                    <td>{{$index + 1}}</td>
+                    <td>
+                        <pre ng-bind-html-unsafe="formatJson(result)"></pre>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

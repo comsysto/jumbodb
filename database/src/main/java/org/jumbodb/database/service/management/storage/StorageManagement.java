@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.connector.importer.DataInfo;
 import org.jumbodb.connector.importer.IndexInfo;
 import org.jumbodb.connector.importer.MetaData;
@@ -26,7 +27,11 @@ import org.jumbodb.database.service.management.storage.dto.collections.JumboColl
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
 import org.jumbodb.database.service.management.storage.dto.deliveries.VersionedJumboCollection;
 import org.jumbodb.database.service.management.storage.dto.index.CollectionIndex;
+import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilCollection;
+import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilIndex;
 import org.jumbodb.database.service.query.JumboSearcher;
+import org.jumbodb.database.service.query.data.DataStrategy;
+import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -55,6 +60,30 @@ public class StorageManagement {
 
     private void onDataChanged() {
         jumboSearcher.onDataChanged();
+    }
+
+    public List<QueryUtilCollection> findQueryableCollections() {
+        List<QueryUtilCollection> result = new LinkedList<QueryUtilCollection>();
+        List<JumboCollection> jumboCollections = getJumboCollections(false);
+        String dataStrategyName = "none";
+        Set<QueryOperation> supportedOperations = new HashSet<QueryOperation>();
+        for (JumboCollection collection : jumboCollections) {
+            Set<QueryUtilIndex> resultIndexes = new HashSet<QueryUtilIndex>();
+            for (DeliveryChunk deliveryChunk : collection.getChunks()) {
+                for (DeliveryVersion deliveryVersion : deliveryChunk.getVersions()) {
+                    List<CollectionIndex> collectionIndexes = getCollectionIndexes(collection.getName(), deliveryChunk.getKey(), deliveryVersion.getVersion());
+                    for (CollectionIndex collectionIndex : collectionIndexes) {
+                        IndexStrategy indexStrategy = jumboSearcher.getIndexStrategy(collectionIndex.getStrategy());
+                        resultIndexes.add(new QueryUtilIndex(collectionIndex.getIndexName(), collectionIndex.getStrategy(), new ArrayList<QueryOperation>(indexStrategy.getSupportedOperations())));
+                    }
+                    DataStrategy dataStrategy = jumboSearcher.getDataStrategy(collection.getName(), deliveryChunk.getKey());
+                    dataStrategyName = dataStrategy.getStrategyName();
+                    supportedOperations.addAll(dataStrategy.getSupportedOperations());
+                }
+            }
+            result.add(new QueryUtilCollection(collection.getName(), new ArrayList<QueryUtilIndex>(resultIndexes), dataStrategyName, new ArrayList<QueryOperation>(supportedOperations)));
+        }
+        return result;
     }
 
     public void deleteCompleteCollection(String collectionName) {
@@ -145,7 +174,7 @@ public class StorageManagement {
     }
 
     private List<String> findCollectionsWithChunkAndVersion(String chunkedDeliveryKey, String version) {
-        List<File> collectionDirectories = findCollectionDirectories();
+        List<File> collectionDirectories = findCollectionDataDirectories();
         List<String> result = new LinkedList<String>();
         for (File collectionDirectory : collectionDirectories) {
             String path = collectionDirectory.getAbsolutePath() + "/" + chunkedDeliveryKey + "/" + version;
@@ -158,7 +187,7 @@ public class StorageManagement {
         return result;
     }
 
-    private List<File> findCollectionDirectories() {
+    private List<File> findCollectionDataDirectories() {
         List<File> collectionDirectories = new LinkedList<File>();
         File[] files = getDataPath().listFiles();
         for (File file : files) {
@@ -265,58 +294,61 @@ public class StorageManagement {
         }
     }
 
-
     public List<JumboCollection> getJumboCollections() {
+        return getJumboCollections(true);
+    }
+
+    public List<JumboCollection> getJumboCollections(boolean loadSizes) {
         List<JumboCollection> collections = new LinkedList<JumboCollection>();
         File[] collectionFolders = getDataPath().listFiles(FOLDER_FILTER);
         for (File collectionFolder : collectionFolders) {
-            collections.add(getJumboCollection(collectionFolder));
+            collections.add(getJumboCollection(collectionFolder, loadSizes));
         }
         Collections.sort(collections);
         return collections;
     }
 
-    private JumboCollection getJumboCollection(File collectionFolder) {
+    private JumboCollection getJumboCollection(File collectionFolder, boolean loadSizes) {
         String collectionName = collectionFolder.getName();
-        List<DeliveryChunk> collectionChunks = getCollectionDeliveryChunks(collectionName, collectionFolder);
+        List<DeliveryChunk> collectionChunks = getCollectionDeliveryChunks(collectionName, collectionFolder, loadSizes);
         String collapseId = "col" + collectionName.hashCode();
         return new JumboCollection(collapseId, collectionName, collectionChunks);
     }
 
-    private List<DeliveryChunk> getCollectionDeliveryChunks(String collectionName, File collectionFolder) {
+    private List<DeliveryChunk> getCollectionDeliveryChunks(String collectionName, File collectionFolder, boolean loadSizes) {
         List<DeliveryChunk> deliveryChunks = new LinkedList<DeliveryChunk>();
         File[] chunkFolders = collectionFolder.listFiles(FOLDER_FILTER);
         for (File chunkFolder : chunkFolders) {
-            deliveryChunks.add(getDeliveryChunk(chunkFolder, collectionName));
+            deliveryChunks.add(getDeliveryChunk(chunkFolder, collectionName, loadSizes));
         }
         Collections.sort(deliveryChunks);
         return deliveryChunks;
     }
 
-    private DeliveryChunk getDeliveryChunk(File chunkFolder, String collectionName) {
+    private DeliveryChunk getDeliveryChunk(File chunkFolder, String collectionName, boolean loadSizes) {
         String chunkKey = chunkFolder.getName();
         String activeVersion = getActiveDeliveryVersion(collectionName, chunkKey);
-        return new DeliveryChunk(chunkKey, getDeliveryVersions(chunkFolder, collectionName, chunkKey, activeVersion));
+        return new DeliveryChunk(chunkKey, getDeliveryVersions(chunkFolder, collectionName, chunkKey, activeVersion, loadSizes));
     }
 
-    private List<DeliveryVersion> getDeliveryVersions(File chunkFolder, String collectionName, String chunkKey, String activeVersion) {
+    private List<DeliveryVersion> getDeliveryVersions(File chunkFolder, String collectionName, String chunkKey, String activeVersion, boolean loadSizes) {
         List<DeliveryVersion> deliveryVersions = new LinkedList<DeliveryVersion>();
         File[] deliveryVersionFolders = chunkFolder.listFiles(FOLDER_FILTER);
         for (File deliveryVersionFolder : deliveryVersionFolders) {
-            deliveryVersions.add(getDeliveryVersion(deliveryVersionFolder, collectionName, chunkKey, activeVersion));
+            deliveryVersions.add(getDeliveryVersion(deliveryVersionFolder, collectionName, chunkKey, activeVersion, loadSizes));
         }
         Collections.sort(deliveryVersions);
         return deliveryVersions;
     }
 
-    private DeliveryVersion getDeliveryVersion(File deliveryVersionFolder, String collectionName, String chunkKey, String activeVersion) {
+    private DeliveryVersion getDeliveryVersion(File deliveryVersionFolder, String collectionName, String chunkKey, String activeVersion, boolean loadSizes) {
         String version = deliveryVersionFolder.getName();
         Properties deliveryProperties = getDeliveryProperties(deliveryVersionFolder);
         String info = deliveryProperties.getProperty("info");
         String date = deliveryProperties.getProperty("date");
-        long compressedSize = calculateCompressedSize(deliveryVersionFolder);
-        long uncompressedSize = getUncompressedSize(deliveryVersionFolder);
-        long indexSize = getIndexSize(collectionName, chunkKey, version);
+        long compressedSize = loadSizes ? calculateCompressedSize(deliveryVersionFolder) : 0l;
+        long uncompressedSize = loadSizes ? getUncompressedSize(deliveryVersionFolder) : 0l;
+        long indexSize = loadSizes ? getIndexSize(collectionName, chunkKey, version) : 0l;
         boolean active = activeVersion.equals(version);
         return new DeliveryVersion(version, info, date, compressedSize, uncompressedSize, indexSize, active);
     }

@@ -24,7 +24,7 @@ public interface DataStrategy {
     boolean isResponsibleFor(String collection, String chunkKey);
     String getStrategyName();
     int findDataSetsByFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery);
-        List<QueryOperation> getSupportedOperations();
+    List<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);
     void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPath);

@@ -129,4 +129,8 @@
         <property name="storageManagement" ref="storageManagement"/>
     </bean>
 
+    <bean id="queryUtilService" class="org.jumbodb.database.service.queryutil.QueryUtilService">
+        <property name="jumboSearcher" ref="jumboSearcher"/>
+    </bean>
+
 </beans>

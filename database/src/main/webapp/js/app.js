@@ -6,6 +6,6 @@ angular.module('jumbodb', []).
             when('/deliveries', {templateUrl: 'partials/deliveries.html', controller: DeliveriesListCtrl}).
             when('/browse', {templateUrl: 'partials/browse.html', controller: BrowseCtrl}).
             when('/replication', {templateUrl: 'partials/replication.html', controller: ReplicationCtrl}).
-//            when('/phones/:phoneId', {templateUrl: 'partials/phone-detail.html', controller: PhoneDetailCtrl}).
+            when('/help', {templateUrl: 'partials/help.html', controller: HelpCtrl}).
             otherwise({redirectTo: '/overview'});
     }]);

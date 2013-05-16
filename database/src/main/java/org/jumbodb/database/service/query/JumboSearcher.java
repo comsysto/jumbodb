@@ -11,6 +11,7 @@ import org.jumbodb.database.service.query.data.DataStrategyManager;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
+import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,6 +125,17 @@ public class JumboSearcher {
         }
     }
 
+    public IndexStrategy getIndexStrategy(String collection, String chunkKey, String indexName) {
+        return indexStrategyManager.getStrategy(collection, chunkKey, indexName);
+    }
+
+    public IndexStrategy getIndexStrategy(String key) {
+        return indexStrategyManager.getStrategy(key);
+    }
+
+    public DataStrategy getDataStrategy(String collection, String chunkKey) {
+        return dataStrategyManager.getStrategy(collection, chunkKey);
+    }
 
     @Required
     public void setJumboConfiguration(JumboConfiguration jumboConfiguration) {

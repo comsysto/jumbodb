@@ -114,7 +114,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
 
     @Override
     public List<QueryOperation> getSupportedOperations() {
-        return Arrays.asList(QueryOperation.EQ);
+        return new ArrayList<QueryOperation>(OPERATIONS.keySet());
     }
 
     @Override

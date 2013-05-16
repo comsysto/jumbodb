@@ -9,6 +9,9 @@ import org.jumbodb.database.service.management.status.dto.ServerInformation;
 import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
+import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilCollection;
+import org.jumbodb.database.service.queryutil.QueryUtilService;
+import org.jumbodb.database.service.queryutil.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +34,8 @@ public class RestController {
     private StorageManagement storageManagement;
     @Autowired
     private ExportDeliveryService exportDeliveryService;
+    @Autowired
+    private QueryUtilService queryUtilService;
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     @ResponseBody
@@ -49,6 +54,18 @@ public class RestController {
     @ResponseBody
     public List<ChunkedDeliveryVersion> getChunkedDeliveryVersions() {
         return storageManagement.getChunkedDeliveryVersions();
+    }
+
+    @RequestMapping(value = "/query/collections", method = RequestMethod.GET)
+    @ResponseBody
+    public List<QueryUtilCollection> getQueryableCollections() {
+        return storageManagement.findQueryableCollections();
+    }
+
+    @RequestMapping(value = "/query/{collection}/", method = RequestMethod.POST)
+    @ResponseBody
+    public QueryResult query(@PathVariable String collection, @RequestBody String query) {
+        return queryUtilService.findDocumentsByQuery(collection, query);
     }
 
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}", method = RequestMethod.PUT)

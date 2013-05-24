@@ -140,6 +140,7 @@ function BrowseCtrl($scope, $http) {
     }
 
     $scope.formatJson = function(json) {
+        delete json["$$hashKey"]
         var jsonStr = JSON.stringify(json, undefined, 3);
         return syntaxHighlight(jsonStr);
     }

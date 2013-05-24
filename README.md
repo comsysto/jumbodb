@@ -157,5 +157,5 @@ This produces a full bundled distribution. Just unzip and call ./bin/jumbodb
 
 The connectors are licensed under Apache License 2.0: http://www.apache.org/licenses/LICENSE-2.0.html
 
-The database is licensed under GNU AGPL v3: http://www.gnu.org/licenses/agpl-3.0.en.html
+The database is licensed under Apache License 2.0: http://www.apache.org/licenses/LICENSE-2.0.html
 

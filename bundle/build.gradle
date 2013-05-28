@@ -38,6 +38,14 @@ dependencies {
     compile "org.eclipse.jdt.core.compiler:ecj:3.6"
 }
 
+applicationDistribution.from('../README.md'){
+    into "/"
+}
+
+applicationDistribution.from('../database/LICENSE'){
+    into "/"
+}
+
 def retrieveWarFileName() {
     def p = project(':database')
     'jumbodb-' + p.version + '.war'

@@ -1,7 +1,7 @@
-
 ![jumboDB](http://comsysto.github.com/jumbodb/img/pics/jumbo.png)
 
 Website: http://comsysto.github.com/jumbodb/
+Wiki: https://github.com/comsysto/jumbodb/wiki
 
 ## Data Store for low-latency Big Data Apps
 

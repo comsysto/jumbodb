@@ -4,6 +4,10 @@ Website: http://comsysto.github.com/jumbodb/
 
 Wiki: https://github.com/comsysto/jumbodb/wiki
 
+Quick Installation: https://github.com/comsysto/jumbodb/wiki/Quick-installation-guide
+
+Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/database/
+
 ## Data Store for low-latency Big Data Apps
 
 Already using Apache Hadoop for batch data deliveries? Need

@@ -30,9 +30,12 @@ public class JumboDBStarter {
 
     private static String findApplicationPath() {
         String classpath = System.getProperty("java.class.path");
-        String[] split = StringUtils.split(classpath, ";:");
+        classpath = classpath.replace('\\', '/');
+        String[] split = StringUtils.split(classpath, isWindows() ? ";" : ":");
 
         String jarStarterFile = findFileNameFromManifest("jarPath");
+//        System.out.println("jarStarterFile=" + jarStarterFile);
+
         for (String s : split) {
             if(s.endsWith(jarStarterFile)) {
                 return StringUtils.removeEnd(s, jarStarterFile);
@@ -52,5 +55,10 @@ public class JumboDBStarter {
         catch(IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean isWindows() {
+        String os = System.getProperty("os.name").toLowerCase();
+        return (os.indexOf("win") >= 0);
     }
 }

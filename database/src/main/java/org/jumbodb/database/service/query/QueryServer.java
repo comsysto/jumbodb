@@ -10,9 +10,6 @@ import java.util.concurrent.Executors;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
-import org.jumbodb.database.service.query.data.DataStrategy;
-import org.jumbodb.database.service.query.data.DataStrategyManager;
-import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

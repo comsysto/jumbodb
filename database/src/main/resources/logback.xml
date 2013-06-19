@@ -7,8 +7,24 @@
         </layout>
     </appender>
 
+    <appender name="TRACE_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${catalina.home}/logs/jumbodb_trace.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>jumbodb_trace.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <append>true</append>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+    </appender>
+
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>jumbodb.log</file>
+        <file>${catalina.home}/logs/jumbodb.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>jumbodb.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
         <append>true</append>
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
@@ -16,8 +32,9 @@
     </appender>
 
     <logger name="org.jumbodb" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
 
-    <root level="debug">
+    <root level="INFO">
         <appender-ref ref="FILE" />
     </root>
 </configuration>

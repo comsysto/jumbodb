@@ -31,7 +31,10 @@
         </layout>
     </appender>
 
-    <logger name="org.jumbodb" level="DEBUG"/>
+    <logger name="org.jumbodb" level="DEBUG">
+        <appender-ref ref="TRACE_FILE" />
+    </logger>
+
     <logger name="org.springframework" level="INFO"/>
 
     <root level="INFO">

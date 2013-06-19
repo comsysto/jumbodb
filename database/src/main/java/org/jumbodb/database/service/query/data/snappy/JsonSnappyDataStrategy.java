@@ -95,7 +95,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
                 Integer results = task.get();
                 numberOfResults += results;
             }
-            log.debug("Collecting " + numberOfResults + " datasets in " + (System.currentTimeMillis() - startTime) + "ms with " + tasks.size() + " threads: ");
+            log.debug("Collecting " + numberOfResults + " datasets in " + (System.currentTimeMillis() - startTime) + "ms with " + tasks.size() + " threads");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {

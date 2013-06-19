@@ -72,12 +72,12 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         HashMultimap<Integer, Long> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
         List<Future<Integer>> tasks = new LinkedList<Future<Integer>>();
         if (searchQuery.getIndexQuery().size() == 0) {
-            log.info("Running scanned search");
+            log.debug("Running scanned search");
             for (File file : deliveryChunkDefinition.getDataFiles().values()) {
                 tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<Long>emptySet(), searchQuery, resultCallback, this)));
             }
         } else {
-            log.info("Running indexed search");
+            log.debug("Running indexed search");
             for (Integer fileNameHash : fileOffsetsMap.keySet()) {
                 File file = deliveryChunkDefinition.getDataFiles().get(fileNameHash);
                 if (file == null) {
@@ -95,7 +95,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
                 Integer results = task.get();
                 numberOfResults += results;
             }
-            log.debug("findDataSetsByFileOffsets Time: " + (System.currentTimeMillis() - startTime) + "ms Threads: " + tasks.size());
+            log.debug("Collecting " + numberOfResults + " datasets in " + (System.currentTimeMillis() - startTime) + "ms with " + tasks.size() + " threads: ");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {

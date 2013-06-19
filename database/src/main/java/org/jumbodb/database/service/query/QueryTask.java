@@ -28,7 +28,7 @@ public class QueryTask implements Runnable {
 
     @Override
     public void run() {
-        log.info("QueryServer - Accepted Client : ID - " + clientID + " : Address - " + clientSocket.getInetAddress().getHostName());
+        log.debug("QueryServer - Accepted Client : ID - " + clientID + " : Address - " + clientSocket.getInetAddress().getHostName());
 
         try {
             databaseQuerySession = new DatabaseQuerySession(clientSocket, clientID);

@@ -150,7 +150,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     }
                 }
             }
-            log.info("Time for retrieving " + results + " datasets: " + (System.currentTimeMillis() - start) + "ms");
+            log.trace("Time for retrieving " + results + " datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {

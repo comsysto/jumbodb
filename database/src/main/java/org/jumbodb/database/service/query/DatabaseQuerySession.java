@@ -40,9 +40,7 @@ public class DatabaseQuerySession implements Closeable {
         dataOutputStream.writeInt(PROTOCOL_VERSION);
         dataOutputStream.flush();
         snappyOutputStream.flush();
-        log.info("before CMD: ");
         String cmd = dataInputStream.readUTF();
-        log.info("CMD: " + cmd);
         if (cmd.equals(":cmd:query")) {
             String collection = dataInputStream.readUTF();
             log.info("Collection: " + collection);

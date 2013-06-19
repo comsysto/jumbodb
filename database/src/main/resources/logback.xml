@@ -27,12 +27,12 @@
         </rollingPolicy>
         <append>true</append>
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n</Pattern>
         </layout>
     </appender>
 
-    <logger name="org.jumbodb" level="DEBUG">
-        <appender-ref ref="TRACE_FILE" />
+    <logger name="org.jumbodb" level="DEBUG" additivity="false">
+        <appender-ref ref="TRACE_FILE"/>
     </logger>
 
     <logger name="org.springframework" level="INFO"/>

@@ -3,5 +3,12 @@ package org.jumbodb.database.configuration
 /**
  * @author Carsten Hufe
  */
-class JumboConfigurationLoaderSpec {
+class JumboConfigurationLoaderSpec extends spock.lang.Specification {
+    def "load default configuration"() {
+        // TODO
+    }
+
+    def "load configuration from specified file"() {
+        // TODO
+    }
 }

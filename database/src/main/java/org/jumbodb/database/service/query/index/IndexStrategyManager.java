@@ -51,7 +51,7 @@ public class IndexStrategyManager {
     }
 
 
-    private Map<IndexKey, IndexStrategy> buildIndexStrategies(CollectionDefinition collectionDefinition){
+    protected Map<IndexKey, IndexStrategy> buildIndexStrategies(CollectionDefinition collectionDefinition){
         Map<IndexKey, IndexStrategy> result = Maps.newHashMap();
 //        Map<String, IndexStrategy> strategiesByNames = buildStrategiesByName(strategies);
         for (String collectionName : collectionDefinition.getCollections()) {

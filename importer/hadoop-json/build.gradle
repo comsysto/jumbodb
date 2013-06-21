@@ -5,6 +5,8 @@ apply plugin: 'java'
 apply plugin: 'project-reports'
 apply plugin: 'eclipse'
 apply plugin: 'application'
+apply plugin: "groovy"
+
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -34,6 +36,7 @@ sourceSets {
         resources {
             srcDir 'src/test/resources'
             srcDir 'src/test/java'
+            srcDir 'src/test/groovy'
         }
     }
 }
@@ -47,6 +50,8 @@ dependencies {
     bundle project(':commons:geo')
     bundle 'org.xerial.snappy:snappy-java:1.0.5-M4'
     bundle 'commons-io:commons-io:2.3'
+    groovy "org.codehaus.groovy:groovy-all:1.8.6"
+    testCompile "org.spockframework:spock-core:0.6-groovy-1.8"
 }
 
 

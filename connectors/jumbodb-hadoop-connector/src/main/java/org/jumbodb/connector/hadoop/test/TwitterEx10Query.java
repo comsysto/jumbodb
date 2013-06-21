@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.configuration;
+package org.jumbodb.connector.hadoop.test;
 
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;

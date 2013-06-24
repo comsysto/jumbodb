@@ -295,7 +295,7 @@ public class StorageManagement {
     }
 
     public List<JumboCollection> getJumboCollections() {
-        return getJumboCollections(true);
+        return getJumboCollections(false);
     }
 
     public List<JumboCollection> getJumboCollections(boolean loadSizes) {

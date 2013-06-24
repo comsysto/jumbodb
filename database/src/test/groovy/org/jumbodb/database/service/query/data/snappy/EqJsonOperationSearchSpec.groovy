@@ -13,9 +13,9 @@ class EqJsonOperationSearchSpec extends spock.lang.Specification {
     def "matches equality"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.EQ, value)
-        operation.matches(queryClause, testValue) == result
+        operation.matches(queryClause, testValue) == isEquals
         where:
-        value     | testValue   | result
+        value     | testValue   | isEquals
         "testStr" | "testStr"   | true
         "testStr" | "testStrNr" | false
         1         | 1           | true

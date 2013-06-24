@@ -12,9 +12,9 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     def "between double match"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
-        operation.matches(queryClause, testValue) == result
+        operation.matches(queryClause, testValue) == isBetween
         where:
-        from | to  | testValue | result
+        from | to  | testValue | isBetween
         2d   | 10d | 5d        | true
         2d   | 10d | 1d        | false
         2d   | 10d | 11d       | false
@@ -26,9 +26,9 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     def "between float match"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
-        operation.matches(queryClause, testValue) == result
+        operation.matches(queryClause, testValue) == isBetween
         where:
-        from | to  | testValue | result
+        from | to  | testValue | isBetween
         2f   | 10f | 5f        | true
         2f   | 10f | 1f        | false
         2f   | 10f | 11f       | false
@@ -40,9 +40,9 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     def "between integer match"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
-        operation.matches(queryClause, testValue) == result
+        operation.matches(queryClause, testValue) == isBetween
         where:
-        from | to | testValue | result
+        from | to | testValue | isBetween
         2    | 10 | 5         | true
         2    | 10 | 1         | false
         2    | 10 | 11        | false
@@ -55,9 +55,9 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     def "between long match"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
-        operation.matches(queryClause, testValue) == result
+        operation.matches(queryClause, testValue) == isBetween
         where:
-        from | to  | testValue | result
+        from | to  | testValue | isBetween
         2l   | 10l | 5l        | true
         2l   | 10l | 1l        | false
         2l   | 10l | 11l       | false

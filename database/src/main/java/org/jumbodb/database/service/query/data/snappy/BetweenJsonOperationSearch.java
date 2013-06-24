@@ -29,7 +29,7 @@ public class BetweenJsonOperationSearch implements JsonOperationSearch {
             Long dv = (Long) value;
             return searchFrom.longValue() < dv && dv < searchTo.longValue();
         } else {
-            throw new UnsupportedOperationException(value.getClass().getSimpleName() + " is not supported for this search type.");
+            throw new IllegalArgumentException(value.getClass().getSimpleName() + " is not supported for this search type.");
         }
     }
 }

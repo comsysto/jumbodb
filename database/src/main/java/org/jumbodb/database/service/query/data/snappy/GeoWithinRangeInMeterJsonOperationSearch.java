@@ -20,7 +20,8 @@ public class GeoWithinRangeInMeterJsonOperationSearch implements JsonOperationSe
             double longitude =  point.get(1).doubleValue();
             double distanceInMeter = ((Number)coords.get(1)).doubleValue();
             List<Number> valuePoint = (List<Number>) value;
-            return GeoHash.distFromInMeter(latitude, longitude, valuePoint.get(0).doubleValue(), valuePoint.get(1).doubleValue()) < distanceInMeter;
+            double distance = GeoHash.distFromInMeter(latitude, longitude, valuePoint.get(0).doubleValue(), valuePoint.get(1).doubleValue());
+            return distance < distanceInMeter;
         }
         return false;
     }

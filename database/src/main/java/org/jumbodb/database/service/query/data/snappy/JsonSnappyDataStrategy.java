@@ -57,7 +57,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
 
     @Override
     public boolean isResponsibleFor(String collection, String chunkKey) {
-        return true;
+        return true; // TODO find out the real strategy
     }
 
     @Override
@@ -112,9 +112,13 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         return result;
     }
 
+    public Map<QueryOperation, JsonOperationSearch> getOperations() {
+        return OPERATIONS;
+    }
+
     @Override
     public List<QueryOperation> getSupportedOperations() {
-        return new ArrayList<QueryOperation>(OPERATIONS.keySet());
+        return new ArrayList<QueryOperation>(getOperations().keySet());
     }
 
     @Override
@@ -132,7 +136,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
 
     @Override
     public boolean matches(QueryClause queryClause, Object value) {
-        JsonOperationSearch jsonOperationSearch = OPERATIONS.get(queryClause.getQueryOperation());
+        JsonOperationSearch jsonOperationSearch = getOperations().get(queryClause.getQueryOperation());
         if(jsonOperationSearch == null) {
             throw new UnsupportedOperationException("OperationSearch is not supported: " + queryClause.getQueryOperation());
         }

@@ -101,8 +101,8 @@ class JsonSnappyDataStrategySpec extends spock.lang.Specification {
         ]
         def result = strategy.buildFileOffsetsMap(fileOffsets)
         then:
-        result.get(1).toSet() == new HashSet([12, 13, 14, 15])
-        result.get(2).toSet() == new HashSet([15, 17])
+        result.get(1) as Set == [12, 13, 14, 15] as Set
+        result.get(2) as Set == [15, 17] as Set
     }
 
     def "findDataSetsByFileOffsets should run index search and submit 2 tasks, because offsets are spread in 2 files"() {

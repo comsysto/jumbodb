@@ -105,11 +105,19 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         sis.skipCompressed(chunkOffsetToSkip);
                         long partialSkipInData = firstOffset - chunkOffsetUncompressed;
 //                    System.out.println("partialSkipInData " + partialSkipInData );
-                        sis.skip(partialSkipInData);
+                        long skippedBytes = sis.skip(partialSkipInData);
+                        if(skippedBytes != partialSkipInData) {
+                            log.warn("Expected to skip " + partialSkipInData + " bytes but actually skipped " +
+                                skippedBytes + " bytes");
+                        }
                     }
                     else if(toSkip > 0) {
                         // same chunk
-                        sis.skip(toSkip);
+                        long skippedBytes = sis.skip(toSkip);
+                        if(skippedBytes != toSkip) {
+                            log.warn("Expected to skip " + toSkip + " bytes but actually skipped " +
+                                    skippedBytes + " bytes");
+                        }
                     }
                     if(toSkip >= 0) {
                         currentOffset += toSkip;

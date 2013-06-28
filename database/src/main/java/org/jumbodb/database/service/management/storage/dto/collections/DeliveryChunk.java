@@ -92,6 +92,23 @@ public class DeliveryChunk implements Comparable<DeliveryChunk> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DeliveryChunk)) return false;
+
+        DeliveryChunk that = (DeliveryChunk) o;
+
+        if (!key.equals(that.key)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return key.hashCode();
+    }
+
+    @Override
     public String toString() {
         return "DeliveryChunk{" +
                 "key='" + key + '\'' +

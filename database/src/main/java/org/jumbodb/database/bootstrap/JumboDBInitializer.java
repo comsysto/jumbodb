@@ -1,8 +1,12 @@
 package org.jumbodb.database.bootstrap;
 
+import com.google.common.io.Files;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author ugitsch
@@ -28,12 +32,15 @@ public class JumboDBInitializer {
         File dataPath = jumboConfiguration.getDataPath();
         File indexPath = jumboConfiguration.getIndexPath();
 
-        if(!dataPath.exists()) {
-            dataPath.mkdirs();
-        }
-
-        if(!indexPath.exists()) {
-            indexPath.mkdirs();
+        try {
+            if(!dataPath.exists()) {
+                FileUtils.forceMkdir(dataPath);
+            }
+            if(!indexPath.exists()) {
+                FileUtils.forceMkdir(indexPath);
+            }
+        } catch (IOException e){
+            throw new IllegalStateException("Unable to create necessary directories");
         }
     }
 }

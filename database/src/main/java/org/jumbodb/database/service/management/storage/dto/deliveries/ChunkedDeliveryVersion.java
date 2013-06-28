@@ -139,6 +139,23 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChunkedDeliveryVersion)) return false;
+
+        ChunkedDeliveryVersion that = (ChunkedDeliveryVersion) o;
+
+        if (date != null ? !date.equals(that.date) : that.date != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return date != null ? date.hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
         return "ChunkedDeliveryVersion{" +
                 "collapseId='" + collapseId + '\'' +

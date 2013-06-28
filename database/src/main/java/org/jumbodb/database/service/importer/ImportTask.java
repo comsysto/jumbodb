@@ -7,13 +7,10 @@ import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.query.JumboSearcher;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.DataStrategyManager;
-import org.jumbodb.database.service.query.definition.CollectionDefinition;
-import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
@@ -83,9 +80,7 @@ public class ImportTask implements Runnable {
                 @Override
                 public void onCollectionMetaData(ImportMetaData information) {
                     File temporaryDataPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion());
-                    if(temporaryDataPath.exists()) {
-                        temporaryDataPath.delete();
-                    }
+                    deleteIfExists(temporaryDataPath);
 
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String deliveryKeyPath = temporaryDataPath + "/" + information.getCollection() + "/";
@@ -98,9 +93,8 @@ public class ImportTask implements Runnable {
 
 
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
-                    if(!deliveryVersionFilePath.exists()) {
-                        deliveryVersionFilePath.mkdirs();
-                    }
+                    mkdirs(deliveryVersionFilePath);
+
                     File deliveryInfoFile = new File(deliveryKeyPath + "/delivery.properties");
                     FileOutputStream deliveryInfoFos = null;
                     try {
@@ -131,9 +125,8 @@ public class ImportTask implements Runnable {
 
 
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
-                    if(!deliveryVersionFilePath.exists()) {
-                        deliveryVersionFilePath.mkdirs();
-                    }
+                    mkdirs(deliveryVersionFilePath);
+
                     File deliveryInfoFile = new File(deliveryKeyPath + "/index.properties");
                     FileOutputStream deliveryInfoFos = null;
                     try {
@@ -149,9 +142,8 @@ public class ImportTask implements Runnable {
                 @Override
                 public void onActivateDelivery(ImportMetaData information) {
                     File activationPath = getTemporaryActivationPath(dataPath, information.getDeliveryKey(), information.getDeliveryVersion());
-                    if(!activationPath.exists()) {
-                        activationPath.mkdirs();
-                    }
+                    mkdirs(activationPath);
+
                     File activeDeliveryFile = new File(activationPath.getAbsoluteFile() + "/" + information.getCollection());
                     ImportHelper.writeActiveFile(activeDeliveryFile, information.getDeliveryVersion());
                 }
@@ -192,10 +184,8 @@ public class ImportTask implements Runnable {
                     File[] collectionFiles = temporaryActivationPath.listFiles();
                     for (File collectionFile : collectionFiles) {
                         File finalFile = getFinalActivationFilePath(collectionFile.getName(), deliveryKey);
-                        if(finalFile.exists()) {
-                            finalFile.delete();
-                        }
-                        collectionFile.renameTo(finalFile);
+                        deleteIfExists(finalFile);
+                        rename(collectionFile, finalFile);
                     }
                 }
 
@@ -208,10 +198,8 @@ public class ImportTask implements Runnable {
                             File[] indexFolders = collectionFolder.listFiles(directory);
                             for (File indexFolder : indexFolders) {
                                 File finalFolder = getFinalIndexPath(collectionFolder.getName(), indexFolder.getName(), deliveryKey, deliveryVersion);
-                                if(!finalFolder.getParentFile().exists()) {
-                                    finalFolder.getParentFile().mkdirs();
-                                }
-                                indexFolder.renameTo(finalFolder);
+                                mkdirs(finalFolder.getParentFile());
+                                rename(indexFolder, finalFolder);
                             }
                         }
                     }
@@ -222,10 +210,8 @@ public class ImportTask implements Runnable {
                     File[] collectionFolders = temporaryDataPath.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
                     for (File collectionFolder : collectionFolders) {
                         File finalFolder = getFinalDataPath(collectionFolder.getName(), deliveryKey, deliveryVersion);
-                        if(!finalFolder.getParentFile().exists()) {
-                            finalFolder.getParentFile().mkdirs();
-                        }
-                        collectionFolder.renameTo(finalFolder);
+                        mkdirs(finalFolder.getParentFile());
+                        rename(collectionFolder, finalFolder);
                     }
                 }
             });
@@ -283,5 +269,30 @@ public class ImportTask implements Runnable {
             return getTemporaryIndexPath(information.getDeliveryKey(), information.getDeliveryVersion()) + "/" + information.getCollection() + "/" + information.getIndexName() + "/";
         }
         throw new IllegalArgumentException("Type " + information.getFileType() + " is not allowed, only data and index.");
+    }
+
+
+    private void deleteIfExists(File file){
+        if(!file.exists()){
+            return;
+        }
+        if(!file.delete()){
+            log.warn("Cannot delete file " + file.getAbsolutePath());
+        }
+    }
+
+    private void mkdirs(File file){
+        if(file.exists()){
+            return;
+        }
+        if(!file.mkdirs()){
+            log.warn("Cannot create path: " + file.getAbsolutePath());
+        }
+    }
+
+    private void rename(File src, File dest){
+        if(!src.renameTo(dest)){
+            log.warn("Cannot rename file: " + src.getAbsolutePath() + " to " + dest.getAbsolutePath());
+        }
     }
 }

@@ -96,6 +96,23 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VersionedJumboCollection)) return false;
+
+        VersionedJumboCollection that = (VersionedJumboCollection) o;
+
+        if (!collectionName.equals(that.collectionName)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return collectionName.hashCode();
+    }
+
+    @Override
     public String toString() {
         return "VersionedJumboCollection{" +
                 "collectionName='" + collectionName + '\'' +

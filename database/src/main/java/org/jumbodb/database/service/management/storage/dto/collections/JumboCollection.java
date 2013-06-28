@@ -98,6 +98,23 @@ public class JumboCollection implements Comparable<JumboCollection> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JumboCollection)) return false;
+
+        JumboCollection that = (JumboCollection) o;
+
+        if (!name.equals(that.name)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
     public String toString() {
         return "JumboCollection{" +
                 "collapseId='" + collapseId + '\'' +

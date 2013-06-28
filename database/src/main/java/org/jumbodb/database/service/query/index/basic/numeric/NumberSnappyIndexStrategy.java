@@ -130,8 +130,10 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         try {
             MultiValueMap<File, QueryClause> groupedByIndexFile = groupByIndexFile(collection, chunkKey, query);
             List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
-            for (File indexFile : groupedByIndexFile.keySet()) {
-                tasks.add(indexFileExecutor.submit(new NumberSnappyIndexTask(this, indexFile, new HashSet<QueryClause>(groupedByIndexFile.get(indexFile)), queryLimit)));
+
+            for (Map.Entry<File, List<QueryClause>> clausesPerIndexFile : groupedByIndexFile.entrySet()) {
+                tasks.add(indexFileExecutor.submit(new NumberSnappyIndexTask(this, clausesPerIndexFile.getKey(),
+                        new HashSet<QueryClause>(clausesPerIndexFile.getValue()), queryLimit)));
             }
             Set<FileOffset> result = new HashSet<FileOffset>();
             for (Future<Set<FileOffset>> task : tasks) {

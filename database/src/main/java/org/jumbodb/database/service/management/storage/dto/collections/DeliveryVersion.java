@@ -73,6 +73,23 @@ public class DeliveryVersion implements Comparable<DeliveryVersion> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DeliveryVersion)) return false;
+
+        DeliveryVersion that = (DeliveryVersion) o;
+
+        if (!date.equals(that.date)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return date.hashCode();
+    }
+
+    @Override
     public String toString() {
         return "DeliveryVersion{" +
                 "version='" + version + '\'' +

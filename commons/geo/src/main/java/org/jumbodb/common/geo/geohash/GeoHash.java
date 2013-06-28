@@ -566,7 +566,7 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
 
     @Override
     public int compareTo(GeoHash o) {
-        return new Long(bits).compareTo(o.bits);
+        return Long.valueOf(bits).compareTo(o.bits);
     }
 
 

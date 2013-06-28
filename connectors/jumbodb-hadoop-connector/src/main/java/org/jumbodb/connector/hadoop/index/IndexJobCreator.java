@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class IndexJobCreator {
 
-    public static Map<String, Class<? extends AbstractIndexMapper>> INDEX_STRATEGIES = createIndexMapper();
+    public static final Map<String, Class<? extends AbstractIndexMapper>> INDEX_STRATEGIES = createIndexMapper();
 
     private static Map<String, Class<? extends AbstractIndexMapper>> createIndexMapper() {
         Map<String, Class<? extends AbstractIndexMapper>> indexMapper = new HashMap<String, Class<? extends AbstractIndexMapper>>();

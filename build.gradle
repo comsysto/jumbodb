@@ -13,7 +13,6 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'findbugs'
     apply plugin: 'java'
     apply plugin: 'project-reports'
     apply plugin: 'eclipse'
@@ -24,15 +23,26 @@ subprojects {
     sourceCompatibility = 1.6
     targetCompatibility = 1.6
 
-    findbugs {
-        ignoreFailures = true
-    }
-
-
     repositories {
         mavenCentral()
     }
 }
+
+def findbugsProjects() {
+    subprojects.findAll{ project ->
+        !['test', 'evaluation', 'integration', 'testdata'].contains(project.name)
+    }
+}
+
+configure(findbugsProjects()){
+    apply plugin: 'findbugs'
+
+    findbugs {
+        ignoreFailures = true
+    }
+}
+
+
 
 // generate gradle bootstrapping
 // run gradle createWrapper

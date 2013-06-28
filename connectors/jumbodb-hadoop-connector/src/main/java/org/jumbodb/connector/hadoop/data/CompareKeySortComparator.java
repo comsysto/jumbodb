@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Date: 12/12/12
  * Time: 10:07 AM
  */
-public class CompareKeySortComparator extends WritableComparator implements Serializable {
+public class CompareKeySortComparator extends WritableComparator {
     public CompareKeySortComparator(Class<? extends CompareSortKey> keyClass) {
         super(keyClass, true);
     }

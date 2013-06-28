@@ -13,6 +13,7 @@ allprojects {
 }
 
 subprojects {
+    apply plugin: 'findbugs'
     apply plugin: 'java'
     apply plugin: 'project-reports'
     apply plugin: 'eclipse'
@@ -22,6 +23,11 @@ subprojects {
 
     sourceCompatibility = 1.6
     targetCompatibility = 1.6
+
+    findbugs {
+        ignoreFailures = true
+    }
+
 
     repositories {
         mavenCentral()

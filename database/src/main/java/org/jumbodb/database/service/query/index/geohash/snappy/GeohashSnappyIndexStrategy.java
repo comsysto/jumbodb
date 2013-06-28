@@ -22,8 +22,6 @@ public class GeohashSnappyIndexStrategy extends NumberSnappyIndexStrategy<Geohas
 
     public static final int SNAPPY_INDEX_CHUNK_SIZE = 48 * 1024; // must be a multiple of 24! (4 byte geo hash, 4 byte latitude, 4 byte longitude, 4 byte file name hash, 8 byte offset)
 
-    private Logger log = LoggerFactory.getLogger(IntegerSnappyIndexStrategy.class);
-
     @Override
     public Map<QueryOperation, OperationSearch<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>>> getQueryOperationsStrategies() {
         Map<QueryOperation, OperationSearch<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>>> operations = new HashMap<QueryOperation, OperationSearch<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>>>();

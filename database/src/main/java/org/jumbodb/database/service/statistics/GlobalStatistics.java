@@ -30,6 +30,6 @@ public class GlobalStatistics {
     }
 
     public static Date getStartupTime() {
-        return startupTime;
+        return (Date) startupTime.clone();
     }
 }

@@ -1,5 +1,7 @@
 package org.jumbodb.database.service.query.snappy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 import org.xerial.snappy.SnappyCodec;
 
@@ -16,6 +18,7 @@ import java.io.InputStream;
  */
 public class ChunkSkipableSnappyInputStream extends InputStream
 {
+    private Logger log = LoggerFactory.getLogger(ChunkSkipableSnappyInputStream.class);
 
     private boolean             finishedReading    = false;
     protected final InputStream in;
@@ -56,7 +59,12 @@ public class ChunkSkipableSnappyInputStream extends InputStream
         uncompressedLimit  = 0;
         uncompressed = null;
         compressed = null;
-        in.skip(l);
+
+        long skippedBytes = in.skip(l);
+        if(skippedBytes != l){
+            log.warn("Expected to skip " + l + " bytes but actually skipped " + skippedBytes + " bytes.");
+        }
+
         return 0l;
     }
 

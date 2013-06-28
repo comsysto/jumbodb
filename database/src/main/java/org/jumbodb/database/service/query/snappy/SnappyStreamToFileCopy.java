@@ -23,10 +23,14 @@ public class SnappyStreamToFileCopy {
             String absoluteImportPath = absoluteImportFile.getAbsolutePath() + "/";
             File storageFolderFile = new File(absoluteImportPath);
             if (!storageFolderFile.getParentFile().exists()) {
-                storageFolderFile.mkdirs();
+                if(!storageFolderFile.mkdirs()){
+                    log.warn("Cannot create directory: " + storageFolderFile.getAbsolutePath());
+                }
             }
             if (absoluteImportFile.exists()) {
-                absoluteImportFile.delete();
+                if(!absoluteImportFile.delete()){
+                    log.warn("Cannot delete file: " + absoluteImportFile.getAbsolutePath());
+                }
             }
             log.info("ImportServer - " + absoluteImportFile);
 

@@ -39,7 +39,7 @@ public class JsonImporterJob extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
         if (args.length < 1) {
-            System.err.printf("Usage: %s <configuration config file>\n", getClass().getSimpleName());
+            System.err.printf("Usage: %s <configuration config file>%n", getClass().getSimpleName());
             return -1;
         }
         Configuration conf = getConf();

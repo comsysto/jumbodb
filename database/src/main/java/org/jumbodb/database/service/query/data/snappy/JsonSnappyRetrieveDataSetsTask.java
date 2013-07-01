@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -63,13 +62,13 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
             if (searchQuery.getIndexQuery().size() == 0) {
                 sis = new ChunkSkipableSnappyInputStream(new BufferedInputStream(fis));
-                br = new BufferedReader(new InputStreamReader(sis, StandardCharsets.UTF_8));
+                br = new BufferedReader(new InputStreamReader(sis));
                 log.info("Full scan ");
                 long count = 0;
                 String line;
                 while ((line = br.readLine()) != null && resultCallback.needsMore()) {
                     if (matchingFilter(line, jsonParser)) {
-                        resultCallback.writeResult(line.getBytes(StandardCharsets.UTF_8));
+                        resultCallback.writeResult(line.getBytes());
                         results++;
                     }
                     if (count % 100000 == 0) {
@@ -207,7 +206,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     }
 
     private boolean matchingFilter(byte[] s, JSONParser jsonParser) throws IOException, ParseException {
-        return matchingFilter(new String(s, StandardCharsets.UTF_8), jsonParser);
+        return matchingFilter(new String(s), jsonParser);
     }
 
     private boolean matchingFilter(String s, JSONParser jsonParser) throws IOException, ParseException {

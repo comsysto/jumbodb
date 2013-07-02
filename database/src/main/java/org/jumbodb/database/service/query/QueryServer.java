@@ -50,10 +50,9 @@ public class QueryServer {
                         Socket clientSocket = serverSocket.accept();
                         serverSocketExecutor.submit(new QueryTask(clientSocket, id++, jumboSearcher, jsonMapper));
                     }
-//                    serverSocket.close();
                     log.info("QueryServer stopped");
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    log.error("Unknown error: ", e);
                 }
             }
         });
@@ -65,8 +64,8 @@ public class QueryServer {
 //    }
 
     public void stop() throws IOException {
-        serverSocket.close();
         serverActive = false;
+        serverSocket.close();
         serverSocketExecutor.shutdown();
     }
 

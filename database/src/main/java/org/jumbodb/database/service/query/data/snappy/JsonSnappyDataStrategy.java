@@ -99,7 +99,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+            throw (RuntimeException)e.getCause();
         }
         return numberOfResults;
     }

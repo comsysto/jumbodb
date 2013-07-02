@@ -59,7 +59,7 @@ public class QueryTask implements Runnable {
                 }
             });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("Unhandled exception ", e);
         } finally {
             IOUtils.closeQuietly(databaseQuerySession);
             IOUtils.closeQuietly(clientSocket);

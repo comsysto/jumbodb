@@ -27,6 +27,7 @@ import org.springframework.util.MultiValueMap;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -140,8 +141,10 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                 result.addAll(task.get());
             }
             return result;
-        } catch(Exception ex) {
-            throw new UnhandledException(ex);
+        } catch(ExecutionException e) {
+            throw (RuntimeException)e.getCause();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

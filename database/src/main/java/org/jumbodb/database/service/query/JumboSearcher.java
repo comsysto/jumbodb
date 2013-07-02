@@ -72,7 +72,7 @@ public class JumboSearcher {
             throw new RuntimeException(e);
 
         } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+            throw (RuntimeException)e.getCause();
         }
         return results;
     }
@@ -102,7 +102,7 @@ public class JumboSearcher {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+            throw (RuntimeException)e.getCause();
         }
     }
 

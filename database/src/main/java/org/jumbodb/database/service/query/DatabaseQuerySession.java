@@ -47,15 +47,26 @@ public class DatabaseQuerySession implements Closeable {
             int size = dataInputStream.readInt();
             byte[] jsonQueryDocument = new byte[size];
             dataInputStream.readFully(jsonQueryDocument);
-//            String jsonQueryString = dataInputStream.readUTF();
-//            Logger.info("Query: " + jsonQueryString);
             long start = System.currentTimeMillis();
-            int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, new ResultWriter());
-            GlobalStatistics.incNumberOfQueries(1l);
-            GlobalStatistics.incNumberOfResults(numberOfResults);
-            log.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
-            dataOutputStream.writeInt(-1); // After -1 command follows
-            dataOutputStream.writeUTF(":result:end");
+            try {
+                int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, new ResultWriter());
+                GlobalStatistics.incNumberOfQueries(1l);
+                GlobalStatistics.incNumberOfResults(numberOfResults);
+                log.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
+                dataOutputStream.writeInt(-1); // After -1 command follows
+                dataOutputStream.writeUTF(":result:end");
+            } catch(JumboException e) {
+                log.warn("Handled error through query", e);
+                dataOutputStream.writeInt(-1);
+                dataOutputStream.writeUTF(":error");
+                dataOutputStream.writeUTF(e.getMessage());
+            } catch(RuntimeException e) {
+                log.warn("Unhandled error", e);
+                dataOutputStream.writeInt(-1);
+                dataOutputStream.writeUTF(":error");
+                dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.getMessage());
+            }
+
             dataOutputStream.flush();
             snappyOutputStream.flush();
         }

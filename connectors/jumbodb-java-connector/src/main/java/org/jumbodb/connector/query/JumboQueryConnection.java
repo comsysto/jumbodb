@@ -151,7 +151,10 @@ public class JumboQueryConnection {
                 results++;
             }
             String cmd = dis.readUTF();
-            if(!cmd.equals(":result:end")) {
+            if(cmd.equals(":error")) {
+                throw new JumboQueryConnectionException(dis.readUTF());
+            }
+            else if(!cmd.equals(":result:end")) {
                 throw new IllegalStateException("After length -1 should :result:end must follow!");
             }
             resultHandler.onFinished();

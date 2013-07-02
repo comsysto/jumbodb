@@ -28,19 +28,19 @@ subprojects {
     }
 }
 
-def findbugsProjects() {
-    subprojects.findAll{ project ->
-        !['test', 'evaluation', 'integration', 'testdata'].contains(project.name)
-    }
-}
-
-configure(findbugsProjects()){
-    apply plugin: 'findbugs'
-
-    findbugs {
-        ignoreFailures = true
-    }
-}
+//def findbugsProjects() {
+//    subprojects.findAll{ project ->
+//        !['test', 'evaluation', 'integration', 'testdata'].contains(project.name)
+//    }
+//}
+//
+//configure(findbugsProjects()){
+//    apply plugin: 'findbugs'
+//
+//    findbugs {
+//        ignoreFailures = true
+//    }
+//}
 
 
 

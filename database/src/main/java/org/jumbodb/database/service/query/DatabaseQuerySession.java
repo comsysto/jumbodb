@@ -55,15 +55,25 @@ public class DatabaseQuerySession implements Closeable {
                 log.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
                 dataOutputStream.writeInt(-1); // After -1 command follows
                 dataOutputStream.writeUTF(":result:end");
-            } catch(JumboException e) {
+            } catch(JumboCollectionMissingException e) {
                 log.warn("Handled error through query", e);
                 dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error");
+                dataOutputStream.writeUTF(":error:collection:missing");
+                dataOutputStream.writeUTF(e.getMessage());
+            } catch(JumboIndexMissingException e) {
+                log.warn("Handled error through query", e);
+                dataOutputStream.writeInt(-1);
+                dataOutputStream.writeUTF(":error:collection:index:missing");
+                dataOutputStream.writeUTF(e.getMessage());
+            } catch(JumboCommonException e) {
+                log.warn("Handled error through query", e);
+                dataOutputStream.writeInt(-1);
+                dataOutputStream.writeUTF(":error:common");
                 dataOutputStream.writeUTF(e.getMessage());
             } catch(RuntimeException e) {
                 log.warn("Unhandled error", e);
                 dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error");
+                dataOutputStream.writeUTF(":error:unknown");
                 dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.getMessage());
             }
 

@@ -7,6 +7,9 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.connector.JumboConstants;
+import org.jumbodb.connector.exception.JumboCommonException;
+import org.jumbodb.connector.exception.JumboIndexMissingException;
+import org.jumbodb.connector.exception.JumboUnknownException;
 import org.xerial.snappy.SnappyInputStream;
 
 import java.io.*;
@@ -151,9 +154,18 @@ public class JumboQueryConnection {
                 results++;
             }
             String cmd = dis.readUTF();
-            if(cmd.equals(":error")) {
-                throw new JumboQueryConnectionException(dis.readUTF());
+            if(cmd.equals(":error:unknown")) {
+                throw new JumboUnknownException(dis.readUTF());
             }
+            else if(cmd.equals(":error:common")) {
+                throw new JumboCommonException(dis.readUTF());
+            } else if(cmd.equals(":error:collection:missing")) {
+                LOG.warn("Collection is missing: " + dis.readUTF());
+//                throw new JumboCollectionMissingException(dis.readUTF());
+            } else if(cmd.equals(":error:collection:index:missing")) {
+                throw new JumboIndexMissingException(dis.readUTF());
+            }
+
             else if(!cmd.equals(":result:end")) {
                 throw new IllegalStateException("After length -1 should :result:end must follow!");
             }

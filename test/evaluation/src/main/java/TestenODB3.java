@@ -26,7 +26,7 @@ public class TestenODB3 {
         JumboQuery query = new JumboQuery();
         query.addIndexQuery("does_not_Exist", Arrays.asList(new QueryClause(QueryOperation.EQ, "whatever")));
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find("uk.catchment.aggregated.daily.sum.by_cell", Map.class, query);
+        List<Map> daily = jumboDriver.find("uk.catchment.aggregated.daily.sum.by_cella", Map.class, query);
         System.out.println(daily);
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }

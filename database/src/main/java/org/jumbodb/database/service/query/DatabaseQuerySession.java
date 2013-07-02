@@ -74,7 +74,7 @@ public class DatabaseQuerySession implements Closeable {
                 log.warn("Unhandled error", e);
                 dataOutputStream.writeInt(-1);
                 dataOutputStream.writeUTF(":error:unknown");
-                dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.getMessage());
+                dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.toString());
             }
 
             dataOutputStream.flush();

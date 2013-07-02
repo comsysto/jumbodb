@@ -59,7 +59,9 @@ public class JumboSearcher {
             }
             return getNumberOfResultsFromFutures(futures);
         }
-        return 0;
+        else {
+            throw new JumboCollectionMissingException("Collection '" + collectionName + "' does not exist!");
+        }
     }
 
     private int getNumberOfResultsFromFutures(Collection<Future<Integer>> futures) {

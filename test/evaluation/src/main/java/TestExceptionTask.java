@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 public class TestExceptionTask implements Runnable {
     @Override
     public void run() {
-//        throw new NullPointerException();
+        Integer a = null;
+        a.equals(2);
     }
 }

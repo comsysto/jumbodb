@@ -13,7 +13,8 @@ public class TestExceptionThread {
             System.out.println(o);
         } catch (InterruptedException e) {
         } catch (ExecutionException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            Throwable cause = e.getCause();
+            System.out.println(cause.getCause());
         }
 
     }

@@ -1,4 +1,6 @@
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.connector.query.JumboQueryConnection;
 
 import java.util.Arrays;
@@ -20,14 +22,11 @@ public class TestenODB3 {
 //        System.out.println(daily);
 //        System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
 
-        JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
+        JumboQueryConnection jumboDriver = new JumboQueryConnection("smartsteps-jumbo-dev01.ec2.smartste.ps", 12002);
         JumboQuery query = new JumboQuery();
-//        query.addIndexComparision("tocellid_date", Arrays.asList("11211422244-20121002", "1121332341112-20121002"));
-//        query.addJsonQuery(JsonComparisionType.EQUALS, "_id.date", Arrays.asList((Object) new Long(20121002)));
-//        query.addJsonQuery(JsonComparisionType.EQUALS, "_id.toCell", Arrays.asList((Object) "11211422244", "1121332341112"));
+        query.addIndexQuery("does_not_Exist", Arrays.asList(new QueryClause(QueryOperation.EQ, "whatever")));
         long start = System.currentTimeMillis();
-//        List<Map> daily = jumboDriver.find("de.catchment.dates.daily", Map.class, query);
-        List<Map> daily = jumboDriver.find("de.catchment.aggregated.daily.sum.by_cell", Map.class, query);
+        List<Map> daily = jumboDriver.find("uk.catchment.aggregated.daily.sum.by_cell", Map.class, query);
         System.out.println(daily);
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }

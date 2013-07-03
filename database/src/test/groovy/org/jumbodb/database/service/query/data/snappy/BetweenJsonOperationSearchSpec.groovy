@@ -2,6 +2,7 @@ package org.jumbodb.database.service.query.data.snappy
 
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
@@ -9,7 +10,8 @@ import org.jumbodb.common.query.QueryOperation
 class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     def operation = new BetweenJsonOperationSearch()
 
-    def "between double match"() {
+    @Unroll
+    def "between double match #from < #testValue > #to"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
         operation.matches(queryClause, testValue) == isBetween
@@ -23,7 +25,8 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
         -2d  | 1d  | 0d        | true
     }
 
-    def "between float match"() {
+    @Unroll
+    def "between float match #from < #testValue > #to"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
         operation.matches(queryClause, testValue) == isBetween
@@ -37,7 +40,8 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
         -2f  | 1f  | 0f        | true
     }
 
-    def "between integer match"() {
+    @Unroll
+    def "between integer match #from < #testValue > #to"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
         operation.matches(queryClause, testValue) == isBetween
@@ -52,7 +56,8 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
 
     }
 
-    def "between long match"() {
+    @Unroll
+    def "between long match #from < #testValue > #to"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
         operation.matches(queryClause, testValue) == isBetween

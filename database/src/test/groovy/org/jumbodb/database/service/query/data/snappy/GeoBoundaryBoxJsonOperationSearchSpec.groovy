@@ -2,6 +2,7 @@ package org.jumbodb.database.service.query.data.snappy
 
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
@@ -9,7 +10,8 @@ import org.jumbodb.common.query.QueryOperation
 class GeoBoundaryBoxJsonOperationSearchSpec extends spock.lang.Specification {
     def operation = new GeoBoundaryBoxJsonOperationSearch()
 
-    def "should match the boundary box"() {
+    @Unroll
+    def "should match the boundary box [[#lat1, #lon1][#lat2, #lon2]] with point [#testLat, #testLon] == #isInBoundaryBox"() {
         expect:
         List<Double> p1 = Arrays.asList(lat1, lon1)
         List<Double> p2 = Arrays.asList(lat2, lon2)

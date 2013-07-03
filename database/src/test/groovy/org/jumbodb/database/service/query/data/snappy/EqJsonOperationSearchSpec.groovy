@@ -2,6 +2,7 @@ package org.jumbodb.database.service.query.data.snappy
 
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import spock.lang.Unroll
 
 
 /**
@@ -10,7 +11,8 @@ import org.jumbodb.common.query.QueryOperation
 class EqJsonOperationSearchSpec extends spock.lang.Specification {
     def operation = new EqJsonOperationSearch()
 
-    def "matches equality"() {
+    @Unroll
+    def "matches equality #value eq #testValue == #isEquals"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.EQ, value)
         operation.matches(queryClause, testValue) == isEquals

@@ -88,7 +88,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     long firstOffset = offsetGroup.get(0);
                     long toSkip = firstOffset - currentOffset;
 
-                    // CARSTEN make this system outs trace
 //                    System.out.println(file.getAbsolutePath());
                     long chunkIndex = (firstOffset / snappyChunks.getChunkSize());
 //                    System.out.println("chunkIndex " + chunkIndex );

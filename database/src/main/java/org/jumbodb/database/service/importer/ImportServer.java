@@ -51,7 +51,6 @@ public class ImportServer {
                         Socket clientSocket = serverSocket.accept();
                         executorService.submit(new ImportTask(clientSocket, id++, config.getDataPath(), config.getIndexPath(), jumboSearcher, dataStrategyManager, indexStrategyManager));
                     }
-//                    serverSocket.close();
                     log.info("ImportServer stopped");
                 } catch (Exception e) {
                     throw new RuntimeException(e);

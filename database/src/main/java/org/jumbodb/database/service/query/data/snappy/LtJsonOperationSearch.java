@@ -25,7 +25,7 @@ public class LtJsonOperationSearch implements JsonOperationSearch {
             Long dv = (Long) value;
             return dv < searchValue.longValue();
         } else {
-            throw new UnsupportedOperationException(value.getClass().getSimpleName() + " is not supported for this search type.");
+            throw new IllegalArgumentException(value.getClass().getSimpleName() + " is not supported for this search type.");
         }
     }
 }

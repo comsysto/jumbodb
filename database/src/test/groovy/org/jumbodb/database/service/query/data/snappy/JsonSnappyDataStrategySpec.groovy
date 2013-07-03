@@ -9,6 +9,7 @@ import org.jumbodb.database.service.query.ResultCallback
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
 import org.xerial.snappy.SnappyInputStream
+import spock.lang.Unroll
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
@@ -19,7 +20,8 @@ import java.util.concurrent.Future
 class JsonSnappyDataStrategySpec extends spock.lang.Specification {
     def strategy = new JsonSnappyDataStrategy()
 
-    def "verify supported operations"() {
+    @Unroll
+    def "verify supported operations #operation"() {
         expect:
         strategy.getSupportedOperations().contains(operation)
         where:

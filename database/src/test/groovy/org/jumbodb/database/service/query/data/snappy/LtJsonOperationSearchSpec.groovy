@@ -2,63 +2,68 @@ package org.jumbodb.database.service.query.data.snappy
 
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
 class LtJsonOperationSearchSpec extends spock.lang.Specification {
-    def operation = new GtJsonOperationSearch()
+    def operation = new LtJsonOperationSearch()
 
-    def "less than double match"() {
+    @Unroll
+    def "less than double match #testValue < #value == #isLessThan"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.LT, value)
-        operation.matches(queryClause, testValue) == isGreaterThan
+        operation.matches(queryClause, testValue) == isLessThan
         where:
-        value | testValue | isGreaterThan
-        2d    | 5d        | true
-        2d    | 1d        | false
+        value | testValue | isLessThan
+        2d    | 5d        | false
+        2d    | 1d        | true
         2d    | 2d        | false
-        -2d   | 0d        | true
-        -2d   | -3d       | false
+        -2d   | 0d        | false
+        -2d   | -3d       | true
     }
 
-    def "less than float match"() {
+    @Unroll
+    def "less than float match #testValue < #value == #isLessThan"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.LT, value)
-        operation.matches(queryClause, testValue) == isGreaterThan
+        operation.matches(queryClause, testValue) == isLessThan
         where:
-        value | testValue | isGreaterThan
-        2f    | 5f        | true
-        2f    | 1f        | false
+        value | testValue | isLessThan
+        2f    | 5f        | false
+        2f    | 1f        | true
         2f    | 2f        | false
-        -2f   | 0f        | true
-        -2f   | -3f       | false
+        -2f   | 0f        | false
+        -2f   | -3f       | true
     }
 
-    def "less than integer match"() {
+    @Unroll
+    def "less than integer match #testValue < #value == #isLessThan"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.LT, value)
-        operation.matches(queryClause, testValue) == isGreaterThan
+        operation.matches(queryClause, testValue) == isLessThan
         where:
-        value | testValue | isGreaterThan
-        2     | 5         | true
-        2     | 1         | false
+        value | testValue | isLessThan
+        2     | 5         | false
+        2     | 1         | true
         2     | 2         | false
-        -2    | 0         | true
-        -2    | -3        | false
+        -2    | 0         | false
+        -2    | -3        | true
     }
 
-    def "less than long match"() {
+    @Unroll
+    def "less than long match #testValue < #value == #isLessThan"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.LT, value)
-        operation.matches(queryClause, testValue) == isGreaterThan
+        operation.matches(queryClause, testValue) == isLessThan
         where:
-        value | testValue | isGreaterThan
-        2l    | 5l        | true
-        2l    | 1l        | false
+        value | testValue | isLessThan
+        2l    | 5l        | false
+        2l    | 1l        | true
         2l    | 2l        | false
-        -2l   | 0l        | true
-        -2l   | -3l       | false
+        -2l   | 0l        | false
+        -2l   | -3l       | true
     }
 
     def "illegal argument exception expected"() {

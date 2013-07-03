@@ -11,7 +11,7 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     def operation = new BetweenJsonOperationSearch()
 
     @Unroll
-    def "between double match #from < #testValue > #to"() {
+    def "between double match #from < #testValue > #to == #isBetween"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
         operation.matches(queryClause, testValue) == isBetween
@@ -26,7 +26,7 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     }
 
     @Unroll
-    def "between float match #from < #testValue > #to"() {
+    def "between float match #from < #testValue > #to == #isBetween"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
         operation.matches(queryClause, testValue) == isBetween
@@ -41,7 +41,7 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     }
 
     @Unroll
-    def "between integer match #from < #testValue > #to"() {
+    def "between integer match #from < #testValue > #to == #isBetween"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
         operation.matches(queryClause, testValue) == isBetween
@@ -57,7 +57,7 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     }
 
     @Unroll
-    def "between long match #from < #testValue > #to"() {
+    def "between long match #from < #testValue > #to == #isBetween"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
         operation.matches(queryClause, testValue) == isBetween

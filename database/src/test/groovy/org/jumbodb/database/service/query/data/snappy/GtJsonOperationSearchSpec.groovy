@@ -2,6 +2,7 @@ package org.jumbodb.database.service.query.data.snappy
 
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
@@ -9,7 +10,8 @@ import org.jumbodb.common.query.QueryOperation
 class GtJsonOperationSearchSpec extends spock.lang.Specification {
     def operation = new GtJsonOperationSearch()
 
-    def "greater than double match"() {
+    @Unroll
+    def "greater than double match #testValue > #value == #isGreaterThan"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.GT, value)
         operation.matches(queryClause, testValue) == isGreaterThan
@@ -22,7 +24,8 @@ class GtJsonOperationSearchSpec extends spock.lang.Specification {
         -2d   | -3d       | false
     }
 
-    def "greater than float match"() {
+    @Unroll
+    def "greater than float match #testValue > #value== #isGreaterThan"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.GT, value)
         operation.matches(queryClause, testValue) == isGreaterThan
@@ -35,7 +38,8 @@ class GtJsonOperationSearchSpec extends spock.lang.Specification {
         -2f   | -3f       | false
     }
 
-    def "greater than integer match"() {
+    @Unroll
+    def "greater than integer match #testValue > #value == #isGreaterThan"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.GT, value)
         operation.matches(queryClause, testValue) == isGreaterThan
@@ -48,7 +52,8 @@ class GtJsonOperationSearchSpec extends spock.lang.Specification {
         -2    | -3        | false
     }
 
-    def "greater than long match"() {
+    @Unroll
+    def "greater than long match #testValue > #value == #isGreaterThan"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.GT, value)
         operation.matches(queryClause, testValue) == isGreaterThan

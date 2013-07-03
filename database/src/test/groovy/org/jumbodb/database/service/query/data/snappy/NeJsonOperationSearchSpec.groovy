@@ -2,6 +2,7 @@ package org.jumbodb.database.service.query.data.snappy
 
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
@@ -9,7 +10,8 @@ import org.jumbodb.common.query.QueryOperation
 class NeJsonOperationSearchSpec extends spock.lang.Specification {
     def operation = new NeJsonOperationSearch()
 
-    def "matches non equality"() {
+    @Unroll
+    def "matches non equality #value ne #testValue == #isNotEquals"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.EQ, value)
         operation.matches(queryClause, testValue) == isNotEquals

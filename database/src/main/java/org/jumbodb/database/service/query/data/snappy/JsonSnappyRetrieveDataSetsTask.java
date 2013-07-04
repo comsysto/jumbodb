@@ -13,7 +13,6 @@ import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.nio.cs.StandardCharsets;
 
 import java.io.*;
 import java.util.*;
@@ -28,10 +27,10 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private JsonSnappyDataStrategy strategy;
     private final List<Long> offsets;
     //    private final int bufferSize = 10;
-    private final int bufferSize = 16 * 1024; // CARSTEN make the buffer size learnable by collection
-    private final int maximumOffsetGroupSize = 1000;
+    public final int DEFAULT_BUFFER_SIZE = 16 * 1024; // CARSTEN make the buffer size learnable by collection
+    public final int MAXIMUM_OFFSET_GROUP_SIZE = 1000;
     public static final byte[] EMPTY_BUFFER = new byte[0];
-    private final byte[] defaultBuffer = new byte[bufferSize]; // for reuse
+    private final byte[] defaultBuffer = new byte[DEFAULT_BUFFER_SIZE]; // for reuse
 
 
     public JsonSnappyRetrieveDataSetsTask(File file, Set<Long> offsets, JumboQuery searchQuery, ResultCallback resultCallback, JsonSnappyDataStrategy strategy) {
@@ -57,7 +56,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
         try {
 
-            List<List<Long>> offsetGroups = groupOffsetsByBufferSize(bufferSize);
+            List<List<Long>> offsetGroups = groupOffsetsByBufferSize(offsets, DEFAULT_BUFFER_SIZE);
             fis = new FileInputStream(file);
              // ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
 
@@ -174,7 +173,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return results;
     }
 
-    private byte[] getResultBuffer(byte[] lastBuffer, long toSkip) {
+    protected byte[] getResultBuffer(byte[] lastBuffer, long toSkip) {
         if(toSkip >= 0) {
             return EMPTY_BUFFER;
         }
@@ -184,20 +183,18 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return last;
     }
 
-    private byte[] concat(byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
+    protected byte[] concat(byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
         byte[] tmp = new byte[resultBuffer.length + readBufferLength];
         System.arraycopy(resultBuffer, 0, tmp, 0, resultBuffer.length);
         System.arraycopy(readBuffer, 0, tmp, resultBuffer.length, readBufferLength);
         return tmp;
     }
 
-    private long calculateChunkOffsetUncompressed(long chunkIndex, int snappyChunkSize) {
-//        long l = chunkIndex - 1;
-//        return l > 0 ? l * ChunkSkipableSnappyInputStream.snappyChunkSize : 0;
+    protected long calculateChunkOffsetUncompressed(long chunkIndex, int snappyChunkSize) {
         return chunkIndex * snappyChunkSize;
     }
 
-    private long calculateChunkOffsetCompressed(long chunkIndex, List<Integer> snappyChunks) {
+    protected long calculateChunkOffsetCompressed(long chunkIndex, List<Integer> snappyChunks) {
         long result = 0l;
         for(int i = 0; i < chunkIndex; i++) {
             result += snappyChunks.get(i) + 4; // 4 byte for length of chunk
@@ -205,11 +202,11 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return result + 16;
     }
 
-    private boolean matchingFilter(byte[] s, JSONParser jsonParser) throws IOException, ParseException {
+    protected boolean matchingFilter(byte[] s, JSONParser jsonParser) throws IOException, ParseException {
         return matchingFilter(new String(s, "UTF-8"), jsonParser);
     }
 
-    private boolean matchingFilter(String s, JSONParser jsonParser) throws IOException, ParseException {
+    protected boolean matchingFilter(String s, JSONParser jsonParser) throws IOException, ParseException {
         if (searchQuery.getJsonQuery().size() == 0) {
             return true;
         }
@@ -269,20 +266,20 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             return defaultBuffer;
         }
         Long first = offsetGroup.get(0);
-        Long last = offsetGroup.get(offsetGroup.size() - 1) + bufferSize;
+        Long last = offsetGroup.get(offsetGroup.size() - 1) + DEFAULT_BUFFER_SIZE;
         int size = (int) (last - first);
         return new byte[size];
 
     }
 
-    private List<List<Long>> groupOffsetsByBufferSize(int bufSize) {
+    private List<List<Long>> groupOffsetsByBufferSize(List<Long> offsets, int bufSize) {
         List<List<Long>> offsetGroups = new LinkedList<List<Long>>();
         List<Long> group = new ArrayList<Long>();
         int initialOffset = -100000;
         long lastOffset = initialOffset;
         for (Long offset : offsets) {
 
-            if ((offset - lastOffset) <= bufSize && group.size() < maximumOffsetGroupSize) {
+            if ((offset - lastOffset) <= bufSize && group.size() < MAXIMUM_OFFSET_GROUP_SIZE) {
                 group.add(offset);
             } else {
                 if (lastOffset != initialOffset) {

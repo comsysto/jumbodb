@@ -3,6 +3,7 @@ package org.jumbodb.connector.query;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.JumboQuery;
@@ -32,8 +33,14 @@ public class JumboQueryConnection {
     public JumboQueryConnection(String host, int port) {
         this.host = host;
         this.port = port;
-        this.jsonMapper = new ObjectMapper();
-        this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.jsonMapper = createJacksonObjectMapper();
+    }
+
+    protected ObjectMapper createJacksonObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+        return objectMapper;
     }
 
     public <T> Iterable<T> findWithStreamedResult(final String collection, final Class<T> jsonClazz, final JumboQuery searchQuery) {

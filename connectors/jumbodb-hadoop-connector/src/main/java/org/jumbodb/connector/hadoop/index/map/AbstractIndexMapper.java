@@ -11,6 +11,7 @@ import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
@@ -32,6 +33,7 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
         super.setup(context);
         jsonMapper = new ObjectMapper();
         jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jsonMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
 
     }
 

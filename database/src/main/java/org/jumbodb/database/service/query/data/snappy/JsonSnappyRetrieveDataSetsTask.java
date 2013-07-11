@@ -207,16 +207,19 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     }
 
     protected boolean matchingFilter(String s, JSONParser jsonParser) throws IOException, ParseException {
-        if (searchQuery.getJsonQuery().size() == 0) {
+        List<JsonQuery> jsonQueries = searchQuery.getJsonQuery();
+        Map<String, Object> parsedJson = (Map<String, Object>)jsonParser.parse(s);
+        return matchingFilter(parsedJson, jsonQueries);
+    }
+
+    private boolean matchingFilter(Map<String, Object> parsedJson, List<JsonQuery> jsonQueries) throws ParseException {
+        if (jsonQueries.size() == 0) {
             return true;
         }
-//        JSONObject cl = new JSONObject();
-
         boolean matching = true;
-        for (JsonQuery jsonQuery : searchQuery.getJsonQuery()) {
+        for (JsonQuery jsonQuery : jsonQueries) {
             String[] split = StringUtils.split(jsonQuery.getFieldName(), '.');
-//            UpdaterMapper<JSONObject> mapper = new UpdaterMapper<JSONObject>(cl);
-            Object lastObj = jsonParser.parse(s);
+            Object lastObj = parsedJson;
             for (String key : split) {
                 if (lastObj != null) {
                     Map<String, Object> map = (Map<String, Object>) lastObj;
@@ -227,13 +230,12 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             for (QueryClause queryClause : jsonQuery.getClauses()) {
                 if(lastObj != null) {
                     if(strategy.matches(queryClause, lastObj)) {
-                        queryClauseMatch = true;
+                        queryClauseMatch = matchingFilter(parsedJson, queryClause.getQueryClauses());
                         break;
                     }
                 }
             }
             matching &= queryClauseMatch;
-
         }
         return matching;
     }

@@ -2,10 +2,15 @@ package org.jumbodb.common.query;
 
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class QueryClause {
     private QueryOperation queryOperation;
     private Object value;
+    private List<JsonQuery> queryClauses = new LinkedList<JsonQuery>();
 
     public QueryClause() {
     }
@@ -13,6 +18,12 @@ public class QueryClause {
     public QueryClause(QueryOperation queryOperation, Object value) {
         this.queryOperation = queryOperation;
         this.value = value;
+    }
+
+    public QueryClause(QueryOperation queryOperation, Object value, List<JsonQuery> queryClauses) {
+        this.queryOperation = queryOperation;
+        this.value = value;
+        this.queryClauses = queryClauses;
     }
 
     public QueryOperation getQueryOperation() {
@@ -31,6 +42,14 @@ public class QueryClause {
         this.value = value;
     }
 
+    public List<JsonQuery> getQueryClauses() {
+        return queryClauses;
+    }
+
+    public void setQueryClauses(List<JsonQuery> queryClauses) {
+        this.queryClauses = queryClauses;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -38,6 +57,7 @@ public class QueryClause {
 
         QueryClause that = (QueryClause) o;
 
+        if (queryClauses != null ? !queryClauses.equals(that.queryClauses) : that.queryClauses != null) return false;
         if (queryOperation != that.queryOperation) return false;
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
 
@@ -48,6 +68,7 @@ public class QueryClause {
     public int hashCode() {
         int result = queryOperation != null ? queryOperation.hashCode() : 0;
         result = 31 * result + (value != null ? value.hashCode() : 0);
+        result = 31 * result + (queryClauses != null ? queryClauses.hashCode() : 0);
         return result;
     }
 

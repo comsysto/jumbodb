@@ -69,12 +69,12 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
     public int findDataSetsByFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery) {
         int numberOfResults = 0;
         long startTime = System.currentTimeMillis();
-        HashMultimap<Integer, Long> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
+        HashMultimap<Integer, FileOffset> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
         List<Future<Integer>> tasks = new LinkedList<Future<Integer>>();
         if (searchQuery.getIndexQuery().size() == 0) {
             log.debug("Running scanned search");
             for (File file : deliveryChunkDefinition.getDataFiles().values()) {
-                tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<Long>emptySet(), searchQuery, resultCallback, this)));
+                tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery, resultCallback, this)));
             }
         } else {
             log.debug("Running indexed search");
@@ -83,7 +83,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
                 if (file == null) {
                     throw new IllegalStateException("File with " + fileNameHash + " not found!");
                 }
-                Set<Long> offsets = fileOffsetsMap.get(fileNameHash);
+                Set<FileOffset> offsets = fileOffsetsMap.get(fileNameHash);
                 if (offsets.size() > 0) {
                     tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this)));
                 }
@@ -104,10 +104,10 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         return numberOfResults;
     }
 
-    private HashMultimap<Integer, Long> buildFileOffsetsMap(Collection<FileOffset> fileOffsets) {
-        HashMultimap<Integer, Long> result = HashMultimap.create();
+    private HashMultimap<Integer, FileOffset> buildFileOffsetsMap(Collection<FileOffset> fileOffsets) {
+        HashMultimap<Integer, FileOffset> result = HashMultimap.create();
         for (FileOffset fileOffset : fileOffsets) {
-            result.put(fileOffset.getFileNameHash(), fileOffset.getOffset());
+            result.put(fileOffset.getFileNameHash(), fileOffset);
         }
         return result;
     }

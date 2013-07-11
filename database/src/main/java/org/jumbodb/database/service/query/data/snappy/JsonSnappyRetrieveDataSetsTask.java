@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
@@ -25,7 +26,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private final JumboQuery searchQuery;
     private final ResultCallback resultCallback;
     private JsonSnappyDataStrategy strategy;
-    private final List<Long> offsets;
+    private final List<FileOffset> offsets;
     //    private final int bufferSize = 10;
     public final int DEFAULT_BUFFER_SIZE = 16 * 1024; // CARSTEN make the buffer size learnable by collection
     public final int MAXIMUM_OFFSET_GROUP_SIZE = 1000;
@@ -33,12 +34,12 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private final byte[] defaultBuffer = new byte[DEFAULT_BUFFER_SIZE]; // for reuse
 
 
-    public JsonSnappyRetrieveDataSetsTask(File file, Set<Long> offsets, JumboQuery searchQuery, ResultCallback resultCallback, JsonSnappyDataStrategy strategy) {
+    public JsonSnappyRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery, ResultCallback resultCallback, JsonSnappyDataStrategy strategy) {
         this.file = file;
         this.searchQuery = searchQuery;
         this.resultCallback = resultCallback;
         this.strategy = strategy;
-        this.offsets = new LinkedList<Long>(offsets);
+        this.offsets = new LinkedList<FileOffset>(offsets);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
         try {
 
-            List<List<Long>> offsetGroups = groupOffsetsByBufferSize(offsets, DEFAULT_BUFFER_SIZE);
+            List<List<FileOffset>> offsetGroups = groupOffsetsByBufferSize(offsets, DEFAULT_BUFFER_SIZE);
             fis = new FileInputStream(file);
              // ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
 
@@ -67,7 +68,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 long count = 0;
                 String line;
                 while ((line = br.readLine()) != null && resultCallback.needsMore()) {
-                    if (matchingFilter(line, jsonParser)) {
+                    if (matchingFilter(line, jsonParser, searchQuery.getJsonQuery())) {
                         resultCallback.writeResult(line.getBytes("UTF-8"));
                         results++;
                     }
@@ -83,8 +84,9 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
                 long currentOffset = 0;
                 byte[] lastBuffer = EMPTY_BUFFER;
-                for (List<Long> offsetGroup : offsetGroups) {
-                    long firstOffset = offsetGroup.get(0);
+                for (List<FileOffset> offsetGroup : offsetGroups) {
+                    FileOffset firstFileOffset = offsetGroup.get(0);
+                    long firstOffset = firstFileOffset.getOffset();
                     long toSkip = firstOffset - currentOffset;
 
 //                    System.out.println(file.getAbsolutePath());
@@ -143,11 +145,12 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     }
                     lastBuffer = resultBuffer;
 
-                    for (Long offset : offsetGroup) {
-                        int fromOffset = (int) (offset - firstOffset);
+                    for (FileOffset fileOffset : offsetGroup) {
+                        int fromOffset = (int) (fileOffset.getOffset() - firstOffset);
                         int datasetLength = findDatasetLengthByLineBreak(resultBuffer, fromOffset);
                         byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, fromOffset, datasetLength);
-                        if (matchingFilter(dataSetFromOffsetsGroup, jsonParser)) {
+                        if (matchingFilter(dataSetFromOffsetsGroup, jsonParser, searchQuery.getJsonQuery())
+                                && matchingFilter(dataSetFromOffsetsGroup, jsonParser, fileOffset.getJsonQueries())) {
                             if(!resultCallback.needsMore()) {
                                 return results;
                             }
@@ -202,12 +205,17 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return result + 16;
     }
 
-    protected boolean matchingFilter(byte[] s, JSONParser jsonParser) throws IOException, ParseException {
-        return matchingFilter(new String(s, "UTF-8"), jsonParser);
+//    protected boolean matchingFilter(byte[] s, JSONParser jsonParser) throws IOException, ParseException {
+//        List<JsonQuery> jsonQueries = searchQuery.getJsonQuery();
+//        return matchingFilter(s, jsonParser, jsonQueries);
+//    }
+
+    private boolean matchingFilter(byte[] s, JSONParser jsonParser, List<JsonQuery> jsonQueries) throws ParseException, IOException {
+        String in = new String(s, "UTF-8");
+        return matchingFilter(in, jsonParser, jsonQueries);
     }
 
-    protected boolean matchingFilter(String s, JSONParser jsonParser) throws IOException, ParseException {
-        List<JsonQuery> jsonQueries = searchQuery.getJsonQuery();
+    private boolean matchingFilter(String s, JSONParser jsonParser, List<JsonQuery> jsonQueries) throws ParseException {
         Map<String, Object> parsedJson = (Map<String, Object>)jsonParser.parse(s);
         return matchingFilter(parsedJson, jsonQueries);
     }
@@ -263,32 +271,33 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return datasetLength;
     }
 
-    private byte[] getBufferByOffsetGroup(List<Long> offsetGroup) {
+    private byte[] getBufferByOffsetGroup(List<FileOffset> offsetGroup) {
         if (offsetGroup.size() == 1) {
             return defaultBuffer;
         }
-        Long first = offsetGroup.get(0);
-        Long last = offsetGroup.get(offsetGroup.size() - 1) + DEFAULT_BUFFER_SIZE;
+        FileOffset firstFileOffset = offsetGroup.get(0);
+        Long first = firstFileOffset.getOffset();
+        Long last = offsetGroup.get(offsetGroup.size() - 1).getOffset() + DEFAULT_BUFFER_SIZE;
         int size = (int) (last - first);
         return new byte[size];
 
     }
 
-    private List<List<Long>> groupOffsetsByBufferSize(List<Long> offsets, int bufSize) {
-        List<List<Long>> offsetGroups = new LinkedList<List<Long>>();
-        List<Long> group = new ArrayList<Long>();
+    private List<List<FileOffset>> groupOffsetsByBufferSize(List<FileOffset> offsets, int bufSize) {
+        List<List<FileOffset>> offsetGroups = new LinkedList<List<FileOffset>>();
+        List<FileOffset> group = new ArrayList<FileOffset>();
         int initialOffset = -100000;
         long lastOffset = initialOffset;
-        for (Long offset : offsets) {
-
+        for (FileOffset fileOffset : offsets) {
+            long offset = fileOffset.getOffset();
             if ((offset - lastOffset) <= bufSize && group.size() < MAXIMUM_OFFSET_GROUP_SIZE) {
-                group.add(offset);
+                group.add(fileOffset);
             } else {
                 if (lastOffset != initialOffset) {
                     offsetGroups.add(group);
                 }
-                group = new ArrayList<Long>();
-                group.add(offset);
+                group = new ArrayList<FileOffset>();
+                group.add(fileOffset);
             }
 
             lastOffset = offset;

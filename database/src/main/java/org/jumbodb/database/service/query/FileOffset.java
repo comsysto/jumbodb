@@ -12,6 +12,7 @@ public class FileOffset implements Comparable<FileOffset> {
     public FileOffset(int fileNameHash, long offset, List<JsonQuery> jsonQueries) {
         this.fileNameHash = fileNameHash;
         this.offset = offset;
+        this.jsonQueries = jsonQueries;
     }
 
     public List<JsonQuery> getJsonQueries() {

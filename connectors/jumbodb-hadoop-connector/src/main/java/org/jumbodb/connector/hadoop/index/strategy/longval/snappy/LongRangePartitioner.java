@@ -1,11 +1,9 @@
 package org.jumbodb.connector.hadoop.index.strategy.longval.snappy;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.index.strategy.PartitionUtil;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * User: carsten

@@ -37,7 +37,7 @@ public class SearchIndexTask implements Callable<Set<FileOffset>> {
             throw new JumboIndexMissingException("The queried index '" + query.getName() + "' on collection '" + collection + "' with chunk key '" + chunkKey + "' does not exist.");
         }
         Set<FileOffset> fileOffsets = strategy.findFileOffsets(collection, chunkKey, query, queryLimit);
-        log.debug("Searched a full index with " + query.getClauses().size() + " offsets in " + (System.currentTimeMillis() - start) + "ms");
+        log.debug("Searched a full index with " + fileOffsets.size() + " offsets in " + (System.currentTimeMillis() - start) + "ms");
         return fileOffsets;
     }
 

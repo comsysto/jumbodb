@@ -104,8 +104,12 @@ public class DatabaseQuerySession implements Closeable {
         private LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
         private boolean running = true;
 
-        public void writeResult(byte[] result) throws InterruptedException {
-            queue.put(result);
+        public void writeResult(byte[] result) {
+            try {
+                queue.put(result);
+            } catch (InterruptedException e) {
+                log.error("Unhandled error", e);
+            }
         }
 
         @Override

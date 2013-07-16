@@ -95,9 +95,15 @@ public class DatabaseQuerySession implements Closeable {
     }
 
     public class ResultWriter {
-        public synchronized void writeResult(byte[] result) throws IOException {
-            dataOutputStream.writeInt(result.length);
-            dataOutputStream.write(result);
+        int i = 0;
+        public void writeResult(byte[] result) throws IOException {
+            if(i % 100000 == 0) {
+                synchronized (this) {
+                    dataOutputStream.writeInt(result.length);
+                    dataOutputStream.write(result);
+                }
+            }
+            i++;
         }
     }
 

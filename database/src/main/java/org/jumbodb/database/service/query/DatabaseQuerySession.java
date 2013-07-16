@@ -117,8 +117,10 @@ public class DatabaseQuerySession implements Closeable {
             try {
                 while(running || queue.size() > 0) {
                     byte dataset[] = queue.take();
-                    dataOutputStream.writeInt(dataset.length);
-                    dataOutputStream.write(dataset);
+                    if(dataset.length > 0) {
+                        dataOutputStream.writeInt(dataset.length);
+                        dataOutputStream.write(dataset);
+                    }
                 }
             } catch (InterruptedException e) {
                 log.error("Unhandled error", e);
@@ -128,13 +130,14 @@ public class DatabaseQuerySession implements Closeable {
         }
 
         public void datasetsFinished() {
-            running = true;
-            while(queue.size() > 0) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-
+            try {
+                running = false;
+                queue.put(new byte[0]);
+                while(queue.size() > 0) {
+                        Thread.sleep(100);
                 }
+            } catch (InterruptedException e) {
+                log.error("Unhandled", e);
             }
         }
 

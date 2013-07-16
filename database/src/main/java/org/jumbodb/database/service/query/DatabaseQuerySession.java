@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * User: carsten
@@ -104,9 +105,13 @@ public class DatabaseQuerySession implements Closeable {
     public class ResultWriter extends Thread {
         private LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
         private boolean running = true;
-
+        private AtomicInteger count = new AtomicInteger(0);
         public void writeResult(byte[] result) {
             try {
+                int i = count.incrementAndGet();
+                if(i % 50000 == 0) {
+                    log.info("Results written to buffer: " + i + " Currently in buffer: " + queue.size());
+                }
                 queue.put(result);
             } catch (InterruptedException e) {
                 log.error("Unhandled error", e);

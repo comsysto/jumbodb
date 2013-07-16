@@ -8,6 +8,8 @@ import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * User: carsten
@@ -48,11 +50,13 @@ public class DatabaseQuerySession implements Closeable {
             byte[] jsonQueryDocument = new byte[size];
             dataInputStream.readFully(jsonQueryDocument);
             long start = System.currentTimeMillis();
+            ResultWriter resultWriter = new ResultWriter();
             try {
-                int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, new ResultWriter());
+                int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, resultWriter);
                 GlobalStatistics.incNumberOfQueries(1l);
                 GlobalStatistics.incNumberOfResults(numberOfResults);
                 log.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
+                resultWriter.datasetsFinished();
                 dataOutputStream.writeInt(-1); // After -1 command follows
                 dataOutputStream.writeUTF(":result:end");
             } catch(JumboCollectionMissingException e) {
@@ -75,6 +79,8 @@ public class DatabaseQuerySession implements Closeable {
                 dataOutputStream.writeInt(-1);
                 dataOutputStream.writeUTF(":error:unknown");
                 dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.toString());
+            } finally {
+                resultWriter.forceCleanup();
             }
 
             dataOutputStream.flush();
@@ -94,20 +100,46 @@ public class DatabaseQuerySession implements Closeable {
         IOUtils.closeQuietly(clientSocket);
     }
 
-    public class ResultWriter {
-        int i = 0;
-        public void writeResult(byte[] result) throws IOException {
-            if(i % 100000 == 0) {
-                synchronized (this) {
-                    dataOutputStream.writeInt(result.length);
-                    dataOutputStream.write(result);
+    public class ResultWriter extends Thread {
+        private LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
+        private boolean running = true;
+
+        public void writeResult(byte[] result) throws InterruptedException {
+            queue.put(result);
+        }
+
+        @Override
+        public void run() {
+            try {
+                while(running || queue.size() > 0) {
+                    byte dataset[] = queue.take();
+                    dataOutputStream.writeInt(dataset.length);
+                    dataOutputStream.write(dataset);
+                }
+            } catch (InterruptedException e) {
+                log.error("Unhandled error", e);
+            } catch (IOException e) {
+                log.error("Unhandled error", e);
+            }
+        }
+
+        public void datasetsFinished() {
+            running = true;
+            while(queue.size() > 0) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+
                 }
             }
-            i++;
+        }
+
+        public void forceCleanup() {
+            queue.clear();
         }
     }
 
     public interface QueryHandler {
-        int onQuery(String collection, byte[] query, ResultWriter resultWriter);
+        int onQuery(String collection, byte[] query, DatabaseQuerySession.ResultWriter resultWriter);
     }
 }

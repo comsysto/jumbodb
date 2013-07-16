@@ -51,6 +51,7 @@ public class DatabaseQuerySession implements Closeable {
             dataInputStream.readFully(jsonQueryDocument);
             long start = System.currentTimeMillis();
             ResultWriter resultWriter = new ResultWriter();
+            resultWriter.start();
             try {
                 int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, resultWriter);
                 GlobalStatistics.incNumberOfQueries(1l);

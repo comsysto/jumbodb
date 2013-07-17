@@ -1,0 +1,34 @@
+{
+    "description": "Sample data with 5GB and 3 collections",
+    "outputFolder": "~/testdata",
+    "collections": [
+        {
+            "name": "first_collection",
+            "description": "First collection with 10 GB data whatever",
+            "strategy": "JSON_SNAPPY_V1",
+            "numberOfFiles": 100,
+            "datasetSizeInByte": 1000,
+            "datasetsPerFile": 100000,
+            "snappyBlockSizeInByte": 32768
+        },
+        {
+            "name": "second_collection",
+            "description": "Second collection with 10 GB data whatever",
+            "strategy": "JSON_SNAPPY_V1",
+            "numberOfFiles": 100,
+            "datasetSizeInByte": 10000,
+            "datasetsPerFile": 10000,
+            "snappyBlockSizeInByte": 32768
+        },
+        {
+            "name": "third_collection",
+            "description": "Third collection with other block size",
+            "strategy": "JSON_SNAPPY_V1",
+            "numberOfFiles": 100,
+            "datasetSizeInByte": 10000,
+            "datasetsPerFile": 10000,
+            "snappyBlockSizeInByte": 65536
+        }
+    ]
+
+}

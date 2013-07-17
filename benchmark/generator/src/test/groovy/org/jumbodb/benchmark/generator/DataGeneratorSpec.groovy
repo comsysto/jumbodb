@@ -30,4 +30,15 @@ class DataGeneratorSpec extends Specification {
 
     }
 
+    def "data generator parses valid config file"() {
+        given:
+        def configFile = this.class.getResource("/testConfigFile.json")
+        when:
+        def config = new DataGenerator().parseConfigFile(new File(configFile.path))
+        then:
+        config.description == "Sample data with 5GB and 3 collections"
+        config.collections.size() == 3
+        config.collections.get(0).datasetSizeInByte == 1000
+    }
+
 }

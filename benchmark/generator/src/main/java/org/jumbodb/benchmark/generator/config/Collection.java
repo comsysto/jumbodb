@@ -5,8 +5,8 @@ public class Collection {
     private String name;
     private String description;
     private String strategy;
-    private int numberOfFiles;
-    private int datasetSizeInByte;
+    private long numberOfFiles;
+    private long datasetSizeInByte;
     private long datasetsPerFile;
     private long snappyBlockSizeInByte;
 
@@ -34,7 +34,7 @@ public class Collection {
         this.strategy = strategy;
     }
 
-    public int getNumberOfFiles() {
+    public long getNumberOfFiles() {
         return numberOfFiles;
     }
 
@@ -42,7 +42,7 @@ public class Collection {
         this.numberOfFiles = numberOfFiles;
     }
 
-    public int getDatasetSizeInByte() {
+    public long getDatasetSizeInByte() {
         return datasetSizeInByte;
     }
 

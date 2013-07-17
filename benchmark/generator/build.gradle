@@ -5,6 +5,7 @@ apply plugin: 'java'
 apply plugin: 'project-reports'
 apply plugin: 'eclipse'
 apply plugin: 'application'
+apply plugin: 'groovy'
 
 
 sourceCompatibility = 1.6
@@ -32,12 +33,14 @@ sourceSets {
         resources {
             srcDir 'src/test/resources'
             srcDir 'src/test/java'
+            srcDir 'src/test/groovy'
         }
     }
 }
 
 dependencies {
     compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+    compile "org.springframework:spring-context:$springVersion"
 //    compile "org.apache.hadoop:hadoop-core:1.0.3"
     compile 'commons-io:commons-io:2.3'
     compile 'commons-lang:commons-lang:2.5'
@@ -46,11 +49,15 @@ dependencies {
     compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
 //    compile 'net.minidev:json-smart:2.0-RC2'
 
+    groovy "org.codehaus.groovy:groovy-all:1.8.6"
+
+    testCompile "org.spockframework:spock-core:0.6-groovy-1.8"
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.0"
+    testCompile 'cglib:cglib:2.2.2'
 }
 
-mainClassName = "TODO"
+mainClassName = "org.jumbodb.benchmark.generator.main.DataGenerator"
 
 eclipse {
     classpath {

@@ -30,6 +30,7 @@ dependencies {
     compile 'commons-collections:commons-collections:3.2.1'
     compile 'com.google.guava:guava:13.0'
     compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
+    compile project(':commons:data')
 //    compile 'net.minidev:json-smart:2.0-RC2'
 
     testCompile "junit:junit:4.10"

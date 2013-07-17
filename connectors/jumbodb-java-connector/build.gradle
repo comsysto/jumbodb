@@ -102,12 +102,6 @@ uploadArchives {
 // https://github.com/ari/gradle-release-plugin/blob/master/build.gradle
 
 
-// generate gradle bootstrapping
-// run gradle createWrapper
-task createWrapper(type: Wrapper) {
-    gradleVersion = '1.4'
-}
-
 eclipse {
     classpath {
         downloadSources = true
@@ -115,3 +109,8 @@ eclipse {
     }
 }
 
+idea {
+    module {
+        downloadSources = true
+    }
+}

@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.snappy;
+package org.jumbodb.data.common.snappy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

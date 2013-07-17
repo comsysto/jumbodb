@@ -95,15 +95,16 @@ uploadArchives {
     }
 }
 
-// generate gradle bootstrapping
-// run gradle createWrapper
-task createWrapper(type: Wrapper) {
-    gradleVersion = '1.4'
-}
-
 eclipse {
     classpath {
         downloadSources = true
         downloadJavadoc = false
+    }
+}
+
+
+idea {
+    module {
+        downloadSources = true
     }
 }

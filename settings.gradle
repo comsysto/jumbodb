@@ -1,6 +1,7 @@
 include 'connectors:jumbodb-hadoop-connector'
 include 'connectors:jumbodb-java-connector'
 include 'database'
+include 'commons:data'
 include 'commons:query'
 include 'commons:geo'
 include 'bundle'

@@ -1,7 +1,7 @@
 package org.jumbodb.database.service.query.index.basic.numeric;
 
 import org.jumbodb.common.query.QueryClause;
-import org.jumbodb.database.service.query.snappy.SnappyChunks;
+import org.jumbodb.data.common.snappy.SnappyChunks;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

@@ -4,7 +4,7 @@ import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch;
-import org.jumbodb.database.service.query.snappy.SnappyUtil;
+import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

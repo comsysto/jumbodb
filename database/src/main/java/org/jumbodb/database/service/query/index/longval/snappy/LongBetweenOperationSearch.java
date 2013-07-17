@@ -4,7 +4,7 @@ import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
-import org.jumbodb.database.service.query.snappy.SnappyChunks;
+import org.jumbodb.data.common.snappy.SnappyChunks;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

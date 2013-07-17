@@ -9,9 +9,9 @@ import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
-import org.jumbodb.database.service.query.snappy.ChunkSkipableSnappyInputStream;
-import org.jumbodb.database.service.query.snappy.SnappyChunks;
-import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
+import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
+import org.jumbodb.data.common.snappy.SnappyChunks;
+import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

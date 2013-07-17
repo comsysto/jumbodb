@@ -21,20 +21,6 @@ configurations {
     // this scope extracts the files and copies it into he same jar file, because ou can just use one jar file in emr
     deployerJars
 }
-sourceSets {
-    main {
-        resources {
-            srcDir 'src/main/resources'
-            srcDir 'src/main/java'
-        }
-    }
-    test {
-        resources {
-            srcDir 'src/test/resources'
-            srcDir 'src/test/java'
-        }
-    }
-}
 
 dependencies {
     deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
@@ -102,5 +88,11 @@ eclipse {
     classpath {
         downloadSources = true
         downloadJavadoc = false
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
     }
 }

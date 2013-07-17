@@ -43,6 +43,11 @@ subprojects {
 //}
 
 
+idea {
+    module {
+        downloadSources = true
+    }
+}
 
 // generate gradle bootstrapping
 // run gradle createWrapper

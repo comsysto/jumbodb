@@ -36,7 +36,7 @@ dependencies {
     testCompile "org.mockito:mockito-core:1.9.0"
 }
 
-mainClassName = "TODO"
+mainClassName = "org.jumbodb.benchmark.suite.BenchmarkSuiteRunner"
 
 eclipse {
     classpath {

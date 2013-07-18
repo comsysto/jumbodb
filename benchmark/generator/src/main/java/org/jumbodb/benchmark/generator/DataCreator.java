@@ -4,6 +4,8 @@ package org.jumbodb.benchmark.generator;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.time.StopWatch;
+
 import java.io.*;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -14,14 +16,15 @@ import java.util.concurrent.Executors;
 public class DataCreator {
 
     private static final String FILE_NAME_FORMAT = "part%05d";
-    private static final String JSON_DOC_FORMAT = "{\"name\": \"%s\"}%n";
-
+    private static final String JSON_DOC_PREFIX = "{\"name\": \"";
+    private static final String JSON_DOC_SUFFIX = "\"";
+    private static final int NR_OF_BUFFERED_JSON_DOCS = 10000;
 
     //ULF refactor
     public void create(final String outputFolder, final int numberOfFiles, final int dataSetsPerFile,
-                       final int dataSetSizeInByte) throws IOException {
+                       final int dataSetSizeInChars) throws IOException {
 
-
+        final byte [][] randomizedJSONDocs = createRandomizedJSONDocs(dataSetSizeInChars);
         int cores = Runtime.getRuntime().availableProcessors();
 
         ExecutorService executorService = Executors.newFixedThreadPool(cores);
@@ -36,9 +39,9 @@ public class DataCreator {
                 public Void call() throws Exception {
                     BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(new File(outputFolder, fileName)));
 
-                    for (long dataSetNo = 0; dataSetNo < dataSetsPerFile; dataSetNo++){
-                        String jsonDocument = createJSONDocument(dataSetSizeInByte);
-                        fos.write(jsonDocument.getBytes());
+                    for (int dataSetNo = 0, jsonDocNo = 0; dataSetNo < dataSetsPerFile; dataSetNo++){
+                        fos.write(randomizedJSONDocs[jsonDocNo]);
+                        jsonDocNo = jsonDocNo < NR_OF_BUFFERED_JSON_DOCS ? jsonDocNo + 1 : 0;
                     }
                     IOUtils.closeQuietly(fos);
                     return null;
@@ -52,8 +55,21 @@ public class DataCreator {
         }
     }
 
-    protected String createJSONDocument(int docSizeInBytes) {
-        int remaining = docSizeInBytes - JSON_DOC_FORMAT.length() + 3;
-        return String.format(JSON_DOC_FORMAT, RandomStringUtils.random(remaining));
+
+    private byte[][] createRandomizedJSONDocs(int dataSetSizeInChars){
+        int randomStringSize = dataSetSizeInChars - (JSON_DOC_SUFFIX.length() + JSON_DOC_PREFIX.length());
+        String randomString = RandomStringUtils.random(randomStringSize * NR_OF_BUFFERED_JSON_DOCS);
+        byte [][] result = new byte[NR_OF_BUFFERED_JSON_DOCS][];
+
+        for (int i=0; i< NR_OF_BUFFERED_JSON_DOCS; i++) {
+            int beginIndex = i * randomStringSize;
+            int endIndex = beginIndex + randomStringSize;
+
+            String jsonDoc = JSON_DOC_PREFIX + randomString.substring(beginIndex, endIndex) + JSON_DOC_SUFFIX
+                    + System.getProperty("line.separator");
+
+            result[i] = jsonDoc.getBytes();
+        }
+        return result;
     }
 }

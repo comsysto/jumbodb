@@ -21,7 +21,7 @@ public class JsonPlainDataStrategyTask implements Callable<JsonPlainDataStrategy
 
     @Override
     public JsonPlainDataStrategyResult call() throws Exception {
-
+        // TODO
         return null;
     }
 }

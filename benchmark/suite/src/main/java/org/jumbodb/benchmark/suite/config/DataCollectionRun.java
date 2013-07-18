@@ -35,6 +35,14 @@ public class DataCollectionRun {
         this.numberOfSamplesPerRun = numberOfSamplesPerRun;
     }
 
+    public String getStrategy() {
+        return strategy;
+    }
+
+    public void setStrategy(String strategy) {
+        this.strategy = strategy;
+    }
+
     @Override
     public String toString() {
         return "DataCollectionRun{" +

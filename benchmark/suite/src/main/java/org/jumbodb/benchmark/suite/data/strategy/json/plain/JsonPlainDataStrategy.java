@@ -37,6 +37,7 @@ public class JsonPlainDataStrategy implements DataStrategy {
         for (File file : groupOffsetsByFile.keySet()) {
             results.add(executorService.submit(new JsonPlainDataStrategyTask(file, groupOffsetsByFile.get(file))));
         }
+        // TODO
 
         return null;
     }

@@ -7,7 +7,6 @@ import org.jumbodb.benchmark.generator.config.GeneratorConfig;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Executors;
 
 /**
  * @author Ulf Gitschthaler
@@ -28,7 +27,7 @@ public class DataGenerator {
         Collection collection = config.getCollections().get(0);
 
         new DataCreator().create(config.getOutputFolder(), collection.getNumberOfFiles(), collection.getDataSetsPerFile(),
-                collection.getDataSetSizeInByte());
+                collection.getDataSetSizeInChars());
     }
 
     protected GeneratorConfig parseConfigFile(File configFile) throws IOException {

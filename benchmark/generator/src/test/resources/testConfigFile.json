@@ -7,7 +7,7 @@
             "description": "First collection with 10 GB data whatever",
             "strategy": "JSON_SNAPPY_V1",
             "numberOfFiles": 100,
-            "dataSetSizeInByte": 1000,
+            "dataSetSizeInChars": 1000,
             "dataSetsPerFile": 100000,
             "snappyBlockSizeInByte": 32768
         },
@@ -16,7 +16,7 @@
             "description": "Second collection with 10 GB data whatever",
             "strategy": "JSON_SNAPPY_V1",
             "numberOfFiles": 100,
-            "dataSetSizeInByte": 10000,
+            "dataSetSizeInChars": 10000,
             "dataSetsPerFile": 10000,
             "snappyBlockSizeInByte": 32768
         },
@@ -25,7 +25,7 @@
             "description": "Third collection with other block size",
             "strategy": "JSON_SNAPPY_V1",
             "numberOfFiles": 100,
-            "dataSetSizeInByte": 10000,
+            "dataSetSizeInChars": 10000,
             "dataSetsPerFile": 10000,
             "snappyBlockSizeInByte": 65536
         }

@@ -4,7 +4,6 @@ package org.jumbodb.benchmark.generator;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.time.StopWatch;
 
 import java.io.*;
 import java.util.List;
@@ -57,19 +56,29 @@ public class DataCreator {
 
 
     private byte[][] createRandomizedJSONDocs(int dataSetSizeInChars){
-        int randomStringSize = dataSetSizeInChars - (JSON_DOC_SUFFIX.length() + JSON_DOC_PREFIX.length());
-        String randomString = RandomStringUtils.random(randomStringSize * NR_OF_BUFFERED_JSON_DOCS);
+        int randomStringSize = calculateRandomStringLength(dataSetSizeInChars);
+        String randomString = generateRandomString(randomStringSize);
         byte [][] result = new byte[NR_OF_BUFFERED_JSON_DOCS][];
 
         for (int i=0; i< NR_OF_BUFFERED_JSON_DOCS; i++) {
             int beginIndex = i * randomStringSize;
             int endIndex = beginIndex + randomStringSize;
 
-            String jsonDoc = JSON_DOC_PREFIX + randomString.substring(beginIndex, endIndex) + JSON_DOC_SUFFIX
-                    + System.getProperty("line.separator");
-
-            result[i] = jsonDoc.getBytes();
+            result[i] = generateJSONDocument(randomString, beginIndex, endIndex).getBytes();
         }
         return result;
+    }
+
+    private String generateJSONDocument(String randomString, int beginIndex, int endIndex) {
+        return JSON_DOC_PREFIX + randomString.substring(beginIndex, endIndex) + JSON_DOC_SUFFIX
+                + System.getProperty("line.separator");
+    }
+
+    private String generateRandomString(int randomStringSize) {
+        return RandomStringUtils.random(randomStringSize * NR_OF_BUFFERED_JSON_DOCS);
+    }
+
+    private int calculateRandomStringLength(int dataSetSizeInChars) {
+        return dataSetSizeInChars - (JSON_DOC_SUFFIX.length() + JSON_DOC_PREFIX.length());
     }
 }

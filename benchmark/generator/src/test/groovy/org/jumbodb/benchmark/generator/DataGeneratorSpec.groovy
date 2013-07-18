@@ -37,7 +37,7 @@ class DataGeneratorSpec extends Specification {
         then:
         config.description == "Sample data with 5GB and 3 collections"
         config.collections.size() == 3
-        config.collections[0].dataSetSizeInByte == 1000
+        config.collections[0].dataSetSizeInChars == 1000
     }
 
 }

@@ -7,11 +7,7 @@ import org.jumbodb.benchmark.generator.config.GeneratorConfig;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Executors;
 
-/**
- * @author Ulf Gitschthaler
- */
 public class DataGenerator {
 
     private static DataGenerator dataGenerator = new DataGenerator();
@@ -25,10 +21,13 @@ public class DataGenerator {
 
     protected void run(File configFile) throws IOException {
         GeneratorConfig config = parseConfigFile(configFile);
-        Collection collection = config.getCollections().get(0);
 
-        new DataCreator().create(config.getOutputFolder(), collection.getNumberOfFiles(), collection.getDataSetsPerFile(),
-                collection.getDataSetSizeInByte());
+        for (Collection collection : config.getCollections()) {
+            DataCreator dataCreator = new DataCreator(config.getOutputFolder(), collection.getNumberOfFiles(),
+                    collection.getDataSetsPerFile(), collection.getDataSetSizeInChars(), collection.getName(),
+                    config.getParallelGenerationThreads());
+            dataCreator.generateData();
+        }
     }
 
     protected GeneratorConfig parseConfigFile(File configFile) throws IOException {

@@ -6,7 +6,7 @@ public class Collection {
     private String description;
     private String strategy;
     private int numberOfFiles;
-    private int dataSetSizeInByte;
+    private int dataSetSizeInChars;
     private int dataSetsPerFile;
     private int snappyBlockSizeInByte;
 
@@ -42,12 +42,12 @@ public class Collection {
         this.numberOfFiles = numberOfFiles;
     }
 
-    public int getDataSetSizeInByte() {
-        return dataSetSizeInByte;
+    public int getDataSetSizeInChars() {
+        return dataSetSizeInChars;
     }
 
-    public void setDataSetSizeInByte(int dataSetSizeInByte) {
-        this.dataSetSizeInByte = dataSetSizeInByte;
+    public void setDataSetSizeInChars(int dataSetSizeInChars) {
+        this.dataSetSizeInChars = dataSetSizeInChars;
     }
 
     public int getDataSetsPerFile() {

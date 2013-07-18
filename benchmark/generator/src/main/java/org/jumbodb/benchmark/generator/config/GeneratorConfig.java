@@ -6,6 +6,7 @@ public class GeneratorConfig {
 
    private String description;
    private String outputFolder;
+   private int parallelGenerationThreads;
    private List<Collection> collections;
 
     public String getDescription() {
@@ -30,5 +31,13 @@ public class GeneratorConfig {
 
     public void setCollections(List<Collection> collections) {
         this.collections = collections;
+    }
+
+    public int getParallelGenerationThreads() {
+        return parallelGenerationThreads;
+    }
+
+    public void setParallelGenerationThreads(int parallelGenerationThreads) {
+        this.parallelGenerationThreads = parallelGenerationThreads;
     }
 }

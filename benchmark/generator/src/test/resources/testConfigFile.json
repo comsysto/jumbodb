@@ -1,6 +1,6 @@
 {
     "description": "Sample data with 5GB and 3 collections",
-    "outputFolder": "~/testdata",
+    "outputFolder": "/Users/carsten/testen",
     "collections": [
         {
             "name": "first_collection",

@@ -1,0 +1,16 @@
+{
+    "description": "Sample data with 5GB and 3 collections",
+    "inputFolder": "/Users/u6f6o/Craftsmanship/Dumps/jumbodb",
+    "dataCollections": [
+        {
+            "name": "first_collection",
+            "offsetGenerator": "org.jumbodb.aaa.IndexGenerator",
+            "description": "do somthing with it",
+            "runs" : [
+                {"strategy": "JSON_PLAIN_V1", "numberOfThreads": [5, 10, 15, 20, 25], "datasetLoadGroupSize": [1, 10, 100], "numberOfSamplesPerRun": 1000},
+                {"strategy": "JSON_PLAIN_V1", "numberOfThreads": [5, 10, 15, 20, 25], "datasetLoadGroupSize": [1000, 10000], "numberOfSamplesPerRun": 100}
+            ]
+        }
+    ]
+
+}

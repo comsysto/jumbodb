@@ -1,7 +1,6 @@
 package org.jumbodb.benchmark.generator
 
-import com.google.common.io.Files
-import org.jumbodb.benchmark.generator.DataGenerator
+
 import spock.lang.Specification
 
 
@@ -38,7 +37,7 @@ class DataGeneratorSpec extends Specification {
         then:
         config.description == "Sample data with 5GB and 3 collections"
         config.collections.size() == 3
-        config.collections.get(0).datasetSizeInByte == 1000
+        config.collections[0].dataSetSizeInByte == 1000
     }
 
 }

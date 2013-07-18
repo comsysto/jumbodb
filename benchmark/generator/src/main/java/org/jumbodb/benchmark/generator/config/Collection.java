@@ -5,10 +5,10 @@ public class Collection {
     private String name;
     private String description;
     private String strategy;
-    private long numberOfFiles;
-    private long datasetSizeInByte;
-    private long datasetsPerFile;
-    private long snappyBlockSizeInByte;
+    private int numberOfFiles;
+    private int dataSetSizeInByte;
+    private int dataSetsPerFile;
+    private int snappyBlockSizeInByte;
 
     public String getName() {
         return name;
@@ -34,7 +34,7 @@ public class Collection {
         this.strategy = strategy;
     }
 
-    public long getNumberOfFiles() {
+    public int getNumberOfFiles() {
         return numberOfFiles;
     }
 
@@ -42,27 +42,27 @@ public class Collection {
         this.numberOfFiles = numberOfFiles;
     }
 
-    public long getDatasetSizeInByte() {
-        return datasetSizeInByte;
+    public int getDataSetSizeInByte() {
+        return dataSetSizeInByte;
     }
 
-    public void setDatasetSizeInByte(int datasetSizeInByte) {
-        this.datasetSizeInByte = datasetSizeInByte;
+    public void setDataSetSizeInByte(int dataSetSizeInByte) {
+        this.dataSetSizeInByte = dataSetSizeInByte;
     }
 
-    public long getDatasetsPerFile() {
-        return datasetsPerFile;
+    public int getDataSetsPerFile() {
+        return dataSetsPerFile;
     }
 
-    public void setDatasetsPerFile(long datasetsPerFile) {
-        this.datasetsPerFile = datasetsPerFile;
+    public void setDataSetsPerFile(int dataSetsPerFile) {
+        this.dataSetsPerFile = dataSetsPerFile;
     }
 
-    public long getSnappyBlockSizeInByte() {
+    public int getSnappyBlockSizeInByte() {
         return snappyBlockSizeInByte;
     }
 
-    public void setSnappyBlockSizeInByte(long snappyBlockSizeInByte) {
+    public void setSnappyBlockSizeInByte(int snappyBlockSizeInByte) {
         this.snappyBlockSizeInByte = snappyBlockSizeInByte;
     }
 }

@@ -2,7 +2,7 @@ package org.jumbodb.benchmark.generator.config;
 
 import java.util.List;
 
-public class ConfigFile {
+public class GeneratorConfig {
 
    private String description;
    private String outputFolder;

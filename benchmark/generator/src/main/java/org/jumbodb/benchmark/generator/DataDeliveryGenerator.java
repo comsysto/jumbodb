@@ -8,9 +8,9 @@ import org.jumbodb.benchmark.generator.config.GeneratorConfig;
 import java.io.File;
 import java.io.IOException;
 
-public class DataGenerator {
+public class DataDeliveryGenerator {
 
-    private static DataGenerator dataGenerator = new DataGenerator();
+    private static DataDeliveryGenerator dataGenerator = new DataDeliveryGenerator();
 
     public static void main(String[] args) throws IOException {
         if (!checkConfigParams(args)) {
@@ -23,10 +23,10 @@ public class DataGenerator {
         GeneratorConfig config = parseConfigFile(configFile);
 
         for (Collection collection : config.getCollections()) {
-            DataCreator dataCreator = new DataCreator(config.getOutputFolder(), collection.getNumberOfFiles(),
+            DataCollectionGenerator dataCollectionGenerator = new DataCollectionGenerator(config.getOutputFolder(), collection.getNumberOfFiles(),
                     collection.getDataSetsPerFile(), collection.getDataSetSizeInChars(), collection.getName(),
                     config.getParallelGenerationThreads());
-            dataCreator.generateData();
+            dataCollectionGenerator.generateData();
         }
     }
 

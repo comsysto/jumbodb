@@ -8,14 +8,14 @@ import java.io.FileOutputStream;
 import java.util.concurrent.Callable;
 
 
-public class DataGeneratorRunner implements Callable<Void>{
+public class DataFileGenerationRunner implements Callable<Void>{
 
     private final String destFilePath;
     private final int dataSetsPerFile;
     private final byte[][] jsonDocs;
 
 
-   public DataGeneratorRunner(String outputFilePath, int dataSetsPerFile, byte[][] randomizedJSONDocs) {
+   public DataFileGenerationRunner(String outputFilePath, int dataSetsPerFile, byte[][] randomizedJSONDocs) {
         this.destFilePath = outputFilePath;
         this.dataSetsPerFile = dataSetsPerFile;
         this.jsonDocs = randomizedJSONDocs;

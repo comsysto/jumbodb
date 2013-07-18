@@ -7,12 +7,12 @@ import spock.lang.Specification
 /**
  * @author Ulf Gitschthaler
  */
-class DataGeneratorSpec extends Specification {
+class DataDeliveryGeneratorSpec extends Specification {
 
 
     def "data generator stops on missing config file"(){
         when:
-        DataGenerator.main()
+        DataDeliveryGenerator.main()
         then:
         thrown(IllegalArgumentException.class)
     }
@@ -20,8 +20,8 @@ class DataGeneratorSpec extends Specification {
     def "data generator starts with valid config file"(){
 //        given:
 //        def fakeConfigFile = File.createTempFile("startup", "");
-//        def dataGenerator = new DataGenerator()
-//        dataGenerator.dataGenerator = Mock(DataGenerator.class)
+//        def dataGenerator = new DataDeliveryGenerator()
+//        dataGenerator.dataGenerator = Mock(DataDeliveryGenerator.class)
 //        when:
 //        dataGenerator.main(fakeConfigFile.getAbsolutePath())
 //        then:
@@ -33,7 +33,7 @@ class DataGeneratorSpec extends Specification {
         given:
         def configFile = this.class.getResource("/testConfigFile.json")
         when:
-        def config = new DataGenerator().parseConfigFile(new File(configFile.path))
+        def config = new DataDeliveryGenerator().parseConfigFile(new File(configFile.path))
         then:
         config.description == "Sample data with 5GB and 3 collections"
         config.collections.size() == 3

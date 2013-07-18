@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 import static org.jumbodb.data.common.meta.DeliveryProperties.*;
 
 
-public class DataCreator {
+public class DataCollectionGenerator {
 
     private static final String FILE_NAME_FORMAT = "part%05d";
     private static final String JSON_DOC_PREFIX = "{\"name\": \"";
@@ -35,8 +35,8 @@ public class DataCreator {
     private final int parallelThreads;
 
 
-    public DataCreator(String outputFolder, int numberOfFiles, int dataSetsPerFile, int dataSetSizeInChars,
-                       String collectionName, int parallelThreads) {
+    public DataCollectionGenerator(String outputFolder, int numberOfFiles, int dataSetsPerFile, int dataSetSizeInChars,
+                                   String collectionName, int parallelThreads) {
         this.outputFolder = outputFolder;
         this.numberOfFiles = numberOfFiles;
         this.dataSetsPerFile = dataSetsPerFile;
@@ -55,7 +55,7 @@ public class DataCreator {
 
         for (int fileNo = 0; fileNo < numberOfFiles; fileNo++) {
             String fileName = getDataFileName(dataFolder, fileNo);
-            generationRunners.add(new DataGeneratorRunner(fileName, dataSetsPerFile, randomizedJSONDocs));
+            generationRunners.add(new DataFileGenerationRunner(fileName, dataSetsPerFile, randomizedJSONDocs));
         }
         try {
             ExecutorService executorService = Executors.newFixedThreadPool(nrOfThreadsToUse());

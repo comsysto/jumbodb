@@ -58,7 +58,7 @@ dependencies {
     testCompile 'cglib:cglib:2.2.2'
 }
 
-mainClassName = "org.jumbodb.benchmark.generator.main.DataGenerator"
+mainClassName = "org.jumbodb.benchmark.generator.main.DataDeliveryGenerator"
 
 eclipse {
     classpath {

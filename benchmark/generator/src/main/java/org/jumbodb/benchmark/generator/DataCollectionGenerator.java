@@ -2,72 +2,95 @@ package org.jumbodb.benchmark.generator;
 
 
 import com.google.common.collect.Lists;
-import com.sun.tools.internal.ws.processor.util.DirectoryUtil;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.jumbodb.data.common.meta.DeliveryProperties;
 
 import java.io.*;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+
+import static org.jumbodb.data.common.meta.DeliveryProperties.*;
 
 
-public class DataCreator {
+public class DataCollectionGenerator {
 
     private static final String FILE_NAME_FORMAT = "part%05d";
     private static final String JSON_DOC_PREFIX = "{\"name\": \"";
     private static final String JSON_DOC_SUFFIX = "\"";
     private static final int NR_OF_BUFFERED_JSON_DOCS = 10000;
+    private static final String DESCRIPTION = "Benchmark delivery";
+    public static final String DEFAULT_CHUNK_NAME = "benchmark_delivery";
 
     private final String outputFolder;
     private final int numberOfFiles;
     private final int dataSetsPerFile;
     private final int dataSetSizeInChars;
     private final String collectionName;
-    private final int parrallelThreads;
+    private final String deliveryVersion = UUID.randomUUID().toString();
+    private final int parallelThreads;
 
 
-    public DataCreator(String outputFolder, int numberOfFiles, int dataSetsPerFile, int dataSetSizeInChars,
-                       String collectionName, int parallelThreads) {
+    public DataCollectionGenerator(String outputFolder, int numberOfFiles, int dataSetsPerFile, int dataSetSizeInChars,
+                                   String collectionName, int parallelThreads) {
         this.outputFolder = outputFolder;
         this.numberOfFiles = numberOfFiles;
         this.dataSetsPerFile = dataSetsPerFile;
         this.dataSetSizeInChars = dataSetSizeInChars;
         this.collectionName = collectionName;
-        this.parrallelThreads = parallelThreads;
+        this.parallelThreads = parallelThreads;
     }
 
     public void generateData() {
+        String dataFolder = getDataFolder(outputFolder, collectionName);
+        createDataFolder(dataFolder);
+        createDeliveryProperties(dataFolder);
 
         final byte [][] randomizedJSONDocs = generateRandomizedJSONDocs(dataSetSizeInChars);
         List<Callable<Void>> generationRunners = Lists.newArrayList();
 
         for (int fileNo = 0; fileNo < numberOfFiles; fileNo++) {
-            String fileName = generateDataFileName(outputFolder, collectionName, fileNo);
-            generationRunners.add(new DataGeneratorRunner(fileName, dataSetsPerFile, randomizedJSONDocs));
+            String fileName = getDataFileName(dataFolder, fileNo);
+            generationRunners.add(new DataFileGenerationRunner(fileName, dataSetsPerFile, randomizedJSONDocs));
         }
         try {
             ExecutorService executorService = Executors.newFixedThreadPool(nrOfThreadsToUse());
             executorService.invokeAll(generationRunners);
         } catch (InterruptedException e) {
-            // ULF that needs to be fixed
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            throw new RuntimeException(e);
         }
     }
 
-    // ULF: use property to define it by your own
-    private int nrOfThreadsToUse(){
-        return parrallelThreads >= 1 ? parrallelThreads : Runtime.getRuntime().availableProcessors();
+    private void createDeliveryProperties(String dataFolder){
+        DeliveryMeta deliveryMeta = new DeliveryMeta(deliveryVersion, DESCRIPTION, new Date().toString(),
+                "/dev/null", DEFAULT_CHUNK_NAME);
+
+        String deliveryPropertiesPath = FilenameUtils.concat(dataFolder, DeliveryProperties.DEFAULT_FILENAME);
+        DeliveryProperties.write(new File(deliveryPropertiesPath), deliveryMeta);
     }
 
-    private String generateDataFileName(String outputFolder, String collectionName, int fileNr) {
-        String path = FilenameUtils.concat(outputFolder, collectionName);
-        // ULF evaluate return value
-        new File(path).mkdir();
-        return FilenameUtils.concat(path, String.format(FILE_NAME_FORMAT, fileNr));
+    private int nrOfThreadsToUse(){
+        return parallelThreads >= 1 ? parallelThreads : Runtime.getRuntime().availableProcessors();
+    }
+
+    private void createDataFolder(String dataFolder) {
+        if (!new File(dataFolder).mkdirs()){
+            throw new IllegalStateException("Cannot create data folders");
+        }
+    }
+
+    private String getDataFolder(String outputFolder, String collectionName) {
+        String collectionPath = FilenameUtils.concat(outputFolder, collectionName);
+        String chunkPath = FilenameUtils.concat(collectionPath, DEFAULT_CHUNK_NAME);
+        return FilenameUtils.concat(chunkPath, deliveryVersion);
+    }
+
+    private String getDataFileName(String dataFileFolder, int fileNr) {
+        return FilenameUtils.concat(dataFileFolder, String.format(FILE_NAME_FORMAT, fileNr));
     }
 
     private byte[][] generateRandomizedJSONDocs(int dataSetSizeInChars){

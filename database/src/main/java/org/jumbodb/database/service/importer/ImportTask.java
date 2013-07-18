@@ -3,6 +3,9 @@ package org.jumbodb.database.service.importer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.jumbodb.data.common.meta.ActiveProperties;
+import org.jumbodb.data.common.meta.DeliveryProperties;
+import org.jumbodb.data.common.meta.IndexProperties;
 import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.query.JumboSearcher;
 import org.jumbodb.database.service.query.data.DataStrategy;
@@ -84,27 +87,13 @@ public class ImportTask implements Runnable {
 
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String deliveryKeyPath = temporaryDataPath + "/" + information.getCollection() + "/";
-                    Properties deliveryInfo = new Properties();
-                    deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
-                    deliveryInfo.setProperty("sourcePath", information.getSourcePath());
-                    deliveryInfo.setProperty("date", sdf.format(new Date()));
-                    deliveryInfo.setProperty("info", information.getInfo());
-                    deliveryInfo.setProperty("strategy", information.getDataStrategy());
-
+                    DeliveryProperties.DeliveryMeta meta = new DeliveryProperties.DeliveryMeta(information.getDeliveryVersion(), information.getSourcePath(), sdf.format(new Date()), information.getInfo(), information.getDataStrategy());
 
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
                     mkdirs(deliveryVersionFilePath);
 
-                    File deliveryInfoFile = new File(deliveryKeyPath + "/delivery.properties");
-                    FileOutputStream deliveryInfoFos = null;
-                    try {
-                        deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
-                        deliveryInfo.store(deliveryInfoFos, "Delivery Information");
-                    } catch(IOException e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        IOUtils.closeQuietly(deliveryInfoFos);
-                    }
+                    File deliveryInfoFile = new File(deliveryKeyPath + "/" + DeliveryProperties.DEFAULT_FILENAME);
+                    DeliveryProperties.write(deliveryInfoFile, meta);
                     // pfad sollte der richtige sein ...
                     File activeDeliveryFile = getFinalActivationFilePath(information.getCollection(), information.getDeliveryKey());//new File(deliveryKeyPath + "/active.properties");
                     if(!activeDeliveryFile.exists()) {
@@ -116,27 +105,12 @@ public class ImportTask implements Runnable {
                 public void onCollectionMetaIndex(ImportMetaIndex information) {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String deliveryKeyPath = getTemporaryIndexPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/" + information.getIndexName() + "/";
-                    Properties deliveryInfo = new Properties();
-                    deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
-                    deliveryInfo.setProperty("date", sdf.format(new Date()));
-                    deliveryInfo.setProperty("indexName", information.getIndexName());
-                    deliveryInfo.setProperty("strategy", information.getStrategy());
-                    deliveryInfo.setProperty("indexSourceFields", information.getIndexSourceFields());
-
-
+//                    Properties deliveryInfo = new Properties();
+                    IndexProperties.IndexMeta meta = new IndexProperties.IndexMeta(information.getDeliveryVersion(), sdf.format(new Date()), information.getIndexName(), information.getStrategy(), information.getIndexSourceFields());
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
                     mkdirs(deliveryVersionFilePath);
-
-                    File deliveryInfoFile = new File(deliveryKeyPath + "/index.properties");
-                    FileOutputStream deliveryInfoFos = null;
-                    try {
-                        deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
-                        deliveryInfo.store(deliveryInfoFos, "Delivery Information");
-                    } catch(IOException e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        IOUtils.closeQuietly(deliveryInfoFos);
-                    }
+                    File deliveryInfoFile = new File(deliveryKeyPath + "/" + IndexProperties.DEFAULT_FILENAME);
+                    IndexProperties.write(deliveryInfoFile, meta);
                 }
 
                 @Override
@@ -145,7 +119,7 @@ public class ImportTask implements Runnable {
                     mkdirs(activationPath);
 
                     File activeDeliveryFile = new File(activationPath.getAbsoluteFile() + "/" + information.getCollection());
-                    ImportHelper.writeActiveFile(activeDeliveryFile, information.getDeliveryVersion());
+                    ActiveProperties.writeActiveFile(activeDeliveryFile, information.getDeliveryVersion());
                 }
 
                 @Override
@@ -228,7 +202,7 @@ public class ImportTask implements Runnable {
 
 
     private File getFinalActivationFilePath(String collection, String deliveryKey) {
-        return new File(dataPath.getAbsolutePath() + "/" + collection + "/" + deliveryKey + "/active.properties");
+        return new File(dataPath.getAbsolutePath() + "/" + collection + "/" + deliveryKey + "/" + ActiveProperties.DEFAULT_FILENAME);
     }
 
     private File getFinalDataPath(String collection, String deliveryKey, String deliverVersion) {

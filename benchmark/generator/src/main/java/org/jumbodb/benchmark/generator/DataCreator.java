@@ -2,6 +2,8 @@ package org.jumbodb.benchmark.generator;
 
 
 import com.google.common.collect.Lists;
+import com.sun.tools.internal.ws.processor.util.DirectoryUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 public class DataCreator {
@@ -19,43 +22,55 @@ public class DataCreator {
     private static final String JSON_DOC_SUFFIX = "\"";
     private static final int NR_OF_BUFFERED_JSON_DOCS = 10000;
 
-    //ULF refactor
-    public void create(final String outputFolder, final int numberOfFiles, final int dataSetsPerFile,
-                       final int dataSetSizeInChars) throws IOException {
+    private final String outputFolder;
+    private final int numberOfFiles;
+    private final int dataSetsPerFile;
+    private final int dataSetSizeInChars;
+    private final String collectionName;
+    private final int parrallelThreads;
 
-        final byte [][] randomizedJSONDocs = createRandomizedJSONDocs(dataSetSizeInChars);
-        int cores = Runtime.getRuntime().availableProcessors();
 
-        ExecutorService executorService = Executors.newFixedThreadPool(cores);
-        List<Callable<Void>> callables = Lists.newArrayList();
+    public DataCreator(String outputFolder, int numberOfFiles, int dataSetsPerFile, int dataSetSizeInChars,
+                       String collectionName, int parallelThreads) {
+        this.outputFolder = outputFolder;
+        this.numberOfFiles = numberOfFiles;
+        this.dataSetsPerFile = dataSetsPerFile;
+        this.dataSetSizeInChars = dataSetSizeInChars;
+        this.collectionName = collectionName;
+        this.parrallelThreads = parallelThreads;
+    }
 
-        for (long fileNo = 0; fileNo < numberOfFiles; fileNo++) {
-            final String fileName = String.format(FILE_NAME_FORMAT, fileNo);
+    public void generateData() {
 
-            callables.add(
-            new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(new File(outputFolder, fileName)));
+        final byte [][] randomizedJSONDocs = generateRandomizedJSONDocs(dataSetSizeInChars);
+        List<Callable<Void>> generationRunners = Lists.newArrayList();
 
-                    for (int dataSetNo = 0, jsonDocNo = 0; dataSetNo < dataSetsPerFile; dataSetNo++){
-                        fos.write(randomizedJSONDocs[jsonDocNo]);
-                        jsonDocNo = jsonDocNo < NR_OF_BUFFERED_JSON_DOCS ? jsonDocNo + 1 : 0;
-                    }
-                    IOUtils.closeQuietly(fos);
-                    return null;
-                }
-            });
+        for (int fileNo = 0; fileNo < numberOfFiles; fileNo++) {
+            String fileName = generateDataFileName(outputFolder, collectionName, fileNo);
+            generationRunners.add(new DataGeneratorRunner(fileName, dataSetsPerFile, randomizedJSONDocs));
         }
         try {
-            executorService.invokeAll(callables);
+            ExecutorService executorService = Executors.newFixedThreadPool(nrOfThreadsToUse());
+            executorService.invokeAll(generationRunners);
         } catch (InterruptedException e) {
+            // ULF that needs to be fixed
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
 
+    // ULF: use property to define it by your own
+    private int nrOfThreadsToUse(){
+        return parrallelThreads >= 1 ? parrallelThreads : Runtime.getRuntime().availableProcessors();
+    }
 
-    private byte[][] createRandomizedJSONDocs(int dataSetSizeInChars){
+    private String generateDataFileName(String outputFolder, String collectionName, int fileNr) {
+        String path = FilenameUtils.concat(outputFolder, collectionName);
+        // ULF evaluate return value
+        new File(path).mkdir();
+        return FilenameUtils.concat(path, String.format(FILE_NAME_FORMAT, fileNr));
+    }
+
+    private byte[][] generateRandomizedJSONDocs(int dataSetSizeInChars){
         int randomStringSize = calculateRandomStringLength(dataSetSizeInChars);
         String randomString = generateRandomString(randomStringSize);
         byte [][] result = new byte[NR_OF_BUFFERED_JSON_DOCS][];

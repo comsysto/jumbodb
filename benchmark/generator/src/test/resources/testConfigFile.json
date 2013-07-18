@@ -1,6 +1,7 @@
 {
     "description": "Sample data with 5GB and 3 collections",
     "outputFolder": "~/testdata",
+    "parallelGenerationThreads": 4,
     "collections": [
         {
             "name": "first_collection",

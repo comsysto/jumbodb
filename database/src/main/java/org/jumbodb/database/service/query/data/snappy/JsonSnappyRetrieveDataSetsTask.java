@@ -12,6 +12,7 @@ import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.database.service.query.snappy.SnappyChunks;
 import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
+import org.jumbodb.database.service.query.snappy.SnappyChunksWithCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +81,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             } else {
                 sis = new ChunkSkipableSnappyInputStream(fis);
                 dis = new DataInputStream(sis);
-                SnappyChunks snappyChunks = SnappyChunksUtil.getSnappyChunksByFile(file);
+                SnappyChunks snappyChunks = SnappyChunksWithCache.getSnappyChunksByFile(file);
 
                 long currentOffset = 0;
                 byte[] lastBuffer = EMPTY_BUFFER;

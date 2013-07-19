@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Time: 11:06 AM
  */
 public class DatabaseQuerySession implements Closeable {
-    private Logger log = LoggerFactory.getLogger(DatabaseQuerySession.class);
+    private final Logger log = LoggerFactory.getLogger(DatabaseQuerySession.class);
 
     public static final int PROTOCOL_VERSION = 3;
     private Socket clientSocket;
@@ -130,8 +130,10 @@ public class DatabaseQuerySession implements Closeable {
                 }
             } catch (InterruptedException e) {
                 log.error("Unhandled error", e);
+                forceCleanup();
             } catch (IOException e) {
                 log.error("Unhandled error", e);
+                forceCleanup();
             }
         }
 
@@ -148,6 +150,7 @@ public class DatabaseQuerySession implements Closeable {
         }
 
         public void forceCleanup() {
+            running = false;
             queue.clear();
         }
     }

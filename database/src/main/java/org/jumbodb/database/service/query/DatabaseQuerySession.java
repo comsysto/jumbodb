@@ -121,7 +121,7 @@ public class DatabaseQuerySession implements Closeable {
         @Override
         public void run() {
             try {
-                while(running || queue.size() > 0) {
+                while(running) {
                     byte dataset[] = queue.take();
                     if(dataset.length > 0) {
                         dataOutputStream.writeInt(dataset.length);
@@ -142,7 +142,7 @@ public class DatabaseQuerySession implements Closeable {
                 running = false;
                 queue.put(new byte[0]);
                 while(queue.size() > 0) {
-                        Thread.sleep(100);
+                    Thread.sleep(50);
                 }
             } catch (InterruptedException e) {
                 log.error("Unhandled", e);

@@ -46,7 +46,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         Collections.sort(this.offsets);
-        JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+        JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         long start = System.currentTimeMillis();
         FileInputStream fis = null;
         ChunkSkipableSnappyInputStream sis = null;

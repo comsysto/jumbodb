@@ -41,6 +41,7 @@ public class TextValueOutputFormat<K, V, R> extends TextOutputFormat<K, V> {
     }
 
     private class TextValueRecordWriter extends LineRecordWriter<K, V>{
+        private final byte[] lineBreak = "\n".getBytes("UTF-8");
 
         public TextValueRecordWriter(DataOutputStream out)
                 throws IOException{
@@ -50,7 +51,8 @@ public class TextValueOutputFormat<K, V, R> extends TextOutputFormat<K, V> {
         @Override
         public synchronized void write(K key, V value)
                 throws IOException {
-            out.writeBytes(value.toString() + '\n');
+            out.write(value.toString().getBytes("UTF-8"));
+            out.write(lineBreak);
         }
     }
 }

@@ -27,7 +27,7 @@ public class TestenODB3 {
 //        query.addIndexQuery("cellid", Arrays.asList(new QueryClause(QueryOperation.EQ, "1122331441214")));
 //        query.addJsonQuery("cellid", Arrays.asList(new QueryClause(QueryOperation.EQ, "1122331441214")));
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find("uk.cells", Map.class, query);
+        List<Map> daily = jumboDriver.find("br.cells", Map.class, query);
         System.out.println(daily);
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }

@@ -212,19 +212,22 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 //    }
 
     private boolean matchingFilter(byte[] s, JSONParser jsonParser, List<JsonQuery> jsonQueries) throws ParseException, IOException {
+        if (jsonQueries.size() == 0) {
+            return true;
+        }
         String in = new String(s, "UTF-8");
         return matchingFilter(in, jsonParser, jsonQueries);
     }
 
     private boolean matchingFilter(String s, JSONParser jsonParser, List<JsonQuery> jsonQueries) throws ParseException {
+        if (jsonQueries.size() == 0) {
+            return true;
+        }
         Map<String, Object> parsedJson = (Map<String, Object>)jsonParser.parse(s);
         return matchingFilter(parsedJson, jsonQueries);
     }
 
     private boolean matchingFilter(Map<String, Object> parsedJson, List<JsonQuery> jsonQueries) throws ParseException {
-        if (jsonQueries.size() == 0) {
-            return true;
-        }
         boolean matching = true;
         for (JsonQuery jsonQuery : jsonQueries) {
             String[] split = StringUtils.split(jsonQuery.getFieldName(), '.');

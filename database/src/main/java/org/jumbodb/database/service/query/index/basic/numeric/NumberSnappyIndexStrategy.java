@@ -49,7 +49,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     public Set<FileOffset> searchOffsetsByClauses(File indexFile, Set<QueryClause> clauses, int queryLimit) throws IOException {
         long start = System.currentTimeMillis();
         RandomAccessFile raf = null;
-        Set<FileOffset> result = new HashSet<FileOffset>();
+        List<FileOffset> result = new LinkedList<FileOffset>();
         try {
             SnappyChunks snappyChunks = SnappyChunksWithCache.getSnappyChunksByFile(indexFile);
             raf = new RandomAccessFile(indexFile, "r");
@@ -64,7 +64,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
             IOUtils.closeQuietly(raf);
         }
         log.trace("Search one index part-file with " + result.size() + " offsets in " + (System.currentTimeMillis() - start) + "ms");
-        return result;
+        return new HashSet<FileOffset>(result);
     }
 
     @Override

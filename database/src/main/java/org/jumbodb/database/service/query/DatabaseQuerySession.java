@@ -121,7 +121,7 @@ public class DatabaseQuerySession implements Closeable {
         @Override
         public void run() {
             try {
-                while(running) {
+                while(running || queue.size() > 0) {
                     byte dataset[] = queue.take();
                     if(dataset.length > 0) {
                         dataOutputStream.writeInt(dataset.length);

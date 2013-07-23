@@ -228,6 +228,9 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     }
 
     private boolean matchingFilter(Map<String, Object> parsedJson, List<JsonQuery> jsonQueries) throws ParseException {
+        if (jsonQueries.size() == 0) {
+            return true;
+        }
         boolean matching = true;
         for (JsonQuery jsonQuery : jsonQueries) {
             String[] split = StringUtils.split(jsonQuery.getFieldName(), '.');

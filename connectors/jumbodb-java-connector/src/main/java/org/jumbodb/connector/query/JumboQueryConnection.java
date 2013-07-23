@@ -57,8 +57,8 @@ public class JumboQueryConnection {
                 while(queue.size() == 0 && !finished.get()) {
                     // wait nothing to do
                     long diffInTimeMillis = System.currentTimeMillis() - start;
-                    if(diffInTimeMillis > JumboConstants.QUERY_WAITING_TIMEOUT_IN_MS) {
-                        throw new RuntimeException("Fetching results took longer than " + JumboConstants.QUERY_WAITING_TIMEOUT_IN_MS + "ms");
+                    if(diffInTimeMillis > getTimeoutInMs()) {
+                        throw new RuntimeException("Fetching results took longer than " + getTimeoutInMs() + "ms");
                     }
                 }
                 return queue.size() > 0;
@@ -79,7 +79,11 @@ public class JumboQueryConnection {
                 findWithCallback(collection, jsonClazz, searchQuery, new ResultHandler<T>() {
                     @Override
                     public void onResult(T dataset) {
-                        queue.add(dataset);
+                        try {
+                            queue.put(dataset);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
 
                     @Override
@@ -96,6 +100,10 @@ public class JumboQueryConnection {
         }.start();
 
         return it;
+    }
+
+    public long getTimeoutInMs() {
+        return JumboConstants.QUERY_WAITING_TIMEOUT_IN_MS;
     }
 
     public <T> List<T> find(String collection, Class<T> jsonClazz, JumboQuery searchQuery) {

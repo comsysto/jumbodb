@@ -15,10 +15,7 @@ import org.jumbodb.database.service.query.definition.IndexDefinition;
 import org.jumbodb.database.service.query.index.IndexKey;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.database.service.query.index.integer.snappy.*;
-import org.jumbodb.database.service.query.snappy.SnappyChunks;
-import org.jumbodb.database.service.query.snappy.SnappyChunksUtil;
-import org.jumbodb.database.service.query.snappy.SnappyStreamToFileCopy;
-import org.jumbodb.database.service.query.snappy.SnappyUtil;
+import org.jumbodb.database.service.query.snappy.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -52,9 +49,9 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     public Set<FileOffset> searchOffsetsByClauses(File indexFile, Set<QueryClause> clauses, int queryLimit) throws IOException {
         long start = System.currentTimeMillis();
         RandomAccessFile raf = null;
-        Set<FileOffset> result = new HashSet<FileOffset>();
+        List<FileOffset> result = new LinkedList<FileOffset>();
         try {
-            SnappyChunks snappyChunks = SnappyChunksUtil.getSnappyChunksByFile(indexFile);
+            SnappyChunks snappyChunks = SnappyChunksWithCache.getSnappyChunksByFile(indexFile);
             raf = new RandomAccessFile(indexFile, "r");
 
             for (QueryClause clause : clauses) {
@@ -67,7 +64,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
             IOUtils.closeQuietly(raf);
         }
         log.trace("Search one index part-file with " + result.size() + " offsets in " + (System.currentTimeMillis() - start) + "ms");
-        return result;
+        return new HashSet<FileOffset>(result);
     }
 
     @Override
@@ -100,10 +97,10 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         List<IF> result = new LinkedList<IF>();
         File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".odx"));
         for (File indexFile : indexFiles) {
-                SnappyChunks snappyChunks = SnappyChunksUtil.getSnappyChunksByFile(indexFile);
-                if(snappyChunks.getNumberOfChunks() > 0) {
-                    result.add(createIndexFileDescription(indexFile, snappyChunks));
-                }
+            SnappyChunks snappyChunks = SnappyChunksWithCache.getSnappyChunksByFile(indexFile);
+            if(snappyChunks.getNumberOfChunks() > 0) {
+                result.add(createIndexFileDescription(indexFile, snappyChunks));
+            }
         }
         return result;
     }

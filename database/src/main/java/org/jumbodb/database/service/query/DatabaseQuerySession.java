@@ -40,13 +40,13 @@ public class DatabaseQuerySession implements Closeable {
     }
 
     public void query(QueryHandler queryHandler) throws IOException {
-        dataOutputStream.writeInt(PROTOCOL_VERSION);
-        dataOutputStream.flush();
-        snappyOutputStream.flush();
-        String cmd = dataInputStream.readUTF();
-        if (cmd.equals(":cmd:query")) {
-            ResultWriter resultWriter = new ResultWriter();
-            try {
+        ResultWriter resultWriter = new ResultWriter();
+        try {
+            dataOutputStream.writeInt(PROTOCOL_VERSION);
+            dataOutputStream.flush();
+            snappyOutputStream.flush();
+            String cmd = dataInputStream.readUTF();
+            if (cmd.equals(":cmd:query")) {
                 String collection = dataInputStream.readUTF();
                 log.info("Collection: " + collection);
                 int size = dataInputStream.readInt();
@@ -61,36 +61,34 @@ public class DatabaseQuerySession implements Closeable {
                 resultWriter.datasetsFinished();
                 dataOutputStream.writeInt(-1); // After -1 command follows
                 dataOutputStream.writeUTF(":result:end");
-            } catch(JumboCollectionMissingException e) {
-                log.warn("Handled error through query", e);
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:collection:missing");
-                dataOutputStream.writeUTF(e.getMessage());
-            } catch(JumboIndexMissingException e) {
-                log.warn("Handled error through query", e);
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:collection:index:missing");
-                dataOutputStream.writeUTF(e.getMessage());
-            } catch(JumboCommonException e) {
-                log.warn("Handled error through query", e);
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:common");
-                dataOutputStream.writeUTF(e.getMessage());
-            } catch(EOFException e) {
-                log.warn("Connection was unexpectly closed by the client.");
-            } catch(RuntimeException e) {
-                log.warn("Unhandled error", e);
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:unknown");
-                dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.toString());
-            } finally {
-                resultWriter.forceCleanup();
+                dataOutputStream.flush();
+                snappyOutputStream.flush();
             }
-
-            dataOutputStream.flush();
-            snappyOutputStream.flush();
+        } catch(JumboCollectionMissingException e) {
+            log.warn("Handled error through query", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:collection:missing");
+            dataOutputStream.writeUTF(e.getMessage());
+        } catch(JumboIndexMissingException e) {
+            log.warn("Handled error through query", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:collection:index:missing");
+            dataOutputStream.writeUTF(e.getMessage());
+        } catch(JumboCommonException e) {
+            log.warn("Handled error through query", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:common");
+            dataOutputStream.writeUTF(e.getMessage());
+        } catch(EOFException e) {
+            log.warn("Connection was unexpectly closed by the client.");
+        } catch(RuntimeException e) {
+            log.warn("Unhandled error", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:unknown");
+            dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.toString());
+        } finally {
+            resultWriter.forceCleanup();
         }
-
     }
 
     @Override

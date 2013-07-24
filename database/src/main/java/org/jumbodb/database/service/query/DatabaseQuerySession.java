@@ -76,6 +76,8 @@ public class DatabaseQuerySession implements Closeable {
                 dataOutputStream.writeInt(-1);
                 dataOutputStream.writeUTF(":error:common");
                 dataOutputStream.writeUTF(e.getMessage());
+            } catch(EOFException e) {
+                log.warn("Connection was unexpectly closed by the client.");
             } catch(RuntimeException e) {
                 log.warn("Unhandled error", e);
                 dataOutputStream.writeInt(-1);

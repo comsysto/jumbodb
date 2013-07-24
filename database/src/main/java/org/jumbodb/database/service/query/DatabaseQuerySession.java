@@ -45,15 +45,15 @@ public class DatabaseQuerySession implements Closeable {
         snappyOutputStream.flush();
         String cmd = dataInputStream.readUTF();
         if (cmd.equals(":cmd:query")) {
-            String collection = dataInputStream.readUTF();
-            log.info("Collection: " + collection);
-            int size = dataInputStream.readInt();
-            byte[] jsonQueryDocument = new byte[size];
-            dataInputStream.readFully(jsonQueryDocument);
-            long start = System.currentTimeMillis();
             ResultWriter resultWriter = new ResultWriter();
-            resultWriter.start();
             try {
+                String collection = dataInputStream.readUTF();
+                log.info("Collection: " + collection);
+                int size = dataInputStream.readInt();
+                byte[] jsonQueryDocument = new byte[size];
+                dataInputStream.readFully(jsonQueryDocument);
+                long start = System.currentTimeMillis();
+                resultWriter.start();
                 int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, resultWriter);
                 GlobalStatistics.incNumberOfQueries(1l);
                 GlobalStatistics.incNumberOfResults(numberOfResults);

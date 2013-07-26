@@ -12,6 +12,7 @@ import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.data.common.snappy.SnappyChunks;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
+import org.jumbodb.database.service.query.snappy.SnappyChunksWithCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         Collections.sort(this.offsets);
-        JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+        JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         long start = System.currentTimeMillis();
         FileInputStream fis = null;
         ChunkSkipableSnappyInputStream sis = null;
@@ -80,7 +81,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             } else {
                 sis = new ChunkSkipableSnappyInputStream(fis);
                 dis = new DataInputStream(sis);
-                SnappyChunks snappyChunks = SnappyChunksUtil.getSnappyChunksByFile(file);
+                SnappyChunks snappyChunks = SnappyChunksWithCache.getSnappyChunksByFile(file);
 
                 long currentOffset = 0;
                 byte[] lastBuffer = EMPTY_BUFFER;
@@ -211,11 +212,17 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 //    }
 
     private boolean matchingFilter(byte[] s, JSONParser jsonParser, List<JsonQuery> jsonQueries) throws ParseException, IOException {
+        if (jsonQueries.size() == 0) {
+            return true;
+        }
         String in = new String(s, "UTF-8");
         return matchingFilter(in, jsonParser, jsonQueries);
     }
 
     private boolean matchingFilter(String s, JSONParser jsonParser, List<JsonQuery> jsonQueries) throws ParseException {
+        if (jsonQueries.size() == 0) {
+            return true;
+        }
         Map<String, Object> parsedJson = (Map<String, Object>)jsonParser.parse(s);
         return matchingFilter(parsedJson, jsonQueries);
     }

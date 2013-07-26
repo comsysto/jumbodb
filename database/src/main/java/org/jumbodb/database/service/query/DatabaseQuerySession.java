@@ -8,6 +8,9 @@ import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * User: carsten
@@ -15,7 +18,7 @@ import java.net.Socket;
  * Time: 11:06 AM
  */
 public class DatabaseQuerySession implements Closeable {
-    private Logger log = LoggerFactory.getLogger(DatabaseQuerySession.class);
+    private final Logger log = LoggerFactory.getLogger(DatabaseQuerySession.class);
 
     public static final int PROTOCOL_VERSION = 3;
     private Socket clientSocket;
@@ -37,50 +40,55 @@ public class DatabaseQuerySession implements Closeable {
     }
 
     public void query(QueryHandler queryHandler) throws IOException {
-        dataOutputStream.writeInt(PROTOCOL_VERSION);
-        dataOutputStream.flush();
-        snappyOutputStream.flush();
-        String cmd = dataInputStream.readUTF();
-        if (cmd.equals(":cmd:query")) {
-            String collection = dataInputStream.readUTF();
-            log.info("Collection: " + collection);
-            int size = dataInputStream.readInt();
-            byte[] jsonQueryDocument = new byte[size];
-            dataInputStream.readFully(jsonQueryDocument);
-            long start = System.currentTimeMillis();
-            try {
-                int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, new ResultWriter());
+        ResultWriter resultWriter = new ResultWriter();
+        try {
+            dataOutputStream.writeInt(PROTOCOL_VERSION);
+            dataOutputStream.flush();
+            snappyOutputStream.flush();
+            String cmd = dataInputStream.readUTF();
+            if (cmd.equals(":cmd:query")) {
+                String collection = dataInputStream.readUTF();
+                log.info("Collection: " + collection);
+                int size = dataInputStream.readInt();
+                byte[] jsonQueryDocument = new byte[size];
+                dataInputStream.readFully(jsonQueryDocument);
+                long start = System.currentTimeMillis();
+                resultWriter.start();
+                int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, resultWriter);
                 GlobalStatistics.incNumberOfQueries(1l);
                 GlobalStatistics.incNumberOfResults(numberOfResults);
                 log.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
+                resultWriter.datasetsFinished();
                 dataOutputStream.writeInt(-1); // After -1 command follows
                 dataOutputStream.writeUTF(":result:end");
-            } catch(JumboCollectionMissingException e) {
-                log.warn("Handled error through query", e);
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:collection:missing");
-                dataOutputStream.writeUTF(e.getMessage());
-            } catch(JumboIndexMissingException e) {
-                log.warn("Handled error through query", e);
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:collection:index:missing");
-                dataOutputStream.writeUTF(e.getMessage());
-            } catch(JumboCommonException e) {
-                log.warn("Handled error through query", e);
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:common");
-                dataOutputStream.writeUTF(e.getMessage());
-            } catch(RuntimeException e) {
-                log.warn("Unhandled error", e);
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:unknown");
-                dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.toString());
+                dataOutputStream.flush();
+                snappyOutputStream.flush();
             }
-
-            dataOutputStream.flush();
-            snappyOutputStream.flush();
+        } catch(JumboCollectionMissingException e) {
+            log.warn("Handled error through query", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:collection:missing");
+            dataOutputStream.writeUTF(e.getMessage());
+        } catch(JumboIndexMissingException e) {
+            log.warn("Handled error through query", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:collection:index:missing");
+            dataOutputStream.writeUTF(e.getMessage());
+        } catch(JumboCommonException e) {
+            log.warn("Handled error through query", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:common");
+            dataOutputStream.writeUTF(e.getMessage());
+        } catch(EOFException e) {
+            log.warn("Connection was unexpectly closed by the client.");
+        } catch(RuntimeException e) {
+            log.warn("Unhandled error", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:unknown");
+            dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.toString());
+        } finally {
+            resultWriter.forceCleanup();
         }
-
     }
 
     @Override
@@ -94,14 +102,60 @@ public class DatabaseQuerySession implements Closeable {
         IOUtils.closeQuietly(clientSocket);
     }
 
-    public class ResultWriter {
-        public synchronized void writeResult(byte[] result) throws IOException {
-            dataOutputStream.writeInt(result.length);
-            dataOutputStream.write(result);
+    public class ResultWriter extends Thread {
+        private LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
+        private boolean running = true;
+        private AtomicInteger count = new AtomicInteger(0);
+        public void writeResult(byte[] result) {
+            try {
+                int i = count.incrementAndGet();
+                if(i % 50000 == 0) {
+                    log.info("Results written to buffer: " + i + " Currently in buffer: " + queue.size());
+                }
+                queue.put(result);
+            } catch (InterruptedException e) {
+                log.error("Unhandled error", e);
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                while(running || queue.size() > 0) {
+                    byte dataset[] = queue.take();
+                    if(dataset.length > 0) {
+                        dataOutputStream.writeInt(dataset.length);
+                        dataOutputStream.write(dataset);
+                    }
+                }
+            } catch (InterruptedException e) {
+                log.error("Unhandled error", e);
+                forceCleanup();
+            } catch (IOException e) {
+                log.error("Unhandled error", e);
+                forceCleanup();
+            }
+        }
+
+        public void datasetsFinished() {
+            try {
+                running = false;
+                queue.put(new byte[0]);
+                while(queue.size() > 0) {
+                    Thread.sleep(50);
+                }
+            } catch (InterruptedException e) {
+                log.error("Unhandled", e);
+            }
+        }
+
+        public void forceCleanup() {
+            running = false;
+            queue.clear();
         }
     }
 
     public interface QueryHandler {
-        int onQuery(String collection, byte[] query, ResultWriter resultWriter);
+        int onQuery(String collection, byte[] query, DatabaseQuerySession.ResultWriter resultWriter);
     }
 }

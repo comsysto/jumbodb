@@ -1,3 +1,4 @@
+import org.apache.commons.io.IOUtils;
 import org.xerial.snappy.SnappyInputStream;
 import org.xerial.snappy.SnappyOutputStream;
 
@@ -12,7 +13,8 @@ import java.io.*;
  */
 public class SnappyTestIn {
     public static void main(String[] args) throws Exception {
-//        FileInputStream fis = new FileInputStream("/Users/carsten/jumbodb/index/carsten.twitter/first_delivery/4a7e1c02-3e69-418c-becb-4a68927850cc/followers_count/part-r-00000.odx");
+//        FileInputStream fis = new FileInputStream("/Users/carsten/jumbodb/data/br.cells/first_delivery/7dc01e85-96a0-49be-a16b-4ce6e9fee081/part-r-00000");
+
 //        BufferedInputStream bis = new BufferedInputStream(fis);
 //        SnappyInputStream sis = new SnappyInputStream(bis);
 //        DataInputStream dis = new DataInputStream(sis);
@@ -46,59 +48,66 @@ public class SnappyTestIn {
 //        dis.close();
 //        bis.close();
 //        fis.close();
-        FileInputStream fis = new FileInputStream("/Users/carsten/smhadoop/output/twitter/2013-04-24-18-09-54/index/carsten.twitter/followers_count_double/part-r-00000.odx");
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        DataInputStream dis = new DataInputStream(bis);
-
-        int count = 0;
-        while (dis.available() > 0) {
-            byte buffer[] = new byte[8];
-            dis.read(buffer);
-            double value = readDouble(buffer, 0);
-//            Double value = dis.readDouble();
-//            if(value < 100000) {
-//            if(value > 150 && value < 200) {
-                count++;
-                System.out.println(value);
-//            }
-            dis.readInt();
-            dis.readLong();
-        }
-        System.out.println("count " + count);
-        dis.close();
-        bis.close();
+        FileInputStream fis = new FileInputStream("/Users/carsten/jumbodb/data/br.cells/first_delivery/7dc01e85-96a0-49be-a16b-4ce6e9fee081/part-r-00000");
+        FileOutputStream fos = new FileOutputStream("/Users/carsten/testena");
+        ChunkSkipableSnappyInputStream sis = new ChunkSkipableSnappyInputStream(new BufferedInputStream(fis));
+        IOUtils.copy(sis, fos);
+        sis.close();
         fis.close();
+        fos.close();
     }
+//        BufferedInputStream bis = new BufferedInputStream(fis);
+//        DataInputStream dis = new DataInputStream(bis);
 
-
-    public static double readDouble(byte[] buffer, int pos) {
-        long val = readLong(buffer, pos);
-        return Double.longBitsToDouble(val);
-    }
-
-    public static float readFloat(byte[] buffer, int pos) {
-        long val = readInt(buffer, pos);
-        return Float.floatToIntBits(val);
-    }
-
-    public static int readInt(byte[] buffer, int pos) {
-        int b1 = (buffer[pos] & 0xFF) << 24;
-        int b2 = (buffer[pos + 1] & 0xFF) << 16;
-        int b3 = (buffer[pos + 2] & 0xFF) << 8;
-        int b4 = buffer[pos + 3] & 0xFF;
-        return b1 | b2 | b3 | b4;
-    }
-
-    public static long readLong(byte[] buffer, int pos) {
-        return (((long)buffer[pos] << 56) +
-                ((long)(buffer[pos + 1] & 255) << 48) +
-                ((long)(buffer[pos + 2] & 255) << 40) +
-                ((long)(buffer[pos + 3] & 255) << 32) +
-                ((long)(buffer[pos + 4] & 255) << 24) +
-                ((buffer[pos + 5] & 255) << 16) +
-                ((buffer[pos + 6] & 255) <<  8) +
-                ((buffer[pos + 7] & 255) <<  0));
-    }
+//        int count = 0;
+//        while (dis.available() > 0) {
+//            byte buffer[] = new byte[8];
+//            dis.read(buffer);
+//            double value = readDouble(buffer, 0);
+////            Double value = dis.readDouble();
+////            if(value < 100000) {
+////            if(value > 150 && value < 200) {
+//                count++;
+//                System.out.println(value);
+////            }
+//            dis.readInt();
+//            dis.readLong();
+//        }
+//        System.out.println("count " + count);
+//        dis.close();
+//        bis.close();
+//        fis.close();
+//    }
+//
+//
+//    public static double readDouble(byte[] buffer, int pos) {
+//        long val = readLong(buffer, pos);
+//        return Double.longBitsToDouble(val);
+//    }
+//
+//    public static float readFloat(byte[] buffer, int pos) {
+//        long val = readInt(buffer, pos);
+//        return Float.floatToIntBits(val);
+//    }
+//
+//    public static int readInt(byte[] buffer, int pos) {
+//        int b1 = (buffer[pos] & 0xFF) << 24;
+//        int b2 = (buffer[pos + 1] & 0xFF) << 16;
+//        int b3 = (buffer[pos + 2] & 0xFF) << 8;
+//        int b4 = buffer[pos + 3] & 0xFF;
+//        return b1 | b2 | b3 | b4;
+//    }
+//
+//    public static long readLong(byte[] buffer, int pos) {
+//        return (((long)buffer[pos] << 56) +
+//                ((long)(buffer[pos + 1] & 255) << 48) +
+//                ((long)(buffer[pos + 2] & 255) << 40) +
+//                ((long)(buffer[pos + 3] & 255) << 32) +
+//                ((long)(buffer[pos + 4] & 255) << 24) +
+//                ((buffer[pos + 5] & 255) << 16) +
+//                ((buffer[pos + 6] & 255) <<  8) +
+//                ((buffer[pos + 7] & 255) <<  0));
+//    }
 //        long b1 = (buffer[pos] & 0xFF) << 56;
 //        long b2 = (buffer[pos + 1] & 0xFF) << 48;
 //        long b3 = (buffer[pos + 2] & 0xFF) << 40;

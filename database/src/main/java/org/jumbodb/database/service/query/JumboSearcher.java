@@ -13,6 +13,7 @@ import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
+import org.jumbodb.database.service.query.snappy.SnappyChunksWithCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -48,6 +49,7 @@ public class JumboSearcher {
         this.collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(jumboConfiguration.getDataPath(), jumboConfiguration.getIndexPath());
         this.indexStrategyManager.onInitialize(collectionDefinition);
         this.dataStrategyManager.onInitialize(collectionDefinition);
+        SnappyChunksWithCache.clearCache();
     }
 
     public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery, ResultCallback resultCallback) {

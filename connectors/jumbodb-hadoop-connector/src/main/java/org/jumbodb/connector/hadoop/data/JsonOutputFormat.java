@@ -42,6 +42,7 @@ public abstract class JsonOutputFormat<K, V, R> extends TextOutputFormat<K, V> {
     }
 
     private class JsonRecordWriter extends LineRecordWriter<K, V>{
+        private final byte[] lineBreak = "\n".getBytes("UTF-8");
         private ObjectMapper jsonMapper = new ObjectMapper();
 
         public JsonRecordWriter(DataOutputStream out)
@@ -53,7 +54,7 @@ public abstract class JsonOutputFormat<K, V, R> extends TextOutputFormat<K, V> {
         public synchronized void write(K key, V value)
                 throws IOException {
             out.write(jsonMapper.writeValueAsBytes(getJsonObject(key, value)));
-            out.writeChars("\n");
+            out.write(lineBreak);
         }
     }
 

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryTask implements Runnable {
     private Logger log = LoggerFactory.getLogger(QueryTask.class);
@@ -17,7 +18,7 @@ public class QueryTask implements Runnable {
     private JumboSearcher jumboSearcher;
     private final ObjectMapper jsonMapper;
     private DatabaseQuerySession databaseQuerySession;
-    private int numberOfResults = 0;
+    private AtomicInteger numberOfResults = new AtomicInteger();
 
     public QueryTask(Socket s, int clientID, JumboSearcher jumboSearcher, ObjectMapper jsonMapper) {
         clientSocket = s;
@@ -40,9 +41,9 @@ public class QueryTask implements Runnable {
                         final int limit = searchQuery.getLimit();
                         return jumboSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {
                             @Override
-                            public synchronized void writeResult(byte[] result) throws IOException {
+                            public void writeResult(byte[] result) throws IOException {
                                 resultWriter.writeResult(result);
-                                numberOfResults++;
+                                numberOfResults.incrementAndGet();
                             }
 
                             @Override
@@ -50,7 +51,7 @@ public class QueryTask implements Runnable {
                                 if(limit == -1) {
                                     return true;
                                 }
-                                return numberOfResults < limit;
+                                return numberOfResults.get() < limit;
                             }
                         });
                     } catch (IOException e) {

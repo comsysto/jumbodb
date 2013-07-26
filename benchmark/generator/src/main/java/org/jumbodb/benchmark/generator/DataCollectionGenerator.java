@@ -4,20 +4,16 @@ package org.jumbodb.benchmark.generator;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
-import org.jumbodb.data.common.meta.DeliveryProperties;
 
 import java.io.*;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.jumbodb.data.common.meta.DeliveryProperties.*;
 
-
-public class DataCollectionGenerator {
+public abstract class DataCollectionGenerator {
 
     private static final String FILE_NAME_FORMAT = "part%05d";
     private static final String JSON_DOC_PREFIX = "{\"name\": \"";
@@ -48,14 +44,14 @@ public class DataCollectionGenerator {
     public void generateData() {
         String dataFolder = getDataFolder(outputFolder, collectionName);
         createDataFolder(dataFolder);
-        createDeliveryProperties(dataFolder);
+        createDeliveryProperties(dataFolder, deliveryVersion, DESCRIPTION);
 
         final byte [][] randomizedJSONDocs = generateRandomizedJSONDocs(dataSetSizeInChars);
         List<Callable<Void>> generationRunners = Lists.newArrayList();
 
         for (int fileNo = 0; fileNo < numberOfFiles; fileNo++) {
             String fileName = getDataFileName(dataFolder, fileNo);
-            generationRunners.add(new DataFileGenerationRunner(fileName, dataSetsPerFile, randomizedJSONDocs));
+            generationRunners.add(createDataGenerationRunner(fileName, dataSetsPerFile, randomizedJSONDocs));
         }
         try {
             ExecutorService executorService = Executors.newFixedThreadPool(nrOfThreadsToUse());
@@ -65,13 +61,6 @@ public class DataCollectionGenerator {
         }
     }
 
-    private void createDeliveryProperties(String dataFolder){
-        DeliveryMeta deliveryMeta = new DeliveryMeta(deliveryVersion, DESCRIPTION, new Date().toString(),
-                "/dev/null", DEFAULT_CHUNK_NAME);
-
-        String deliveryPropertiesPath = FilenameUtils.concat(dataFolder, DeliveryProperties.DEFAULT_FILENAME);
-        DeliveryProperties.write(new File(deliveryPropertiesPath), deliveryMeta);
-    }
 
     private int nrOfThreadsToUse(){
         return parallelThreads >= 1 ? parallelThreads : Runtime.getRuntime().availableProcessors();
@@ -119,4 +108,8 @@ public class DataCollectionGenerator {
     private int calculateRandomStringLength(int dataSetSizeInChars) {
         return dataSetSizeInChars - (JSON_DOC_SUFFIX.length() + JSON_DOC_PREFIX.length());
     }
+
+    public abstract Callable<Void> createDataGenerationRunner(String fileName, int dataSetsPerFile, byte[][] randomizedJSONDocs);
+
+    public abstract void createDeliveryProperties(String dataFolder, String deliveryVersion, String description);
 }

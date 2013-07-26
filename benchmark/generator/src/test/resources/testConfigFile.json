@@ -6,7 +6,7 @@
         {
             "name": "first_collection",
             "description": "First collection with 10 GB data whatever",
-            "strategy": "JSON_SNAPPY_V1",
+            "strategy": "JSON_PLAIN_V1",
             "numberOfFiles": 100,
             "dataSetSizeInChars": 1000,
             "dataSetsPerFile": 1000,

@@ -1,9 +1,12 @@
-package org.jumbodb.benchmark.generator;
+package org.jumbodb.benchmark.generator.job;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.benchmark.generator.DataCollectionGenerator;
+import org.jumbodb.benchmark.generator.SnappyV1DataCollectionGenerator;
 import org.jumbodb.benchmark.generator.config.Collection;
 import org.jumbodb.benchmark.generator.config.GeneratorConfig;
+import org.jumbodb.benchmark.generator.PlainDataCollectionGenerator;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,9 +26,19 @@ public class DataDeliveryGenerator {
         GeneratorConfig config = parseConfigFile(configFile);
 
         for (Collection collection : config.getCollections()) {
-            DataCollectionGenerator dataCollectionGenerator = new DataCollectionGenerator(config.getOutputFolder(), collection.getNumberOfFiles(),
-                    collection.getDataSetsPerFile(), collection.getDataSetSizeInChars(), collection.getName(),
-                    config.getParallelGenerationThreads());
+            DataCollectionGenerator dataCollectionGenerator;
+
+            if("JSON_PLAIN_V1".equals(collection.getStrategy())){
+                dataCollectionGenerator = new PlainDataCollectionGenerator(config.getOutputFolder(),
+                        collection.getNumberOfFiles(), collection.getDataSetsPerFile(), collection.getDataSetSizeInChars(),
+                        collection.getName(), config.getParallelGenerationThreads());
+            } else if("JSON_SNAPPY_V1".equals(collection.getStrategy())){
+                dataCollectionGenerator =  new SnappyV1DataCollectionGenerator(config.getOutputFolder(),
+                        collection.getNumberOfFiles(), collection.getDataSetsPerFile(), collection.getDataSetSizeInChars(),
+                        collection.getName(), config.getParallelGenerationThreads());
+            } else {
+                throw new IllegalStateException("Strategy " + collection.getStrategy() + " does not exist");
+            }
             dataCollectionGenerator.generateData();
         }
     }
@@ -46,6 +59,4 @@ public class DataDeliveryGenerator {
     private static boolean isRequiredParameterPresent(String[] args) {
         return ArrayUtils.getLength(args) == 1;
     }
-
-
 }

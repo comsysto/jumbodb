@@ -1,6 +1,6 @@
 package org.jumbodb.benchmark.generator
 
-
+import org.jumbodb.benchmark.generator.job.DataDeliveryGenerator
 import spock.lang.Specification
 
 
@@ -17,6 +17,7 @@ class DataDeliveryGeneratorSpec extends Specification {
         thrown(IllegalArgumentException.class)
     }
 
+    // ULF fix
     def "data generator starts with valid config file"(){
 //        given:
 //        def fakeConfigFile = File.createTempFile("startup", "");

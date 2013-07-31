@@ -82,29 +82,12 @@ public class ImportTask implements Runnable {
                     File temporaryDataPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion());
                     deleteIfExists(temporaryDataPath);
 
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String deliveryKeyPath = temporaryDataPath + "/" + information.getCollection() + "/";
-                    Properties deliveryInfo = new Properties();
-                    deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
-                    deliveryInfo.setProperty("sourcePath", information.getSourcePath());
-                    deliveryInfo.setProperty("date", sdf.format(new Date()));
-                    deliveryInfo.setProperty("info", information.getInfo());
-                    deliveryInfo.setProperty("strategy", information.getDataStrategy());
-
-
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
-                    mkdirs(deliveryVersionFilePath);
-
                     File deliveryInfoFile = new File(deliveryKeyPath + "/delivery.properties");
-                    FileOutputStream deliveryInfoFos = null;
-                    try {
-                        deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
-                        deliveryInfo.store(deliveryInfoFos, "Delivery Information");
-                    } catch(IOException e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        IOUtils.closeQuietly(deliveryInfoFos);
-                    }
+
+                    mkdirs(deliveryVersionFilePath);
+                    ImportHelper.writeDataDeliveryProperties(information, deliveryInfoFile);
                     // pfad sollte der richtige sein ...
                     File activeDeliveryFile = getFinalActivationFilePath(information.getCollection(), information.getDeliveryKey());//new File(deliveryKeyPath + "/active.properties");
                     if(!activeDeliveryFile.exists()) {
@@ -114,29 +97,12 @@ public class ImportTask implements Runnable {
 
                 @Override
                 public void onCollectionMetaIndex(ImportMetaIndex information) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String deliveryKeyPath = getTemporaryIndexPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/" + information.getIndexName() + "/";
-                    Properties deliveryInfo = new Properties();
-                    deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
-                    deliveryInfo.setProperty("date", sdf.format(new Date()));
-                    deliveryInfo.setProperty("indexName", information.getIndexName());
-                    deliveryInfo.setProperty("strategy", information.getStrategy());
-                    deliveryInfo.setProperty("indexSourceFields", information.getIndexSourceFields());
-
-
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
                     mkdirs(deliveryVersionFilePath);
 
                     File deliveryInfoFile = new File(deliveryKeyPath + "/index.properties");
-                    FileOutputStream deliveryInfoFos = null;
-                    try {
-                        deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
-                        deliveryInfo.store(deliveryInfoFos, "Delivery Information");
-                    } catch(IOException e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        IOUtils.closeQuietly(deliveryInfoFos);
-                    }
+                    ImportHelper.writeIndexProperties(information, deliveryInfoFile);
                 }
 
                 @Override

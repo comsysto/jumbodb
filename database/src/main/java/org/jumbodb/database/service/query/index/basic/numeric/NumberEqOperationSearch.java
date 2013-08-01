@@ -32,7 +32,7 @@ public abstract class NumberEqOperationSearch<T, S, IFV, IF extends NumberSnappy
         int lastFromChunk = -1;
         int lastToChunk = -1;
         // TODO verify snappy version
-        while(lastFromChunk != fromChunk && lastToChunk != toChunk) {
+        while(lastFromChunk != fromChunk && lastToChunk != toChunk || fromChunk == maxChunk) {
             int chunkDiff = (toChunk - fromChunk) / 2;
             int currentChunk = chunkDiff + fromChunk;
 
@@ -66,16 +66,16 @@ public abstract class NumberEqOperationSearch<T, S, IFV, IF extends NumberSnappy
             }
 //            lastInt < searchValue
             else if (lt(lastInt, searchValue)) {
-                if(currentChunk == lastFromChunk && currentChunk == fromChunk) {
-                    return currentChunk;
-                }
+//                if(currentChunk == lastFromChunk && currentChunk == fromChunk) {
+//                    return currentChunk;
+//                }
                 lastFromChunk = fromChunk;
                 fromChunk = currentChunk;
 //                firstInt > searchValue
             } else if(gt(firstInt, searchValue)) {
-                if(currentChunk == lastToChunk && currentChunk == toChunk) {
-                    return currentChunk;
-                }
+//                if(currentChunk == lastToChunk && currentChunk == toChunk) {
+//                    return currentChunk;
+//                }
                 lastToChunk = toChunk;
                 toChunk = currentChunk;
             }

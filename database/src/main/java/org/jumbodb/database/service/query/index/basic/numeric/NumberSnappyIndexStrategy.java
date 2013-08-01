@@ -3,7 +3,6 @@ package org.jumbodb.database.service.query.index.basic.numeric;
 import com.google.common.collect.Maps;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
-import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
@@ -14,7 +13,6 @@ import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.definition.IndexDefinition;
 import org.jumbodb.database.service.query.index.IndexKey;
 import org.jumbodb.database.service.query.index.IndexStrategy;
-import org.jumbodb.database.service.query.index.integer.snappy.*;
 import org.jumbodb.database.service.query.snappy.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +37,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     private CollectionDefinition collectionDefinition;
     private Map<IndexKey, List<IF>> indexFiles;
 
-    private final Map<QueryOperation, OperationSearch<T, IFV, IF>> OPERATIONS = createOperations();
+    protected final Map<QueryOperation, OperationSearch<T, IFV, IF>> OPERATIONS = createOperations();
 
     private Map<QueryOperation, OperationSearch<T, IFV, IF>> createOperations() {
         Map<QueryOperation, OperationSearch<T, IFV, IF>> operations = getQueryOperationsStrategies();
@@ -181,7 +179,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                     bais = new ByteArrayInputStream(uncompressed);
                     dis = new DataInputStream(bais);
                     while(bais.available() > 0) {
-                        T currentValue = readValueFromDataInputStream(dis);
+                        T currentValue = readValueFromDataInput(dis);
                         int fileNameHash = dis.readInt();
                         long offset = dis.readLong();
                         if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
@@ -232,7 +230,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
 
     public abstract Map<QueryOperation, OperationSearch<T, IFV, IF>> getQueryOperationsStrategies();
     public abstract int getSnappyChunkSize();
-    public abstract T readValueFromDataInputStream(DataInputStream dis) throws IOException;
+    public abstract T readValueFromDataInput(DataInput dis) throws IOException;
     public abstract T readLastValue(byte[] uncompressed);
     public abstract T readFirstValue(byte[] uncompressed);
     public abstract IF createIndexFile(T from, T to, File indexFile);

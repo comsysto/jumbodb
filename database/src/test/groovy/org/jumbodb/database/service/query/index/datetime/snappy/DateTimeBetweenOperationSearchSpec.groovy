@@ -78,30 +78,30 @@ class DateTimeBetweenOperationSearchSpec extends spock.lang.Specification {
 
 
 
-//    @Unroll
-//    def "findFirstMatchingChunk #searchDate with expected chunk #expectedChunk"() {
-//        setup:
-//        def file = createFile();
-//        def snappyChunks = createIndexFile(file)
-//        def ramFile = new RandomAccessFile(file, "r")
-//        expect:
-//        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchDate, "2013-01-01 12:00:00"])), snappyChunks) == expectedChunk
-//        cleanup:
-//        ramFile.close()
-//        file.delete();
-//        where:
-//        searchDate            | expectedChunk
-//        "2012-01-01 06:00:00" | 0 // is outside of the generated range
-//        "2012-01-01 12:00:00" | 0
-//        "2012-01-30 12:00:00" | 0
-//        "2012-02-01 12:00:00" | 0   // is equal to starting value has to check a chunk before
-//        "2012-02-01 12:00:01" | 1
-//        "2012-11-15 12:00:00" | 10
-//        "2012-12-01 12:00:00" | 10 // is equal to starting value has to check a chunk before
-//        "2012-12-01 12:00:01" | 11
-//        "2012-12-28 12:00:00" | 11
-//        "2012-12-30 12:00:00" | 11 // is outside of the generated range
-//    }
+    @Unroll
+    def "findFirstMatchingChunk #searchDate with expected chunk #expectedChunk"() {
+        setup:
+        def file = createFile();
+        def snappyChunks = createIndexFile(file)
+        def ramFile = new RandomAccessFile(file, "r")
+        expect:
+        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchDate, "2013-01-01 12:00:00"])), snappyChunks) == expectedChunk
+        cleanup:
+        ramFile.close()
+        file.delete();
+        where:
+        searchDate            | expectedChunk
+        "2012-01-01 06:00:00" | 0 // is outside of the generated range
+        "2012-01-01 12:00:00" | 0
+        "2012-01-30 12:00:00" | 0
+        "2012-02-01 12:00:00" | 0   // is equal to starting value has to check a chunk before
+        "2012-02-01 12:00:01" | 1
+        "2012-11-15 12:00:00" | 10
+        "2012-12-01 12:00:00" | 10 // is equal to starting value has to check a chunk before
+        "2012-12-01 12:00:01" | 11
+        "2012-12-28 12:00:00" | 11
+        "2012-12-30 12:00:00" | 11 // is outside of the generated range
+    }
 
     @Unroll
     def "acceptIndexFile from=#indexFileFrom to=#indexFileTo "() {

@@ -22,9 +22,9 @@ class DateTimeNeOperationSearchSpec extends spock.lang.Specification {
         operation.matching(sdf.parse(testValue).getTime(), operation.getQueryValueRetriever(queryClause)) == isNotEqual
         where:
         value                 | testValue             | isNotEqual
-        "2012-10-01 12:00:00" | "2012-10-01 12:00:00" | true
-        "2012-10-01 12:00:00" | "2012-10-01 12:00:01" | false
-        "2012-10-01 12:00:00" | "2012-10-01 11:59:59" | false
+        "2012-10-01 12:00:00" | "2012-10-01 12:00:00" | false
+        "2012-10-01 12:00:00" | "2012-10-01 12:00:01" | true
+        "2012-10-01 12:00:00" | "2012-10-01 11:59:59" | true
     }
 
     @Unroll

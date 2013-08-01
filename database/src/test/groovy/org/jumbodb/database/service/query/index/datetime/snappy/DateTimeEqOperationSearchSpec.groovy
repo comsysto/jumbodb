@@ -14,7 +14,7 @@ class DateTimeEqOperationSearchSpec extends spock.lang.Specification {
     def operation = new DateTimeEqOperationSearch(new DateTimeSnappyIndexStrategy())
 
     @Unroll
-    def "equal match #value == #testValue > #to == #isEqual"() {
+    def "equal match #value == #testValue == #isEqual"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.EQ, value)
         def sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN)
@@ -23,7 +23,7 @@ class DateTimeEqOperationSearchSpec extends spock.lang.Specification {
         where:
         value                 | testValue             | isEqual
         "2012-10-01 12:00:00" | "2012-10-01 12:00:00" | true
-        "2012-10-01 12:00:00" | "2012-10-01 12:00:00" | true
+        "2012-10-01 12:00:01" | "2012-10-01 12:00:01" | true
         "2012-10-01 12:00:00" | "2012-10-01 12:00:01" | false
         "2012-10-01 12:00:00" | "2012-10-01 11:59:59" | false
     }
@@ -54,7 +54,7 @@ class DateTimeEqOperationSearchSpec extends spock.lang.Specification {
     }
 
     @Unroll
-    def "acceptIndexFile value=#queryValue"() {
+    def "acceptIndexFile value=#queryValue indexFileFrom=#indexFileFrom indexFileTo=#indexFileTo"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.EQ, queryValue)
         def sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN)
@@ -72,7 +72,7 @@ class DateTimeEqOperationSearchSpec extends spock.lang.Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, []))
+        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, "2013-10-01 11:59:59"))
         then:
         valueRetriever instanceof DateTimeQueryValueRetriever
     }

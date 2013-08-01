@@ -14,7 +14,7 @@ class DateTimeGtOperationSearchSpec extends spock.lang.Specification {
     def operation = new DateTimeGtOperationSearch(new DateTimeSnappyIndexStrategy())
 
     @Unroll
-    def "greater match #value > #testValue == #isGreater"() {
+    def "greater match #value < #testValue == #isGreater"() {
         expect:
         def queryClause = new QueryClause(QueryOperation.GT, value)
         def sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN)

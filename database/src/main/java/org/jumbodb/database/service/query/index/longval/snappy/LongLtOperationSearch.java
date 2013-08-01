@@ -23,7 +23,7 @@ public class LongLtOperationSearch extends NumberLtOperationSearch<Long,Long,  N
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Long> snappyIndexFile) {
         Long searchValue = queryValueRetriever.getValue();
-        return searchValue < snappyIndexFile.getTo();
+        return searchValue > snappyIndexFile.getTo() || searchValue > snappyIndexFile.getFrom();
     }
 
     @Override

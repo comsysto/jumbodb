@@ -1,16 +1,32 @@
 package org.jumbodb.database.service.query.index.datetime.snappy
 
+import org.apache.commons.io.FileUtils
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.database.service.importer.ImportHelper
+import org.jumbodb.database.service.importer.ImportMetaFileInformation
+import org.jumbodb.database.service.importer.ImportMetaIndex
+import org.jumbodb.database.service.query.FileOffset
+import org.jumbodb.database.service.query.definition.CollectionDefinition
+import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
+import org.jumbodb.database.service.query.definition.IndexDefinition
+import org.jumbodb.database.service.query.index.IndexKey
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
+import org.jumbodb.database.service.query.snappy.SnappyChunksUtil
+import spock.lang.Specification
+
+import java.text.SimpleDateFormat
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
 
 
 /**
  * @author Carsten Hufe
  */
-class DateTimeSnappyIndexStrategySpec extends spock.lang.Specification {
+class DateTimeSnappyIndexStrategySpec extends Specification {
     def strategy = new DateTimeSnappyIndexStrategy()
 
     def "verify strategy name"() {
@@ -88,49 +104,245 @@ class DateTimeSnappyIndexStrategySpec extends spock.lang.Specification {
         indexFile.getIndexFile() == fileMock
     }
 
-    def "findFileOffsets"() {
-        // TODO
+    def "groupByIndexFile"() {
+        setup:
+        def operationMock = Mock(DateTimeEqOperationSearch)
+        def strategy = new DateTimeSnappyIndexStrategy()
+        def indexFolder = createIndexFolder()
+        def cd = createCollectionDefinition(indexFolder)
+        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        strategy.onInitialize(cd)
+        def queryClause = new QueryClause(QueryOperation.EQ, "2012-06-29 11:34:48")
+        def query = new IndexQuery("testIndex", [queryClause])
+        when:
+        def groupedByIndex = strategy.groupByIndexFile("testCollection", "testChunkKey", query)
+        def keys = groupedByIndex.keySet()
+        def fileKey = keys.iterator().next()
+        then:
+        1 * operationMock.acceptIndexFile(_, _) >> true
+        keys.size() == 1
+        groupedByIndex.get(fileKey).get(0) == queryClause
+        when:
+        groupedByIndex = strategy.groupByIndexFile("testCollection", "testChunkKey", query)
+        keys = groupedByIndex.keySet()
+        then:
+        1 * operationMock.acceptIndexFile(_, _) >> false
+        keys.size() == 0
+        cleanup:
+        indexFolder.delete()
+    }
 
+    def "findFileOffsets"() {
+        setup:
+        def operationMock = Mock(DateTimeEqOperationSearch)
+        def executorMock = Mock(ExecutorService)
+        def futureMock = Mock(Future)
+        def strategy = new DateTimeSnappyIndexStrategy()
+        def indexFolder = createIndexFolder()
+        def cd = createCollectionDefinition(indexFolder)
+        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        strategy.setIndexFileExecutor(executorMock)
+        strategy.onInitialize(cd)
+        def queryClause = new QueryClause(QueryOperation.EQ, "2012-06-29 11:34:48")
+        def query = new IndexQuery("testIndex", [queryClause])
+        def expectedOffsets = ([12345l, 67890l] as Set)
+        when:
+        def fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10)
+        then:
+        1 * operationMock.acceptIndexFile(_, _) >> true
+        1 * futureMock.get() >> expectedOffsets
+        1 * executorMock.submit(_) >> futureMock
+        fileOffsets == expectedOffsets
+        when:
+        fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10)
+        then:
+        1 * operationMock.acceptIndexFile(_, _) >> false
+        0 * executorMock.submit(_) >> futureMock
+        fileOffsets.size() == 0
+        cleanup:
+        indexFolder.delete()
     }
 
     def "searchOffsetsByClauses"() {
-        // TODO
+        // no mocking here, instead a integrated test with equal
+        setup:
+        def strategy = new DateTimeSnappyIndexStrategy()
+        def indexFile = DateTimeDataGeneration.createFile()
+        DateTimeDataGeneration.createIndexFile(indexFile)
+        def queryClause1 = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
+        def queryClause2 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:00")
+        def queryClause3 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:01") // should not exist, so no result for it
+        def queryClause4 = new QueryClause(QueryOperation.EQ, "2012-12-29 11:34:48")
+        when:
+        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5)
+        then:
+        fileOffsets == ([new FileOffset(50000, 1356777388000, []), new FileOffset(50000, 1335866500000, []), new FileOffset(50000, 1325415700000, [])] as Set)
+        cleanup:
+        indexFile.delete()
+    }
+
+    def "findOffsetForClause"() {
+        // no mocking here, instead a integrated test with equal
+        setup:
+        def strategy = new DateTimeSnappyIndexStrategy()
+        def indexFile = DateTimeDataGeneration.createFile()
+        def snappyChunks = DateTimeDataGeneration.createIndexFile(indexFile)
+        def ramFile = new RandomAccessFile(indexFile, "r")
+        when:
+        def queryClause = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
+        def fileOffsets = strategy.findOffsetForClause(ramFile, queryClause, snappyChunks, 5)
+        then:
+        fileOffsets == ([new FileOffset(50000, 1325415700000, [])] as Set)
+        when:
+        queryClause = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:01") // should not exist, so no result for it
+        fileOffsets = strategy.findOffsetForClause(ramFile, queryClause, snappyChunks, 5)
+        then:
+        fileOffsets.size() == 0
+        cleanup:
+        ramFile.close()
+        indexFile.delete()
     }
 
     def "isResponsibleFor"() {
-        // TODO
-
+        setup:
+        def operationMock = Mock(DateTimeEqOperationSearch)
+        def strategy = new DateTimeSnappyIndexStrategy()
+        def indexFolder = createIndexFolder()
+        def cd = createCollectionDefinition(indexFolder)
+        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        strategy.onInitialize(cd)
+        when:
+        def responsible = strategy.isResponsibleFor("testCollection", "testChunkKey", "testIndex")
+        then:
+        responsible
+        when:
+        def notResponsible = !strategy.isResponsibleFor("testCollection", "testChunkKey", "notIn")
+        then:
+        notResponsible
+        cleanup:
+        indexFolder.delete()
     }
 
     def "buildIndexRanges"() {
-        // TODO
-
+        setup:
+        def operationMock = Mock(DateTimeEqOperationSearch)
+        def strategy = new DateTimeSnappyIndexStrategy()
+        def indexFolder = createIndexFolder()
+        def cd = createCollectionDefinition(indexFolder)
+        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        when:
+        strategy.onInitialize(cd)
+        def ranges = strategy.buildIndexRanges()
+        def testIndexFiles = ranges.get(new IndexKey("testCollection", "testChunkKey", "testIndex"))
+        then:
+        ranges.size() == 1
+        testIndexFiles.size() == 1
+        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        sdf.format(new Date(testIndexFiles[0].getFrom())) == "2012-01-01 12:00:00"
+        sdf.format(new Date(testIndexFiles[0].getTo())) == "2012-12-29 11:34:48"
+        cleanup:
+        indexFolder.delete()
     }
 
     def "createIndexFileDescription"() {
-        // TODO
-
+        setup:
+        def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        def indexFile = File.createTempFile("part00001", "odx")
+        def snappyChunks = DateTimeDataGeneration.createIndexFile(indexFile)
+        when:
+        def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
+        then:
+        indexFileDescription.getIndexFile().getName() == indexFile.getName()
+        sdf.format(new Date(indexFileDescription.getFrom())) == "2012-01-01 12:00:00"
+        sdf.format(new Date(indexFileDescription.getTo())) == "2012-12-29 11:34:48"
+        cleanup:
+        indexFile.delete()
     }
 
     def "buildIndexRange"() {
-        // TODO
-
+        setup:
+        def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        def indexFolder = createIndexFolder()
+        when:
+        def indexRange = strategy.buildIndexRange(indexFolder)
+        then:
+        indexRange.size() == 1
+        indexRange[0].getIndexFile().getName() == "part00001.odx"
+        sdf.format(new Date(indexRange[0].getFrom())) == "2012-01-01 12:00:00"
+        sdf.format(new Date(indexRange[0].getTo())) == "2012-12-29 11:34:48"
+        cleanup:
+        indexFolder.delete()
     }
 
     def "onImport"() {
-        // TODO
+        setup:
+        def indexFileContent = DateTimeDataGeneration.createIndexContent()
+        def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
+        def meta = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.INDEX, "part00001.odx", "collection", "testindex", indexFileContent.length, "deliveryKey", "deliveryVersion", "STRATEGY")
+        when:
+        strategy.onImport(meta, new ByteArrayInputStream(indexFileContent), indexFolder)
+        then:
+        new File(indexFolder.getAbsolutePath() + "/part00001.odx").exists()
+        new File(indexFolder.getAbsolutePath() + "/part00001.odx.chunks.snappy").exists()
+        SnappyChunksUtil.getSnappyChunksByFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx")).getLength() == indexFileContent.length
+        cleanup:
+        indexFolder.delete()
 
     }
 
     def "onInitialize"() {
-        // TODO
-
+        setup:
+        def operationMock = Mock(DateTimeEqOperationSearch)
+        def strategy = new DateTimeSnappyIndexStrategy()
+        def indexFolder = createIndexFolder()
+        def cd = createCollectionDefinition(indexFolder)
+        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        when:
+        strategy.onDataChanged(cd)
+        def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
+        then:
+        strategy.getCollectionDefinition() == cd
+        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        sdf.format(new Date(testIndexFiles[0].getFrom())) == "2012-01-01 12:00:00"
+        sdf.format(new Date(testIndexFiles[0].getTo())) == "2012-12-29 11:34:48"
+        cleanup:
+        indexFolder.delete()
     }
 
 
     def "onDataChanged"() {
-        // TODO
+        setup:
+        def operationMock = Mock(DateTimeEqOperationSearch)
+        def strategy = new DateTimeSnappyIndexStrategy()
+        def indexFolder = createIndexFolder()
+        def cd = createCollectionDefinition(indexFolder)
+        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        when:
+        strategy.onDataChanged(cd)
+        def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
+        then:
+        strategy.getCollectionDefinition() == cd
+        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        sdf.format(new Date(testIndexFiles[0].getFrom())) == "2012-01-01 12:00:00"
+        sdf.format(new Date(testIndexFiles[0].getTo())) == "2012-12-29 11:34:48"
+        cleanup:
+        indexFolder.delete()
+    }
 
+    def createIndexFolder() {
+        def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
+        indexFolder.mkdirs()
+        DateTimeDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx"))
+        indexFolder
+    }
+
+    def createCollectionDefinition(indexFolder) {
+        def index = new IndexDefinition("testIndex", indexFolder, "DATETIME_SNAPPY_V1")
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [index], [:], "DATETIME_SNAPPY_V1")]]
+        new CollectionDefinition(cdMap)
     }
 
 

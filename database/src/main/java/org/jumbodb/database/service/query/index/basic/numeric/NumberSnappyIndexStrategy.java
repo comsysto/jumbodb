@@ -74,7 +74,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         return false;
     }
 
-    private Map<IndexKey, List<IF>> buildIndexRanges() {
+    protected Map<IndexKey, List<IF>> buildIndexRanges() {
         Map<IndexKey, List<IF>> result = Maps.newHashMap();
         for (String collection : collectionDefinition.getCollections()) {
             for (DeliveryChunkDefinition deliveryChunkDefinition : collectionDefinition.getChunks(collection)) {
@@ -86,12 +86,10 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                 }
             }
         }
-
-
         return result;
     }
 
-    private List<IF> buildIndexRange(File indexFolder) {
+    protected List<IF> buildIndexRange(File indexFolder) {
         List<IF> result = new LinkedList<IF>();
         File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".odx"));
         for (File indexFile : indexFiles) {
@@ -103,7 +101,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         return result;
     }
 
-    private IF createIndexFileDescription(File indexFile, SnappyChunks snappyChunks) {
+    protected IF createIndexFileDescription(File indexFile, SnappyChunks snappyChunks) {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(indexFile, "r");
@@ -156,12 +154,12 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         return groupByIndexFile;
     }
 
-    private List<IF> getIndexFiles(String collection, String chunkKey, IndexQuery query) {
+    protected List<IF> getIndexFiles(String collection, String chunkKey, IndexQuery query) {
         return indexFiles.get(new IndexKey(collection, chunkKey, query.getName()));
     }
 
 
-    private Set<FileOffset> findOffsetForClause(RandomAccessFile indexRaf, QueryClause clause, SnappyChunks snappyChunks, int queryLimit) throws IOException {
+    protected Set<FileOffset> findOffsetForClause(RandomAccessFile indexRaf, QueryClause clause, SnappyChunks snappyChunks, int queryLimit) throws IOException {
         OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(clause.getQueryOperation());
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + clause.getQueryOperation());
@@ -245,5 +243,13 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     @Required
     public void setIndexFileExecutor(ExecutorService indexFileExecutor) {
         this.indexFileExecutor = indexFileExecutor;
+    }
+
+    protected CollectionDefinition getCollectionDefinition() {
+        return collectionDefinition;
+    }
+
+    protected Map<IndexKey, List<IF>> getIndexFiles() {
+        return indexFiles;
     }
 }

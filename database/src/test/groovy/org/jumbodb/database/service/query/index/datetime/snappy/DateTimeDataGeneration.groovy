@@ -2,6 +2,8 @@ package org.jumbodb.database.service.query.index.datetime.snappy
 
 import org.apache.commons.lang.time.DateUtils
 import org.jumbodb.database.service.query.snappy.SnappyChunks
+import org.jumbodb.database.service.query.snappy.SnappyChunksUtil
+import org.jumbodb.database.service.query.snappy.SnappyStreamToFileCopy
 import org.xerial.snappy.SnappyOutputStream
 
 /**
@@ -12,18 +14,9 @@ class DateTimeDataGeneration {
         File.createTempFile("randomindex", "odx")
     }
 
-    def static createIndexFile(file) {
-        def chunks = new LinkedList<Integer>()
-        def fos = new FileOutputStream(file)  {
-            @Override
-            public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
-                chunks.add(i2);
-                super.write(bytes, i, i2);
-            }
-        }
-        def chunkSize = 32000
-        def sos = new SnappyOutputStream(fos, chunkSize)
-        def dos = new DataOutputStream(sos)
+    def static createIndexContent() {
+        def fos = new ByteArrayOutputStream()
+        def dos = new DataOutputStream(fos)
 
         // write 12 blocks, one per month
 
@@ -42,11 +35,14 @@ class DateTimeDataGeneration {
             }
         }
         dos.close()
-        sos.close()
         fos.close()
+        fos.toByteArray()
+    }
 
+    def static createIndexFile(file) {
+        def chunkSize = 32000
         def umcompressedFileLength = 20 * 12 * 1600 // index entry length * 12 months * datasets per month
-        chunks.remove(0) // snappy meta data
-        new SnappyChunks(umcompressedFileLength, chunkSize, 12, chunks)
+        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
+        SnappyChunksUtil.getSnappyChunksByFile(file)
     }
 }

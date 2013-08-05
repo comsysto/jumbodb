@@ -1,7 +1,78 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy
 
+import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import java.text.SimpleDateFormat
+
 /**
  * @author Carsten Hufe
  */
-class DoubleBetweenOperationSearchSpec {
+class DoubleBetweenOperationSearchSpec extends Specification {
+    def operation = new DoubleBetweenOperationSearch(new DoubleSnappyIndexStrategy())
+
+    @Unroll
+    def "between match #from < #testValue > #to == #isBetween"() {
+        expect:
+        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
+
+        operation.matching(testValue, operation.getQueryValueRetriever(queryClause)) == isBetween
+        where:
+        from | to | testValue | isBetween
+        1d   | 5d | 2d        | true
+        1d   | 5d | 0.99d     | false
+        1d   | 5d | 1d        | false
+        1d   | 5d | 5d        | false
+        1d   | 5d | 1.01d     | true
+        1d   | 5d | 4.99d     | true
+    }
+
+    @Unroll
+    def "findFirstMatchingChunk #searchValue with expected chunk #expectedChunk"() {
+        setup:
+        def file = DoubleDataGeneration.createFile();
+        def snappyChunks = DoubleDataGeneration.createIndexFile(file)
+        def ramFile = new RandomAccessFile(file, "r")
+        expect:
+        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 20000d])), snappyChunks) == expectedChunk
+        cleanup:
+        ramFile.close()
+        file.delete();
+        where:
+        searchValue | expectedChunk
+        -1d         | 0 // is outside of the generated range
+        0d          | 0
+        1d          | 0
+        1600d       | 0   // is equal to starting value has to check a chunk before
+        1601d       | 1
+        12801d      | 8
+        14400d      | 8 // is equal to starting value has to check a chunk before
+        14401d      | 9
+        15999d      | 9
+        20000d      | 9 // is outside of the generated range
+    }
+
+    @Unroll
+    def "acceptIndexFile from=#indexFileFrom to=#indexFileTo "() {
+        expect:
+        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(queryFrom, queryTo))
+        def indexFile = new NumberSnappyIndexFile<Double>(indexFileFrom, indexFileTo, Mock(File));
+        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        where:
+        queryFrom | queryTo | indexFileFrom | indexFileTo | accept
+        1d        | 10d     | 1.01d         | 9.99d       | true
+        1d        | 10d     | 1d            | 10d         | false
+        1d        | 10d     | 1.01d         | 10d         | true
+        1d        | 10d     | 1d            | 9.99d       | false
+    }
+
+    def "getQueryValueRetriever"() {
+        when:
+        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, []))
+        then:
+        valueRetriever instanceof DoubleBetweenQueryValueRetriever
+    }
 }

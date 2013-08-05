@@ -8,6 +8,7 @@ import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +41,7 @@ public class LongSnappyIndexStrategy extends NumberSnappyIndexStrategy<Long, Lon
     }
 
     @Override
-    public Long readValueFromDataInputStream(DataInputStream dis) throws IOException {
+    public Long readValueFromDataInput(DataInput dis) throws IOException {
         return dis.readLong();
     }
 

@@ -70,7 +70,7 @@ public class DataStrategyManager {
                 return strategy;
             }
         }
-        throw new IllegalStateException("Should not be reached, because NotFoundIndexStrategy should be set automatically");
+        throw new IllegalStateException("Should not be reached, because NotFoundDataStrategy should be set automatically");
     }
 
     private Map<String, DataStrategy> buildStrategiesByName(List<DataStrategy> strategies){

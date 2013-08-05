@@ -55,4 +55,12 @@ public class FileOffset implements Comparable<FileOffset> {
         result = 31 * result + (jsonQueries != null ? jsonQueries.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "FileOffset{" +
+                "fileNameHash=" + fileNameHash +
+                ", offset=" + offset +
+                '}';
+    }
 }

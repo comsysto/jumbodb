@@ -85,13 +85,9 @@ public class ImportTask implements Runnable {
                     File temporaryDataPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion());
                     deleteIfExists(temporaryDataPath);
 
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String deliveryKeyPath = temporaryDataPath + "/" + information.getCollection() + "/";
                     DeliveryProperties.DeliveryMeta meta = new DeliveryProperties.DeliveryMeta(information.getDeliveryVersion(), information.getSourcePath(), sdf.format(new Date()), information.getInfo(), information.getDataStrategy());
-
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
-                    mkdirs(deliveryVersionFilePath);
-
                     File deliveryInfoFile = new File(deliveryKeyPath + "/" + DeliveryProperties.DEFAULT_FILENAME);
                     DeliveryProperties.write(deliveryInfoFile, meta);
                     // pfad sollte der richtige sein ...
@@ -103,7 +99,6 @@ public class ImportTask implements Runnable {
 
                 @Override
                 public void onCollectionMetaIndex(ImportMetaIndex information) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String deliveryKeyPath = getTemporaryIndexPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/" + information.getIndexName() + "/";
 //                    Properties deliveryInfo = new Properties();
                     IndexProperties.IndexMeta meta = new IndexProperties.IndexMeta(information.getDeliveryVersion(), sdf.format(new Date()), information.getIndexName(), information.getStrategy(), information.getIndexSourceFields());

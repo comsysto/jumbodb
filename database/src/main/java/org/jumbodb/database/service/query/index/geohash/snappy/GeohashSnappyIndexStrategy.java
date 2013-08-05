@@ -6,6 +6,7 @@ import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexS
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch;
 import org.jumbodb.data.common.snappy.SnappyUtil;
 
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +34,7 @@ public class GeohashSnappyIndexStrategy extends NumberSnappyIndexStrategy<Geohas
     }
 
     @Override
-    public GeohashCoords readValueFromDataInputStream(DataInputStream dis) throws IOException {
+    public GeohashCoords readValueFromDataInput(DataInput dis) throws IOException {
         return new GeohashCoords(dis.readInt(), dis.readFloat(), dis.readFloat());
     }
 

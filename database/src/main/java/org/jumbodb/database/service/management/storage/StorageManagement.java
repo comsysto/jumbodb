@@ -240,13 +240,7 @@ public class StorageManagement {
     }
 
     private Date getDateForVersion(File versionFolder) {
-        String date = DeliveryProperties.getDate(getDeliveryPropertiesFile(versionFolder));
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        try {
-            return sdf.parse(date);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        return DeliveryProperties.getDate(getDeliveryPropertiesFile(versionFolder));
     }
 
     private void activateDeliveryVersion(String version, File activeDeliveryFile) {
@@ -327,7 +321,7 @@ public class StorageManagement {
         long uncompressedSize = loadSizes ? getUncompressedSize(deliveryVersionFolder) : 0l;
         long indexSize = loadSizes ? getIndexSize(collectionName, chunkKey, version) : 0l;
         boolean active = activeVersion.equals(version);
-        return new DeliveryVersion(version, deliveryMeta.getInfo(), deliveryMeta.getDate(), compressedSize, uncompressedSize, indexSize, active);
+        return new DeliveryVersion(version, deliveryMeta.getInfo(), dateToString(deliveryMeta.getDate()), compressedSize, uncompressedSize, indexSize, active);
     }
 
     private File getDeliveryPropertiesFile(File deliveryVersionFolder) {
@@ -428,7 +422,7 @@ public class StorageManagement {
                     long compressedSize = calculateCompressedSize(versionFolder);
                     long uncompressedSize = getUncompressedSize(versionFolder);
                     long indexSize = getIndexSize(collectionName, chunkKey, version);
-                    versionedJumboCollections.add(new VersionedJumboCollection(collectionName, version, chunkKey, meta.getInfo(), meta.getDate(), meta.getSourcePath(), meta.getStrategy(), active, compressedSize, uncompressedSize, indexSize));
+                    versionedJumboCollections.add(new VersionedJumboCollection(collectionName, version, chunkKey, meta.getInfo(), dateToString(meta.getDate()), meta.getSourcePath(), meta.getStrategy(), active, compressedSize, uncompressedSize, indexSize));
                 }
             }
 
@@ -474,9 +468,14 @@ public class StorageManagement {
         List<CollectionIndex> result = new LinkedList<CollectionIndex>();
         for (File indexFolder : indexFolders) {
             IndexProperties.IndexMeta props = IndexProperties.getIndexMeta(new File(indexFolder.getAbsolutePath() + "/" + IndexProperties.DEFAULT_FILENAME));
-            result.add(new CollectionIndex(indexFolder.getName(), props.getDate(), props.getIndexSourceFields(), props.getStrategy()));
+            result.add(new CollectionIndex(indexFolder.getName(), dateToString(props.getDate()), props.getIndexSourceFields(), props.getStrategy()));
         }
         return result;
+    }
+
+    private String dateToString(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(DeliveryProperties.DATE_PATTERN);
+        return sdf.format(date);
     }
 
     private File findCollectionChunkedVersionIndexFolder(String collectionName, String deliveryChunkKey, String version) {

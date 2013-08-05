@@ -1,10 +1,12 @@
 package org.jumbodb.data.common.meta;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.UnhandledException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -13,6 +15,7 @@ import java.util.Properties;
  * @author Carsten Hufe
  */
 public class IndexProperties {
+    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm";
     public static final String DEFAULT_FILENAME = "index.properties";
 
     public static String getStrategy(File indexPropsFile) {
@@ -21,19 +24,25 @@ public class IndexProperties {
     }
 
     public static IndexMeta getIndexMeta(File file) {
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties properties = PropertiesHelper.loadProperties(file);
         String deliveryVersion = properties.getProperty("deliveryVersion");
         String date = properties.getProperty("date");
         String indexName = properties.getProperty("indexName");
         String strategy = properties.getProperty("strategy");
         String indexSourceFields = properties.getProperty("indexSourceFields");
-        return  new IndexMeta(deliveryVersion, date, indexName, strategy, indexSourceFields);
+        try {
+            return  new IndexMeta(deliveryVersion, sdf.parse(date), indexName, strategy, indexSourceFields);
+        } catch (ParseException e) {
+            throw new UnhandledException(e);
+        }
     }
 
     public static void write(File deliveryInfoFile, IndexMeta indexMeta) {
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties indexInfo = new Properties();
         indexInfo.setProperty("deliveryVersion", indexMeta.getDeliveryVersion());
-        indexInfo.setProperty("date", indexMeta.getDate());
+        indexInfo.setProperty("date", sdf.format(indexMeta.getDate()));
         indexInfo.setProperty("indexName", indexMeta.getIndexName());
         indexInfo.setProperty("strategy", indexMeta.getStrategy());
         indexInfo.setProperty("indexSourceFields", indexMeta.getIndexSourceFields());
@@ -51,12 +60,12 @@ public class IndexProperties {
 
     public static class IndexMeta {
         private String deliveryVersion;
-        private String date;
+        private Date date;
         private String indexName;
         private String strategy;
         private String indexSourceFields;
 
-        public IndexMeta(String deliveryVersion, String date, String indexName, String strategy, String indexSourceFields) {
+        public IndexMeta(String deliveryVersion, Date date, String indexName, String strategy, String indexSourceFields) {
             this.deliveryVersion = deliveryVersion;
             this.date = date;
             this.indexName = indexName;
@@ -68,7 +77,7 @@ public class IndexProperties {
             return deliveryVersion;
         }
 
-        public String getDate() {
+        public Date getDate() {
             return date;
         }
 

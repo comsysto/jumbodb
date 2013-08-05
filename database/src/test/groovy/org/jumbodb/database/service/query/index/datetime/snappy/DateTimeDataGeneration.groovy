@@ -1,9 +1,8 @@
 package org.jumbodb.database.service.query.index.datetime.snappy
 
 import org.apache.commons.lang.time.DateUtils
-import org.jumbodb.database.service.query.snappy.SnappyChunks
-import org.jumbodb.database.service.query.snappy.SnappyChunksUtil
-import org.jumbodb.database.service.query.snappy.SnappyStreamToFileCopy
+import org.jumbodb.data.common.snappy.SnappyChunksUtil
+import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
 import org.xerial.snappy.SnappyOutputStream
 
 /**

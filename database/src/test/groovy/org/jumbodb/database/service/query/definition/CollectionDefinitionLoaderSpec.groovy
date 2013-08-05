@@ -1,6 +1,8 @@
 package org.jumbodb.database.service.query.definition
 
-import org.jumbodb.database.service.importer.ImportHelper
+import org.jumbodb.data.common.meta.ActiveProperties
+import org.jumbodb.data.common.meta.DeliveryProperties
+import org.jumbodb.data.common.meta.IndexProperties
 import org.jumbodb.database.service.importer.ImportMetaData
 import org.jumbodb.database.service.importer.ImportMetaIndex
 
@@ -19,13 +21,13 @@ class CollectionDefinitionLoaderSpec extends spock.lang.Specification {
         new File(versionPath + "part0001.chunks.snappy").createNewFile()
         new File(versionPath + "part0002").createNewFile()
         new File(versionPath + "part0002.chunks.snappy").createNewFile()
-        def metaData = new ImportMetaData(collection, chunkKey, version, "TEST_STRATEGY", "Data imported from", "Some info")
-        ImportHelper.writeDataDeliveryProperties(metaData, new File(versionPath + "/delivery.properties"))
+        def metaData = new DeliveryProperties.DeliveryMeta(version, "Some info", new Date(), "Data imported from", "TEST_STRATEGY")
+        DeliveryProperties.write(new File(versionPath + "/delivery.properties"), metaData)
     }
 
     def writeActiveProperties(collection, chunkKey, version) {
         def chunkKeyPath = dataPath.absolutePath + "/" + collection + "/" + chunkKey + "/"
-        ImportHelper.writeActiveFile(new File(chunkKeyPath + "/active.properties"), version);
+        ActiveProperties.writeActiveFile(new File(chunkKeyPath + "/active.properties"), version);
     }
 
     def createIndexCollectionVersion(collection, chunkKey, version) {
@@ -44,10 +46,10 @@ class CollectionDefinitionLoaderSpec extends spock.lang.Specification {
         new File(index2Path + "part0002.odx").createNewFile()
         new File(index2Path + "part0002.odx.chunks.snappy").createNewFile()
 
-        def indexMeta1 = new ImportMetaIndex(collection, chunkKey, version, "index1", "INDEX1_STRATEGY", "some index source field1")
-        ImportHelper.writeIndexProperties(indexMeta1, new File(index1Path + "/index.properties"))
-        def indexMeta2 = new ImportMetaIndex(collection, chunkKey, version, "index2", "INDEX2_STRATEGY", "some index source field2")
-        ImportHelper.writeIndexProperties(indexMeta2, new File(index2Path + "/index.properties"))
+        def indexMeta1 = new IndexProperties.IndexMeta(version, new Date(), "index1", "INDEX1_STRATEGY", "some index source field1")
+        IndexProperties.write(new File(index1Path + "/index.properties"), indexMeta1)
+        def indexMeta2 = new IndexProperties.IndexMeta(version, new Date(), "index2", "INDEX2_STRATEGY", "some index source field2")
+        IndexProperties.write(new File(index2Path + "/index.properties"), indexMeta2)
     }
 
     def "verify loaded data structure"() {

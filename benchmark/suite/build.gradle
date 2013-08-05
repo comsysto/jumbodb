@@ -1,0 +1,52 @@
+defaultTasks 'build'
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'project-reports'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+group = 'org.jumbodb.benchmark.suite'
+archivesBaseName = 'jumbodb-benchmark-suite'
+
+repositories {
+    mavenCentral()
+}
+
+
+configurations {
+    // this scope extracts the files and copies it into he same jar file, because ou can just use one jar file in emr
+}
+
+dependencies {
+    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+//    compile "org.apache.hadoop:hadoop-core:1.0.3"
+    compile 'commons-io:commons-io:2.3'
+    compile 'commons-lang:commons-lang:2.5'
+    compile 'commons-collections:commons-collections:3.2.1'
+    compile 'com.google.guava:guava:13.0'
+    compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
+//    compile 'net.minidev:json-smart:2.0-RC2'
+
+    testCompile "junit:junit:4.10"
+    testCompile "org.mockito:mockito-core:1.9.0"
+}
+
+mainClassName = "org.jumbodb.benchmark.suite.BenchmarkSuiteRunner"
+
+eclipse {
+    classpath {
+        downloadSources = true
+        downloadJavadoc = false
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+    }
+}

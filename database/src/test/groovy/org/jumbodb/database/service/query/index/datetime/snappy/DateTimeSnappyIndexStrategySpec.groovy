@@ -1,12 +1,10 @@
 package org.jumbodb.database.service.query.index.datetime.snappy
 
-import org.apache.commons.io.FileUtils
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.database.service.importer.ImportHelper
+import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.importer.ImportMetaFileInformation
-import org.jumbodb.database.service.importer.ImportMetaIndex
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
@@ -15,7 +13,6 @@ import org.jumbodb.database.service.query.index.IndexKey
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
-import org.jumbodb.database.service.query.snappy.SnappyChunksUtil
 import spock.lang.Specification
 
 import java.text.SimpleDateFormat

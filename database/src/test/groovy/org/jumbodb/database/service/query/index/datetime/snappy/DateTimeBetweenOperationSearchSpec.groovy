@@ -1,12 +1,8 @@
 package org.jumbodb.database.service.query.index.datetime.snappy
 
-import org.apache.commons.lang.time.DateUtils
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
-import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
-import org.jumbodb.database.service.query.snappy.SnappyChunks
-import org.xerial.snappy.SnappyOutputStream
 import spock.lang.Unroll
 
 import java.text.SimpleDateFormat

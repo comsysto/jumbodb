@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.snappy
 
-import org.jumbodb.database.service.importer.ImportMetaFileInformation
-import org.jumbodb.database.service.query.data.snappy.JsonSnappyDataStrategy
+import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
 import org.xerial.snappy.SnappyInputStream
 
 /**

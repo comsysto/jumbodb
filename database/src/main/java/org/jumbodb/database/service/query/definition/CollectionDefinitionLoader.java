@@ -1,10 +1,12 @@
 package org.jumbodb.database.service.query.definition;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.jumbodb.data.common.meta.ActiveProperties;
+import org.jumbodb.data.common.meta.DeliveryProperties;
+import org.jumbodb.data.common.meta.IndexProperties;
 
 import java.io.*;
 import java.util.*;
@@ -40,30 +42,13 @@ public class CollectionDefinitionLoader {
 
     private static DeliveryChunkDefinition getDataDataDeliveryChunk(File indexPath, File dataCollectionFolder, String collectionName, String chunkKey) {
         String dataDeliveryKeyFolder = dataCollectionFolder.getAbsolutePath() + "/" + chunkKey + "/";
-        Properties activeProps = loadProperties(new File(dataDeliveryKeyFolder + "active.properties"));
-        String deliveryVersion = activeProps.getProperty("deliveryVersion");
+        String deliveryVersion = ActiveProperties.getActiveDeliveryVersion(new File(dataDeliveryKeyFolder + ActiveProperties.DEFAULT_FILENAME));
 
         String dataDeliveryVersionFolder = dataDeliveryKeyFolder + deliveryVersion + "/";
         String indexDeliveryVersionFolder = indexPath.getAbsolutePath() + "/" + collectionName + "/" + chunkKey + "/" + deliveryVersion + "/";
         return createDeliveryChunk(collectionName, chunkKey, new File(indexDeliveryVersionFolder), new File(dataDeliveryVersionFolder));
     }
 
-    public static Properties loadProperties(File file) {
-        Properties props = new Properties();
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(file);
-            props.load(fis);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            IOUtils.closeQuietly(fis);
-        }
-        return props;
-
-    }
 
     private static DeliveryChunkDefinition createDeliveryChunk(String collectionName, String chunkKey, File collectionIndexFolder, File collectionDataFolder) {
         File[] indexFolders = collectionIndexFolder.listFiles(FOLDER_INSTANCE);
@@ -86,12 +71,10 @@ public class CollectionDefinitionLoader {
     }
 
     private static String getIndexStrategy(File indexFolder) {
-        Properties properties = loadProperties(new File(indexFolder.getAbsolutePath() + "/index.properties"));
-        return properties.getProperty("strategy");
+        return IndexProperties.getStrategy(new File(indexFolder.getAbsolutePath() + "/" + IndexProperties.DEFAULT_FILENAME));
     }
 
     private static String getDataStrategy(File dataFolder) {
-        Properties properties = loadProperties(new File(dataFolder.getAbsolutePath() + "/delivery.properties"));
-        return properties.getProperty("strategy");
+        return DeliveryProperties.getStrategy(new File(dataFolder.getAbsolutePath() + "/" + DeliveryProperties.DEFAULT_FILENAME));
     }
 }

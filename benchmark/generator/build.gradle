@@ -1,0 +1,75 @@
+defaultTasks 'build'
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'project-reports'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+apply plugin: 'groovy'
+
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+group = 'org.jumbodb.benchmark.generator'
+archivesBaseName = 'jumbodb-benchmark-generator'
+
+repositories {
+    mavenCentral()
+}
+
+
+configurations {
+    // this scope extracts the files and copies it into he same jar file, because ou can just use one jar file in emr
+}
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/resources'
+            srcDir 'src/main/java'
+        }
+    }
+    test {
+        resources {
+            srcDir 'src/test/resources'
+            srcDir 'src/test/java'
+            srcDir 'src/test/groovy'
+        }
+    }
+}
+
+dependencies {
+    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+    compile "org.springframework:spring-context:$springVersion"
+//    compile "org.apache.hadoop:hadoop-core:1.0.3"
+    compile 'commons-io:commons-io:2.3'
+    compile 'commons-lang:commons-lang:2.5'
+    compile 'commons-collections:commons-collections:3.2.1'
+    compile 'com.google.guava:guava:13.0'
+    compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
+    compile project(':commons:data')
+//    compile 'net.minidev:json-smart:2.0-RC2'
+
+    groovy "org.codehaus.groovy:groovy-all:1.8.6"
+
+    testCompile "org.spockframework:spock-core:0.6-groovy-1.8"
+    testCompile "junit:junit:4.10"
+    testCompile "org.mockito:mockito-core:1.9.0"
+    testCompile 'cglib:cglib:2.2.2'
+}
+
+mainClassName = "org.jumbodb.benchmark.generator.job.DataDeliveryGenerator"
+
+eclipse {
+    classpath {
+        downloadSources = true
+        downloadJavadoc = false
+    }
+}
+
+
+idea {
+    module {
+        downloadSources = true
+    }
+}

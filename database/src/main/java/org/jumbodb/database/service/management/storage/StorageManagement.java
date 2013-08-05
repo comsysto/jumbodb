@@ -19,8 +19,10 @@ import org.jumbodb.connector.importer.DataInfo;
 import org.jumbodb.connector.importer.IndexInfo;
 import org.jumbodb.connector.importer.MetaData;
 import org.jumbodb.connector.importer.MetaIndex;
+import org.jumbodb.data.common.meta.ActiveProperties;
+import org.jumbodb.data.common.meta.DeliveryProperties;
+import org.jumbodb.data.common.meta.IndexProperties;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
-import org.jumbodb.database.service.importer.ImportHelper;
 import org.jumbodb.database.service.management.storage.dto.collections.DeliveryChunk;
 import org.jumbodb.database.service.management.storage.dto.collections.DeliveryVersion;
 import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
@@ -212,11 +214,11 @@ public class StorageManagement {
 
 
     public String getActiveDeliveryVersion(String collection, String chunkDeliveryKey) {
-        return ImportHelper.getActiveDeliveryVersion(getActiveDeliveryFile(collection, chunkDeliveryKey));
+        return ActiveProperties.getActiveDeliveryVersion(getActiveDeliveryFile(collection, chunkDeliveryKey));
     }
 
     private File getActiveDeliveryFile(String collection, String chunkDeliveryKey) {
-        return new File(getDataPath().getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/active.properties");
+        return new File(getDataPath().getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/" + ActiveProperties.DEFAULT_FILENAME);
     }
 
     private String findAppropriateInactiveVersionToActivate(String collection, String deliveryChunkKey) {
@@ -238,42 +240,13 @@ public class StorageManagement {
     }
 
     private Date getDateForVersion(File versionFolder) {
-        String date = getDate(versionFolder);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        try {
-            return sdf.parse(date);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String getDate(File versionFolder) {
-        Properties activeProps = getDeliveryProperties(versionFolder);
-        return activeProps.getProperty("date");
-    }
-
-    private Properties getIndexProperties(File indexFolder) {
-        try {
-            String deliveryPropsPath = indexFolder.getAbsolutePath() + "/index.properties";
-            return PropertiesLoaderUtils.loadProperties(new FileSystemResource(deliveryPropsPath));
-        } catch (IOException e) {
-            throw new UnhandledException(e);
-        }
-    }
-
-    private Properties getDeliveryProperties(File versionFolder) {
-        try {
-            String deliveryPropsPath = versionFolder.getAbsolutePath() + "/delivery.properties";
-            return PropertiesLoaderUtils.loadProperties(new FileSystemResource(deliveryPropsPath));
-        } catch (IOException e) {
-            throw new UnhandledException(e);
-        }
+        return DeliveryProperties.getDate(getDeliveryPropertiesFile(versionFolder));
     }
 
     private void activateDeliveryVersion(String version, File activeDeliveryFile) {
 //        System.out.println("Mock: Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
         log.info("Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
-        ImportHelper.writeActiveFile(activeDeliveryFile, version);
+        ActiveProperties.writeActiveFile(activeDeliveryFile, version);
     }
 
     public File getIndexPath() {
@@ -343,14 +316,16 @@ public class StorageManagement {
 
     private DeliveryVersion getDeliveryVersion(File deliveryVersionFolder, String collectionName, String chunkKey, String activeVersion, boolean loadSizes) {
         String version = deliveryVersionFolder.getName();
-        Properties deliveryProperties = getDeliveryProperties(deliveryVersionFolder);
-        String info = deliveryProperties.getProperty("info");
-        String date = deliveryProperties.getProperty("date");
+        DeliveryProperties.DeliveryMeta deliveryMeta = DeliveryProperties.getDeliveryMeta(getDeliveryPropertiesFile(deliveryVersionFolder));
         long compressedSize = loadSizes ? calculateCompressedSize(deliveryVersionFolder) : 0l;
         long uncompressedSize = loadSizes ? getUncompressedSize(deliveryVersionFolder) : 0l;
         long indexSize = loadSizes ? getIndexSize(collectionName, chunkKey, version) : 0l;
         boolean active = activeVersion.equals(version);
-        return new DeliveryVersion(version, info, date, compressedSize, uncompressedSize, indexSize, active);
+        return new DeliveryVersion(version, deliveryMeta.getInfo(), dateToString(deliveryMeta.getDate()), compressedSize, uncompressedSize, indexSize, active);
+    }
+
+    private File getDeliveryPropertiesFile(File deliveryVersionFolder) {
+        return new File(deliveryVersionFolder.getAbsolutePath() + "/" + DeliveryProperties.DEFAULT_FILENAME);
     }
 
     private long getUncompressedSize(File deliveryVersionFolder) {
@@ -442,16 +417,12 @@ public class StorageManagement {
                 File[] versionFolders = deliveryChunkFolder.listFiles(FOLDER_FILTER);
                 for (File versionFolder : versionFolders) {
                     String version = versionFolder.getName();
-                    Properties deliveryProperties = getDeliveryProperties(versionFolder);
-                    String info = deliveryProperties.getProperty("info");
-                    String date = deliveryProperties.getProperty("date");
-                    String sourcePath = deliveryProperties.getProperty("sourcePath");
-                    String strategy = deliveryProperties.getProperty("strategy");
+                    DeliveryProperties.DeliveryMeta meta = DeliveryProperties.getDeliveryMeta(getDeliveryPropertiesFile(versionFolder));
                     boolean active = activeVersion.equals(version);
                     long compressedSize = calculateCompressedSize(versionFolder);
                     long uncompressedSize = getUncompressedSize(versionFolder);
                     long indexSize = getIndexSize(collectionName, chunkKey, version);
-                    versionedJumboCollections.add(new VersionedJumboCollection(collectionName, version, chunkKey, info, date, sourcePath, strategy, active, compressedSize, uncompressedSize, indexSize));
+                    versionedJumboCollections.add(new VersionedJumboCollection(collectionName, version, chunkKey, meta.getInfo(), dateToString(meta.getDate()), meta.getSourcePath(), meta.getStrategy(), active, compressedSize, uncompressedSize, indexSize));
                 }
             }
 
@@ -496,10 +467,15 @@ public class StorageManagement {
         }
         List<CollectionIndex> result = new LinkedList<CollectionIndex>();
         for (File indexFolder : indexFolders) {
-            Properties props = getIndexProperties(indexFolder);
-            result.add(new CollectionIndex(indexFolder.getName(), props.getProperty("date"), props.getProperty("indexSourceFields"), props.getProperty("strategy")));
+            IndexProperties.IndexMeta props = IndexProperties.getIndexMeta(new File(indexFolder.getAbsolutePath() + "/" + IndexProperties.DEFAULT_FILENAME));
+            result.add(new CollectionIndex(indexFolder.getName(), dateToString(props.getDate()), props.getIndexSourceFields(), props.getStrategy()));
         }
         return result;
+    }
+
+    private String dateToString(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(DeliveryProperties.DATE_PATTERN);
+        return sdf.format(date);
     }
 
     private File findCollectionChunkedVersionIndexFolder(String collectionName, String deliveryChunkKey, String version) {

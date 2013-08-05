@@ -93,3 +93,10 @@ eclipse {
         downloadJavadoc = false
     }
 }
+
+
+idea {
+    module {
+        downloadSources = true
+    }
+}

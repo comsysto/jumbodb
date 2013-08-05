@@ -6,8 +6,7 @@ import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
-import org.jumbodb.database.service.query.snappy.SnappyStreamToFileCopy
-import org.xerial.snappy.SnappyOutputStream
+import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
 import spock.lang.Unroll
 
 /**

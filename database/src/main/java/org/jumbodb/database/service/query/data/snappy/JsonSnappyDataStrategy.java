@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.data.snappy;
 
 import com.google.common.collect.HashMultimap;
-import org.apache.commons.io.IOUtils;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
@@ -11,12 +10,10 @@ import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
-import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch;
-import org.jumbodb.database.service.query.snappy.SnappyStreamToFileCopy;
+import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
-import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.util.*;

@@ -1,5 +1,8 @@
 package org.jumbodb.database.service.query.snappy;
 
+import org.jumbodb.data.common.snappy.SnappyChunks;
+import org.jumbodb.data.common.snappy.SnappyChunksUtil;
+
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 

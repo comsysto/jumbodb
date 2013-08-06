@@ -3,10 +3,6 @@ package org.jumbodb.database.service.query.index.longval.snappy
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
-import org.jumbodb.database.service.query.index.doubleval.snappy.DoubleBetweenOperationSearch
-import org.jumbodb.database.service.query.index.doubleval.snappy.DoubleBetweenQueryValueRetriever
-import org.jumbodb.database.service.query.index.doubleval.snappy.DoubleDataGeneration
-import org.jumbodb.database.service.query.index.doubleval.snappy.DoubleSnappyIndexStrategy
 import spock.lang.Specification
 import spock.lang.Unroll
 

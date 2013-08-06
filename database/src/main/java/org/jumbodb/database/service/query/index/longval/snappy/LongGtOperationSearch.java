@@ -13,9 +13,9 @@ public class LongGtOperationSearch extends LongEqOperationSearch {
     }
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Long> hashCodeSnappyIndexFile) {
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Long> snappyIndexFile) {
         Long searchValue = queryValueRetriever.getValue();
-        return searchValue < hashCodeSnappyIndexFile.getFrom() || searchValue < hashCodeSnappyIndexFile.getTo();
+        return searchValue < snappyIndexFile.getFrom() || searchValue < snappyIndexFile.getTo();
     }
 
     @Override

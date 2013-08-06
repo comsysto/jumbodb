@@ -70,7 +70,7 @@ class IntegerEqOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, 5l))
+        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, 5))
         then:
         valueRetriever instanceof IntegerQueryValueRetriever
     }

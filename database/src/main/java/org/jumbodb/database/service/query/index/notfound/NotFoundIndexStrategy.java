@@ -24,7 +24,7 @@ public class NotFoundIndexStrategy implements IndexStrategy {
 
     @Override
     public String getStrategyName() {
-        return "NOT_FOUND";  //To change body of implemented methods use File | Settings | File Templates.
+        return "NOT_FOUND";
     }
 
     @Override

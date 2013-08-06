@@ -13,9 +13,6 @@ import org.jumbodb.database.service.query.index.IndexKey
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
-import org.jumbodb.database.service.query.index.floatval.snappy.FloatDataGeneration
-import org.jumbodb.database.service.query.index.floatval.snappy.FloatEqOperationSearch
-import org.jumbodb.database.service.query.index.floatval.snappy.FloatSnappyIndexStrategy
 import spock.lang.Specification
 
 import java.util.concurrent.ExecutorService
@@ -343,7 +340,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(IntegerEqOperationSearch)
         def numberSnappyIndexFile = Mock(NumberSnappyIndexFile)
-        def clause = new QueryClause(QueryOperation.EQ, 5f)
+        def clause = new QueryClause(QueryOperation.EQ, 5)
         def valueRetriever = Mock(QueryValueRetriever)
         def strategy = new IntegerSnappyIndexStrategy()
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -371,7 +368,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
             }
         }
         when:
-        strategy.acceptIndexFile(new QueryClause(QueryOperation.EQ, 5f), Mock(NumberSnappyIndexFile))
+        strategy.acceptIndexFile(new QueryClause(QueryOperation.EQ, 5), Mock(NumberSnappyIndexFile))
         then:
         thrown UnsupportedOperationException
     }

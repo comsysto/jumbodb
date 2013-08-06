@@ -12,7 +12,7 @@ import spock.lang.Unroll
  */
 class DoubleBetweenQueryValueRetrieverSpec extends Specification {
     @Unroll
-    def "verify date long parsing #queryValue"() {
+    def "verify double parsing #queryValue"() {
         expect:
         def retriever = new DoubleBetweenQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, queryValue))
         retriever.getValue() == converted

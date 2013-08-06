@@ -13,12 +13,8 @@ import org.jumbodb.database.service.query.index.IndexKey
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeDataGeneration
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeEqOperationSearch
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeSnappyIndexStrategy
 import spock.lang.Specification
 
-import java.text.SimpleDateFormat
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 

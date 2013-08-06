@@ -6,7 +6,6 @@ import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexF
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.text.SimpleDateFormat
 
 /**
  * @author Carsten Hufe

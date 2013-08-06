@@ -3,10 +3,6 @@ package org.jumbodb.database.service.query.index.doubleval.snappy
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeDataGeneration
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeGtOperationSearch
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeQueryValueRetriever
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeSnappyIndexStrategy
 import spock.lang.Specification
 import spock.lang.Unroll
 

@@ -14,16 +14,18 @@ class HashCode32EqOperationSearchSpec extends Specification {
     def operation = new HashCode32EqOperationSearch(new HashCode32SnappyIndexStrategy())
 
     @Unroll
-    def "equal match #value == #testValue == #isEqual"() {
+    def "equal match #hashCodeValue == #testValue == #isEqual"() {
+        setup:
+        def queryRetrieverMock = Mock(QueryValueRetriever)
+        queryRetrieverMock.getValue() >> hashCodeValue
         expect:
-        def queryClause = new QueryClause(QueryOperation.EQ, value)
-        operation.matching(testValue, operation.getQueryValueRetriever(queryClause)) == isEqual
+        operation.matching(testValue, queryRetrieverMock) == isEqual
         where:
-        value | testValue | isEqual
-        -123  | -123      | true
-        123   | 123       | true
-        123   | 124       | false
-        123   | 122       | false
+        hashCodeValue | testValue | isEqual
+        -123          | -123      | true
+        123           | 123       | true
+        123           | 124       | false
+        123           | 122       | false
     }
 
     @Unroll

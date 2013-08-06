@@ -16,7 +16,19 @@ public class HashCode64QueryValueRetriever implements QueryValueRetriever {
     private Long value;
 
     public HashCode64QueryValueRetriever(QueryClause queryClause) {
-        value = HashCode64.hash((String) queryClause.getValue());
+        Object objValue = queryClause.getValue();
+        if(objValue instanceof String) {
+            value = HashCode64.hash((String) objValue);
+        }
+        else if(objValue instanceof Long) {
+            value = (Long) objValue;
+        }
+        else if(objValue instanceof Double) {
+            value = Double.doubleToLongBits((Double)objValue);
+        }
+        else {
+            throw new IllegalArgumentException("Value type " + objValue.getClass() + " for HashCode64 is not supported");
+        }
     }
 
     @Override

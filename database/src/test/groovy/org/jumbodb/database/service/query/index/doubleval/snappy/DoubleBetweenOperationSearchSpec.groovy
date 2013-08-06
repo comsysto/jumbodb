@@ -43,16 +43,18 @@ class DoubleBetweenOperationSearchSpec extends Specification {
         file.delete();
         where:
         searchValue | expectedChunk
-        -1d         | 0 // is outside of the generated range
+        -1700d      | 0 // is outside of the generated range
+        -1599d      | 0
+        -1d         | 0
         0d          | 0
-        1d          | 0
-        1600d       | 0   // is equal to starting value has to check a chunk before
-        1601d       | 1
-        12801d      | 8
-        14400d      | 8 // is equal to starting value has to check a chunk before
-        14401d      | 9
-        15999d      | 9
-        20000d      | 9 // is outside of the generated range
+        1d          | 1
+        1600d       | 1   // is equal to starting value has to check a chunk before
+        1601d       | 2
+        12801d      | 9
+        14400d      | 9 // is equal to starting value has to check a chunk before
+        14401d      | 10
+        15999d      | 10
+        20000d      | 10 // is outside of the generated range
     }
 
     @Unroll

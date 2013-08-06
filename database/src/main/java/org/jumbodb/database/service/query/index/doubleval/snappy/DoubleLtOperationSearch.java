@@ -23,7 +23,7 @@ public class DoubleLtOperationSearch extends NumberLtOperationSearch<Double, Dou
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Double> snappyIndexFile) {
         Double searchValue = queryValueRetriever.getValue();
-        return searchValue < snappyIndexFile.getTo();
+        return searchValue > snappyIndexFile.getTo() || searchValue > snappyIndexFile.getFrom();
     }
 
     @Override

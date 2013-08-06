@@ -15,7 +15,7 @@ public class DoubleGtOperationSearch extends DoubleEqOperationSearch {
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Double> snappyIndexFile) {
         Double searchValue = queryValueRetriever.getValue();
-        return searchValue > snappyIndexFile.getFrom();
+        return searchValue < snappyIndexFile.getFrom() || searchValue < snappyIndexFile.getTo();
     }
 
     @Override

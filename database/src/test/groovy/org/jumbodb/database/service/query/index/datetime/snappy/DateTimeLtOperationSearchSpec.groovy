@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.datetime.snappy
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.text.SimpleDateFormat
@@ -10,7 +11,7 @@ import java.text.SimpleDateFormat
 /**
  * @author Carsten Hufe
  */
-class DateTimeLtOperationSearchSpec extends spock.lang.Specification {
+class DateTimeLtOperationSearchSpec extends Specification {
     def operation = new DateTimeLtOperationSearch(new DateTimeSnappyIndexStrategy())
 
     @Unroll
@@ -57,7 +58,7 @@ class DateTimeLtOperationSearchSpec extends spock.lang.Specification {
         expect:
         def queryClause = new QueryClause(QueryOperation.LT, queryValue)
         def sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN)
-        def indexFile = new NumberSnappyIndexFile<Long>(sdf.parse(indexFileFrom).getTime(), sdf.parse(indexFileTo).getTime(), Mock(File));
+        def indexFile = new NumberSnappyIndexFile<Long>(sdf.parse(indexFileFrom).getTime(), sdf.parse(indexFileTo).getTime(), Mock(File))
         operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
         where:
         queryValue            | indexFileFrom         | indexFileTo           | accept

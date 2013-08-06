@@ -20,8 +20,8 @@ class DoubleDataGeneration {
 
         def fileHash = 50000
         def offsetBase = 100000
-        def i = 0
-        for(chunks in 1..10) {
+        def i = -1600
+        for(chunks in 1..11) {
             for(datasetInChunk in 1..1600) {
                 dos.writeDouble(i)
                 dos.writeInt(fileHash)

@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.datetime.snappy
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.text.SimpleDateFormat
@@ -10,7 +11,7 @@ import java.text.SimpleDateFormat
 /**
  * @author Carsten Hufe
  */
-class DateTimeNeOperationSearchSpec extends spock.lang.Specification {
+class DateTimeNeOperationSearchSpec extends Specification {
     def operation = new DateTimeNeOperationSearch(new DateTimeSnappyIndexStrategy())
 
     @Unroll

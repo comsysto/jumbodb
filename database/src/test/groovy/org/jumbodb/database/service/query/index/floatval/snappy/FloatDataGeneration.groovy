@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.longval.snappy
+package org.jumbodb.database.service.query.index.floatval.snappy
 
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
@@ -6,7 +6,7 @@ import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
 /**
  * @author Carsten Hufe
  */
-class LongDataGeneration {
+class FloatDataGeneration {
     def static createFile() {
         File.createTempFile("randomindex", "odx")
     }
@@ -19,10 +19,10 @@ class LongDataGeneration {
 
         def fileHash = 50000
         def offsetBase = 100000
-        def i = -1600
+        def i = -2048
         for(chunks in 1..11) {
-            for(datasetInChunk in 1..1600) {
-                dos.writeLong(i)
+            for(datasetInChunk in 1..2048) {
+                dos.writeFloat(i)
                 dos.writeInt(fileHash)
                 dos.writeLong(i + offsetBase)
                 i++
@@ -34,8 +34,8 @@ class LongDataGeneration {
     }
 
     def static createIndexFile(file) {
-        def chunkSize = 32000
-        def umcompressedFileLength = 20 * 11 * 1600 // index entry length * 11 chunks * datasets per chunk
+        def chunkSize = 32768
+        def umcompressedFileLength = 16 * 11 * 2048 // index entry length * 12 chunks * datasets per chunk
         SnappyStreamToFileCopy.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
     }

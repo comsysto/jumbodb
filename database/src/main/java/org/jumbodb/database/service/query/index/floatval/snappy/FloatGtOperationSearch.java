@@ -15,7 +15,7 @@ public class FloatGtOperationSearch extends FloatEqOperationSearch {
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Float> snappyIndexFile) {
         Float searchValue = queryValueRetriever.getValue();
-        return searchValue > snappyIndexFile.getFrom();
+        return searchValue < snappyIndexFile.getFrom() || searchValue < snappyIndexFile.getTo();
     }
 
     @Override

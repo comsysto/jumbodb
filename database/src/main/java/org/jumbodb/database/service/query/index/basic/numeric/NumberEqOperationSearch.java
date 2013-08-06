@@ -26,7 +26,7 @@ public abstract class NumberEqOperationSearch<T, S, IFV, IF extends NumberSnappy
         int numberOfChunks = snappyChunks.getNumberOfChunks();
         int fromChunk = 0;
         int toChunk = numberOfChunks;
-        int maxChunk = numberOfChunks - 1;
+//        int maxChunk = numberOfChunks - 1;
         int lastFromChunk = -1;
         int lastToChunk = -1;
         // TODO verify snappy version

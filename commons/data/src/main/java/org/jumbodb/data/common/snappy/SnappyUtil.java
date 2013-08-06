@@ -43,7 +43,7 @@ public class SnappyUtil {
     }
 
     public static float readFloat(byte[] buffer, int pos) {
-        long val = readInt(buffer, pos);
-        return Float.floatToIntBits(val);
+        int val = readInt(buffer, pos);
+        return Float.intBitsToFloat(val);
     }
 }

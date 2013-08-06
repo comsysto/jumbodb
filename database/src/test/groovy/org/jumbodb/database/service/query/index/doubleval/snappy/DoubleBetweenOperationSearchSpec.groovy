@@ -28,6 +28,7 @@ class DoubleBetweenOperationSearchSpec extends Specification {
         1d   | 5d | 5d        | false
         1d   | 5d | 1.01d     | true
         1d   | 5d | 4.99d     | true
+        1d   | 5d | 5.01d     | false
     }
 
     @Unroll

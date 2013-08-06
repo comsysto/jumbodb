@@ -16,7 +16,7 @@ class DoubleDataGeneration {
         def fos = new ByteArrayOutputStream()
         def dos = new DataOutputStream(fos)
 
-        // write 12 chunks
+        // write 11 chunks
 
         def fileHash = 50000
         def offsetBase = 100000
@@ -36,7 +36,7 @@ class DoubleDataGeneration {
 
     def static createIndexFile(file) {
         def chunkSize = 32000
-        def umcompressedFileLength = 20 * 12 * 1600 // index entry length * 12 chunks * datasets per chunk
+        def umcompressedFileLength = 20 * 11 * 1600 // index entry length * 11 chunks * datasets per chunk
         SnappyStreamToFileCopy.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
     }

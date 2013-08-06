@@ -23,7 +23,7 @@ public class FloatLtOperationSearch extends NumberLtOperationSearch<Float, Float
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Float> snappyIndexFile) {
         Float searchValue = queryValueRetriever.getValue();
-        return searchValue < snappyIndexFile.getTo();
+        return searchValue > snappyIndexFile.getTo() || searchValue > snappyIndexFile.getFrom();
     }
 
     @Override

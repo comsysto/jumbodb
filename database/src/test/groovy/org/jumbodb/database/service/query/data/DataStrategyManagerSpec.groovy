@@ -2,11 +2,12 @@ package org.jumbodb.database.service.query.data
 
 import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
+import spock.lang.Specification
 
 /**
  * @author Carsten Hufe
  */
-class DataStrategyManagerSpec extends spock.lang.Specification {
+class DataStrategyManagerSpec extends Specification {
 
     def "get strategy by strategy key"() {
         setup:

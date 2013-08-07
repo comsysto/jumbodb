@@ -78,7 +78,7 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1f, 2f], [3f, 4f]]))
+        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1f, 2f], 5]))
         then:
         valueRetriever instanceof GeohashWithingRangeMeterQueryValueRetriever
     }

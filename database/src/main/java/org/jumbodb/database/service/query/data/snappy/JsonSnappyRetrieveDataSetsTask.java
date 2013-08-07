@@ -11,8 +11,7 @@ import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.data.common.snappy.SnappyChunks;
-import org.jumbodb.data.common.snappy.SnappyChunksUtil;
-import org.jumbodb.database.service.query.snappy.SnappyChunksWithCache;
+import org.jumbodb.data.common.snappy.SnappyChunksWithCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

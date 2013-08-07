@@ -49,6 +49,6 @@ public class NotFoundIndexStrategy implements IndexStrategy {
 
     @Override
     public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
-        throw new RuntimeException("Strategy " + information.getStrategy() + " was not found!");
+        throw new UnsupportedOperationException("Strategy " + information.getStrategy() + " was not found!");
     }
 }

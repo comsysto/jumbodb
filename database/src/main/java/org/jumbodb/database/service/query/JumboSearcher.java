@@ -1,6 +1,5 @@
 package org.jumbodb.database.service.query;
 
-import com.google.common.collect.HashMultimap;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.IndexQuery;
@@ -13,12 +12,11 @@ import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
-import org.jumbodb.database.service.query.snappy.SnappyChunksWithCache;
+import org.jumbodb.data.common.snappy.SnappyChunksWithCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 

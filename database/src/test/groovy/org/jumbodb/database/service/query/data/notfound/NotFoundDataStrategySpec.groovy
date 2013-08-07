@@ -5,11 +5,12 @@ import org.jumbodb.database.service.importer.ImportMetaFileInformation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
+import spock.lang.Specification
 
 /**
  * @author Carsten Hufe
  */
-class NotFoundDataStrategySpec extends spock.lang.Specification {
+class NotFoundDataStrategySpec extends Specification {
     def strategy = new NotFoundDataStrategy()
 
     def "strategy should always be responsible because it's the last strategy"() {

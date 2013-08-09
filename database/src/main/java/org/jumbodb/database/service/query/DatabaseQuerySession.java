@@ -61,8 +61,6 @@ public class DatabaseQuerySession implements Closeable {
                 resultWriter.datasetsFinished();
                 dataOutputStream.writeInt(-1); // After -1 command follows
                 dataOutputStream.writeUTF(":result:end");
-                dataOutputStream.flush();
-                snappyOutputStream.flush();
             }
         } catch(JumboCollectionMissingException e) {
             log.warn("Handled error through query", e);
@@ -87,6 +85,8 @@ public class DatabaseQuerySession implements Closeable {
             dataOutputStream.writeUTF(":error:unknown");
             dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.toString());
         } finally {
+            dataOutputStream.flush();
+            snappyOutputStream.flush();
             resultWriter.forceCleanup();
         }
     }

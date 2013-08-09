@@ -38,11 +38,10 @@ public class QueryServer {
     public void start() throws Exception {
         serverActive = true;
         serverSocket = new ServerSocket(config.getQueryPort());
-        serverSocketExecutor.submit(new Thread() {
+        new Thread() {
             @Override
             public void run() {
                 try {
-
                     int id = 0;
                     log.info("QueryServer started");
                     log.info("Configuration " + config.toString());
@@ -53,15 +52,16 @@ public class QueryServer {
                     log.info("QueryServer stopped");
                 } catch (Exception e) {
                     log.error("Unknown error: ", e);
+                } finally {
+                    serverActive = false;
                 }
             }
-        });
+        }.start();
     }
 
-//    @Override
-//    public void restart() {
-//        jumboSearcher.restart();
-//    }
+    protected void setServerSocketExecutor(ExecutorService serverSocketExecutor) {
+        this.serverSocketExecutor = serverSocketExecutor;
+    }
 
     public void stop() throws IOException {
         serverActive = false;

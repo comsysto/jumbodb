@@ -1,9 +1,11 @@
 package org.jumbodb.database.configuration
 
+import spock.lang.Specification
+
 /**
  * @author Carsten Hufe
  */
-class JumboConfigurationLoaderSpec extends spock.lang.Specification {
+class JumboConfigurationLoaderSpec extends Specification {
     def "load default configuration"() {
         // TODO
     }

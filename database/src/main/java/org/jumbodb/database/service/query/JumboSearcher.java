@@ -40,13 +40,19 @@ public class JumboSearcher {
     public void onInitialize() {
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        onDataChanged();
+        this.collectionDefinition = getCollectionDefinition();
+        this.indexStrategyManager.onInitialize(collectionDefinition);
+        this.dataStrategyManager.onInitialize(collectionDefinition);
+    }
+
+    protected CollectionDefinition getCollectionDefinition() {
+        return CollectionDefinitionLoader.loadCollectionDefinition(jumboConfiguration.getDataPath(), jumboConfiguration.getIndexPath());
     }
 
     public void onDataChanged() {
-        this.collectionDefinition = CollectionDefinitionLoader.loadCollectionDefinition(jumboConfiguration.getDataPath(), jumboConfiguration.getIndexPath());
-        this.indexStrategyManager.onInitialize(collectionDefinition);
-        this.dataStrategyManager.onInitialize(collectionDefinition);
+        this.collectionDefinition = getCollectionDefinition();
+        this.indexStrategyManager.onDataChanged(collectionDefinition);
+        this.dataStrategyManager.onDataChanged(collectionDefinition);
         SnappyChunksWithCache.clearCache();
     }
 
@@ -108,7 +114,7 @@ public class JumboSearcher {
         }
     }
 
-    private class SearchDeliveryChunkTask implements Callable<Integer> {
+    protected class SearchDeliveryChunkTask implements Callable<Integer> {
         private DeliveryChunkDefinition deliveryChunk;
         private JumboQuery searchQuery;
         private ResultCallback resultCallback;

@@ -1,7 +1,50 @@
 package org.jumbodb.database.service.queryutil
 
+import org.jumbodb.common.query.JumboQuery
+import org.jumbodb.database.service.query.JumboSearcher
+import spock.lang.Specification
+
 /**
  * @author Carsten Hufe
  */
-class QueryUtilServiceSpec {
+class QueryUtilServiceSpec extends Specification {
+
+    def "findDocumentsByQuery"() {
+        setup:
+        def jumboSearcherMock = Mock(JumboSearcher)
+        def queryUtilService = new QueryUtilService()
+        queryUtilService.setJumboSearcher(jumboSearcherMock)
+        def query = """
+        { "indexQuery": [], "jsonQuery": [], "limit": 10}
+        """
+        when:
+        def queryResult = queryUtilService.findDocumentsByQuery("testCollection", query)
+        then:
+        queryResult.getMessage() == null
+        queryResult.getResults()[0] == [sample: "result", anumber: 4]
+        queryResult.getResults()[1] == [sample: "another result", anumber: 6]
+        1 * jumboSearcherMock.findResultAndWriteIntoCallback("testCollection", _, _) >> {  collection, jumboQuery, resultWriter ->
+            resultWriter.writeResult("""{"sample": "result", "anumber": 4}""".getBytes("UTF-8"))
+            resultWriter.writeResult("""{"sample": "another result", "anumber": 6}""".getBytes("UTF-8"))
+            return 2
+        }
+    }
+
+    def "on IOException"() {
+        setup:
+        def jumboSearcherMock = Mock(JumboSearcher)
+        def queryUtilService = new QueryUtilService()
+        queryUtilService.setJumboSearcher(jumboSearcherMock)
+        def query = """
+        { "indexQuery": [], "jsonQuery": [], "limit": 10}
+        """
+        when:
+        def queryResult = queryUtilService.findDocumentsByQuery("testCollection", query)
+        then:
+        queryResult.getResults() == null
+        queryResult.getMessage() == "test exception"
+        1 * jumboSearcherMock.findResultAndWriteIntoCallback("testCollection", _, _) >> {  collection, jumboQuery, resultWriter ->
+            throw new IOException("test exception")
+        }
+    }
 }

@@ -1,9 +1,11 @@
 package org.jumbodb.database.service.importer
 
+import spock.lang.Specification
+
 /**
  * @author Carsten Hufe
  */
-class DatabaseImportSessionSpec extends spock.lang.Specification {
+class DatabaseImportSessionSpec extends Specification {
     def "onImport Event"() {
         // TODO
     }

@@ -16,12 +16,17 @@ import java.util.Set;
  * Time: 10:30 AM
  */
 public class JumboConfigurationLoader {
-    public static Properties loadConfiguration() throws IOException {
+    private File globalConfigFile;
+
+    public JumboConfigurationLoader(File globalConfigFile) {
+        this.globalConfigFile = globalConfigFile;
+    }
+
+    public Properties loadConfiguration() throws IOException {
         Properties properties = new Properties();
         PropertiesLoaderUtils.fillProperties(properties, new ClassPathResource("org/jumbodb/database/service/jumbodb.conf"));
-        File file = new File("/etc/jumbodb.conf");
-        if(file.exists()) {
-            PropertiesLoaderUtils.fillProperties(properties, new FileSystemResource(file));
+        if(globalConfigFile.exists()) {
+            PropertiesLoaderUtils.fillProperties(properties, new FileSystemResource(globalConfigFile));
         }
         String jumboConfig = System.getProperty("jumbodb.config");
         if (StringUtils.isNotEmpty(jumboConfig)) {

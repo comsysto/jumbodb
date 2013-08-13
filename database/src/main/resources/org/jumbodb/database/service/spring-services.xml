@@ -14,7 +14,11 @@
     <context:component-scan base-package="org.jumbodb.database.service" />
 
 
-    <bean id="jumboConfigProperties" class="org.jumbodb.database.configuration.JumboConfigurationLoader" factory-method="loadConfiguration"/>
+    <bean id="jumboConfigLoader" class="org.jumbodb.database.configuration.JumboConfigurationLoader">
+        <constructor-arg value="/etc/jumbodb.conf"/>
+    </bean>
+
+    <bean id="jumboConfigProperties" factory-bean="jumboConfigLoader" factory-method="loadConfiguration"/>
 
     <context:property-placeholder
             properties-ref="jumboConfigProperties"

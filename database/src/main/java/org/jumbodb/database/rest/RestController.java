@@ -13,6 +13,7 @@ import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilCo
 import org.jumbodb.database.service.queryutil.QueryUtilService;
 import org.jumbodb.database.service.queryutil.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,13 +29,9 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "/rest")
 public class RestController {
-    @Autowired
     private StatusService statusService;
-    @Autowired
     private StorageManagement storageManagement;
-    @Autowired
     private ExportDeliveryService exportDeliveryService;
-    @Autowired
     private QueryUtilService queryUtilService;
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
@@ -121,7 +118,7 @@ public class RestController {
     @ResponseBody
     public Message abortReplications(@PathVariable String id) {
         exportDeliveryService.stopReplication(id);
-        return new Message("delete", "Replication was aborted.");
+        return new Message("abort", "Replication was aborted.");
     }
 
     @RequestMapping(value = "/replication/{id}", method = RequestMethod.DELETE)
@@ -131,5 +128,23 @@ public class RestController {
         return new Message("delete", "Replication was deleted.");
     }
 
+    @Autowired
+    public void setStatusService(StatusService statusService) {
+        this.statusService = statusService;
+    }
 
+    @Autowired
+    public void setStorageManagement(StorageManagement storageManagement) {
+        this.storageManagement = storageManagement;
+    }
+
+    @Autowired
+    public void setExportDeliveryService(ExportDeliveryService exportDeliveryService) {
+        this.exportDeliveryService = exportDeliveryService;
+    }
+
+    @Autowired
+    public void setQueryUtilService(QueryUtilService queryUtilService) {
+        this.queryUtilService = queryUtilService;
+    }
 }

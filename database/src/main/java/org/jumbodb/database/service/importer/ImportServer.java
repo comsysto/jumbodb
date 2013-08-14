@@ -60,13 +60,17 @@ public class ImportServer {
     }
 
     public void stop() throws IOException {
-        serverSocket.close();
         serverActive = false;
         executorService.shutdown();
+        serverSocket.close();
     }
 
     public boolean isServerActive() {
         return serverActive;
+    }
+
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 }
 

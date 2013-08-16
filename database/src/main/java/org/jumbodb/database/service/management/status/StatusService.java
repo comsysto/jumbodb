@@ -57,6 +57,7 @@ public class StatusService {
         status.setIndexDiskTotalSpace(format.format(indexDiskTotalSpace / divideMB) + " MB");
         status.setIndexDiskUsedSpacePerc((double)(((indexDiskTotalSpace - indexDiskFreeSpace) * 100) / indexDiskTotalSpace));
         status.setIndexDiskUsedSpace(format.format((indexDiskTotalSpace - indexDiskFreeSpace) / divideMB) + " MB");
+        status.setStorageFormatVersion("not yet available");
         return status;
     }
 }

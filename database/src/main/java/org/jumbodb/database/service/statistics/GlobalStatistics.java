@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.statistics;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * User: carsten
@@ -9,24 +10,24 @@ import java.util.Date;
  */
 // CARSTEN make spring bean
 public class GlobalStatistics {
-    private static long numberOfQueries = 0l;
-    private static long numberOfResults = 0l;
+    private static AtomicLong numberOfQueries = new AtomicLong(0l);
+    private static AtomicLong numberOfResults = new AtomicLong(0l);
     private static Date startupTime = new Date();
 
-    public synchronized static void incNumberOfQueries(long numberOfQueries) {
-        GlobalStatistics.numberOfQueries += numberOfQueries;
+    public static void incNumberOfQueries(long numberOfQueries) {
+        GlobalStatistics.numberOfQueries.addAndGet(numberOfQueries);
     }
 
-    public synchronized static void incNumberOfResults(long numberOfResults) {
-        GlobalStatistics.numberOfResults += numberOfResults;
+    public static void incNumberOfResults(long numberOfResults) {
+        GlobalStatistics.numberOfResults.addAndGet(numberOfResults);
     }
 
     public static long getNumberOfQueries() {
-        return numberOfQueries;
+        return numberOfQueries.get();
     }
 
     public static long getNumberOfResults() {
-        return numberOfResults;
+        return numberOfResults.get();
     }
 
     public static Date getStartupTime() {

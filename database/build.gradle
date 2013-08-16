@@ -88,8 +88,7 @@ dependencies {
     groovy "org.codehaus.groovy:groovy-all:2.0.8"
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
 
-    testCompile 'junit:junit:4.10'
-    testCompile 'org.mockito:mockito-all:1.9.0'
+    testCompile "org.mockito:mockito-core:1.9.5"
 
 //    providedCompile 'javax.servlet:jsp-api:2.0'
     providedCompile "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"

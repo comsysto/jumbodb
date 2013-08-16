@@ -15,7 +15,7 @@ import java.util.Properties;
  * @author Carsten Hufe
  */
 public class IndexProperties {
-    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm";
+    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm";  // TODO support seconds
     public static final String DEFAULT_FILENAME = "index.properties";
 
     public static String getStrategy(File indexPropsFile) {

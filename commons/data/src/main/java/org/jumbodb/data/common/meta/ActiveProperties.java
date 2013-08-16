@@ -35,45 +35,4 @@ public class ActiveProperties {
             IOUtils.closeQuietly(activeDeliveryFos);
         }
     }
-
-
-//    public static void writeIndexProperties(ImportMetaIndex information, File deliveryInfoFile) {
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//        Properties deliveryInfo = new Properties();
-//        deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
-//        deliveryInfo.setProperty("date", sdf.format(new Date()));
-//        deliveryInfo.setProperty("indexName", information.getIndexName());
-//        deliveryInfo.setProperty("strategy", information.getStrategy());
-//        deliveryInfo.setProperty("indexSourceFields", information.getIndexSourceFields());
-//
-//        FileOutputStream deliveryInfoFos = null;
-//        try {
-//            deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
-//            deliveryInfo.store(deliveryInfoFos, "Delivery Information");
-//        } catch(IOException e) {
-//            throw new RuntimeException(e);
-//        } finally {
-//            IOUtils.closeQuietly(deliveryInfoFos);
-//        }
-//    }
-//
-//    public static void writeDataDeliveryProperties(ImportMetaData information, File deliveryInfoFile) {
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//        Properties deliveryInfo = new Properties();
-//        deliveryInfo.setProperty("deliveryVersion", information.getDeliveryVersion());
-//        deliveryInfo.setProperty("sourcePath", information.getSourcePath());
-//        deliveryInfo.setProperty("date", sdf.format(new Date()));
-//        deliveryInfo.setProperty("info", information.getInfo());
-//        deliveryInfo.setProperty("strategy", information.getDataStrategy());
-//        FileOutputStream deliveryInfoFos = null;
-//        try {
-//            deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
-//            deliveryInfo.store(deliveryInfoFos, "Delivery Information");
-//        } catch(IOException e) {
-//            throw new RuntimeException(e);
-//        } finally {
-//            IOUtils.closeQuietly(deliveryInfoFos);
-//
-//        }
-//    }
 }

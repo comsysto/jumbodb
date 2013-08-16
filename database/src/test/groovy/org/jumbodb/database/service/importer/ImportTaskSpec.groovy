@@ -260,7 +260,7 @@ class ImportTaskSpec extends Specification {
         1 * importSessionMock.runImport(_) >> { importHandler ->
             importHandler[0].onFinished("test_delivery_key", "test_version")
         }
-
+        1 * jumboSearcherMock.onDataChanged()
         new File(dataDir.getAbsolutePath() + "/test_collection/test_delivery_key/active.properties").exists() == true
         tmpActivationFile.exists() == false
         new File(indexDir.getAbsolutePath() + "/test_collection/test_delivery_key/test_version/test_index_name/index.properties").exists() == true

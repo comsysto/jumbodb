@@ -38,7 +38,7 @@ public class IndexProperties {
         }
     }
 
-    public static void write(File deliveryInfoFile, IndexMeta indexMeta) {
+    public static void write(File indexFile, IndexMeta indexMeta) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties indexInfo = new Properties();
         indexInfo.setProperty("deliveryVersion", indexMeta.getDeliveryVersion());
@@ -49,7 +49,7 @@ public class IndexProperties {
 
         FileOutputStream deliveryInfoFos = null;
         try {
-            deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
+            deliveryInfoFos = new FileOutputStream(indexFile);
             indexInfo.store(deliveryInfoFos, "Index Information");
         } catch(IOException e) {
             throw new RuntimeException(e);

@@ -493,6 +493,7 @@ public class StorageManagement {
     public List<IndexInfo> getIndexInfoForDelivery(List<MetaIndex> metaIndex) {
         List<IndexInfo> result = new LinkedList<IndexInfo>();
         for (MetaIndex index : metaIndex) {
+            // TODO fix me implementation details of strategy
             File indexFolder = findCollectionChunkedVersionIndexFolder(index.getCollection(), index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexName());
             FilenameFilter ioFileFilter = FileFilterUtils.suffixFileFilter(".odx");
             File[] files = indexFolder.listFiles(ioFileFilter);
@@ -504,6 +505,7 @@ public class StorageManagement {
         return result;
     }
 
+    // TODO fix me implementation details of strategy
     public List<DataInfo> getDataInfoForDelivery(List<MetaData> metaDatas) {
         List<DataInfo> result = new LinkedList<DataInfo>();
         IOFileFilter notChunksSnappy = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".chunks.snappy"));

@@ -46,7 +46,7 @@ public class ImportTask implements Runnable {
         log.info("ImportServer - Accepted Client : ID - " + clientID + " : Address - " + clientSocket.getInetAddress().getHostName());
         DatabaseImportSession databaseImportSession = null;
         try {
-            databaseImportSession = new DatabaseImportSession(clientSocket, clientID);
+            databaseImportSession = createDatabaseImportSession();
             databaseImportSession.runImport(new ImportHandler() {
                 @Override
                 public boolean existsDeliveryVersion(String deliveryKey, String deliveryVersion) {
@@ -188,7 +188,12 @@ public class ImportTask implements Runnable {
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(databaseImportSession);
+            IOUtils.closeQuietly(clientSocket);
         }
+    }
+
+    protected DatabaseImportSession createDatabaseImportSession() throws IOException {
+        return new DatabaseImportSession(clientSocket, clientID);
     }
 
     private File getFinalIndexPath(String collection, String indexName, String deliveryKey, String deliveryVersion) {

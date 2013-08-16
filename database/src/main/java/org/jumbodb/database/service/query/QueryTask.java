@@ -32,7 +32,7 @@ public class QueryTask implements Runnable {
         log.debug("QueryServer - Accepted Client : ID - " + clientID + " : Address - " + clientSocket.getInetAddress().getHostName());
 
         try {
-            databaseQuerySession = new DatabaseQuerySession(clientSocket, clientID);
+            databaseQuerySession = createDatabaseQuerySession();
             databaseQuerySession.query(new DatabaseQuerySession.QueryHandler() {
                 @Override
                 public int onQuery(String collection, byte[] query, final DatabaseQuerySession.ResultWriter resultWriter) {
@@ -48,7 +48,7 @@ public class QueryTask implements Runnable {
 
                             @Override
                             public boolean needsMore() throws IOException {
-                                if(limit == -1) {
+                                if (limit == -1) {
                                     return true;
                                 }
                                 return numberOfResults.get() < limit;
@@ -65,5 +65,9 @@ public class QueryTask implements Runnable {
             IOUtils.closeQuietly(databaseQuerySession);
             IOUtils.closeQuietly(clientSocket);
         }
+    }
+
+    protected DatabaseQuerySession createDatabaseQuerySession() throws IOException {
+        return new DatabaseQuerySession(clientSocket, clientID);
     }
 }

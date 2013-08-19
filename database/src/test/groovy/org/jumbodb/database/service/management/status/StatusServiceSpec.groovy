@@ -30,7 +30,7 @@ class StatusServiceSpec extends Specification {
         info.getIndexPath() == indexDir.getAbsolutePath()
         info.getQueryProtocolVersion() == DatabaseQuerySession.PROTOCOL_VERSION.toString()
         info.getImportProtocolVersion() == DatabaseImportSession.PROTOCOL_VERSION.toString()
-        info.getNumberOfQueries() == 100l
+        info.getNumberOfQueries() > 0l
         info.getNumberOfResults() == 5000l
         StringUtils.isNotBlank(info.getAllocatedMemory())
         StringUtils.isNotBlank(info.getMaximumMemory())

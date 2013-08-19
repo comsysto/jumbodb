@@ -289,13 +289,10 @@ class StorageManagementSpec extends Specification {
         dataInfos[0].getFileLength() == 13l
         dataInfos[0].getFilename() == "part0001"
         dataInfos[0].getDataStrategy() == "test_data_strategy"
+        when:
+        def fileNames = (dataInfos.collect{ it.getFilename() } as Set)
         then:
-        dataInfos[1].getCollection() == "test_collection3"
-        dataInfos[1].getDeliveryKey() == "test_delivery3"
-        dataInfos[1].getDeliveryVersion() == "version4"
-        dataInfos[1].getFileLength() == 13l
-        dataInfos[1].getFilename() == "part0002"
-        dataInfos[1].getDataStrategy() == "test_data_strategy"
+        fileNames == ["part0001", "part0002"] as Set
         cleanup:
         dataDir.delete()
         indexDir.delete()

@@ -4,13 +4,13 @@ import com.google.common.collect.HashMultimap;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
-import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -49,7 +49,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
     @Override
     public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
         String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/" + information.getFileName();
-        SnappyStreamToFileCopy.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), SNAPPY_DATA_CHUNK_SIZE);
+        SnappyChunksUtil.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), SNAPPY_DATA_CHUNK_SIZE);
     }
 
     @Override

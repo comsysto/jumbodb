@@ -9,8 +9,8 @@ import java.io.RandomAccessFile;
  * @author Carsten Hufe
  */
 public class SnappyUtil {
-    public static byte[] getUncompressed(RandomAccessFile indexRaf, SnappyChunks snappyChunks, long currentChunk) throws IOException {
-        long offsetForChunk = snappyChunks.getOffsetForChunk(currentChunk);
+    public static byte[] getUncompressed(RandomAccessFile indexRaf, SnappyChunks snappyChunks, long searchChunk) throws IOException {
+        long offsetForChunk = snappyChunks.getOffsetForChunk(searchChunk);
         indexRaf.seek(offsetForChunk);
         int snappyBlockLength = indexRaf.readInt();
         byte[] compressed = new byte[snappyBlockLength];

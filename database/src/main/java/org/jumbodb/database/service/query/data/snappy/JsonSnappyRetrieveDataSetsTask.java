@@ -49,7 +49,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         long start = System.currentTimeMillis();
         FileInputStream fis = null;
         ChunkSkipableSnappyInputStream sis = null;
-        DataInputStream dis = null;
         BufferedReader br = null;
         FileInputStream chunksFis = null;
         DataInputStream chunksDis = null;
@@ -79,7 +78,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 }
             } else {
                 sis = new ChunkSkipableSnappyInputStream(fis);
-                dis = new DataInputStream(sis);
                 SnappyChunks snappyChunks = SnappyChunksWithCache.getSnappyChunksByFile(file);
 
                 long currentOffset = 0;
@@ -89,22 +87,15 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     long firstOffset = firstFileOffset.getOffset();
                     long toSkip = firstOffset - currentOffset;
 
-//                    System.out.println(file.getAbsolutePath());
                     long chunkIndex = (firstOffset / snappyChunks.getChunkSize());
-//                    System.out.println("chunkIndex " + chunkIndex );
                     long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
-//                    System.out.println("chunkOffsetCompressed " + chunkOffsetCompressed );
                     long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunks.getChunkSize());
-//                    System.out.println("chunkOffsetUncompressed " + chunkOffsetUncompressed );
                     long position = fis.getChannel().position();
-//                    System.out.println("position " + position );
                     long chunkOffsetToSkip = chunkOffsetCompressed - position;
-//                    System.out.println("chunkOffsetToSkip " + chunkOffsetToSkip );
                     if(chunkOffsetToSkip > 0) {
                         // other chunk
                         sis.skipCompressed(chunkOffsetToSkip);
                         long partialSkipInData = firstOffset - chunkOffsetUncompressed;
-//                    System.out.println("partialSkipInData " + partialSkipInData );
                         long skippedBytes = sis.skip(partialSkipInData);
                         if(skippedBytes != partialSkipInData) {
                             log.warn("Expected to skip " + partialSkipInData + " bytes but actually skipped " +
@@ -166,7 +157,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            IOUtils.closeQuietly(dis);
             IOUtils.closeQuietly(fis);
             IOUtils.closeQuietly(sis);
             IOUtils.closeQuietly(br);

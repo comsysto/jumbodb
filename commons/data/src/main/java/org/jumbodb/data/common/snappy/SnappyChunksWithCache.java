@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Carsten Hufe
  */
+@Deprecated // replace by ehcache
 public class SnappyChunksWithCache {
     public static final ConcurrentHashMap<File, SnappyChunks> CACHE = new ConcurrentHashMap<File, SnappyChunks>();
 

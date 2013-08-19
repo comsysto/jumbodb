@@ -7,7 +7,7 @@ import org.jumbodb.connector.importer.IndexInfo
 import org.jumbodb.data.common.meta.ActiveProperties
 import org.jumbodb.data.common.meta.DeliveryProperties
 import org.jumbodb.data.common.meta.IndexProperties
-import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
+import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.configuration.JumboConfiguration
 import org.jumbodb.database.service.query.JumboSearcher
 import org.jumbodb.database.service.query.data.DataStrategy
@@ -540,8 +540,8 @@ class StorageManagementSpec extends Specification {
     def makeDataCollection(dataDir, collection, deliveryKey, version) {
         def path = dataDir.getAbsolutePath() + "/$collection/$deliveryKey/$version/"
         def bytes = "The real data".getBytes("UTF-8")
-        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(bytes), new File(path + "part0001"), bytes.length, 32768)
-        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(bytes), new File(path + "part0002"), bytes.length, 32768)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), new File(path + "part0001"), bytes.length, 32768)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), new File(path + "part0002"), bytes.length, 32768)
         def propsFile = new File(path + DeliveryProperties.DEFAULT_FILENAME)
         Files.createParentDirs(propsFile)
         def meta = new DeliveryProperties.DeliveryMeta(version, "some info", new Date(), "source path", "test_data_strategy")
@@ -551,8 +551,8 @@ class StorageManagementSpec extends Specification {
     def makeIndex(indexDir, collection, deliveryKey, version, indexName) {
         def path = indexDir.getAbsolutePath() + "/$collection/$deliveryKey/$version/$indexName/"
         def bytes = "Hello World".getBytes("UTF-8")
-        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(bytes), new File(path + "part0001.odx"), bytes.length, 32768)
-        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(bytes), new File(path + "part0002.odx"), bytes.length, 32768)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), new File(path + "part0001.odx"), bytes.length, 32768)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), new File(path + "part0002.odx"), bytes.length, 32768)
         def propsFile = new File(path + IndexProperties.DEFAULT_FILENAME)
         Files.createParentDirs(propsFile)
         def meta = new IndexProperties.IndexMeta(version, new Date(), indexName, "test_index_strategy", "source fields")

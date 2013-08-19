@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.index.floatval.snappy
 
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
-import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
 
 /**
  * @author Carsten Hufe
@@ -36,7 +35,7 @@ class FloatDataGeneration {
     def static createIndexFile(file) {
         def chunkSize = 32768
         def umcompressedFileLength = 16 * 11 * 2048 // index entry length * 12 chunks * datasets per chunk
-        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
     }
 }

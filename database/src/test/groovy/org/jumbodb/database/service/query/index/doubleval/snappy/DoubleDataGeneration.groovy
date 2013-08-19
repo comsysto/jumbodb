@@ -2,7 +2,6 @@ package org.jumbodb.database.service.query.index.doubleval.snappy
 
 import org.apache.commons.lang.time.DateUtils
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
-import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
 
 /**
  * @author Carsten Hufe
@@ -37,7 +36,7 @@ class DoubleDataGeneration {
     def static createIndexFile(file) {
         def chunkSize = 32000
         def umcompressedFileLength = 20 * 11 * 1600 // index entry length * 11 chunks * datasets per chunk
-        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
     }
 }

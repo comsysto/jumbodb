@@ -2,7 +2,6 @@ package org.jumbodb.database.service.query.index.datetime.snappy
 
 import org.apache.commons.lang.time.DateUtils
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
-import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
 import org.xerial.snappy.SnappyOutputStream
 
 /**
@@ -41,7 +40,7 @@ class DateTimeDataGeneration {
     def static createIndexFile(file) {
         def chunkSize = 32000
         def umcompressedFileLength = 20 * 12 * 1600 // index entry length * 12 months * datasets per month
-        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
     }
 }

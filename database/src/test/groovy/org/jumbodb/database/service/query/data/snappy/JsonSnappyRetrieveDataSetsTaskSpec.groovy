@@ -4,15 +4,16 @@ import net.minidev.json.parser.JSONParser
 import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
-import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
+import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
-class JsonSnappyRetrieveDataSetsTaskSpec extends spock.lang.Specification {
+class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
 
     def createTestData() {
         def data = ""
@@ -25,7 +26,7 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends spock.lang.Specification {
     def createTestFile() {
         def tmpFile = File.createTempFile("data", "file")
         def data = createTestData()
-        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(data), tmpFile, data.length, 32 * 1024)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(data), tmpFile, data.length, 32 * 1024)
         tmpFile
     }
 

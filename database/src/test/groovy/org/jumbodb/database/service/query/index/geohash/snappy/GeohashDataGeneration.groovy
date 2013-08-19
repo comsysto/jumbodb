@@ -2,7 +2,6 @@ package org.jumbodb.database.service.query.index.geohash.snappy
 
 import org.jumbodb.common.geo.geohash.GeoHash
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
-import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy
 
 /**
  * @author Carsten Hufe
@@ -50,7 +49,7 @@ class GeohashDataGeneration {
     def static createIndexFile(file) {
         def chunkSize = 24 * 2048
         def umcompressedFileLength = 24 * 10 * 2048 // index entry length * 10 chunks * datasets per chunk
-        SnappyStreamToFileCopy.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
     }
 }

@@ -6,6 +6,7 @@ import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
@@ -14,7 +15,6 @@ import org.jumbodb.database.service.query.definition.IndexDefinition;
 import org.jumbodb.database.service.query.index.IndexKey;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.data.common.snappy.SnappyChunks;
-import org.jumbodb.data.common.snappy.SnappyStreamToFileCopy;
 import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.jumbodb.data.common.snappy.SnappyChunksWithCache;
 import org.slf4j.Logger;
@@ -226,7 +226,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     @Override
     public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
         String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/" + information.getFileName();
-        SnappyStreamToFileCopy.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), getSnappyChunkSize());
+        SnappyChunksUtil.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), getSnappyChunkSize());
     }
 
     public abstract Map<QueryOperation, OperationSearch<T, IFV, IF>> getQueryOperationsStrategies();

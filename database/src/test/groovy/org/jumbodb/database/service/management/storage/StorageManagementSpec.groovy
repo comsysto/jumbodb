@@ -287,7 +287,6 @@ class StorageManagementSpec extends Specification {
         dataInfos[0].getDeliveryKey() == "test_delivery3"
         dataInfos[0].getDeliveryVersion() == "version4"
         dataInfos[0].getFileLength() == 13l
-        dataInfos[0].getFilename() == "part0001"
         dataInfos[0].getDataStrategy() == "test_data_strategy"
         when:
         def fileNames = (dataInfos.collect{ it.getFilename() } as Set)

@@ -92,7 +92,7 @@ public class RestController {
                  return counter.get() < jumboQuery.getLimit();
              }
          });
-        response.getWriter().println(":end");
+        response.getWriter().println(":EOF");
     }
 
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}", method = RequestMethod.PUT)

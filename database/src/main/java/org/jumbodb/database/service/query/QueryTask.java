@@ -38,7 +38,6 @@ public class QueryTask implements Runnable {
                 public int onQuery(String collection, byte[] query, final DatabaseQuerySession.ResultWriter resultWriter) {
                     try {
                         JumboQuery searchQuery = jsonMapper.readValue(query, JumboQuery.class);
-                        final int limit = searchQuery.getLimit();
                         return jumboSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {
                             @Override
                             public void writeResult(byte[] result) throws IOException {
@@ -47,7 +46,8 @@ public class QueryTask implements Runnable {
                             }
 
                             @Override
-                            public boolean needsMore() throws IOException {
+                            public boolean needsMore(JumboQuery jumboQuery) throws IOException {
+                                final int limit = jumboQuery.getLimit();
                                 if (limit == -1) {
                                     return true;
                                 }

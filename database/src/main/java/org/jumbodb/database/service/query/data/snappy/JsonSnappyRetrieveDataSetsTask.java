@@ -66,7 +66,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 log.info("Full scan ");
                 long count = 0;
                 String line;
-                while ((line = br.readLine()) != null && resultCallback.needsMore()) {
+                while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
                     if (matchingFilter(line, jsonParser, searchQuery.getJsonQuery())) {
                         resultCallback.writeResult(line.getBytes("UTF-8"));
                         results++;
@@ -142,7 +142,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, fromOffset, datasetLength);
                         if (matchingFilter(dataSetFromOffsetsGroup, jsonParser, searchQuery.getJsonQuery())
                                 && matchingFilter(dataSetFromOffsetsGroup, jsonParser, fileOffset.getJsonQueries())) {
-                            if(!resultCallback.needsMore()) {
+                            if(!resultCallback.needsMore(searchQuery)) {
                                 return results;
                             }
                             resultCallback.writeResult(dataSetFromOffsetsGroup);

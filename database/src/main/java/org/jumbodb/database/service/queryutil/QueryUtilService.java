@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.queryutil;
 
+import org.apache.commons.lang.UnhandledException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.service.query.JumboSearcher;
@@ -36,7 +37,7 @@ public class QueryUtilService {
                 }
 
                 @Override
-                public boolean needsMore() throws IOException {
+                public boolean needsMore(JumboQuery jumboQuery) throws IOException {
                     return result.size() < jumboQuery.getLimit();
                 }
             });
@@ -47,6 +48,17 @@ public class QueryUtilService {
         }
         long queryTime = System.currentTimeMillis() - start;
         return new QueryResult(result, queryTime);
+    }
+
+    public void findDocumentsByQuery(String collection, String query, ResultCallback callback) {
+        final ObjectMapper mapper = new ObjectMapper();
+        try {
+            final JumboQuery jumboQuery = mapper.readValue(query, JumboQuery.class);
+            jumboSearcher.findResultAndWriteIntoCallback(collection, jumboQuery, callback);
+
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
     }
 
     @Required

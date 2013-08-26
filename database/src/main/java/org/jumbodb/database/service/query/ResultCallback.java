@@ -1,5 +1,7 @@
 package org.jumbodb.database.service.query;
 
+import org.jumbodb.common.query.JumboQuery;
+
 import java.io.IOException;
 
 /**
@@ -9,5 +11,5 @@ import java.io.IOException;
  */
 public interface ResultCallback {
     void writeResult(byte[] result) throws IOException;
-    boolean needsMore() throws IOException;
+    boolean needsMore(JumboQuery jumboQuery) throws IOException;
 }

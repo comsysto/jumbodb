@@ -1,5 +1,7 @@
 package org.jumbodb.database.rest;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.rest.dto.Message;
 import org.jumbodb.database.service.exporter.ExportDelivery;
 import org.jumbodb.database.service.exporter.ExportDeliveryService;
@@ -10,6 +12,7 @@ import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
 import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilCollection;
+import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.queryutil.QueryUtilService;
 import org.jumbodb.database.service.queryutil.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +20,15 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * User: carsten
@@ -63,6 +72,26 @@ public class RestController {
     @ResponseBody
     public QueryResult query(@PathVariable String collection, @RequestBody String query) {
         return queryUtilService.findDocumentsByQuery(collection, query);
+    }
+
+    @RequestMapping(value = "/query/{collection}/stream", method = RequestMethod.POST)
+    public void queryStream(@PathVariable String collection, @RequestBody String query, final HttpServletResponse response) {
+        final AtomicInteger counter = new AtomicInteger(0);
+        queryUtilService.findDocumentsByQuery(collection, query, new ResultCallback() {
+             @Override
+             public void writeResult(byte[] result) throws IOException {
+                synchronized (response) {
+                    response.getWriter().println(new String(result, "UTF-8"));
+                    response.getWriter().flush();
+                    counter.incrementAndGet();
+                }
+             }
+
+             @Override
+             public boolean needsMore(JumboQuery jumboQuery) throws IOException {
+                 return counter.get() < jumboQuery.getLimit();
+             }
+         });
     }
 
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}", method = RequestMethod.PUT)

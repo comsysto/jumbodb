@@ -75,7 +75,7 @@ public class RestController {
     }
 
     @RequestMapping(value = "/query/{collection}/stream", method = RequestMethod.POST)
-    public void queryStream(@PathVariable String collection, @RequestBody String query, final HttpServletResponse response) {
+    public void queryStream(@PathVariable String collection, @RequestBody String query, final HttpServletResponse response) throws IOException {
         final AtomicInteger counter = new AtomicInteger(0);
         queryUtilService.findDocumentsByQuery(collection, query, new ResultCallback() {
              @Override
@@ -92,6 +92,7 @@ public class RestController {
                  return counter.get() < jumboQuery.getLimit();
              }
          });
+        response.getWriter().println(":end");
     }
 
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}", method = RequestMethod.PUT)

@@ -28,13 +28,13 @@ class QueryTaskSpec extends Specification {
             queryHandler[0].onQuery("mycollection", "jsonquery".getBytes("UTF-8"), resultWriterMock)
         }
         1 * jumboSearcherMock.findResultAndWriteIntoCallback("mycollection", _, _) >> { collection, query, resultWriter ->
-            assert resultWriter.needsMore() == true
+            assert resultWriter.needsMore(jumboQuery) == true
             resultWriter.writeResult("Result 1".getBytes("UTF-8"))
-            assert resultWriter.needsMore() == true
+            assert resultWriter.needsMore(jumboQuery) == true
             resultWriter.writeResult("Result 2".getBytes("UTF-8"))
-            assert resultWriter.needsMore() == true
+            assert resultWriter.needsMore(jumboQuery) == true
             resultWriter.writeResult("Result 3".getBytes("UTF-8"))
-            assert resultWriter.needsMore() == false
+            assert resultWriter.needsMore(jumboQuery) == false
 
         }
         1 * objectMapperMock.readValue(_, _) >> jumboQuery

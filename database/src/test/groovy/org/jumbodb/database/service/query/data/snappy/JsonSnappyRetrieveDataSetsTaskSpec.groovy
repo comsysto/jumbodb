@@ -41,7 +41,7 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         def resultCallback = Mock(ResultCallback)
         def dataStrategy = Mock(JsonSnappyDataStrategy)
         dataStrategy.matches(_, _) >> true
-        resultCallback.needsMore() >> true
+        resultCallback.needsMore(_) >> true
         def jumboQuery = new JumboQuery()
         jumboQuery.addIndexQuery("testIndex", Arrays.asList(new QueryClause(QueryOperation.EQ, "somevalue")))
         when:
@@ -109,7 +109,7 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         def file = createTestFile()
         def resultCallback = Mock(ResultCallback)
         def dataStrategy = Mock(JsonSnappyDataStrategy)
-        resultCallback.needsMore() >> true
+        resultCallback.needsMore(_) >> true
         def jumboQuery = new JumboQuery()
         jumboQuery.addJsonQuery("number", Arrays.asList(new QueryClause(QueryOperation.EQ, 100010), new QueryClause(QueryOperation.EQ, 100020), new QueryClause(QueryOperation.EQ, 100030)))
         when:

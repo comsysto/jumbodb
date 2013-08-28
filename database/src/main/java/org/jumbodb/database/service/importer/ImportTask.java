@@ -85,7 +85,7 @@ public class ImportTask implements Runnable {
                     File temporaryDataPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion());
                     deleteIfExists(temporaryDataPath);
                     String deliveryKeyPath = temporaryDataPath + "/" + information.getCollection() + "/";
-                    DeliveryProperties.DeliveryMeta meta = new DeliveryProperties.DeliveryMeta(information.getDeliveryVersion(), information.getSourcePath(), new Date(), information.getInfo(), information.getDataStrategy());
+                    DeliveryProperties.DeliveryMeta meta = new DeliveryProperties.DeliveryMeta(information.getDeliveryVersion(), information.getInfo(), new Date(), information.getSourcePath(), information.getDataStrategy());
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
                     mkdirs(deliveryVersionFilePath);
                     File deliveryInfoFile = new File(deliveryKeyPath + "/" + DeliveryProperties.DEFAULT_FILENAME);

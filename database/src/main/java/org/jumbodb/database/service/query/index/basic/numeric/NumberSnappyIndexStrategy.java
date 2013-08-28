@@ -193,7 +193,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                 return (BlockRange<T>) snappyChunkRange;
             }
         };
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
         long currentChunk = integerOperationSearch.findFirstMatchingChunk(fileDataRetriever, queryValueRetriever, snappyChunks);
         long numberOfChunks = snappyChunks.getNumberOfChunks();
 //        log.trace("findFirstMatchingChunk currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");

@@ -193,12 +193,12 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def queryClause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
-        def fileOffsets = strategy.findOffsetForClause(ramFile, queryClause, snappyChunks, 5)
+        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
         then:
         fileOffsets == ([new FileOffset(50000, 100000l, [])] as Set)
         when:
         queryClause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForClause(ramFile, queryClause, snappyChunks, 5)
+        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
         then:
         fileOffsets.size() == 0
         cleanup:

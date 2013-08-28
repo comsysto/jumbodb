@@ -185,12 +185,12 @@ class FloatSnappyIndexStrategySpec extends Specification {
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def queryClause = new QueryClause(QueryOperation.EQ, 3333f)
-        def fileOffsets = strategy.findOffsetForClause(ramFile, queryClause, snappyChunks, 5)
+        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
         then:
         fileOffsets == ([new FileOffset(50000, 103333l, [])] as Set)
         when:
         queryClause = new QueryClause(QueryOperation.EQ, 3.3f) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForClause(ramFile, queryClause, snappyChunks, 5)
+        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
         then:
         fileOffsets.size() == 0
         cleanup:

@@ -176,12 +176,15 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
             @Override
             public BlockRange<T> getBlockRange(long searchChunk) throws IOException {
                 BlockRange<?> snappyChunkRange = PseudoCacheForSnappy.getSnappyChunkRange(indexFile, searchChunk);
+                log.trace("getBlockRange " + indexFile.getAbsolutePath() + " Chunk " + searchChunk);
                 if(snappyChunkRange == null) {
                     byte[] uncompressedBlock = getUncompressedBlock(searchChunk);
                     T firstInt = readFirstValue(uncompressedBlock);
                     T lastInt = readLastValue(uncompressedBlock);
                     snappyChunkRange = new BlockRange<T>(firstInt, lastInt);
                     PseudoCacheForSnappy.putSnappyChunkRange(indexFile, searchChunk, snappyChunkRange);
+                } else {
+                    log.trace("PseudoCacheForSnappy Cache Hit");
                 }
                 return (BlockRange<T>) snappyChunkRange;
             }

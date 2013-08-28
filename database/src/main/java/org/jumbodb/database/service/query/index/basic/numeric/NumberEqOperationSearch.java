@@ -10,19 +10,13 @@ import java.io.RandomAccessFile;
  * @author Carsten Hufe
  */
 public abstract class NumberEqOperationSearch<T, S, IFV, IF extends NumberSnappyIndexFile<IFV>> implements OperationSearch<T, IFV, IF> {
-    private NumberSnappyIndexStrategy<T, IFV, IF> strategy;
-
-    public NumberEqOperationSearch(NumberSnappyIndexStrategy<T, IFV, IF> strategy) {
-        this.strategy = strategy;
-    }
-
     @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
         S searchValue = queryClause.getValue();
-        return findFirstMatchingChunk(indexRaf, snappyChunks, searchValue);
+        return findFirstMatchingChunk(fileDataRetriever, snappyChunks, searchValue);
     }
 
-    protected long findFirstMatchingChunk(RandomAccessFile indexRaf, SnappyChunks snappyChunks, S searchValue) throws IOException {
+    protected long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, SnappyChunks snappyChunks, S searchValue) throws IOException {
         int numberOfChunks = snappyChunks.getNumberOfChunks();
         int fromChunk = 0;
         int toChunk = numberOfChunks;
@@ -34,17 +28,21 @@ public abstract class NumberEqOperationSearch<T, S, IFV, IF extends NumberSnappy
             int chunkDiff = (toChunk - fromChunk) / 2;
             int currentChunk = chunkDiff + fromChunk;
 
-            byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
-            T firstInt = strategy.readFirstValue(uncompressed);
-            T lastInt = strategy.readLastValue(uncompressed);
+            BlockRange<T> blockRange = fileDataRetriever.getBlockRange(currentChunk);
+//            byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
+            T firstInt = blockRange.getFirstValue();
+            T lastInt = blockRange.getLastValue();
 
             // firstInt == searchValue
             if(eq(firstInt, searchValue)) {
                 // ok ist gleich ein block weiter zurück ... da es bereits da beginnen könnte
                 while(currentChunk > 0) {
                     currentChunk--;
-                    uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
-                    firstInt = strategy.readFirstValue(uncompressed);
+                    blockRange = fileDataRetriever.getBlockRange(currentChunk);
+
+//                    uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
+//                    firstInt = strategy.readFirstValue(uncompressed);
+                    firstInt = blockRange.getFirstValue();
 //                    firstInt < searchValue
                     if(lt(firstInt, searchValue)) {
                         return currentChunk;

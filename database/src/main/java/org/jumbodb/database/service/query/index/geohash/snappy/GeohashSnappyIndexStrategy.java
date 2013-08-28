@@ -23,8 +23,8 @@ public class GeohashSnappyIndexStrategy extends NumberSnappyIndexStrategy<Geohas
     @Override
     public Map<QueryOperation, OperationSearch<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>>> getQueryOperationsStrategies() {
         Map<QueryOperation, OperationSearch<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>>> operations = new HashMap<QueryOperation, OperationSearch<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>>>();
-        operations.put(QueryOperation.GEO_BOUNDARY_BOX, new GeohashBoundaryBoxOperationSearch(this));
-        operations.put(QueryOperation.GEO_WITHIN_RANGE_METER, new GeohashWithinRangeMeterBoxOperationSearch(this));
+        operations.put(QueryOperation.GEO_BOUNDARY_BOX, new GeohashBoundaryBoxOperationSearch());
+        operations.put(QueryOperation.GEO_WITHIN_RANGE_METER, new GeohashWithinRangeMeterBoxOperationSearch());
         return operations;
     }
 

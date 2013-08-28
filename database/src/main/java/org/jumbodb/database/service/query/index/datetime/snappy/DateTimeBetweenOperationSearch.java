@@ -10,9 +10,6 @@ import org.jumbodb.database.service.query.index.longval.snappy.LongBetweenOperat
  * @author Carsten Hufe
  */
 public class DateTimeBetweenOperationSearch extends LongBetweenOperationSearch {
-    protected DateTimeBetweenOperationSearch(NumberSnappyIndexStrategy<Long, Long, NumberSnappyIndexFile<Long>> strategy) {
-        super(strategy);
-    }
 
     @Override
     public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {

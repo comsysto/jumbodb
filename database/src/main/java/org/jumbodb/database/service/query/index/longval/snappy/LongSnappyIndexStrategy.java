@@ -27,11 +27,11 @@ public class LongSnappyIndexStrategy extends NumberSnappyIndexStrategy<Long, Lon
     @Override
     public Map<QueryOperation, OperationSearch<Long, Long, NumberSnappyIndexFile<Long>>> getQueryOperationsStrategies() {
         Map<QueryOperation, OperationSearch<Long, Long, NumberSnappyIndexFile<Long>>> operations = new HashMap<QueryOperation, OperationSearch<Long, Long, NumberSnappyIndexFile<Long>>>();
-        operations.put(QueryOperation.EQ, new LongEqOperationSearch(this));
-        operations.put(QueryOperation.NE, new LongNeOperationSearch(this));
-        operations.put(QueryOperation.GT, new LongGtOperationSearch(this));
-        operations.put(QueryOperation.LT, new LongLtOperationSearch(this));
-        operations.put(QueryOperation.BETWEEN, new LongBetweenOperationSearch(this));
+        operations.put(QueryOperation.EQ, new LongEqOperationSearch());
+        operations.put(QueryOperation.NE, new LongNeOperationSearch());
+        operations.put(QueryOperation.GT, new LongGtOperationSearch());
+        operations.put(QueryOperation.LT, new LongLtOperationSearch());
+        operations.put(QueryOperation.BETWEEN, new LongBetweenOperationSearch());
         return operations;
     }
 

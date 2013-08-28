@@ -2,6 +2,9 @@ package org.jumbodb.database.service.query.index.geohash.snappy
 
 import org.jumbodb.common.geo.geohash.GeoHash
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
+import org.jumbodb.data.common.snappy.SnappyUtil
+import org.jumbodb.database.service.query.index.basic.numeric.BlockRange
+import org.jumbodb.database.service.query.index.basic.numeric.FileDataRetriever
 
 /**
  * @author Carsten Hufe
@@ -51,5 +54,35 @@ class GeohashDataGeneration {
         def umcompressedFileLength = 24 * 10 * 2048 // index entry length * 10 chunks * datasets per chunk
         SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
+    }
+
+    def static createFileDataRetriever(file, snappyChunks) {
+        new FileDataRetriever() {
+
+            @Override
+            BlockRange<GeohashCoords> getBlockRange(long searchChunk) throws IOException {
+                def ramFile = new RandomAccessFile(file, "r")
+                byte[] uncompressedBlock = SnappyUtil.getUncompressed(ramFile, snappyChunks, searchChunk)
+                GeohashCoords firstInt = readFirstValue(uncompressedBlock);
+                GeohashCoords lastInt = readLastValue(uncompressedBlock);
+                ramFile.close()
+                return new BlockRange<GeohashCoords>(firstInt, lastInt);
+
+            }
+
+            def readLastValue(byte[] uncompressed) {
+                int geohash = SnappyUtil.readInt(uncompressed, uncompressed.length - 24);
+                float latitude = SnappyUtil.readFloat(uncompressed, uncompressed.length - 20);
+                float longitude = SnappyUtil.readFloat(uncompressed, uncompressed.length - 16);
+                return new GeohashCoords(geohash, latitude, longitude);
+            }
+
+            def readFirstValue(byte[] uncompressed) {
+                int geohash = SnappyUtil.readInt(uncompressed, 0);
+                float latitude = SnappyUtil.readFloat(uncompressed, 4);
+                float longitude = SnappyUtil.readFloat(uncompressed, 8);
+                return new GeohashCoords(geohash, latitude, longitude);
+            }
+        }
     }
 }

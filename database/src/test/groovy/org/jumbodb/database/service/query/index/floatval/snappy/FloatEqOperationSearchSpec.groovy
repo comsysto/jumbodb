@@ -10,7 +10,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class FloatEqOperationSearchSpec extends Specification {
-    def operation = new FloatEqOperationSearch(new FloatSnappyIndexStrategy())
+    def operation = new FloatEqOperationSearch()
 
     @Unroll
     def "equal match #value == #testValue == #isEqual"() {
@@ -29,11 +29,10 @@ class FloatEqOperationSearchSpec extends Specification {
         setup:
         def file = FloatDataGeneration.createFile();
         def snappyChunks = FloatDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = FloatDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, searchValue)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchValue | expectedChunk

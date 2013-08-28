@@ -11,7 +11,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class DoubleNeOperationSearchSpec extends Specification {
-    def operation = new DoubleNeOperationSearch(new DoubleSnappyIndexStrategy())
+    def operation = new DoubleNeOperationSearch()
 
     @Unroll
     def "not equal match #value != #testValue == #isNotEqual"() {
@@ -31,11 +31,10 @@ class DoubleNeOperationSearchSpec extends Specification {
         setup:
         def file = DoubleDataGeneration.createFile();
         def snappyChunks = DoubleDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = DoubleDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchDate | expectedChunk

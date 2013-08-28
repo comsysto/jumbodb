@@ -27,11 +27,11 @@ public class FloatSnappyIndexStrategy extends NumberSnappyIndexStrategy<Float, F
     @Override
     public Map<QueryOperation, OperationSearch<Float, Float, NumberSnappyIndexFile<Float>>> getQueryOperationsStrategies() {
         Map<QueryOperation, OperationSearch<Float, Float, NumberSnappyIndexFile<Float>>> operations = new HashMap<QueryOperation, OperationSearch<Float, Float, NumberSnappyIndexFile<Float>>>();
-        operations.put(QueryOperation.EQ, new FloatEqOperationSearch(this));
-        operations.put(QueryOperation.NE, new FloatNeOperationSearch(this));
-        operations.put(QueryOperation.GT, new FloatGtOperationSearch(this));
-        operations.put(QueryOperation.LT, new FloatLtOperationSearch(this));
-        operations.put(QueryOperation.BETWEEN, new FloatBetweenOperationSearch(this));
+        operations.put(QueryOperation.EQ, new FloatEqOperationSearch());
+        operations.put(QueryOperation.NE, new FloatNeOperationSearch());
+        operations.put(QueryOperation.GT, new FloatGtOperationSearch());
+        operations.put(QueryOperation.LT, new FloatLtOperationSearch());
+        operations.put(QueryOperation.BETWEEN, new FloatBetweenOperationSearch());
         return operations;
     }
 

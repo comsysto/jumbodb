@@ -7,12 +7,6 @@ import org.jumbodb.database.service.query.index.basic.numeric.*;
  * @author Carsten Hufe
  */
 public class IntegerEqOperationSearch extends NumberEqOperationSearch<Integer, Integer, Integer, NumberSnappyIndexFile<Integer>> {
-
-
-    public IntegerEqOperationSearch(NumberSnappyIndexStrategy<Integer, Integer, NumberSnappyIndexFile<Integer>> strategy) {
-        super(strategy);
-    }
-
     @Override
     public boolean matching(Integer currentValue, QueryValueRetriever queryValueRetriever) {
         Integer searchValue = queryValueRetriever.getValue();

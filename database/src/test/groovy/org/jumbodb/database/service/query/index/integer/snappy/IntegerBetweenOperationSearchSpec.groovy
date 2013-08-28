@@ -10,7 +10,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class IntegerBetweenOperationSearchSpec extends Specification {
-    def operation = new IntegerBetweenOperationSearch(new IntegerSnappyIndexStrategy())
+    def operation = new IntegerBetweenOperationSearch()
 
     @Unroll
     def "between match #from < #testValue > #to == #isBetween"() {
@@ -33,11 +33,10 @@ class IntegerBetweenOperationSearchSpec extends Specification {
         setup:
         def file = IntegerDataGeneration.createFile();
         def snappyChunks = IntegerDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = IntegerDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 20000l])), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 20000l])), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchValue | expectedChunk

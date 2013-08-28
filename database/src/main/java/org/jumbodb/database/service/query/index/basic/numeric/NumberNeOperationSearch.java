@@ -10,14 +10,9 @@ import java.io.RandomAccessFile;
  * @author Carsten Hufe
  */
 public abstract class NumberNeOperationSearch<T, IFV, IF extends NumberSnappyIndexFile<IFV>> implements OperationSearch<T, IFV, IF> {
-    private NumberSnappyIndexStrategy<T, IFV, IF> strategy;
-
-    public NumberNeOperationSearch(NumberSnappyIndexStrategy<T, IFV, IF> strategy) {
-        this.strategy = strategy;
-    }
 
     @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
         T searchValue = (T)queryClause.getValue();
         int numberOfChunks = snappyChunks.getNumberOfChunks();
         int fromChunk = 0;
@@ -25,10 +20,12 @@ public abstract class NumberNeOperationSearch<T, IFV, IF extends NumberSnappyInd
         // TODO verify snappy version
         while(toChunk != 0) {
             int currentChunk = (toChunk - fromChunk) / 2;
-
-            byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
-            T firstInt = strategy.readFirstValue(uncompressed);
-            T lastInt = strategy.readLastValue(uncompressed);
+            BlockRange<T> blockRange = fileDataRetriever.getBlockRange(currentChunk);
+//            byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
+//            T firstInt = strategy.readFirstValue(uncompressed);
+//            T lastInt = strategy.readLastValue(uncompressed);
+            T firstInt = blockRange.getFirstValue();
+            T lastInt = blockRange.getLastValue();
 
             // just going up
             //firstInt != searchValue || lastInt != searchValue

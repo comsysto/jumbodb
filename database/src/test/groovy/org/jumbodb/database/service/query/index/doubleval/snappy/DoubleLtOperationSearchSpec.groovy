@@ -11,7 +11,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class DoubleLtOperationSearchSpec extends Specification {
-    def operation = new DoubleLtOperationSearch(new DoubleSnappyIndexStrategy())
+    def operation = new DoubleLtOperationSearch()
 
     @Unroll
     def "less match #value > #testValue == #isLess"() {
@@ -30,11 +30,10 @@ class DoubleLtOperationSearchSpec extends Specification {
         setup:
         def file = DoubleDataGeneration.createFile();
         def snappyChunks = DoubleDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = DoubleDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchValue | expectedChunk

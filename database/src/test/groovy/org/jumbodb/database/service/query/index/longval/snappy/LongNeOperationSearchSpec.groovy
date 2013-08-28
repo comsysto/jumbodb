@@ -10,7 +10,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class LongNeOperationSearchSpec extends Specification {
-    def operation = new LongNeOperationSearch(new LongSnappyIndexStrategy())
+    def operation = new LongNeOperationSearch()
 
     @Unroll
     def "not equal match #value != #testValue == #isNotEqual"() {
@@ -30,11 +30,10 @@ class LongNeOperationSearchSpec extends Specification {
         setup:
         def file = LongDataGeneration.createFile();
         def snappyChunks = LongDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = LongDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchDate | expectedChunk

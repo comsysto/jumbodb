@@ -10,7 +10,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class FloatNeOperationSearchSpec extends Specification {
-    def operation = new FloatNeOperationSearch(new FloatSnappyIndexStrategy())
+    def operation = new FloatNeOperationSearch()
 
     @Unroll
     def "not equal match #value != #testValue == #isNotEqual"() {
@@ -30,11 +30,10 @@ class FloatNeOperationSearchSpec extends Specification {
         setup:
         def file = FloatDataGeneration.createFile();
         def snappyChunks = FloatDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = FloatDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchDate | expectedChunk

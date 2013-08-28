@@ -11,10 +11,6 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
  */
 public class DoubleNeOperationSearch extends NumberNeOperationSearch<Double, Double, NumberSnappyIndexFile<Double>> {
 
-    public DoubleNeOperationSearch(NumberSnappyIndexStrategy<Double, Double, NumberSnappyIndexFile<Double>> strategy) {
-        super(strategy);
-    }
-
     @Override
     public boolean ne(Double val1, Double val2) {
         return !val1.equals(val2);

@@ -11,10 +11,6 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
  */
 public class LongNeOperationSearch extends NumberNeOperationSearch<Long, Long, NumberSnappyIndexFile<Long>> {
 
-    public LongNeOperationSearch(NumberSnappyIndexStrategy<Long, Long, NumberSnappyIndexFile<Long>> strategy) {
-        super(strategy);
-    }
-
     @Override
     public boolean ne(Long val1, Long val2) {
         return !val1.equals(val2);

@@ -4,6 +4,7 @@ import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
+import org.jumbodb.database.service.query.index.integer.snappy.IntegerDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -11,7 +12,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class HashCode32EqOperationSearchSpec extends Specification {
-    def operation = new HashCode32EqOperationSearch(new HashCode32SnappyIndexStrategy())
+    def operation = new HashCode32EqOperationSearch()
 
     @Unroll
     def "equal match #hashCodeValue == #testValue == #isEqual"() {
@@ -33,13 +34,12 @@ class HashCode32EqOperationSearchSpec extends Specification {
         setup:
         def file = HashCode32DataGeneration.createFile();
         def snappyChunks = HashCode32DataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = HashCode32DataGeneration.createFileDataRetriever(file, snappyChunks)
         def queryRetrieverMock = Mock(QueryValueRetriever)
         queryRetrieverMock.getValue() >> hashCodeValue
         expect:
-        operation.findFirstMatchingChunk(ramFile, queryRetrieverMock, snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, queryRetrieverMock, snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         hashCodeValue | expectedChunk

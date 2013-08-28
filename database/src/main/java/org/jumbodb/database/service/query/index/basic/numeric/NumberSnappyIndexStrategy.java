@@ -162,13 +162,27 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
 
-    protected Set<FileOffset> findOffsetForClause(RandomAccessFile indexRaf, QueryClause clause, SnappyChunks snappyChunks, int queryLimit) throws IOException {
+    protected Set<FileOffset> findOffsetForClause(final RandomAccessFile indexRaf, QueryClause clause, final SnappyChunks snappyChunks, int queryLimit) throws IOException {
         OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(clause.getQueryOperation());
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + clause.getQueryOperation());
         }
         QueryValueRetriever queryValueRetriever = integerOperationSearch.getQueryValueRetriever(clause);
-        long currentChunk = integerOperationSearch.findFirstMatchingChunk(indexRaf, queryValueRetriever, snappyChunks);
+        FileDataRetriever fileDataRetriever = new FileDataRetriever() {
+//            @Override
+            public byte[] getUncompressedBlock(long searchChunk) throws IOException {
+                return SnappyUtil.getUncompressed(indexRaf, snappyChunks, searchChunk);
+            }
+
+            @Override
+            public BlockRange getBlockRange(long searchChunk) throws IOException {
+                byte[] uncompressedBlock = getUncompressedBlock(searchChunk);
+                T firstInt = readFirstValue(uncompressedBlock);
+                T lastInt = readLastValue(uncompressedBlock);
+                return new BlockRange<T>(firstInt, lastInt);
+            }
+        };
+        long currentChunk = integerOperationSearch.findFirstMatchingChunk(fileDataRetriever, queryValueRetriever, snappyChunks);
         long numberOfChunks = snappyChunks.getNumberOfChunks();
         if(currentChunk >= 0) {
             Set<FileOffset> result = new HashSet<FileOffset>();

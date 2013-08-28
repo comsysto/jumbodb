@@ -1,6 +1,9 @@
 package org.jumbodb.database.service.query.index.longval.snappy
 
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
+import org.jumbodb.data.common.snappy.SnappyUtil
+import org.jumbodb.database.service.query.index.basic.numeric.BlockRange
+import org.jumbodb.database.service.query.index.basic.numeric.FileDataRetriever
 
 /**
  * @author Carsten Hufe
@@ -37,5 +40,21 @@ class LongDataGeneration {
         def umcompressedFileLength = 20 * 11 * 1600 // index entry length * 11 chunks * datasets per chunk
         SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
+    }
+
+    def static createFileDataRetriever(file, snappyChunks) {
+        new FileDataRetriever() {
+
+            @Override
+            BlockRange<Long> getBlockRange(long searchChunk) throws IOException {
+                def ramFile = new RandomAccessFile(file, "r")
+                byte[] uncompressedBlock = SnappyUtil.getUncompressed(ramFile, snappyChunks, searchChunk)
+                Long firstInt = SnappyUtil.readLong(uncompressedBlock, 0);
+                Long lastInt = SnappyUtil.readLong(uncompressedBlock, uncompressedBlock.length - 20);
+                ramFile.close()
+                return new BlockRange<Long>(firstInt, lastInt);
+
+            }
+        }
     }
 }

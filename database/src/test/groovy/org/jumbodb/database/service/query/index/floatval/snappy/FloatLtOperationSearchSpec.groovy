@@ -10,7 +10,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class FloatLtOperationSearchSpec extends Specification {
-    def operation = new FloatLtOperationSearch(new FloatSnappyIndexStrategy())
+    def operation = new FloatLtOperationSearch()
 
     @Unroll
     def "less match #value > #testValue == #isLess"() {
@@ -29,11 +29,10 @@ class FloatLtOperationSearchSpec extends Specification {
         setup:
         def file = FloatDataGeneration.createFile();
         def snappyChunks = FloatDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = FloatDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchValue | expectedChunk

@@ -3,6 +3,8 @@ package org.jumbodb.database.service.query.index.datetime.snappy
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
+import org.jumbodb.database.service.query.index.doubleval.snappy.DoubleDataGeneration
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.text.SimpleDateFormat
@@ -10,8 +12,8 @@ import java.text.SimpleDateFormat
 /**
  * @author Carsten Hufe
  */
-class DateTimeBetweenOperationSearchSpec extends spock.lang.Specification {
-    def operation = new DateTimeBetweenOperationSearch(new DateTimeSnappyIndexStrategy())
+class DateTimeBetweenOperationSearchSpec extends Specification {
+    def operation = new DateTimeBetweenOperationSearch()
 
     @Unroll
     def "between match #from < #testValue > #to == #isBetween"() {
@@ -35,11 +37,10 @@ class DateTimeBetweenOperationSearchSpec extends spock.lang.Specification {
         setup:
         def file = DateTimeDataGeneration.createFile();
         def snappyChunks = DateTimeDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = DateTimeDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchDate, "2013-01-01 12:00:00"])), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchDate, "2013-01-01 12:00:00"])), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchDate            | expectedChunk

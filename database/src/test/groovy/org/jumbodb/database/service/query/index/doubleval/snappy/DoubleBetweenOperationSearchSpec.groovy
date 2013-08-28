@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.doubleval.snappy
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
+import org.jumbodb.database.service.query.index.longval.snappy.LongDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -12,7 +13,7 @@ import java.text.SimpleDateFormat
  * @author Carsten Hufe
  */
 class DoubleBetweenOperationSearchSpec extends Specification {
-    def operation = new DoubleBetweenOperationSearch(new DoubleSnappyIndexStrategy())
+    def operation = new DoubleBetweenOperationSearch()
 
     @Unroll
     def "between match #from < #testValue > #to == #isBetween"() {
@@ -36,11 +37,10 @@ class DoubleBetweenOperationSearchSpec extends Specification {
         setup:
         def file = DoubleDataGeneration.createFile();
         def snappyChunks = DoubleDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = DoubleDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 20000d])), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 20000d])), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchValue | expectedChunk

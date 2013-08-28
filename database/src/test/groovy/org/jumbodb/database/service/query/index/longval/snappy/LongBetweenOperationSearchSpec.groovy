@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.longval.snappy
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
+import org.jumbodb.database.service.query.index.integer.snappy.IntegerDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -10,7 +11,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class LongBetweenOperationSearchSpec extends Specification {
-    def operation = new LongBetweenOperationSearch(new LongSnappyIndexStrategy())
+    def operation = new LongBetweenOperationSearch()
 
     @Unroll
     def "between match #from < #testValue > #to == #isBetween"() {
@@ -33,11 +34,10 @@ class LongBetweenOperationSearchSpec extends Specification {
         setup:
         def file = LongDataGeneration.createFile();
         def snappyChunks = LongDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = LongDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 20000l])), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 20000l])), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchValue | expectedChunk

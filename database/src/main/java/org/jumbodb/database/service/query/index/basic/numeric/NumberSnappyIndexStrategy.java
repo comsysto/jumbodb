@@ -175,8 +175,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
 
             @Override
             public BlockRange<T> getBlockRange(long searchChunk) throws IOException {
-                long start = System.currentTimeMillis();
-                log.trace("getBlockRange start " + indexFile.getName() + " Chunk " + searchChunk);
+//                long start = System.currentTimeMillis();
+//                log.trace("getBlockRange start " + indexFile.getName() + " Chunk " + searchChunk);
                 BlockRange<?> snappyChunkRange = PseudoCacheForSnappy.getSnappyChunkRange(indexFile, searchChunk);
                 if(snappyChunkRange == null) {
                     byte[] uncompressedBlock = getUncompressedBlock(searchChunk);
@@ -184,10 +184,11 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                     T lastInt = readLastValue(uncompressedBlock);
                     snappyChunkRange = new BlockRange<T>(firstInt, lastInt);
                     PseudoCacheForSnappy.putSnappyChunkRange(indexFile, searchChunk, snappyChunkRange);
-                } else {
-                    log.trace("PseudoCacheForSnappy Cache Hit");
                 }
-                log.trace("getBlockRange end " + indexFile.getName() + " Chunk " + searchChunk + "/" + snappyChunks.getNumberOfChunks() + " took " + (System.currentTimeMillis() - start) + "ms");
+//                else {
+//                    log.trace("PseudoCacheForSnappy Cache Hit");
+//                }
+//                log.trace("getBlockRange end " + indexFile.getName() + " Chunk " + searchChunk + "/" + snappyChunks.getNumberOfChunks() + " took " + (System.currentTimeMillis() - start) + "ms");
 
                 return (BlockRange<T>) snappyChunkRange;
             }
@@ -195,8 +196,15 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         long start = System.currentTimeMillis();
         long currentChunk = integerOperationSearch.findFirstMatchingChunk(fileDataRetriever, queryValueRetriever, snappyChunks);
         long numberOfChunks = snappyChunks.getNumberOfChunks();
-        log.trace("findFirstMatchingChunk currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");
+//        log.trace("findFirstMatchingChunk currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");
+
+        /* CARSTEN
+           - Traces entfernen
+           - der Teil unten ist extrem uneffizient, wenn keine Ergebnisse gefunden werden
+           - Auch versuchen die Ram file durch Buffered ersetzen!
+         */
         if(currentChunk >= 0) {
+            // CARSTEN replace Ram File by BufferedStream! It's linear
             Set<FileOffset> result = new HashSet<FileOffset>();
             while(currentChunk < numberOfChunks) {
                 byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
@@ -218,6 +226,10 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                         if(queryLimit != -1 && queryLimit < result.size()) {
                             return result;
                         }
+                    }
+                    // nothing found in first block, so there isn't anything
+                    if(result.isEmpty()) {
+                        return result;
                     }
                 } finally {
                     IOUtils.closeQuietly(dis);

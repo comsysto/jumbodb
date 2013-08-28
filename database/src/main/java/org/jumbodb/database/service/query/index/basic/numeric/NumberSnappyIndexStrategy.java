@@ -203,6 +203,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
            - der Teil unten ist extrem uneffizient, wenn keine Ergebnisse gefunden werden
            - Auch versuchen die Ram file durch Buffered ersetzen!
          */
+        int i = 0;
         if(currentChunk >= 0) {
             // CARSTEN replace Ram File by BufferedStream! It's linear
             Set<FileOffset> result = new HashSet<FileOffset>();
@@ -227,8 +228,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                             return result;
                         }
                     }
-                    // nothing found in first block, so there isn't anything
-                    if(result.isEmpty()) {
+                    // nothing found in second block, so there isn't anything
+                    if(i > 1 && result.isEmpty()) {
                         return result;
                     }
                 } finally {
@@ -237,6 +238,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                 }
 
                 currentChunk++;
+                i++;
             }
             return result;
         }

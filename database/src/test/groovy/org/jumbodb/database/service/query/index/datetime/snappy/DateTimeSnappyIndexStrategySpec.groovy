@@ -160,23 +160,23 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         indexFolder.delete()
     }
 
-//    def "searchOffsetsByClauses"() {
-//        // no mocking here, instead a integrated test with equal
-//        setup:
-//        def strategy = new DateTimeSnappyIndexStrategy()
-//        def indexFile = DateTimeDataGeneration.createFile()
-//        DateTimeDataGeneration.createIndexFile(indexFile)
-//        def queryClause1 = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
-//        def queryClause2 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:00")
-//        def queryClause3 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:01") // should not exist, so no result for it
-//        def queryClause4 = new QueryClause(QueryOperation.EQ, "2012-12-29 11:34:48")
-//        when:
-//        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5)
-//        then:
-//        fileOffsets == ([new FileOffset(50000, 1356777388000, []), new FileOffset(50000, 1335866500000, []), new FileOffset(50000, 1325415700000, [])] as Set)
-//        cleanup:
-//        indexFile.delete()
-//    }
+    def "searchOffsetsByClauses"() {
+        // no mocking here, instead a integrated test with equal
+        setup:
+        def strategy = new DateTimeSnappyIndexStrategy()
+        def indexFile = DateTimeDataGeneration.createFile()
+        DateTimeDataGeneration.createIndexFile(indexFile)
+        def queryClause1 = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
+        def queryClause2 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:00")
+        def queryClause3 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:01") // should not exist, so no result for it
+        def queryClause4 = new QueryClause(QueryOperation.EQ, "2012-12-29 11:34:48")
+        when:
+        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5)
+        then:
+        fileOffsets == ([new FileOffset(50000, 1356777388000, []), new FileOffset(50000, 1335866500000, []), new FileOffset(50000, 1325415700000, [])] as Set)
+        cleanup:
+        indexFile.delete()
+    }
 
     def "findOffsetForClause"() {
         // no mocking here, instead a integrated test with equal

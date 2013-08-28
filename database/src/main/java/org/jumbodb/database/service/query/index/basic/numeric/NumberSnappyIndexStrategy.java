@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.xerial.snappy.Snappy;
 
 import java.io.*;
 import java.util.*;
@@ -198,49 +199,60 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         long numberOfChunks = snappyChunks.getNumberOfChunks();
 //        log.trace("findFirstMatchingChunk currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");
 
-        /* CARSTEN
-           - Traces entfernen
-           - der Teil unten ist extrem uneffizient, wenn keine Ergebnisse gefunden werden
-           - Auch versuchen die Ram file durch Buffered ersetzen!
-         */
         int i = 0;
         if(currentChunk >= 0) {
-            // CARSTEN replace Ram File by BufferedStream! It's linear
-            Set<FileOffset> result = new HashSet<FileOffset>();
-            while(currentChunk < numberOfChunks) {
-                byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
-                ByteArrayInputStream bais = null;
-                DataInputStream dis = null;
-                try {
-                    bais = new ByteArrayInputStream(uncompressed);
-                    dis = new DataInputStream(bais);
-                    while(bais.available() > 0) {
-                        T currentValue = readValueFromDataInput(dis);
-                        int fileNameHash = dis.readInt();
-                        long offset = dis.readLong();
-                        if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
-                            result.add(new FileOffset(fileNameHash, offset, clause.getQueryClauses()));
-                        } else if(!result.isEmpty()) {
-                            // found some results, but here it isnt equal, that means end of results
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
+            DataInputStream dis = null;
+            try {
+                fis = new FileInputStream(indexFile);
+                bis = new BufferedInputStream(fis);
+                dis = new DataInputStream(bis);
+                dis.skip(snappyChunks.getOffsetForChunk(currentChunk));
+                Set<FileOffset> result = new HashSet<FileOffset>();
+                while(currentChunk < numberOfChunks) {
+                    int compressedSize = dis.readInt();
+                    byte[] compressed = new byte[compressedSize];
+                    dis.read(compressed);
+                    byte[] uncompressed =  Snappy.uncompress(compressed);
+//                    byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
+                    ByteArrayInputStream bais = null;
+                    DataInputStream byteDis = null;
+                    try {
+                        bais = new ByteArrayInputStream(uncompressed);
+                        byteDis = new DataInputStream(bais);
+                        while(bais.available() > 0) {
+                            T currentValue = readValueFromDataInput(byteDis);
+                            int fileNameHash = byteDis.readInt();
+                            long offset = byteDis.readLong();
+                            if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
+                                result.add(new FileOffset(fileNameHash, offset, clause.getQueryClauses()));
+                            } else if(!result.isEmpty()) {
+                                // found some results, but here it isnt equal, that means end of results
+                                return result;
+                            }
+                            if(queryLimit != -1 && queryLimit < result.size()) {
+                                return result;
+                            }
+                        }
+                        // nothing found in second block, so there isn't anything
+                        if(i > 1 && result.isEmpty()) {
                             return result;
                         }
-                        if(queryLimit != -1 && queryLimit < result.size()) {
-                            return result;
-                        }
+                    } finally {
+                        IOUtils.closeQuietly(byteDis);
+                        IOUtils.closeQuietly(bais);
                     }
-                    // nothing found in second block, so there isn't anything
-                    if(i > 1 && result.isEmpty()) {
-                        return result;
-                    }
-                } finally {
-                    IOUtils.closeQuietly(dis);
-                    IOUtils.closeQuietly(bais);
-                }
 
-                currentChunk++;
-                i++;
+                    currentChunk++;
+                    i++;
+                }
+                return result;
+            } finally {
+                IOUtils.closeQuietly(dis);
+                IOUtils.closeQuietly(bis);
+                IOUtils.closeQuietly(fis);
             }
-            return result;
         }
         return Collections.emptySet();
     }

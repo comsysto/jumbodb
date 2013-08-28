@@ -192,8 +192,10 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                 return (BlockRange<T>) snappyChunkRange;
             }
         };
+        long start = System.currentTimeMillis();
         long currentChunk = integerOperationSearch.findFirstMatchingChunk(fileDataRetriever, queryValueRetriever, snappyChunks);
         long numberOfChunks = snappyChunks.getNumberOfChunks();
+        log.trace("findFirstMatchingChunk currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");
         if(currentChunk >= 0) {
             Set<FileOffset> result = new HashSet<FileOffset>();
             while(currentChunk < numberOfChunks) {

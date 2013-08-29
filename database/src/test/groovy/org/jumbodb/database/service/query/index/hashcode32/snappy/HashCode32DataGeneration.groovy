@@ -1,6 +1,9 @@
 package org.jumbodb.database.service.query.index.hashcode32.snappy
 
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
+import org.jumbodb.data.common.snappy.SnappyUtil
+import org.jumbodb.database.service.query.index.basic.numeric.BlockRange
+import org.jumbodb.database.service.query.index.basic.numeric.FileDataRetriever
 
 /**
  * @author Carsten Hufe
@@ -30,6 +33,22 @@ class HashCode32DataGeneration {
         dos.close()
         fos.close()
         fos.toByteArray()
+    }
+
+    def static createFileDataRetriever(file, snappyChunks) {
+        new FileDataRetriever() {
+
+            @Override
+            BlockRange<Integer> getBlockRange(long searchChunk) throws IOException {
+                def ramFile = new RandomAccessFile(file, "r")
+                byte[] uncompressedBlock = SnappyUtil.getUncompressed(ramFile, snappyChunks, searchChunk)
+                Integer firstInt = SnappyUtil.readInt(uncompressedBlock, 0);
+                Integer lastInt = SnappyUtil.readInt(uncompressedBlock, uncompressedBlock.length - 16);
+                ramFile.close()
+                return new BlockRange<Integer>(firstInt, lastInt);
+
+            }
+        }
     }
 
     def static createIndexFile(file) {

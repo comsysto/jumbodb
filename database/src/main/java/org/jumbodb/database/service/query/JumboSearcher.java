@@ -4,6 +4,7 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.database.service.query.index.basic.numeric.PseudoCacheForSnappy;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.DataStrategyManager;
@@ -12,7 +13,6 @@ import org.jumbodb.database.service.query.definition.CollectionDefinitionLoader;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.database.service.query.index.IndexStrategyManager;
-import org.jumbodb.data.common.snappy.SnappyChunksWithCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -53,7 +53,7 @@ public class JumboSearcher {
         this.collectionDefinition = getCollectionDefinition();
         this.indexStrategyManager.onDataChanged(collectionDefinition);
         this.dataStrategyManager.onDataChanged(collectionDefinition);
-        SnappyChunksWithCache.clearCache();
+        PseudoCacheForSnappy.clearCache();
     }
 
     public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery, ResultCallback resultCallback) {

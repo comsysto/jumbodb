@@ -6,9 +6,6 @@ import org.jumbodb.database.service.query.index.basic.numeric.*;
  * @author Carsten Hufe
  */
 public class IntegerGtOperationSearch extends IntegerEqOperationSearch {
-    public IntegerGtOperationSearch(NumberSnappyIndexStrategy<Integer, Integer, NumberSnappyIndexFile<Integer>> strategy) {
-        super(strategy);
-    }
 
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> snappyIndexFile) {

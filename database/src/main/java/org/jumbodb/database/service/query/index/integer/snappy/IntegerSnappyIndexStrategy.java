@@ -27,11 +27,11 @@ public class IntegerSnappyIndexStrategy extends NumberSnappyIndexStrategy<Intege
     @Override
     public Map<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>> getQueryOperationsStrategies() {
         Map<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>> operations = new HashMap<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>>();
-        operations.put(QueryOperation.EQ, new IntegerEqOperationSearch(this));
-        operations.put(QueryOperation.NE, new IntegerNeOperationSearch(this));
-        operations.put(QueryOperation.GT, new IntegerGtOperationSearch(this));
-        operations.put(QueryOperation.LT, new IntegerLtOperationSearch(this));
-        operations.put(QueryOperation.BETWEEN, new IntegerBetweenOperationSearch(this));
+        operations.put(QueryOperation.EQ, new IntegerEqOperationSearch());
+        operations.put(QueryOperation.NE, new IntegerNeOperationSearch());
+        operations.put(QueryOperation.GT, new IntegerGtOperationSearch());
+        operations.put(QueryOperation.LT, new IntegerLtOperationSearch());
+        operations.put(QueryOperation.BETWEEN, new IntegerBetweenOperationSearch());
         return operations;
     }
 

@@ -19,7 +19,7 @@ public class HashCode64SnappyIndexStrategy extends LongSnappyIndexStrategy {
     @Override
     public Map<QueryOperation, OperationSearch<Long, Long, NumberSnappyIndexFile<Long>>> getQueryOperationsStrategies() {
         Map<QueryOperation, OperationSearch<Long, Long, NumberSnappyIndexFile<Long>>> operations = new HashMap<QueryOperation, OperationSearch<Long, Long, NumberSnappyIndexFile<Long>>>();
-        operations.put(QueryOperation.EQ, new HashCode64EqOperationSearch(this));
+        operations.put(QueryOperation.EQ, new HashCode64EqOperationSearch());
         return operations;
     }
 

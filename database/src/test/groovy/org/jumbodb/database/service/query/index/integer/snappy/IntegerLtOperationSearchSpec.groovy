@@ -10,7 +10,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class IntegerLtOperationSearchSpec extends Specification {
-    def operation = new IntegerLtOperationSearch(new IntegerSnappyIndexStrategy())
+    def operation = new IntegerLtOperationSearch()
 
     @Unroll
     def "less match #value > #testValue == #isLess"() {
@@ -29,11 +29,11 @@ class IntegerLtOperationSearchSpec extends Specification {
         setup:
         def file = IntegerDataGeneration.createFile();
         def snappyChunks = IntegerDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = IntegerDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
+//        ramFile.close()
         file.delete();
         where:
         searchValue | expectedChunk

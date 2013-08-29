@@ -10,9 +10,6 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
  * @author Carsten Hufe
  */
 public class DoubleLtOperationSearch extends NumberLtOperationSearch<Double, Double, NumberSnappyIndexFile<Double>> {
-    public DoubleLtOperationSearch(NumberSnappyIndexStrategy<Double, Double, NumberSnappyIndexFile<Double>> strategy) {
-        super(strategy);
-    }
 
     @Override
     public boolean matching(Double currentValue, QueryValueRetriever queryValueRetriever) {

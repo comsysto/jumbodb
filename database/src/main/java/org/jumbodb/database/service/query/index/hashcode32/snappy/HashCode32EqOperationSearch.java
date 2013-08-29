@@ -10,9 +10,6 @@ import org.jumbodb.database.service.query.index.integer.snappy.IntegerEqOperatio
  * @author Carsten Hufe
  */
 public class HashCode32EqOperationSearch extends IntegerEqOperationSearch {
-    public HashCode32EqOperationSearch(NumberSnappyIndexStrategy<Integer, Integer, NumberSnappyIndexFile<Integer>> strategy) {
-        super(strategy);
-    }
 
     @Override
     public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {

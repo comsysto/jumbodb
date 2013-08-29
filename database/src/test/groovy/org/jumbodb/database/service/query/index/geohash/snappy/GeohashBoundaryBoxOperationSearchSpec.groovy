@@ -4,6 +4,7 @@ import org.jumbodb.common.geo.geohash.GeoHash
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
+import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -11,7 +12,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class GeohashBoundaryBoxOperationSearchSpec extends Specification {
-    def operation = new GeohashBoundaryBoxOperationSearch(new GeohashSnappyIndexStrategy())
+    def operation = new GeohashBoundaryBoxOperationSearch()
 
     @Unroll
     def "equal match #value == #testValue == #isEqual"() {
@@ -36,11 +37,10 @@ class GeohashBoundaryBoxOperationSearchSpec extends Specification {
         setup:
         def file = GeohashDataGeneration.createFile();
         def snappyChunks = GeohashDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = GeohashDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, searchValue)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete()
         where:
         searchValue                    | expectedChunk

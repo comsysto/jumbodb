@@ -11,7 +11,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
-    def operation = new GeohashWithinRangeMeterBoxOperationSearch(new GeohashSnappyIndexStrategy())
+    def operation = new GeohashWithinRangeMeterBoxOperationSearch()
 
     @Unroll
     def "equal match #value == #testValue == #isEqual"() {
@@ -36,11 +36,10 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
         setup:
         def file = GeohashDataGeneration.createFile();
         def snappyChunks = GeohashDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = GeohashDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, searchValue)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete()
         where:
         searchValue            | expectedChunk

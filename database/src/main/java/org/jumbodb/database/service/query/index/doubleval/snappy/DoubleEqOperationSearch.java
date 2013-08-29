@@ -11,11 +11,6 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
  */
 public class DoubleEqOperationSearch extends NumberEqOperationSearch<Double, Double, Double, NumberSnappyIndexFile<Double>> {
 
-
-    public DoubleEqOperationSearch(NumberSnappyIndexStrategy<Double, Double, NumberSnappyIndexFile<Double>> strategy) {
-        super(strategy);
-    }
-
     @Override
     public boolean matching(Double currentValue, QueryValueRetriever queryValueRetriever) {
         Double searchValue = queryValueRetriever.getValue();

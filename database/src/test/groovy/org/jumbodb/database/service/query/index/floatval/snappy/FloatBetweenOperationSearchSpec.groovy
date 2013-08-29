@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.floatval.snappy
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
+import org.jumbodb.database.service.query.index.hashcode32.snappy.HashCode32DataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -10,7 +11,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class FloatBetweenOperationSearchSpec extends Specification {
-    def operation = new FloatBetweenOperationSearch(new FloatSnappyIndexStrategy())
+    def operation = new FloatBetweenOperationSearch()
 
     @Unroll
     def "between match #from < #testValue > #to == #isBetween"() {
@@ -34,11 +35,10 @@ class FloatBetweenOperationSearchSpec extends Specification {
         setup:
         def file = FloatDataGeneration.createFile();
         def snappyChunks = FloatDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = FloatDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 22000f])), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 22000f])), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchValue | expectedChunk

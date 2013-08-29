@@ -4,6 +4,7 @@ import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
+import org.jumbodb.database.service.query.index.integer.snappy.IntegerDataGeneration
 import org.jumbodb.database.service.query.index.longval.snappy.LongDataGeneration
 import org.jumbodb.database.service.query.index.longval.snappy.LongEqOperationSearch
 import org.jumbodb.database.service.query.index.longval.snappy.LongQueryValueRetriever
@@ -15,7 +16,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class HashCode64EqOperationSearchSpec extends Specification {
-    def operation = new HashCode64EqOperationSearch(new HashCode64SnappyIndexStrategy())
+    def operation = new HashCode64EqOperationSearch()
 
     @Unroll
     def "equal match #hashCodeValue == #testValue == #isEqual"() {
@@ -35,15 +36,14 @@ class HashCode64EqOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingChunk #hashCodeValue with expected chunk #expectedChunk"() {
         setup:
-        def file = LongDataGeneration.createFile();
-        def snappyChunks = LongDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def file = HashCode64DataGeneration.createFile();
+        def snappyChunks = HashCode64DataGeneration.createIndexFile(file)
+        def retriever = HashCode64DataGeneration.createFileDataRetriever(file, snappyChunks)
         def queryRetrieverMock = Mock(QueryValueRetriever)
         queryRetrieverMock.getValue() >> hashCodeValue
         expect:
-        operation.findFirstMatchingChunk(ramFile, queryRetrieverMock, snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, queryRetrieverMock, snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         hashCodeValue | expectedChunk

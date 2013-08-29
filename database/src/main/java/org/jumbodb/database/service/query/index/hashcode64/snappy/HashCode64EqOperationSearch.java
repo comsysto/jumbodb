@@ -10,9 +10,6 @@ import org.jumbodb.database.service.query.index.longval.snappy.LongEqOperationSe
  * @author Carsten Hufe
  */
 public class HashCode64EqOperationSearch extends LongEqOperationSearch {
-    protected HashCode64EqOperationSearch(NumberSnappyIndexStrategy<Long, Long, NumberSnappyIndexFile<Long>> strategy) {
-        super(strategy);
-    }
 
     @Override
     public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {

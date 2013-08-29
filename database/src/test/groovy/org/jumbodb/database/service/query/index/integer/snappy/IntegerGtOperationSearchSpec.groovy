@@ -10,7 +10,7 @@ import spock.lang.Unroll
  * @author Carsten Hufe
  */
 class IntegerGtOperationSearchSpec extends Specification {
-    def operation = new IntegerGtOperationSearch(new IntegerSnappyIndexStrategy())
+    def operation = new IntegerGtOperationSearch()
 
     @Unroll
     def "greater match #value < #testValue == #isGreater"() {
@@ -29,11 +29,10 @@ class IntegerGtOperationSearchSpec extends Specification {
         setup:
         def file = IntegerDataGeneration.createFile();
         def snappyChunks = IntegerDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = IntegerDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.GT, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.GT, searchValue)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchValue | expectedChunk

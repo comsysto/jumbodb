@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
  * @author Carsten Hufe
  */
 class DateTimeNeOperationSearchSpec extends Specification {
-    def operation = new DateTimeNeOperationSearch(new DateTimeSnappyIndexStrategy())
+    def operation = new DateTimeNeOperationSearch()
 
     @Unroll
     def "not equal match #value != #testValue == #isNotEqual"() {
@@ -33,11 +33,10 @@ class DateTimeNeOperationSearchSpec extends Specification {
         setup:
         def file = DateTimeDataGeneration.createFile();
         def snappyChunks = DateTimeDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = DateTimeDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchDate            | expectedChunk

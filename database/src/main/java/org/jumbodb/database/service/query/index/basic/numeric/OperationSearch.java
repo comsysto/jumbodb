@@ -11,7 +11,7 @@ import java.io.RandomAccessFile;
  */
 public interface OperationSearch<T, IFV, IF extends NumberSnappyIndexFile<IFV>> {
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, IF snappyIndexFile);
-    long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException;
+    long findFirstMatchingChunk(FileDataRetriever<T> indexRaf, QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException;
     boolean matching(T currentValue, QueryValueRetriever queryValueRetriever);
     QueryValueRetriever getQueryValueRetriever(QueryClause queryClause);
 }

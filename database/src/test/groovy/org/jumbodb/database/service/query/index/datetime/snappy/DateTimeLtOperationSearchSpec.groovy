@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
  * @author Carsten Hufe
  */
 class DateTimeLtOperationSearchSpec extends Specification {
-    def operation = new DateTimeLtOperationSearch(new DateTimeSnappyIndexStrategy())
+    def operation = new DateTimeLtOperationSearch()
 
     @Unroll
     def "less match #value > #testValue == #isLess"() {
@@ -33,11 +33,10 @@ class DateTimeLtOperationSearchSpec extends Specification {
         setup:
         def file = DateTimeDataGeneration.createFile();
         def snappyChunks = DateTimeDataGeneration.createIndexFile(file)
-        def ramFile = new RandomAccessFile(file, "r")
+        def retriever = DateTimeDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(ramFile, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchDate)), snappyChunks) == expectedChunk
         cleanup:
-        ramFile.close()
         file.delete();
         where:
         searchDate            | expectedChunk

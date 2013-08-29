@@ -44,6 +44,10 @@ public class SnappyChunks {
         return result;
     }
 
+    public long getSizeForChunk(long numberChunk) {
+        return chunks.get((int) numberChunk);
+    }
+
     @Override
     public String toString() {
         return "SnappyChunks{" +

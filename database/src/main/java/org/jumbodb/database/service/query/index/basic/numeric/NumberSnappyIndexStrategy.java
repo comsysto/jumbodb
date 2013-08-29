@@ -16,12 +16,12 @@ import org.jumbodb.database.service.query.index.IndexKey;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.jumbodb.data.common.snappy.SnappyChunks;
 import org.jumbodb.data.common.snappy.SnappyUtil;
-import org.jumbodb.data.common.snappy.SnappyChunksWithCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.xerial.snappy.Snappy;
 
 import java.io.*;
 import java.util.*;
@@ -52,12 +52,12 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         RandomAccessFile raf = null;
         List<FileOffset> result = new LinkedList<FileOffset>();
         try {
-            SnappyChunks snappyChunks = SnappyChunksWithCache.getSnappyChunksByFile(indexFile);
+            SnappyChunks snappyChunks = PseudoCacheForSnappy.getSnappyChunksByFile(indexFile);
             raf = new RandomAccessFile(indexFile, "r");
 
             for (QueryClause clause : clauses) {
                 if(queryLimit == -1 || queryLimit > result.size()) {
-                    result.addAll(findOffsetForClause(raf, clause, snappyChunks, queryLimit));
+                    result.addAll(findOffsetForClause(indexFile, raf, clause, snappyChunks, queryLimit));
                 }
             }
 
@@ -96,7 +96,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         List<IF> result = new LinkedList<IF>();
         File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".odx"));
         for (File indexFile : indexFiles) {
-            SnappyChunks snappyChunks = SnappyChunksWithCache.getSnappyChunksByFile(indexFile);
+            SnappyChunks snappyChunks = PseudoCacheForSnappy.getSnappyChunksByFile(indexFile);
             if(snappyChunks.getNumberOfChunks() > 0) {
                 result.add(createIndexFileDescription(indexFile, snappyChunks));
             }
@@ -162,45 +162,97 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
 
-    protected Set<FileOffset> findOffsetForClause(RandomAccessFile indexRaf, QueryClause clause, SnappyChunks snappyChunks, int queryLimit) throws IOException {
+    protected Set<FileOffset> findOffsetForClause(final File indexFile, final RandomAccessFile indexRaf, QueryClause clause, final SnappyChunks snappyChunks, int queryLimit) throws IOException {
         OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(clause.getQueryOperation());
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + clause.getQueryOperation());
         }
         QueryValueRetriever queryValueRetriever = integerOperationSearch.getQueryValueRetriever(clause);
-        long currentChunk = integerOperationSearch.findFirstMatchingChunk(indexRaf, queryValueRetriever, snappyChunks);
-        long numberOfChunks = snappyChunks.getNumberOfChunks();
-        if(currentChunk >= 0) {
-            Set<FileOffset> result = new HashSet<FileOffset>();
-            while(currentChunk < numberOfChunks) {
-                byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
-                ByteArrayInputStream bais = null;
-                DataInputStream dis = null;
-                try {
-                    bais = new ByteArrayInputStream(uncompressed);
-                    dis = new DataInputStream(bais);
-                    while(bais.available() > 0) {
-                        T currentValue = readValueFromDataInput(dis);
-                        int fileNameHash = dis.readInt();
-                        long offset = dis.readLong();
-                        if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
-                            result.add(new FileOffset(fileNameHash, offset, clause.getQueryClauses()));
-                        } else if(!result.isEmpty()) {
-                            // found some results, but here it isnt equal, that means end of results
-                            return result;
-                        }
-                        if(queryLimit != -1 && queryLimit < result.size()) {
-                            return result;
-                        }
-                    }
-                } finally {
-                    IOUtils.closeQuietly(dis);
-                    IOUtils.closeQuietly(bais);
-                }
-
-                currentChunk++;
+        FileDataRetriever fileDataRetriever = new FileDataRetriever() {
+//            @Override
+            public byte[] getUncompressedBlock(long searchChunk) throws IOException {
+                return SnappyUtil.getUncompressed(indexRaf, snappyChunks, searchChunk);
             }
-            return result;
+
+            @Override
+            public BlockRange<T> getBlockRange(long searchChunk) throws IOException {
+//                long start = System.currentTimeMillis();
+//                log.trace("getBlockRange start " + indexFile.getName() + " Chunk " + searchChunk);
+                BlockRange<?> snappyChunkRange = PseudoCacheForSnappy.getSnappyChunkRange(indexFile, searchChunk);
+                if(snappyChunkRange == null) {
+                    byte[] uncompressedBlock = getUncompressedBlock(searchChunk);
+                    T firstInt = readFirstValue(uncompressedBlock);
+                    T lastInt = readLastValue(uncompressedBlock);
+                    snappyChunkRange = new BlockRange<T>(firstInt, lastInt);
+                    PseudoCacheForSnappy.putSnappyChunkRange(indexFile, searchChunk, snappyChunkRange);
+                }
+//                else {
+//                    log.trace("PseudoCacheForSnappy Cache Hit");
+//                }
+//                log.trace("getBlockRange end " + indexFile.getName() + " Chunk " + searchChunk + "/" + snappyChunks.getNumberOfChunks() + " took " + (System.currentTimeMillis() - start) + "ms");
+
+                return (BlockRange<T>) snappyChunkRange;
+            }
+        };
+//        long start = System.currentTimeMillis();
+        long currentChunk = integerOperationSearch.findFirstMatchingChunk(fileDataRetriever, queryValueRetriever, snappyChunks);
+        long numberOfChunks = snappyChunks.getNumberOfChunks();
+//        log.trace("findFirstMatchingChunk currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");
+
+        int i = 0;
+        if(currentChunk >= 0) {
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
+            DataInputStream dis = null;
+            try {
+                fis = new FileInputStream(indexFile);
+                bis = new BufferedInputStream(fis);
+                dis = new DataInputStream(bis);
+                dis.skip(snappyChunks.getOffsetForChunk(currentChunk));
+                Set<FileOffset> result = new HashSet<FileOffset>();
+                while(currentChunk < numberOfChunks) {
+                    int compressedSize = dis.readInt();
+                    byte[] compressed = new byte[compressedSize];
+                    dis.read(compressed);
+                    byte[] uncompressed =  Snappy.uncompress(compressed);
+//                    byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
+                    ByteArrayInputStream bais = null;
+                    DataInputStream byteDis = null;
+                    try {
+                        bais = new ByteArrayInputStream(uncompressed);
+                        byteDis = new DataInputStream(bais);
+                        while(bais.available() > 0) {
+                            T currentValue = readValueFromDataInput(byteDis);
+                            int fileNameHash = byteDis.readInt();
+                            long offset = byteDis.readLong();
+                            if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
+                                result.add(new FileOffset(fileNameHash, offset, clause.getQueryClauses()));
+                            } else if(!result.isEmpty()) {
+                                // found some results, but here it isnt equal, that means end of results
+                                return result;
+                            }
+                            if(queryLimit != -1 && queryLimit < result.size()) {
+                                return result;
+                            }
+                        }
+                        // nothing found in second block, so there isn't anything
+                        if(i > 1 && result.isEmpty()) {
+                            return result;
+                        }
+                    } finally {
+                        IOUtils.closeQuietly(byteDis);
+                        IOUtils.closeQuietly(bais);
+                    }
+
+                    currentChunk++;
+                    i++;
+                }
+                return result;
+            } finally {
+                IOUtils.closeQuietly(dis);
+                IOUtils.closeQuietly(bis);
+                IOUtils.closeQuietly(fis);
+            }
         }
         return Collections.emptySet();
     }

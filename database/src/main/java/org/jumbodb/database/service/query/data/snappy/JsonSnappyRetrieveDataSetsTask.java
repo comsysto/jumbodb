@@ -7,11 +7,11 @@ import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.database.service.query.index.basic.numeric.PseudoCacheForSnappy;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.data.common.snappy.SnappyChunks;
-import org.jumbodb.data.common.snappy.SnappyChunksWithCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 }
             } else {
                 sis = new ChunkSkipableSnappyInputStream(fis);
-                SnappyChunks snappyChunks = SnappyChunksWithCache.getSnappyChunksByFile(file);
+                SnappyChunks snappyChunks = PseudoCacheForSnappy.getSnappyChunksByFile(file);
 
                 long currentOffset = 0;
                 byte[] lastBuffer = EMPTY_BUFFER;

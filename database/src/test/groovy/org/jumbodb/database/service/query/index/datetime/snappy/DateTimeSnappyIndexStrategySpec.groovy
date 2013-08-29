@@ -187,12 +187,12 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def queryClause = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
-        def fileOffsets = strategy.findOffsetForClause(ramFile, queryClause, snappyChunks, 5)
+        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
         then:
         fileOffsets == ([new FileOffset(50000, 1325415700000, [])] as Set)
         when:
         queryClause = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:01") // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForClause(ramFile, queryClause, snappyChunks, 5)
+        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
         then:
         fileOffsets.size() == 0
         cleanup:

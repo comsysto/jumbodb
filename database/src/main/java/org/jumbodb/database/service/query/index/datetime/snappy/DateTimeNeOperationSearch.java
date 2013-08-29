@@ -11,9 +11,6 @@ import org.jumbodb.database.service.query.index.longval.snappy.LongNeOperationSe
  * @author Carsten Hufe
  */
 public class DateTimeNeOperationSearch extends LongNeOperationSearch {
-    protected DateTimeNeOperationSearch(NumberSnappyIndexStrategy<Long, Long, NumberSnappyIndexFile<Long>> strategy) {
-        super(strategy);
-    }
 
     @Override
     public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {

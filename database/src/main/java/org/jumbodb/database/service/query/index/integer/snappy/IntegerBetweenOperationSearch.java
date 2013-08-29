@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
 import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.database.service.query.index.basic.numeric.FileDataRetriever;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
@@ -15,15 +16,11 @@ import java.util.List;
  */
 public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
 
-    protected IntegerBetweenOperationSearch(NumberSnappyIndexStrategy<Integer, Integer, NumberSnappyIndexFile<Integer>> strategy) {
-        super(strategy);
-    }
-
     @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(FileDataRetriever<Integer> fileDataRetriever, QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException {
         List<Integer> value = queryValueRetriever.getValue();
         Integer from = value.get(0);
-        return super.findFirstMatchingChunk(indexRaf, snappyChunks, from);
+        return super.findFirstMatchingChunk(fileDataRetriever, snappyChunks, from);
     }
 
     @Override

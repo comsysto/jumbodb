@@ -11,11 +11,6 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
  */
 public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<GeohashCoords, GeohashBoundaryBox, Integer, NumberSnappyIndexFile<Integer>> {
 
-
-    public GeohashBoundaryBoxOperationSearch(NumberSnappyIndexStrategy<GeohashCoords, Integer, NumberSnappyIndexFile<Integer>> strategy) {
-        super(strategy);
-    }
-
     @Override
     public boolean matching(GeohashCoords currentValue, QueryValueRetriever queryValueRetriever) {
         GeohashBoundaryBox searchValue = queryValueRetriever.getValue();

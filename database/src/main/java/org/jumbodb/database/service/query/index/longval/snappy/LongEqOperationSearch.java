@@ -11,11 +11,6 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
  */
 public class LongEqOperationSearch extends NumberEqOperationSearch<Long, Long, Long, NumberSnappyIndexFile<Long>> {
 
-
-    public LongEqOperationSearch(NumberSnappyIndexStrategy<Long, Long, NumberSnappyIndexFile<Long>> strategy) {
-        super(strategy);
-    }
-
     @Override
     public boolean matching(Long currentValue, QueryValueRetriever queryValueRetriever) {
         Long searchValue = queryValueRetriever.getValue();

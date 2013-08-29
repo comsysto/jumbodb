@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.index.floatval.snappy;
 
 import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.database.service.query.index.basic.numeric.FileDataRetriever;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
@@ -15,15 +16,11 @@ import java.util.List;
  */
 public class FloatBetweenOperationSearch extends FloatEqOperationSearch {
 
-    protected FloatBetweenOperationSearch(NumberSnappyIndexStrategy<Float, Float, NumberSnappyIndexFile<Float>> strategy) {
-        super(strategy);
-    }
-
     @Override
-    public long findFirstMatchingChunk(RandomAccessFile indexRaf, QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(FileDataRetriever<Float> fileDataRetriever, QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException {
         List<Float> value = queryValueRetriever.getValue();
         Float from = value.get(0);
-        return super.findFirstMatchingChunk(indexRaf, snappyChunks, from);
+        return super.findFirstMatchingChunk(fileDataRetriever, snappyChunks, from);
     }
 
     @Override

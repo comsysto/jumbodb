@@ -21,7 +21,7 @@ public class HashCode32SnappyIndexStrategy extends IntegerSnappyIndexStrategy {
     @Override
     public Map<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>> getQueryOperationsStrategies() {
         Map<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>> operations = new HashMap<QueryOperation, OperationSearch<Integer, Integer, NumberSnappyIndexFile<Integer>>>();
-        operations.put(QueryOperation.EQ, new HashCode32EqOperationSearch(this));
+        operations.put(QueryOperation.EQ, new HashCode32EqOperationSearch());
         return operations;
     }
 

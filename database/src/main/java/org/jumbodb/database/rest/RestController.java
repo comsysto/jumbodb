@@ -81,7 +81,8 @@ public class RestController {
              @Override
              public void writeResult(byte[] result) throws IOException {
                 synchronized (response) {
-                    response.getWriter().println(new String(result, "UTF-8"));
+                    String s = new String(result, "UTF-8").trim();
+                    response.getWriter().println(s);
                     response.getWriter().flush();
                     counter.incrementAndGet();
                 }

@@ -27,6 +27,7 @@ import java.util.concurrent.*;
  */
 public class JumboSearcher {
     private Logger log = LoggerFactory.getLogger(JumboSearcher.class);
+    private Logger longRunningLog = LoggerFactory.getLogger("LONG_RUNNING_QUERY");
 
     private JumboConfiguration jumboConfiguration;
     private IndexStrategyManager indexStrategyManager;
@@ -35,6 +36,7 @@ public class JumboSearcher {
     private ExecutorService indexExecutor;
     private ExecutorService chunkExecutor;
     private ObjectMapper jsonMapper;
+    private long queryTimeoutOnChunkInSeconds;
 
 
     public void onInitialize() {
@@ -59,22 +61,36 @@ public class JumboSearcher {
     public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery, ResultCallback resultCallback) {
         Collection<DeliveryChunkDefinition> deliveryChunks = collectionDefinition.getChunks(collectionName);
         if(deliveryChunks != null && deliveryChunks.size() > 0) {
-            Collection<Future<Integer>> futures = new LinkedList<Future<Integer>>();
+            Collection<SubmittedChunkJob> futures = new LinkedList<SubmittedChunkJob>();
             for (DeliveryChunkDefinition deliveryChunk : deliveryChunks) {
-                futures.add(chunkExecutor.submit(new SearchDeliveryChunkTask(deliveryChunk, searchQuery, resultCallback)));
+                Future<Integer> future = chunkExecutor.submit(new SearchDeliveryChunkTask(deliveryChunk, searchQuery, resultCallback));
+                futures.add(new SubmittedChunkJob(deliveryChunk, future));
             }
-            return getNumberOfResultsFromFutures(futures);
+            return getNumberOfResultsFromFuturesAndHandleTimeOut(futures, collectionName, searchQuery);
         }
         else {
             throw new JumboCollectionMissingException("Collection '" + collectionName + "' does not exist!");
         }
     }
 
-    private int getNumberOfResultsFromFutures(Collection<Future<Integer>> futures) {
+    private int getNumberOfResultsFromFuturesAndHandleTimeOut(Collection<SubmittedChunkJob> chunkJobs, String collectionName, JumboQuery searchQuery) {
         int results = 0;
         try {
-            for (Future<Integer> future : futures) {
-                results += future.get();
+            for (SubmittedChunkJob job : chunkJobs) {
+                try {
+                    Future<Integer> future = job.getFuture();
+                    results += future.get(queryTimeoutOnChunkInSeconds, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    StringBuilder buf = new StringBuilder();
+                    buf.append("\n############################################################################\n");
+                    buf.append("Timed out after: " + queryTimeoutOnChunkInSeconds + " seconds.\n");
+                    buf.append("========================== Collection / Chunk ==============================\n");
+                    buf.append(job.getDeliveryChunkDefinition());
+                    buf.append("========================== Jumbo DB Query ==================================\n");
+                    buf.append(searchQuery);
+                    longRunningLog.warn(buf.toString());
+                    throw new JumboCommonException("Query on collection '" + collectionName + "' timed out, see long running query log fr further details.");
+                }
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -168,5 +184,10 @@ public class JumboSearcher {
     @Required
     public void setChunkExecutor(ExecutorService chunkExecutor) {
         this.chunkExecutor = chunkExecutor;
+    }
+
+    @Required
+    public void setQueryTimeoutOnChunkInSeconds(long queryTimeoutOnChunkInSeconds) {
+        this.queryTimeoutOnChunkInSeconds = queryTimeoutOnChunkInSeconds;
     }
 }

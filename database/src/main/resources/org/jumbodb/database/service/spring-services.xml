@@ -103,6 +103,7 @@
         <property name="dataStrategyManager" ref="dataStrategyManager"/>
         <property name="indexStrategyManager" ref="indexStrategyManager"/>
         <property name="jumboConfiguration" ref="jumboConfig"/>
+        <property name="queryTimeoutOnChunkInSeconds" value="${jumbodb.query.timeout.chunk.seconds}"/>
     </bean>
 
     <bean id="queryServer" class="org.jumbodb.database.service.query.QueryServer" init-method="start" destroy-method="stop">

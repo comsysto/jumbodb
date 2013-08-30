@@ -31,6 +31,23 @@
         </layout>
     </appender>
 
+    <appender name="JUMBO_LONG_RUNNING_QUERY_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/jumbodb.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.home}/logs/jumbodb_longrunning.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <append>true</append>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n</Pattern>
+        </layout>
+    </appender>
+
+    <logger name="LONG_RUNNING_QUERY" level="info" additivity="false">
+        <appender-ref ref="JUMBO_LONG_RUNNING_QUERY_FILE"/>
+    </logger>
+
+
     <logger name="org.jumbodb" level="TRACE" additivity="false">
         <appender-ref ref="JUMBO_TRACE_FILE"/>
     </logger>

@@ -61,6 +61,7 @@ public class JumboQuery {
         return "JumboQuery{" +
                 "indexQuery=" + indexQuery +
                 ", jsonQuery=" + jsonQuery +
+                ", limit=" + limit +
                 '}';
     }
 }

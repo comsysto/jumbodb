@@ -81,6 +81,7 @@ public class JumboSearcher {
                     Future<Integer> future = job.getFuture();
                     results += future.get(queryTimeoutOnChunkInSeconds, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
+                    cancelOtherRunningJobs(chunkJobs);
                     StringBuilder buf = new StringBuilder();
                     buf.append("\n############################################################################\n");
                     buf.append("Timed out after: " + queryTimeoutOnChunkInSeconds + " seconds.\n");
@@ -99,6 +100,13 @@ public class JumboSearcher {
             throw (RuntimeException)e.getCause();
         }
         return results;
+    }
+
+    private void cancelOtherRunningJobs(Collection<SubmittedChunkJob> chunkJobs) {
+        for (SubmittedChunkJob chunkJob : chunkJobs) {
+            Future<Integer> future = chunkJob.getFuture();
+            future.cancel(true);
+        }
     }
 
     private Collection<FileOffset> findFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition, JumboQuery searchQuery) {

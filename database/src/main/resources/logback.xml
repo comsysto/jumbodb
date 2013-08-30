@@ -43,7 +43,7 @@
         </layout>
     </appender>
 
-    <logger name="LONG_RUNNING_QUERY" level="info" additivity="false">
+    <logger name="LONG_RUNNING_QUERY" level="INFO" additivity="false">
         <appender-ref ref="JUMBO_LONG_RUNNING_QUERY_FILE"/>
     </logger>
 

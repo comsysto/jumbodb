@@ -84,10 +84,10 @@ public class JumboSearcher {
                     cancelOtherRunningJobs(chunkJobs);
                     StringBuilder buf = new StringBuilder();
                     buf.append("\n############################################################################\n");
-                    buf.append("Timed out after: " + queryTimeoutOnChunkInSeconds + " seconds.\n");
-                    buf.append("========================== Collection / Chunk ==============================\n");
+                    buf.append("Timed out after: " + queryTimeoutOnChunkInSeconds + " seconds.");
+                    buf.append("\n========================== Collection / Chunk ==============================\n");
                     buf.append(job.getDeliveryChunkDefinition());
-                    buf.append("========================== Jumbo DB Query ==================================\n");
+                    buf.append("\n========================== Jumbo DB Query ==================================\n");
                     buf.append(searchQuery);
                     longRunningLog.warn(buf.toString());
                     throw new JumboCommonException("Query on collection '" + collectionName + "' timed out, see long running query log fr further details.");

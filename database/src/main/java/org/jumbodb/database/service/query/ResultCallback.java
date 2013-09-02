@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query;
 import org.jumbodb.common.query.JumboQuery;
 
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 /**
  * User: carsten
@@ -12,4 +13,5 @@ import java.io.IOException;
 public interface ResultCallback {
     void writeResult(byte[] result) throws IOException;
     boolean needsMore(JumboQuery jumboQuery) throws IOException;
+    void collect(CancelableTask cancelableTask);
 }

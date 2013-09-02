@@ -3,6 +3,7 @@ package org.jumbodb.database.service.queryutil;
 import org.apache.commons.lang.UnhandledException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.database.service.query.CancelableTask;
 import org.jumbodb.database.service.query.JumboSearcher;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.queryutil.dto.QueryResult;
@@ -34,6 +35,11 @@ public class QueryUtilService {
                     synchronized (result) {
                         result.add(mapper.readValue(dataSet, Map.class));
                     }
+                }
+
+                @Override
+                public void collect(CancelableTask cancelableTask) {
+                    // TODO implement timeout handling in this service
                 }
 
                 @Override

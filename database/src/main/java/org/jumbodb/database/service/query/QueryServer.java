@@ -12,6 +12,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Required;
 
 /**
  * User: carsten
@@ -23,14 +24,17 @@ public class QueryServer {
 
     private boolean serverActive = false;
     private ExecutorService serverSocketExecutor = Executors.newCachedThreadPool();
+    private ExecutorService queryTaskTimeoutExecutor = Executors.newCachedThreadPool();
     private JumboSearcher jumboSearcher;
     private final ObjectMapper jsonMapper;
     private JumboConfiguration config;
     private  ServerSocket serverSocket;
+    private long queryTimeoutInSeconds;
 
-    public QueryServer(JumboConfiguration config, JumboSearcher jumboSearcher) {
+    public QueryServer(JumboConfiguration config, JumboSearcher jumboSearcher, long queryTimeoutInSeconds) {
         this.jumboSearcher = jumboSearcher;
         this.config = config;
+        this.queryTimeoutInSeconds = queryTimeoutInSeconds;
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -47,7 +51,7 @@ public class QueryServer {
                     log.info("Configuration " + config.toString());
                     while (serverActive) {
                         Socket clientSocket = serverSocket.accept();
-                        serverSocketExecutor.submit(new QueryTask(clientSocket, id++, jumboSearcher, jsonMapper));
+                        serverSocketExecutor.submit(new QueryTask(clientSocket, id++, jumboSearcher, jsonMapper, queryTaskTimeoutExecutor, queryTimeoutInSeconds));
                     }
                     log.info("QueryServer stopped");
                 } catch (Exception e) {
@@ -66,6 +70,7 @@ public class QueryServer {
     public void stop() throws IOException {
         serverActive = false;
         serverSocket.close();
+        queryTaskTimeoutExecutor.shutdown();
         serverSocketExecutor.shutdown();
     }
 

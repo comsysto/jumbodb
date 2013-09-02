@@ -4,12 +4,17 @@ import org.codehaus.jackson.map.ObjectMapper
 import org.jumbodb.common.query.JumboQuery
 import spock.lang.Specification
 
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
+
 /**
  * @author Carsten Hufe
  */
 class QueryTaskSpec extends Specification {
     def "querying"() {
         setup:
+        def executorServiceMock = Mock(ExecutorService)
+        def futureMock = Mock(Future)
         def socketMock = Mock(Socket)
         def inetAddressMock = Mock(InetAddress)
         socketMock.getInetAddress() >> inetAddressMock
@@ -20,7 +25,7 @@ class QueryTaskSpec extends Specification {
         def databaseQuerySessionMock = Mock(DatabaseQuerySession)
         def jumboQuery = new JumboQuery()
         jumboQuery.setLimit(3)
-        def queryTask = new QueryTaskWithSessionMock(socketMock, 5, jumboSearcherMock, objectMapperMock, databaseQuerySessionMock)
+        def queryTask = new QueryTaskWithSessionMock(socketMock, 5, jumboSearcherMock, objectMapperMock, databaseQuerySessionMock, executorServiceMock)
         when:
         queryTask.run()
         then:
@@ -38,14 +43,19 @@ class QueryTaskSpec extends Specification {
 
         }
         1 * objectMapperMock.readValue(_, _) >> jumboQuery
+        1 * executorServiceMock.submit(_) >> { val ->
+            val[0].call()
+            return futureMock
+        }
+        1 * futureMock.get(_, _) >> 1
 
     }
 
     class QueryTaskWithSessionMock extends QueryTask {
         private DatabaseQuerySession session
 
-        QueryTaskWithSessionMock(Socket s, int clientID, JumboSearcher jumboSearcher, ObjectMapper jsonMapper, DatabaseQuerySession session) {
-            super(s, clientID, jumboSearcher, jsonMapper)
+        QueryTaskWithSessionMock(Socket s, int clientID, JumboSearcher jumboSearcher, ObjectMapper jsonMapper, DatabaseQuerySession session, ExecutorService executorService) {
+            super(s, clientID, jumboSearcher, jsonMapper, executorService, 100l)
             this.session = session
         }
 

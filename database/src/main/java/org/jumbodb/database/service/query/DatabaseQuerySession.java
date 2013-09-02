@@ -106,6 +106,7 @@ public class DatabaseQuerySession implements Closeable {
         private LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
         private boolean running = true;
         private AtomicInteger count = new AtomicInteger(0);
+
         public void writeResult(byte[] result) {
             try {
                 int i = count.incrementAndGet();
@@ -115,6 +116,29 @@ public class DatabaseQuerySession implements Closeable {
                 queue.put(result);
             } catch (InterruptedException e) {
                 log.error("Unhandled error", e);
+            }
+        }
+
+        public void writeUnknownError(Exception e) {
+            try {
+                forceCleanup();
+                dataOutputStream.writeInt(-1);
+                dataOutputStream.writeUTF(":error:common");
+                dataOutputStream.writeUTF(e.getMessage());
+            }  catch (IOException e1) {
+                log.error("Unhandled exception", e1);
+            }
+        }
+
+        public void writeTimeoutError(String collection, long timeoutInSeconds) {
+            try {
+                forceCleanup();
+                dataOutputStream.writeInt(-1);
+                dataOutputStream.writeUTF(":error:timeout");
+                dataOutputStream.writeUTF("Collection '" + collection + "' timed out after " + timeoutInSeconds + " seconds.");
+
+            }  catch (IOException e1) {
+                log.error("Unhandled exception", e1);
             }
         }
 

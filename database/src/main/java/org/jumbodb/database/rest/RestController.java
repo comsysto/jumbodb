@@ -12,6 +12,7 @@ import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
 import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilCollection;
+import org.jumbodb.database.service.query.CancelableTask;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.queryutil.QueryUtilService;
 import org.jumbodb.database.service.queryutil.dto.QueryResult;
@@ -76,6 +77,7 @@ public class RestController {
 
     @RequestMapping(value = "/query/{collection}/stream", method = RequestMethod.POST)
     public void queryStream(@PathVariable String collection, @RequestBody String query, final HttpServletResponse response) throws IOException {
+        // TODO extract and clean up
         final AtomicInteger counter = new AtomicInteger(0);
         queryUtilService.findDocumentsByQuery(collection, query, new ResultCallback() {
              @Override
@@ -88,7 +90,12 @@ public class RestController {
                 }
              }
 
-             @Override
+            @Override
+            public void collect(CancelableTask cancelableTask) {
+                // TODO implement timeout handling
+            }
+
+            @Override
              public boolean needsMore(JumboQuery jumboQuery) throws IOException {
                  return counter.get() < jumboQuery.getLimit();
              }

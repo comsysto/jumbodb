@@ -7,6 +7,7 @@ import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
+import org.jumbodb.database.service.query.FutureCancelableTask;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
@@ -71,7 +72,9 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         if (searchQuery.getIndexQuery().size() == 0) {
             log.debug("Running scanned search");
             for (File file : deliveryChunkDefinition.getDataFiles().values()) {
-                tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery, resultCallback, this)));
+                Future<Integer> future = retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery, resultCallback, this));
+                tasks.add(future);
+                resultCallback.collect(new FutureCancelableTask(future));
             }
         } else {
             log.debug("Running indexed search");
@@ -82,7 +85,9 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
                 }
                 Set<FileOffset> offsets = fileOffsetsMap.get(fileNameHash);
                 if (offsets.size() > 0) {
-                    tasks.add(retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this)));
+                    Future<Integer> future = retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this));
+                    tasks.add(future);
+                    resultCallback.collect(new FutureCancelableTask(future));
                 }
             }
         }

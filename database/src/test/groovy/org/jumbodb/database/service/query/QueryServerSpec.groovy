@@ -16,7 +16,7 @@ class QueryServerSpec extends Specification {
         def dataFileMock = Mock(File)
         def indexFileMock = Mock(File)
         def config = new JumboConfiguration(12002, 12001, dataFileMock, indexFileMock)
-        def queryServer = new QueryServer(config, jumboSearcherMock)
+        def queryServer = new QueryServer(config, jumboSearcherMock, 500l)
         def executorMock = Mock(ExecutorService)
         queryServer.setServerSocketExecutor(executorMock)
         queryServer.start()
@@ -38,7 +38,7 @@ class QueryServerSpec extends Specification {
         def dataFileMock = Mock(File)
         def indexFileMock = Mock(File)
         def config = new JumboConfiguration(13002, 13001, dataFileMock, indexFileMock)
-        def queryServer = new QueryServer(config, jumboSearcherMock)
+        def queryServer = new QueryServer(config, jumboSearcherMock, 500l)
         queryServer.start()
         when:
         queryServer.stop()

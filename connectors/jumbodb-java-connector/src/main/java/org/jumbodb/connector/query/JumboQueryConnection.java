@@ -10,6 +10,7 @@ import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.connector.JumboConstants;
 import org.jumbodb.connector.exception.JumboCommonException;
 import org.jumbodb.connector.exception.JumboIndexMissingException;
+import org.jumbodb.connector.exception.JumboTimeoutException;
 import org.jumbodb.connector.exception.JumboUnknownException;
 import org.xerial.snappy.SnappyInputStream;
 
@@ -164,6 +165,7 @@ public class JumboQueryConnection {
                     jsonByteArray = new byte[byteArrayLength];
                 }
                 dis.readFully(jsonByteArray, 0, byteArrayLength);
+
                 T result = jsonMapper.readValue(jsonByteArray, 0, byteArrayLength, jsonClazz);
                 resultHandler.onResult(result);
                 results++;
@@ -174,13 +176,17 @@ public class JumboQueryConnection {
             }
             else if(cmd.equals(":error:common")) {
                 throw new JumboCommonException(dis.readUTF());
-            } else if(cmd.equals(":error:collection:missing")) {
+            }
+            else if(cmd.equals(":error:timeout")) {
+                throw new JumboTimeoutException(dis.readUTF());
+            }
+            else if(cmd.equals(":error:collection:missing")) {
                 LOG.warn("Collection is missing: " + dis.readUTF());
 //                throw new JumboCollectionMissingException(dis.readUTF());
-            } else if(cmd.equals(":error:collection:index:missing")) {
+            }
+            else if(cmd.equals(":error:collection:index:missing")) {
                 throw new JumboIndexMissingException(dis.readUTF());
             }
-
             else if(!cmd.equals(":result:end")) {
                 throw new IllegalStateException("After length -1 should :result:end must follow!");
             }

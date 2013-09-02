@@ -2,7 +2,6 @@ package org.jumbodb.connector.query;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.UnhandledException;
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -12,6 +11,8 @@ import org.jumbodb.connector.exception.JumboCommonException;
 import org.jumbodb.connector.exception.JumboIndexMissingException;
 import org.jumbodb.connector.exception.JumboTimeoutException;
 import org.jumbodb.connector.exception.JumboUnknownException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyInputStream;
 
 import java.io.*;
@@ -26,7 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Time: 10:53 AM
  */
 public class JumboQueryConnection {
-    private static final Logger LOG = Logger.getLogger(JumboQueryConnection.class);
+    private Logger log = LoggerFactory.getLogger(JumboQueryConnection.class);
+
     private final String host;
     private final int port;
     private final ObjectMapper jsonMapper;
@@ -172,16 +174,22 @@ public class JumboQueryConnection {
             }
             String cmd = dis.readUTF();
             if(cmd.equals(":error:unknown")) {
-                throw new JumboUnknownException(dis.readUTF());
+                String message = dis.readUTF();
+                log.error("Unknown error: " + message);
+                throw new JumboUnknownException(message);
             }
             else if(cmd.equals(":error:common")) {
-                throw new JumboCommonException(dis.readUTF());
+                String message = dis.readUTF();
+                log.error("Common error: " + message);
+                throw new JumboCommonException(message);
             }
             else if(cmd.equals(":error:timeout")) {
-                throw new JumboTimeoutException(dis.readUTF());
+                String message = dis.readUTF();
+                log.error("Timeout: " + message);
+                throw new JumboTimeoutException(message);
             }
             else if(cmd.equals(":error:collection:missing")) {
-                LOG.warn("Collection is missing: " + dis.readUTF());
+                log.warn("Collection is missing: " + dis.readUTF());
 //                throw new JumboCollectionMissingException(dis.readUTF());
             }
             else if(cmd.equals(":error:collection:index:missing")) {
@@ -203,7 +211,7 @@ public class JumboQueryConnection {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(sock);
         }
-        LOG.info("Size " + results + " Time: " + (System.currentTimeMillis() - start));
+        log.info("Size " + results + " Time: " + (System.currentTimeMillis() - start));
 //        return result;
     }
 

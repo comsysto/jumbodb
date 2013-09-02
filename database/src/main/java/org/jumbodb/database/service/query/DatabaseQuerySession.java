@@ -105,6 +105,7 @@ public class DatabaseQuerySession implements Closeable {
     public class ResultWriter extends Thread {
         private LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
         private boolean running = true;
+        private boolean error = false;
         private AtomicInteger count = new AtomicInteger(0);
 
         public void writeResult(byte[] result) {
@@ -115,16 +116,18 @@ public class DatabaseQuerySession implements Closeable {
                 }
                 queue.put(result);
             } catch (InterruptedException e) {
-                log.error("Unhandled error", e);
+                log.info("Interrupted result writer");
             }
         }
 
         public void writeUnknownError(Exception e) {
             try {
-                forceCleanup();
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:common");
-                dataOutputStream.writeUTF(e.getMessage());
+                error = true;
+                synchronized (dataOutputStream) {
+                    dataOutputStream.writeInt(-1);
+                    dataOutputStream.writeUTF(":error:unknown");
+                    dataOutputStream.writeUTF(e.getMessage());
+                }
             }  catch (IOException e1) {
                 log.error("Unhandled exception", e1);
             }
@@ -132,10 +135,12 @@ public class DatabaseQuerySession implements Closeable {
 
         public void writeTimeoutError(String collection, long timeoutInSeconds) {
             try {
-                forceCleanup();
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:timeout");
-                dataOutputStream.writeUTF("Collection '" + collection + "' timed out after " + timeoutInSeconds + " seconds.");
+                error = true;
+                synchronized (dataOutputStream) {
+                    dataOutputStream.writeInt(-1);
+                    dataOutputStream.writeUTF(":error:timeout");
+                    dataOutputStream.writeUTF("Collection '" + collection + "' timed out after " + timeoutInSeconds + " seconds.");
+                }
 
             }  catch (IOException e1) {
                 log.error("Unhandled exception", e1);
@@ -145,11 +150,13 @@ public class DatabaseQuerySession implements Closeable {
         @Override
         public void run() {
             try {
-                while(running || queue.size() > 0) {
-                    byte dataset[] = queue.take();
-                    if(dataset.length > 0) {
-                        dataOutputStream.writeInt(dataset.length);
-                        dataOutputStream.write(dataset);
+                synchronized (dataOutputStream) {
+                    while((running || queue.size() > 0) && !error) {
+                        byte dataset[] = queue.take();
+                        if(dataset.length > 0) {
+                            dataOutputStream.writeInt(dataset.length);
+                            dataOutputStream.write(dataset);
+                        }
                     }
                 }
             } catch (InterruptedException e) {

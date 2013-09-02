@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.connector.exception.JumboUnknownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class QueryTask implements Runnable {
     private long queryTimeoutInSeconds;
     private DatabaseQuerySession databaseQuerySession;
     private AtomicInteger numberOfResults = new AtomicInteger();
-    private ConcurrentLinkedQueue<CancelableTask> cancelableTasks = new ConcurrentLinkedQueue<CancelableTask>();
+    private LinkedBlockingQueue<CancelableTask> cancelableTasks = new LinkedBlockingQueue<CancelableTask>();
 
     public QueryTask(Socket s, int clientID, JumboSearcher jumboSearcher, ObjectMapper jsonMapper, ExecutorService queryTaskTimeoutExecutor, long queryTimeoutInSeconds) {
         clientSocket = s;
@@ -50,17 +51,16 @@ public class QueryTask implements Runnable {
                     } catch (InterruptedException e) {
                         cancelAllRunningTasks();
                         logQuery(e.getMessage(), collection, query);
-                        resultWriter.writeUnknownError(e);
+                        throw new JumboUnknownException(e.getMessage());
                     } catch (ExecutionException e) {
                         cancelAllRunningTasks();
                         logQuery(e.getMessage(), collection, query);
-                        resultWriter.writeUnknownError(e);
+                        throw new JumboUnknownException(e.getMessage());
                     } catch (TimeoutException e) {
-                        cancelAllRunningTasks();
                         logQuery("Timed out after: " + queryTimeoutInSeconds + " seconds.", collection, query);
-                        resultWriter.writeTimeoutError(collection, queryTimeoutInSeconds);
+                        cancelAllRunningTasks();
+                        throw new JumboTimeoutException("Timed out after: " + queryTimeoutInSeconds + " seconds.");
                     }
-                    return 0;
                 }
             });
         } catch (IOException e) {
@@ -90,8 +90,12 @@ public class QueryTask implements Runnable {
 
     private void cancelAllRunningTasks() {
         CancelableTask cancelableTask;
-        while ((cancelableTask = cancelableTasks.poll()) != null) {
-            cancelableTask.cancel();
+        try {
+            while ((cancelableTask = cancelableTasks.poll(1000, TimeUnit.MILLISECONDS)) != null) {
+                cancelableTask.cancel();
+            }
+        } catch (InterruptedException e) {
+            // nothing todo
         }
     }
 

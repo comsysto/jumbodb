@@ -62,6 +62,11 @@ public class DatabaseQuerySession implements Closeable {
                 dataOutputStream.writeInt(-1); // After -1 command follows
                 dataOutputStream.writeUTF(":result:end");
             }
+        } catch(JumboTimeoutException e) {
+            log.warn("Handled error through query", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:timeout");
+            dataOutputStream.writeUTF(e.getMessage());
         } catch(JumboCollectionMissingException e) {
             log.warn("Handled error through query", e);
             dataOutputStream.writeInt(-1);
@@ -105,7 +110,6 @@ public class DatabaseQuerySession implements Closeable {
     public class ResultWriter extends Thread {
         private LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
         private boolean running = true;
-        private boolean reachedEnd = false;
         private AtomicInteger count = new AtomicInteger(0);
 
         public void writeResult(byte[] result) {
@@ -117,28 +121,6 @@ public class DatabaseQuerySession implements Closeable {
                 queue.put(result);
             } catch (InterruptedException e) {
                 log.info("Interrupted result writer");
-            }
-        }
-
-        public void writeUnknownError(Exception e) {
-            try {
-                while(!reachedEnd) forceCleanup();
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:unknown");
-                dataOutputStream.writeUTF(e.getMessage());
-            }  catch (IOException e1) {
-                log.error("Unhandled exception", e1);
-            }
-        }
-
-        public void writeTimeoutError(String collection, long timeoutInSeconds) {
-            try {
-                while(!reachedEnd) forceCleanup();
-                dataOutputStream.writeInt(-1);
-                dataOutputStream.writeUTF(":error:timeout");
-                dataOutputStream.writeUTF("Collection '" + collection + "' timed out after " + timeoutInSeconds + " seconds.");
-            }  catch (IOException e1) {
-                log.error("Unhandled exception", e1);
             }
         }
 
@@ -158,8 +140,6 @@ public class DatabaseQuerySession implements Closeable {
             } catch (IOException e) {
                 log.error("Unhandled error", e);
                 forceCleanup();
-            } finally {
-                reachedEnd = true;
             }
         }
 

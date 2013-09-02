@@ -25,7 +25,7 @@ public class QueryTask implements Runnable {
     private long queryTimeoutInSeconds;
     private DatabaseQuerySession databaseQuerySession;
     private AtomicInteger numberOfResults = new AtomicInteger();
-    private List<CancelableTask> cancelableTasks = new CopyOnWriteArrayList<CancelableTask>();
+    private ConcurrentLinkedQueue<CancelableTask> cancelableTasks = new ConcurrentLinkedQueue<CancelableTask>();
 
     public QueryTask(Socket s, int clientID, JumboSearcher jumboSearcher, ObjectMapper jsonMapper, ExecutorService queryTaskTimeoutExecutor, long queryTimeoutInSeconds) {
         clientSocket = s;
@@ -89,7 +89,8 @@ public class QueryTask implements Runnable {
     }
 
     private void cancelAllRunningTasks() {
-        for (CancelableTask cancelableTask : cancelableTasks) {
+        CancelableTask cancelableTask;
+        while ((cancelableTask = cancelableTasks.poll()) != null) {
             cancelableTask.cancel();
         }
     }

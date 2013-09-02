@@ -91,11 +91,11 @@ public class QueryTask implements Runnable {
     private void cancelAllRunningTasks() {
         CancelableTask cancelableTask;
         try {
-            while ((cancelableTask = cancelableTasks.poll(1000, TimeUnit.MILLISECONDS)) != null) {
+            while ((cancelableTask = cancelableTasks.poll(500, TimeUnit.MILLISECONDS)) != null) {
                 cancelableTask.cancel();
             }
         } catch (InterruptedException e) {
-            // nothing todo
+            // nothing to do
         }
     }
 

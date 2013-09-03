@@ -54,8 +54,12 @@ public class QueryTask implements Runnable {
                         throw new JumboUnknownException(e.getMessage());
                     } catch (ExecutionException e) {
                         cancelAllRunningTasks();
-                        logQuery(e.getMessage(), collection, query);
-                        throw new JumboUnknownException(e.getMessage());
+                        Throwable cause = e.getCause();
+                        logQuery(cause.getMessage(), collection, query);
+                        if(cause instanceof RuntimeException) {
+                            throw (RuntimeException)cause;
+                        }
+                        throw new JumboUnknownException(cause.getMessage());
                     } catch (TimeoutException e) {
                         logQuery("Timed out after: " + queryTimeoutInSeconds + " seconds.", collection, query);
                         cancelAllRunningTasks();

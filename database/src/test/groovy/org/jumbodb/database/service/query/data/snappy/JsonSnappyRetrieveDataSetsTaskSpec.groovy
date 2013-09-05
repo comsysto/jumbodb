@@ -299,19 +299,19 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         "Oh no the line break is missing!"                       | 6      | -1
     }
 
-    def "getBufferByOffsetGroup(#offsetGroup) == #expectedBufferSize"() {
-        setup:
-        def task = createDefaultTask()
-        expect:
-        def fileOffsets = offsetGroup.collect { new FileOffset(123, it, []) }
-        task.getBufferByOffsetGroup(fileOffsets).length == expectedBufferSize
-        where:
-        offsetGroup                    | expectedBufferSize
-        [4l]                           | 16384 // default buffer size
-        [1000l, 2000l, 67000l, 69999l] | 85383 // -1000 + default buffer size
-        [1000l, 69999l]                | 85383 // -1000 + default buffer size
-        [2000l, 102000l]               | 116384 // -2000 + default buffer size
-    }
+//    def "getBufferByOffsetGroup(#offsetGroup) == #expectedBufferSize"() {
+//        setup:
+//        def task = createDefaultTask()
+//        expect:
+//        def fileOffsets = offsetGroup.collect { new FileOffset(123, it, []) }
+//        task.getBufferByOffsetGroup(fileOffsets).length == expectedBufferSize
+//        where:
+//        offsetGroup                    | expectedBufferSize
+//        [4l]                           | 16384 // default buffer size
+//        [1000l, 2000l, 67000l, 69999l] | 85383 // -1000 + default buffer size
+//        [1000l, 69999l]                | 85383 // -1000 + default buffer size
+//        [2000l, 102000l]               | 116384 // -2000 + default buffer size
+//    }
 
     @Unroll
     def "groupOffsetsByBufferSize == #expectedGroups"() {

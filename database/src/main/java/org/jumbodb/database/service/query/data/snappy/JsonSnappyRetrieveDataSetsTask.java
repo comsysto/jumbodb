@@ -56,8 +56,8 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         DataInputStream dis = null;
         ChunkSkipableSnappyInputStream sis = null;
         BufferedReader br = null;
-        FileInputStream chunksFis = null;
-        DataInputStream chunksDis = null;
+//        FileInputStream chunksFis = null;
+//        DataInputStream chunksDis = null;
         int results = 0;
 
         try {
@@ -99,13 +99,13 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
                 for (FileOffset offset : offsets) {
                     long searchOffset = offset.getOffset();
-                    long chunkIndex = (searchOffset / snappyChunks.getChunkSize());
-                    long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
-                    long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunks.getChunkSize());
-                    long chunkOffsetToSkip = chunkOffsetCompressed - compressedFileStreamPosition;
 
                     // delete buffer when offset is not inside range and skip
                     if(resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
+                        long chunkIndex = (searchOffset / snappyChunks.getChunkSize());
+                        long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
+                        long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunks.getChunkSize());
+                        long chunkOffsetToSkip = chunkOffsetCompressed - compressedFileStreamPosition;
                         compressedFileStreamPosition += dis.skip(chunkOffsetToSkip);
                         uncompressedFileStreamPosition = chunkOffsetUncompressed;
                         resultBuffer = EMPTY_BUFFER;
@@ -118,12 +118,19 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                     while((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
                         int compressedLength = dis.readInt();
-                        int read = dis.read(readBufferCompressed, 0, compressedLength);
-                        compressedFileStreamPosition += read + 4; // 4 byte int length
+                        int read = 0;
+                        try {
+                            read = dis.read(readBufferCompressed, 0, compressedLength);
+                        }
+                        catch (IndexOutOfBoundsException e) {
+                            log.error("Error: compressedLength=" + compressedLength + " compressedFileStreamPosition=" + compressedFileStreamPosition + " file=" + file.getName() + " offset=" + offset.getOffset() + " offsetindex=" + offsets.indexOf(offset));
+                            return 0;
+                        }
+                        compressedFileStreamPosition = read + compressedFileStreamPosition + 4; // 4 byte int length
                         int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
                         uncompressedFileStreamPosition += uncompressLength;
                         resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);
-                        resultBufferEndOffset = uncompressedFileStreamPosition - 1; // CARSTEN wirklich -1 ?
+                        resultBufferEndOffset = uncompressedFileStreamPosition - 1;
                         resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
                         datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                         lineBreakOffset = findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
@@ -211,8 +218,8 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             IOUtils.closeQuietly(dis);
             IOUtils.closeQuietly(sis);
             IOUtils.closeQuietly(br);
-            IOUtils.closeQuietly(chunksDis);
-            IOUtils.closeQuietly(chunksFis);
+//            IOUtils.closeQuietly(chunksDis);
+//            IOUtils.closeQuietly(chunksFis);
         }
         return results;
     }

@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.data.snappy;
 
 import com.google.common.collect.HashMultimap;
+import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
@@ -101,7 +102,11 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
-            throw (RuntimeException)e.getCause();
+            Throwable cause = e.getCause();
+            if(cause instanceof RuntimeException) {
+                throw (RuntimeException)cause;
+            }
+            throw new UnhandledException(cause);
         }
         return numberOfResults;
     }

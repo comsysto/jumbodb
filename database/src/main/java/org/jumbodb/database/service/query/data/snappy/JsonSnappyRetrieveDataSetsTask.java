@@ -110,7 +110,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
                     // load to result buffer till line break
                     int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, (int)(searchOffset - resultBufferStartOffset));
-                  //  int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
+                    int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                     while((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
                         int read1 = bis.read(compressedLengthBuffer);
                         compressedFileStreamPosition += read1;
@@ -119,17 +119,18 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         compressedFileStreamPosition += read;
                         int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
                         uncompressedFileStreamPosition += uncompressLength;
-                        int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
-                        resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
+                    //    int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
+                        resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);
                         resultBufferEndOffset = uncompressedFileStreamPosition - 1;
                         resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
+                        datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                         lineBreakOffset = findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
                     }
 
-                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1);
+                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
 
-                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, 0, datasetLength);
-//                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
+//                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, 0, datasetLength);
+                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
                     if (matchingFilter(dataSetFromOffsetsGroup, jsonParser, searchQuery.getJsonQuery())
                             && matchingFilter(dataSetFromOffsetsGroup, jsonParser, offset.getJsonQueries())) {
                         if(!resultCallback.needsMore(searchQuery)) {
@@ -175,6 +176,16 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return last;
     }
 
+    protected byte[] concat(byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
+//        if(resultBuffer.length == 0) {
+//            return readBuffer;
+//        }
+        byte[] tmp = new byte[resultBuffer.length + readBufferLength];  // CARSTEN reuse buffer
+        System.arraycopy(resultBuffer, 0, tmp, 0, resultBuffer.length);
+        System.arraycopy(readBuffer, 0, tmp, resultBuffer.length, readBufferLength);
+        return tmp;
+    }
+    /*
     protected byte[] concat(int datasetStartOffset, byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
         int resBufLen = resultBuffer.length - datasetStartOffset;
         byte[] tmp = new byte[resBufLen + readBufferLength];
@@ -186,7 +197,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             System.arraycopy(readBuffer, 0, tmp, resBufLen, readBufferLength);
         }
         return tmp;
-    }
+    }  */
 
     protected long calculateChunkOffsetUncompressed(long chunkIndex, int snappyChunkSize) {
         return chunkIndex * snappyChunkSize;

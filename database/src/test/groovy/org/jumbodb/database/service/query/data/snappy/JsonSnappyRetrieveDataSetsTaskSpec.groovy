@@ -177,13 +177,13 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         setup:
         def task = createDefaultTask()
         expect:
-        new String(task.concat(startOffset, readBuffer.getBytes("UTF-8"), resultBuffer.getBytes("UTF-8"), readBuffer.size())) == expectedBuffer
+        new String(task.concat(readBuffer.getBytes("UTF-8"), resultBuffer.getBytes("UTF-8"), readBuffer.size())) == expectedBuffer
         where:
         startOffset | resultBuffer      | readBuffer     | expectedBuffer
         0           | "Hello "          | "World"        | "Hello World"
         0           | "Next "           | "concatinated" | "Next concatinated"
         0           | "!abc"            | "defg!"        | "!abcdefg!"
-        10          | "<removeme>Hello " | "World"        | "Hello World"
+    //    10          | "<removeme>Hello " | "World"        | "Hello World"
     }
 
     @Unroll

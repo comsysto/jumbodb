@@ -55,12 +55,9 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         BufferedInputStream bis = null;
         ChunkSkipableSnappyInputStream sis = null;
         BufferedReader br = null;
-//        FileInputStream chunksFis = null;
-//        DataInputStream chunksDis = null;
         int results = 0;
 
         try {
-
 //            List<List<FileOffset>> offsetGroups = groupOffsetsByBufferSize(offsets, DEFAULT_BUFFER_SIZE);
             fis = new FileInputStream(file);
              // ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
@@ -83,8 +80,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     count++;
                 }
             } else {
-//                bis = new BufferedInputStream(fis);
-//                sis = new ChunkSkipableSnappyInputStream(fis);
                 SnappyChunks snappyChunks = PseudoCacheForSnappy.getSnappyChunksByFile(file);
                 byte[] readBufferCompressed = new byte[snappyChunks.getChunkSize() * 2];
                 byte[] readBufferUncompressed = new byte[snappyChunks.getChunkSize() * 2];
@@ -105,9 +100,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunks.getChunkSize());
                         long chunkOffsetToSkip = chunkOffsetCompressed - compressedFileStreamPosition;
                         long skip = fis.skip(chunkOffsetToSkip);
-                        if(file.getName().endsWith("0009")) {
-                            log.error("skip=" + skip + " chunkOffsetToSkip=" + chunkOffsetToSkip + " offset=" + offset);
-                        }
                         compressedFileStreamPosition += skip;
                         uncompressedFileStreamPosition = chunkOffsetUncompressed;
                         resultBuffer = EMPTY_BUFFER;
@@ -120,22 +112,9 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                     while((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
                         int read1 = fis.read(compressedLengthBuffer);
-                        if(file.getName().endsWith("0009")) {
-                            log.error("read1=" + read1);
-                        }
                         compressedFileStreamPosition += read1;
                         int compressedLength = SnappyUtil.readInt(compressedLengthBuffer, 0);
-                        int read = 0;
-                        try {
-                            read = fis.read(readBufferCompressed, 0, compressedLength);
-                        }
-                        catch (IndexOutOfBoundsException e) {
-                            log.error("Error: compressedLength=" + compressedLength + " compressedFileStreamPosition=" + compressedFileStreamPosition + " file=" + file.getName() + " offset=" + offset.getOffset() + " offsetindex=" + offsets.indexOf(offset));
-                            return 0;
-                        }
-                        if(file.getName().endsWith("0009")) {
-                            log.error("read=" + read);
-                        }
+                        int read = fis.read(readBufferCompressed, 0, compressedLength);
                         compressedFileStreamPosition += read;
                         int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
                         uncompressedFileStreamPosition += uncompressLength;
@@ -159,8 +138,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         results++;
                     }
                 }
-
-
             }
             log.trace("Time for retrieving " + results + " datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
         } catch (FileNotFoundException e) {
@@ -172,8 +149,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             IOUtils.closeQuietly(bis);
             IOUtils.closeQuietly(sis);
             IOUtils.closeQuietly(br);
-//            IOUtils.closeQuietly(chunksDis);
-//            IOUtils.closeQuietly(chunksFis);
         }
         return results;
     }

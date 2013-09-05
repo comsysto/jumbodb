@@ -86,8 +86,8 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 bis = new BufferedInputStream(fis);
 //                sis = new ChunkSkipableSnappyInputStream(fis);
                 SnappyChunks snappyChunks = PseudoCacheForSnappy.getSnappyChunksByFile(file);
-                byte[] readBufferCompressed = new byte[snappyChunks.getChunkSize()];
-                byte[] readBufferUncompressed = new byte[snappyChunks.getChunkSize()];
+                byte[] readBufferCompressed = new byte[snappyChunks.getChunkSize() * 2];
+                byte[] readBufferUncompressed = new byte[snappyChunks.getChunkSize() * 2];
                 byte[] resultBuffer = EMPTY_BUFFER;
                 long resultBufferStartOffset = 0l;
                 long resultBufferEndOffset = 0l;
@@ -125,7 +125,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                             log.error("Error: compressedLength=" + compressedLength + " compressedFileStreamPosition=" + compressedFileStreamPosition + " file=" + file.getName() + " offset=" + offset.getOffset() + " offsetindex=" + offsets.indexOf(offset));
                             return 0;
                         }
-                        compressedFileStreamPosition = read + compressedFileStreamPosition; // 4 byte int length
+                        compressedFileStreamPosition += read;
                         int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
                         uncompressedFileStreamPosition += uncompressLength;
                         resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);

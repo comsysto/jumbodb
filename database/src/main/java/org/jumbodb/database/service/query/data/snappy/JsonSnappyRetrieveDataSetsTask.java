@@ -83,7 +83,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     count++;
                 }
             } else {
-                bis = new BufferedInputStream(fis);
+//                bis = new BufferedInputStream(fis);
 //                sis = new ChunkSkipableSnappyInputStream(fis);
                 SnappyChunks snappyChunks = PseudoCacheForSnappy.getSnappyChunksByFile(file);
                 byte[] readBufferCompressed = new byte[snappyChunks.getChunkSize() * 2];
@@ -104,7 +104,11 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
                         long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunks.getChunkSize());
                         long chunkOffsetToSkip = chunkOffsetCompressed - compressedFileStreamPosition;
-                        compressedFileStreamPosition += bis.skip(chunkOffsetToSkip);
+                        long skip = fis.skip(chunkOffsetToSkip);
+                        if(file.getName().endsWith("0009")) {
+                            log.error("skip=" + skip + " chunkOffsetToSkip=" + chunkOffsetToSkip + " offset=" + offset);
+                        }
+                        compressedFileStreamPosition += skip;
                         uncompressedFileStreamPosition = chunkOffsetUncompressed;
                         resultBuffer = EMPTY_BUFFER;
                         resultBufferStartOffset = uncompressedFileStreamPosition;
@@ -115,15 +119,22 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, (int)(searchOffset - resultBufferStartOffset));
                     int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                     while((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
-                        compressedFileStreamPosition += bis.read(compressedLengthBuffer);
+                        int read1 = fis.read(compressedLengthBuffer);
+                        if(file.getName().endsWith("0009")) {
+                            log.error("read1=" + read1);
+                        }
+                        compressedFileStreamPosition += read1;
                         int compressedLength = SnappyUtil.readInt(compressedLengthBuffer, 0);
                         int read = 0;
                         try {
-                            read = bis.read(readBufferCompressed, 0, compressedLength);
+                            read = fis.read(readBufferCompressed, 0, compressedLength);
                         }
                         catch (IndexOutOfBoundsException e) {
                             log.error("Error: compressedLength=" + compressedLength + " compressedFileStreamPosition=" + compressedFileStreamPosition + " file=" + file.getName() + " offset=" + offset.getOffset() + " offsetindex=" + offsets.indexOf(offset));
                             return 0;
+                        }
+                        if(file.getName().endsWith("0009")) {
+                            log.error("read=" + read);
                         }
                         compressedFileStreamPosition += read;
                         int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);

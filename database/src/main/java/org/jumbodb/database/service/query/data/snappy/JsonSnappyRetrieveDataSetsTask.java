@@ -81,7 +81,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 }
             } else {
                 SnappyChunks snappyChunks = PseudoCacheForSnappy.getSnappyChunksByFile(file);
-                bis = new BufferedInputStream(fis, 16 * 1024);
+                bis = new BufferedInputStream(fis);
                 byte[] readBufferCompressed = new byte[snappyChunks.getChunkSize() * 2];
                 byte[] readBufferUncompressed = new byte[snappyChunks.getChunkSize() * 2];
                 byte[] resultBuffer = EMPTY_BUFFER;

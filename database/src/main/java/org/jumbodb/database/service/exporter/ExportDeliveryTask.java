@@ -33,6 +33,9 @@ public class ExportDeliveryTask implements Runnable {
 
     @Override
     public void run() {
+        if(exportDelivery.getState() == ExportDelivery.State.ABORTED) {
+            return;
+        }
         JumboImportConnection imp = null;
         try {
             exportDelivery.setState(ExportDelivery.State.RUNNING);

@@ -27,7 +27,6 @@
                 /WEB-INF/jumbodb-rest-context.xml
             </param-value>
         </init-param>
-        <load-on-startup>0</load-on-startup>
     </servlet>
 
 

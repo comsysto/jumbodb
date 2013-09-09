@@ -120,7 +120,8 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
                         uncompressedFileStreamPosition += uncompressLength;
                         int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
-                        resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);
+                        resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
+//                        resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);
                         resultBufferEndOffset = uncompressedFileStreamPosition - 1;
                         resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
 //                        datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);

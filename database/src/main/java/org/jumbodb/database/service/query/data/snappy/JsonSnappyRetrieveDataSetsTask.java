@@ -56,6 +56,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         ChunkSkipableSnappyInputStream sis = null;
         BufferedReader br = null;
         int results = 0;
+        StringBuilder builder = null;
 
         try {
 //            List<List<FileOffset>> offsetGroups = groupOffsetsByBufferSize(offsets, DEFAULT_BUFFER_SIZE);
@@ -90,10 +91,9 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 byte[] compressedLengthBuffer = new byte[4];
                 long uncompressedFileStreamPosition = 0l;
                 long compressedFileStreamPosition = 0l;
-
                 for (FileOffset offset : offsets) {
+                    builder = new StringBuilder();
                     long searchOffset = offset.getOffset();
-
                     // delete buffer when offset is not inside range and skip
                     if(resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
                         long chunkIndex = (searchOffset / snappyChunks.getChunkSize());
@@ -120,7 +120,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
                         uncompressedFileStreamPosition += uncompressLength;
                         int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
-                        resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
+                        resultBuffer = concat(builder, datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
 //                        resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);
                         resultBufferEndOffset = uncompressedFileStreamPosition - 1;
                         resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
@@ -133,6 +133,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
                     byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, 0, datasetLength);
 //                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
+                    builder.append("-----> " + new String(dataSetFromOffsetsGroup));
                     if (matchingFilter(dataSetFromOffsetsGroup, jsonParser, searchQuery.getJsonQuery())
                             && matchingFilter(dataSetFromOffsetsGroup, jsonParser, offset.getJsonQueries())) {
                         if(!resultCallback.needsMore(searchQuery)) {
@@ -144,6 +145,9 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 }
             }
             log.trace("Time for retrieving " + results + " datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+        } catch (ParseException e) {
+            log.error(builder.toString());
+            throw new RuntimeException(e);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -188,17 +192,17 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return tmp;
     }
 
-    protected byte[] concat(int datasetStartOffset, byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
+    protected byte[] concat(StringBuilder build, int datasetStartOffset, byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
         int resBufLen = resultBuffer.length - datasetStartOffset;
         byte[] tmp = new byte[resBufLen + readBufferLength];
         if(resBufLen < 0) {
             int abs = Math.abs(resBufLen);
-            log.info("1. cond: readbuffer=" + readBuffer.length + "  abs="+ abs + " readBufferLength - abs="  + (readBufferLength - abs));
+            build.append("1. cond: readbuffer=" + readBuffer.length + "  abs="+ abs + " readBufferLength - abs="  + (readBufferLength - abs) + "\n");
             System.arraycopy(readBuffer, abs, tmp, 0, readBufferLength - abs);
         } else {
-            log.info("2. cond: resultBuffer=" + resultBuffer.length + "  datasetStartOffset="+ datasetStartOffset + " resBufLen="  + resBufLen);
+            build.append("2. cond: resultBuffer=" + resultBuffer.length + "  datasetStartOffset=" + datasetStartOffset + " resBufLen=" + resBufLen + "\n");
             System.arraycopy(resultBuffer, datasetStartOffset, tmp, 0, resBufLen);
-            log.info("3. cond: readBuffer=" + readBuffer.length + "  resBufLen="+ resBufLen + " readBufferLength="  + readBufferLength);
+            build.append("3. cond: readBuffer=" + readBuffer.length + "  resBufLen=" + resBufLen + " readBufferLength=" + readBufferLength + "\n");
             System.arraycopy(readBuffer, 0, tmp, resBufLen, readBufferLength);
         }
         return tmp;

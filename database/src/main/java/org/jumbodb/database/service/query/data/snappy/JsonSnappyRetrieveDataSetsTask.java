@@ -109,7 +109,10 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     }
 
                     // load to result buffer till line break
-                    int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, (int)(searchOffset - resultBufferStartOffset));
+                    int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
+                    builder.append("---> datasetStartOffset=" + datasetStartOffset + "\n");
+                    int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
+//                    int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, (int)(searchOffset - resultBufferStartOffset));
 //                    int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                     while((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
                         int read1 = bis.read(compressedLengthBuffer);
@@ -119,20 +122,22 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                         compressedFileStreamPosition += read;
                         int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
                         uncompressedFileStreamPosition += uncompressLength;
-                        int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
+                        datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                         resultBuffer = concat(builder, datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
 //                        resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);
                         resultBufferEndOffset = uncompressedFileStreamPosition - 1;
                         resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
-//                        datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
+                        datasetStartOffset = 0;
                         lineBreakOffset = findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
                     }
 
-                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1);
-//                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
+//                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : resultBuffer.length ;
+                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
+                    builder.append("-----> datasetLength=" + datasetLength + " lineBreakOffset=" + lineBreakOffset + " resultBuffer.len=" + resultBuffer.length + "\n");
 
-                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, 0, datasetLength);
-//                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
+
+//                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, 0, datasetLength);
+                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
                     builder.append("-----> " + new String(dataSetFromOffsetsGroup));
                     if (matchingFilter(dataSetFromOffsetsGroup, jsonParser, searchQuery.getJsonQuery())
                             && matchingFilter(dataSetFromOffsetsGroup, jsonParser, offset.getJsonQueries())) {

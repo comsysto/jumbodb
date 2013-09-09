@@ -52,6 +52,7 @@
     <filter-mapping>
         <filter-name>encodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
+
     </filter-mapping>
 
     <!-- set session timeout (in minutes) -->

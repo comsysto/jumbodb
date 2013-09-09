@@ -193,9 +193,12 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         byte[] tmp = new byte[resBufLen + readBufferLength];
         if(resBufLen < 0) {
             int abs = Math.abs(resBufLen);
+            log.info("1. cond: readbuffer=" + readBuffer.length + "  abs="+ abs + " readBufferLength - abs="  + (readBufferLength - abs));
             System.arraycopy(readBuffer, abs, tmp, 0, readBufferLength - abs);
         } else {
+            log.info("2. cond: resultBuffer=" + resultBuffer.length + "  datasetStartOffset="+ datasetStartOffset + " resBufLen="  + resBufLen);
             System.arraycopy(resultBuffer, datasetStartOffset, tmp, 0, resBufLen);
+            log.info("3. cond: readBuffer=" + readBuffer.length + "  resBufLen="+ resBufLen + " readBufferLength="  + readBufferLength);
             System.arraycopy(readBuffer, 0, tmp, resBufLen, readBufferLength);
         }
         return tmp;

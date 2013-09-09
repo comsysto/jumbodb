@@ -30,11 +30,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private final ResultCallback resultCallback;
     private JsonSnappyDataStrategy strategy;
     private final List<FileOffset> offsets;
-    //    private final int bufferSize = 10;
-//    public final int DEFAULT_BUFFER_SIZE = 32 * 1024;
-//    public final int MAXIMUM_OFFSET_GROUP_SIZE = 1000;
     public static final byte[] EMPTY_BUFFER = new byte[0];
-//    private final byte[] defaultBuffer = new byte[DEFAULT_BUFFER_SIZE]; // for reuse
 
 
     public JsonSnappyRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery, ResultCallback resultCallback, JsonSnappyDataStrategy strategy) {
@@ -177,15 +173,15 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return last;
     }
 
-    protected byte[] concat(byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
-//        if(resultBuffer.length == 0) {
-//            return readBuffer;
-//        }
-        byte[] tmp = new byte[resultBuffer.length + readBufferLength];  // CARSTEN reuse buffer
-        System.arraycopy(resultBuffer, 0, tmp, 0, resultBuffer.length);
-        System.arraycopy(readBuffer, 0, tmp, resultBuffer.length, readBufferLength);
-        return tmp;
-    }
+//    protected byte[] concat(byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
+////        if(resultBuffer.length == 0) {
+////            return readBuffer;
+////        }
+//        byte[] tmp = new byte[resultBuffer.length + readBufferLength];  // CARSTEN reuse buffer
+//        System.arraycopy(resultBuffer, 0, tmp, 0, resultBuffer.length);
+//        System.arraycopy(readBuffer, 0, tmp, resultBuffer.length, readBufferLength);
+//        return tmp;
+//    }
 
     protected byte[] concat(int datasetStartOffset, byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
         int resBufLen = resultBuffer.length - datasetStartOffset;
@@ -211,11 +207,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         }
         return result + 16;
     }
-
-//    protected boolean matchingFilter(byte[] s, JSONParser jsonParser) throws IOException, ParseException {
-//        List<JsonQuery> jsonQueries = searchQuery.getJsonQuery();
-//        return matchingFilter(s, jsonParser, jsonQueries);
-//    }
 
     private boolean matchingFilter(byte[] s, JSONParser jsonParser, List<JsonQuery> jsonQueries) throws ParseException, IOException {
         if (jsonQueries.size() == 0) {
@@ -283,41 +274,4 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         }
         return datasetLength;
     }
-
-    /*
-    private byte[] getBufferByOffsetGroup(List<FileOffset> offsetGroup, int chunkSize) {
-//        if (offsetGroup.size() == 1) {
-//            return defaultBuffer;
-//        }
-        FileOffset firstFileOffset = offsetGroup.get(0);
-        Long first = firstFileOffset.getOffset();
-        Long last = offsetGroup.get(offsetGroup.size() - 1).getOffset() + chunkSize;
-        int size = (int) (last - first);
-        return new byte[size];
-    }
-
-    private List<List<FileOffset>> groupOffsetsByBufferSize(List<FileOffset> offsets, int bufSize) {
-        List<List<FileOffset>> offsetGroups = new LinkedList<List<FileOffset>>();
-        List<FileOffset> group = new ArrayList<FileOffset>();
-        int initialOffset = -100000;
-        long lastOffset = initialOffset;
-        for (FileOffset fileOffset : offsets) {
-            long offset = fileOffset.getOffset();
-            if ((offset - lastOffset) <= bufSize && group.size() < MAXIMUM_OFFSET_GROUP_SIZE) {
-                group.add(fileOffset);
-            } else {
-                if (lastOffset != initialOffset) {
-                    offsetGroups.add(group);
-                }
-                group = new ArrayList<FileOffset>();
-                group.add(fileOffset);
-            }
-
-            lastOffset = offset;
-        }
-        if (!group.isEmpty()) {
-            offsetGroups.add(group);
-        }
-        return offsetGroups;
-    }   */
 }

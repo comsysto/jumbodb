@@ -185,7 +185,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         System.arraycopy(readBuffer, 0, tmp, resultBuffer.length, readBufferLength);
         return tmp;
     }
-    /*
+
     protected byte[] concat(int datasetStartOffset, byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
         int resBufLen = resultBuffer.length - datasetStartOffset;
         byte[] tmp = new byte[resBufLen + readBufferLength];
@@ -194,10 +194,9 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             System.arraycopy(readBuffer, abs, tmp, 0, readBufferLength - abs);
         } else {
             System.arraycopy(resultBuffer, datasetStartOffset, tmp, 0, resBufLen);
-            System.arraycopy(readBuffer, 0, tmp, resBufLen, readBufferLength);
         }
         return tmp;
-    }  */
+    }
 
     protected long calculateChunkOffsetUncompressed(long chunkIndex, int snappyChunkSize) {
         return chunkIndex * snappyChunkSize;

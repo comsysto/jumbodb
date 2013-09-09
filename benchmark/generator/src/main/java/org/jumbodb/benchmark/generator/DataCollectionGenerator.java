@@ -17,7 +17,7 @@ public abstract class DataCollectionGenerator {
 
     private static final String FILE_NAME_FORMAT = "part%05d";
     private static final String JSON_DOC_PREFIX = "{\"name\": \"";
-    private static final String JSON_DOC_SUFFIX = "\"";
+    private static final String JSON_DOC_SUFFIX = "\"}";
     private static final int NR_OF_BUFFERED_JSON_DOCS = 10000;
     private static final String DESCRIPTION = "Benchmark delivery";
     public static final String DEFAULT_CHUNK_NAME = "benchmark_delivery";

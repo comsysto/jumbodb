@@ -1,6 +1,6 @@
 {
     "description": "Sample data with 5GB and 3 collections",
-    "inputFolder": "/Users/u6f6o/Craftsmanship/Dumps/jumbodb",
+    "inputFolder": "%USER_HOME%/.jumbodb/generated_data",
     "dataCollections": [
         {
             "name": "first_collection",

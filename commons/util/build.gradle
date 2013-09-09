@@ -1,0 +1,61 @@
+defaultTasks 'build'
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'project-reports'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: "groovy"
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+group = 'org.jumbodb.common.util'
+archivesBaseName = 'jumbodb-util'
+
+repositories {
+    mavenCentral()
+}
+
+
+configurations {
+    compile.exclude group: "commons-logging", module: "commons-logging"
+    compile.exclude group: "log4j", module: "log4j"
+    // this scope extracts the files and copies it into he same jar file, because ou can just use one jar file in emr
+}
+
+dependencies {
+    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+    compile 'commons-io:commons-io:2.3'
+    compile 'commons-lang:commons-lang:2.5'
+    compile 'commons-collections:commons-collections:3.2.1'
+    compile 'com.google.guava:guava:13.0'
+    compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
+    compile 'org.slf4j:slf4j-api:1.7.5'
+    compile 'org.slf4j:jcl-over-slf4j:1.7.5'
+    compile 'org.slf4j:log4j-over-slf4j:1.7.5'
+//    testCompile "junit:junit:4.10"
+    groovy "org.codehaus.groovy:groovy-all:2.0.8"
+    testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
+}
+
+task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+task packageSources(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+artifacts {
+    archives(packageJavadoc) {
+        type = 'javadoc'
+        extension = 'jar'
+    }
+    archives(packageSources)
+}
+idea {
+    module {
+        downloadSources = true
+    }
+}

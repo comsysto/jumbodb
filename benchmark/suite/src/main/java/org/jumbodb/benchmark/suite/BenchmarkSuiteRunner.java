@@ -1,13 +1,11 @@
 package org.jumbodb.benchmark.suite;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.benchmark.suite.config.BenchmarkSuiteConfig;
-import org.jumbodb.benchmark.suite.result.BenchmarkJob;
+import org.jumbodb.common.util.config.JSONConfigReader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @author Carsten Hufe
@@ -20,18 +18,18 @@ public class BenchmarkSuiteRunner {
         if (!checkConfigParams(args)) {
             throw new IllegalArgumentException("BenchmarkSuiteRunner job expects config file start parameter");
         }
-        benchmarkSuiteRunner.run(new File(args[0]));
+        benchmarkSuiteRunner.run(args[0]);
     }
 
-    protected void run(File configFile) throws IOException {
+    protected void run(String configFile) throws IOException {
         BenchmarkSuiteConfig config = parseConfigFile(configFile);
         // create execution plans
         BenchmarkSuite suite = new BenchmarkSuite();
         suite.run(config);
     }
 
-    protected BenchmarkSuiteConfig parseConfigFile(File configFile) throws IOException {
-        return new ObjectMapper().readValue(configFile, BenchmarkSuiteConfig.class);
+    protected BenchmarkSuiteConfig parseConfigFile(String configFile) throws IOException {
+        return JSONConfigReader.read(BenchmarkSuiteConfig.class, configFile);
     }
 
     private static boolean checkConfigParams(String[] args) {

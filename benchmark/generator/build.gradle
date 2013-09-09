@@ -48,7 +48,9 @@ dependencies {
     compile 'com.google.guava:guava:13.0'
     compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
     compile project(':commons:data')
+    compile project(':commons:util')
 //    compile 'net.minidev:json-smart:2.0-RC2'
+
 
     testCompile "org.mockito:mockito-core:1.9.5"
     groovy "org.codehaus.groovy:groovy-all:2.0.8"

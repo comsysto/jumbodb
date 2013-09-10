@@ -28,7 +28,9 @@ public class BenchmarkSuite {
                     for (Integer datasetLoadGroupSize : dataCollectionRun.getDatasetLoadGroupSize()) {
                         String offsetGenerator = dataCollection.getOffsetGenerator();
                         Class<? extends OffsetGenerator> offsetGeneratorClazz = (Class<? extends OffsetGenerator>) Class.forName(offsetGenerator);
-                        benchmarkJobs.add(new BenchmarkJob(inputFolder, offsetGeneratorClazz, dataCollectionRun.getStrategy(), dataCollection.getName(), numberOfThreads, datasetLoadGroupSize, dataCollectionRun.getNumberOfSamplesPerRun()));
+                        benchmarkJobs.add(new BenchmarkJob(inputFolder, offsetGeneratorClazz, dataCollectionRun.getStrategy(),
+                                dataCollection.getCollectionName(), dataCollection.getChunkKey(), numberOfThreads, datasetLoadGroupSize, dataCollectionRun.getNumberOfSamplesPerRun(),
+                                dataCollectionRun.getAverageDataSetSize()));
                     }
                 }
             }

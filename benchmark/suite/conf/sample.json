@@ -1,14 +1,28 @@
 {
     "description": "Sample data with 5GB and 3 collections",
     "inputFolder": "%USER_HOME%/.jumbodb/generated_data",
+    "resultFile": "%USER_HOME%/.jumbodb/resultFile.txt",
     "dataCollections": [
         {
-            "name": "first_collection",
-            "offsetGenerator": "org.jumbodb.aaa.IndexGenerator",
+            "collectionName": "first_collection",
+            "chunkKey": "benchmark_delivery",
+            "offsetGenerator": "org.jumbodb.benchmark.suite.data.strategy.json.plain.RandomJsonPlainOffsetGenerator",
             "description": "do somthing with it",
-            "runs" : [
-                {"strategy": "JSON_PLAIN_V1", "numberOfThreads": [5, 10, 15, 20, 25], "datasetLoadGroupSize": [1, 10, 100], "numberOfSamplesPerRun": 1000},
-                {"strategy": "JSON_PLAIN_V1", "numberOfThreads": [5, 10, 15, 20, 25], "datasetLoadGroupSize": [1000, 10000], "numberOfSamplesPerRun": 100}
+            "runs": [
+                {
+                    "strategy": "JSON_PLAIN_V1",
+                    "numberOfThreads": [5, 10, 15, 20, 25],
+                    "datasetLoadGroupSize": [1, 10, 100],
+                    "numberOfSamplesPerRun": 1000,
+                    "averageDataSetSize": 1000
+                },
+                {
+                    "strategy": "JSON_PLAIN_V1",
+                    "numberOfThreads": [5, 10, 15, 20, 25],
+                    "datasetLoadGroupSize": [1000, 10000],
+                    "numberOfSamplesPerRun": 100,
+                    "averageDataSetSize": 1000
+                }
             ]
         }
     ]

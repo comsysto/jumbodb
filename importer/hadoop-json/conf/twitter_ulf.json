@@ -1,0 +1,35 @@
+{
+    "description": "Ulf Twitter Test Import",
+    "deliveryChunkKey": "first_delivery",
+    "hosts": [
+        {
+            "host": "localhost",
+            "port": 12001
+        }
+    ],
+    "datePattern": "EEE MMM dd HH:mm:ss Z yyyy",
+    "output": "/Users/u6f6o/.jumbodb/twitter_data/output",
+    "numberOfOutputFiles": 5,
+    "hadoop": [],
+    "importCollection": [
+        {
+            "input": "/Users/u6f6o/.jumbodb/twitter_data/input",
+            "collectionName": "ulf.twitter",
+            "sort": ["geo.coordinates"],
+            "sortType": "GEOHASH",
+            "dataStrategy": "JSON_SNAPPY_V1",
+            "indexes": [
+                {
+                    "indexName": "screen_name",
+                    "fields": ["user.screen_name"],
+                    "indexStrategy": "HASHCODE64_SNAPPY_V1"
+                },
+                {
+                    "indexName": "created_at",
+                    "fields": ["created_at"],
+                    "indexStrategy": "DATETIME_SNAPPY_V1"
+                }
+            ]
+        }
+    ]
+}

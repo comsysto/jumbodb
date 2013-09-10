@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -13,8 +14,6 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.configuration.*;
 import org.jumbodb.connector.hadoop.index.map.*;
-import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonDoubleIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.hashcode32.snappy.GenericJsonHashCode32IndexMapper;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,6 +27,27 @@ import java.util.*;
  */
 public class JumboConfigurationUtil {
     public static final String JUMBO_INDEX_JSON_CONF = "jumbo.index.configuration";
+
+    private static final Map<String, Class<? extends Mapper>> MAPPER_BY_SORT_KEY = Maps.newHashMap();
+    private static final Map<String, Class<? extends WritableComparable>> WRITABLE_BY_SORT_KEY = Maps.newHashMap();
+
+    static {
+        MAPPER_BY_SORT_KEY.put(GenericJsonStringSortMapper.SORT_KEY, GenericJsonStringSortMapper.class);
+        MAPPER_BY_SORT_KEY.put(GenericJsonDateTimeSortMapper.SORT_KEY, GenericJsonDateTimeSortMapper.class);
+        MAPPER_BY_SORT_KEY.put(GenericJsonDoubleSortMapper.SORT_KEY, GenericJsonDoubleSortMapper.class);
+        MAPPER_BY_SORT_KEY.put(GenericJsonFloatSortMapper.SORT_KEY, GenericJsonFloatSortMapper.class);
+        MAPPER_BY_SORT_KEY.put(GenericJsonIntegerSortMapper.SORT_KEY, GenericJsonIntegerSortMapper.class);
+        MAPPER_BY_SORT_KEY.put(GenericJsonLongSortMapper.SORT_KEY, GenericJsonLongSortMapper.class);
+        MAPPER_BY_SORT_KEY.put(GenericJsonGeohashSortMapper.SORT_KEY, GenericJsonGeohashSortMapper.class);
+
+        WRITABLE_BY_SORT_KEY.put(GenericJsonStringSortMapper.SORT_KEY, Text.class);
+        WRITABLE_BY_SORT_KEY.put(GenericJsonDateTimeSortMapper.SORT_KEY, LongWritable.class);
+        WRITABLE_BY_SORT_KEY.put(GenericJsonDoubleSortMapper.SORT_KEY, DoubleWritable.class);
+        WRITABLE_BY_SORT_KEY.put(GenericJsonFloatSortMapper.SORT_KEY, FloatWritable.class);
+        WRITABLE_BY_SORT_KEY.put(GenericJsonIntegerSortMapper.SORT_KEY, IntWritable.class);
+        WRITABLE_BY_SORT_KEY.put(GenericJsonLongSortMapper.SORT_KEY, LongWritable.class);
+        WRITABLE_BY_SORT_KEY.put(GenericJsonGeohashSortMapper.SORT_KEY, IntWritable.class);
+    }
 
 
     public static void loadConfigurationFileToHadoop(Configuration conf, String configFileLocation) throws IOException {
@@ -171,34 +191,16 @@ public class JumboConfigurationUtil {
     }
 
     public static Class<? extends Mapper> getSortMapperByType(String type) {
-        Map<String, Class<? extends Mapper>> sortMapper = new HashMap<String, Class<? extends Mapper>>();
-        sortMapper.put(GenericJsonStringSortMapper.SORT_KEY, GenericJsonStringSortMapper.class);
-        sortMapper.put(GenericJsonDateTimeSortMapper.SORT_KEY, GenericJsonDateTimeSortMapper.class);
-        sortMapper.put(GenericJsonDoubleSortMapper.SORT_KEY, GenericJsonDoubleSortMapper.class);
-        sortMapper.put(GenericJsonFloatSortMapper.SORT_KEY, GenericJsonFloatSortMapper.class);
-        sortMapper.put(GenericJsonIntegerSortMapper.SORT_KEY, GenericJsonIntegerSortMapper.class);
-        sortMapper.put(GenericJsonLongSortMapper.SORT_KEY, GenericJsonLongSortMapper.class);
-        sortMapper.put(GenericJsonGeohashSortMapper.SORT_KEY, GenericJsonGeohashSortMapper.class);
-        Class<? extends Mapper> aClass = sortMapper.get(type);
-        if(aClass != null) {
-            return aClass;
+        if (!MAPPER_BY_SORT_KEY.containsKey(type)) {
+            throw new IllegalArgumentException("Sort type " + type + " is not supported.");
         }
-        throw new IllegalArgumentException("Sort type " + type + " is not supported.");
+        return MAPPER_BY_SORT_KEY.get(type);
     }
 
     public static Class<? extends WritableComparable> getSortOutputKeyClassByType(String type) {
-        Map<String, Class<? extends WritableComparable>> sortMapper = new HashMap<String, Class<? extends WritableComparable>>();
-        sortMapper.put(GenericJsonStringSortMapper.SORT_KEY, Text.class);
-        sortMapper.put(GenericJsonDateTimeSortMapper.SORT_KEY, LongWritable.class);
-        sortMapper.put(GenericJsonDoubleSortMapper.SORT_KEY, DoubleWritable.class);
-        sortMapper.put(GenericJsonFloatSortMapper.SORT_KEY, FloatWritable.class);
-        sortMapper.put(GenericJsonIntegerSortMapper.SORT_KEY, IntWritable.class);
-        sortMapper.put(GenericJsonLongSortMapper.SORT_KEY, LongWritable.class);
-        sortMapper.put(GenericJsonGeohashSortMapper.SORT_KEY, IntWritable.class);
-        Class<? extends WritableComparable> aClass = sortMapper.get(type);
-        if(aClass != null) {
-            return aClass;
+        if (!WRITABLE_BY_SORT_KEY.containsKey(type)){
+            throw new IllegalArgumentException("Sort type " + type + " is not supported.");
         }
-        throw new IllegalArgumentException("Sort type " + type + " is not supported.");
+        return WRITABLE_BY_SORT_KEY.get(type);
     }
 }

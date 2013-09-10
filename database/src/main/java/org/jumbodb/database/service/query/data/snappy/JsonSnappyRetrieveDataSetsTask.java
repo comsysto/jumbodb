@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private Logger log = LoggerFactory.getLogger(JsonSnappyRetrieveDataSetsTask.class);
 
+    private final boolean resultCacheEnabled;
     private final File file;
     private final Cache datasetsByOffsetsCache;
     private final Cache dataSnappyChunksCache;
@@ -44,6 +45,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         this.dataSnappyChunksCache = dataSnappyChunksCache;
         this.fileLength = file.length();
         this.searchQuery = searchQuery;
+        this.resultCacheEnabled = searchQuery.isResultCacheEnabled();
         this.resultCallback = resultCallback;
         this.strategy = strategy;
         this.offsets = new LinkedList<FileOffset>(offsets);
@@ -55,19 +57,26 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             fullScanData();
         } else {
             long start = System.currentTimeMillis();
-            List<FileOffset> leftOffsets = extractOffsetsFromCacheAndWriteResultForExisting();
-            if(leftOffsets.isEmpty()) {
-                log.trace("Time for retrieving " + results + " only from cache " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
-                return results;
+            if(resultCacheEnabled) {
+                List<FileOffset> leftOffsets = extractOffsetsFromCacheAndWriteResultForExisting();
+                if(leftOffsets.isEmpty()) {
+                    log.trace("Time for retrieving " + results + " only from cache " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+                    return results;
+                }
+                int cacheResult = results;
+                findLeftDatasetsAndWriteResults(leftOffsets);
+                log.trace("Time for retrieving " + results + " (" + cacheResult + " from cache) datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+
             }
-            int cacheResult = results;
-            findLeftDatasetsAndWrite(leftOffsets);
-            log.trace("Time for retrieving " + results + " (" + cacheResult + " from cache) datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+            else {
+                findLeftDatasetsAndWriteResults(offsets);
+                log.trace("Time for retrieving " + results + " (caching disabled) datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+            }
         }
         return results;
     }
 
-    private void findLeftDatasetsAndWrite(List<FileOffset> leftOffsets) throws ParseException {
+    private void findLeftDatasetsAndWriteResults(List<FileOffset> leftOffsets) throws ParseException {
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         try {
@@ -125,7 +134,9 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
 //                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, 0, datasetLength);
                 byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
-                datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), dataSetFromOffsetsGroup);
+                if(resultCacheEnabled) {
+                    datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), dataSetFromOffsetsGroup);
+                }
                 if (matchingFilter(dataSetFromOffsetsGroup, searchQuery.getJsonQuery())
                         && matchingFilter(dataSetFromOffsetsGroup, offset.getJsonQueries())) {
                     if(!resultCallback.needsMore(searchQuery)) {

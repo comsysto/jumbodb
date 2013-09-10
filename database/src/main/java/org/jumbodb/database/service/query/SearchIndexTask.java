@@ -15,15 +15,17 @@ public class SearchIndexTask implements Callable<Set<FileOffset>> {
 
     private IndexStrategyManager indexStrategyManager;
     private int queryLimit;
-
-    private final DeliveryChunkDefinition deliveryChunkDefinition;
+    private boolean resultCacheEnabled;
+    private DeliveryChunkDefinition deliveryChunkDefinition;
     private IndexQuery query;
 
-    public SearchIndexTask(DeliveryChunkDefinition deliveryChunkDefinition, IndexQuery query, IndexStrategyManager indexStrategyManager, int queryLimit) {
+    public SearchIndexTask(DeliveryChunkDefinition deliveryChunkDefinition, IndexQuery query, IndexStrategyManager indexStrategyManager, int queryLimit, boolean resultCacheEnabled) {
         this.deliveryChunkDefinition = deliveryChunkDefinition;
         this.query = query;
         this.indexStrategyManager = indexStrategyManager;
         this.queryLimit = queryLimit;
+
+        this.resultCacheEnabled = resultCacheEnabled;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class SearchIndexTask implements Callable<Set<FileOffset>> {
         if(strategy == null) {
             throw new JumboIndexMissingException("The queried index '" + query.getName() + "' on collection '" + collection + "' with chunk key '" + chunkKey + "' does not exist.");
         }
-        Set<FileOffset> fileOffsets = strategy.findFileOffsets(collection, chunkKey, query, queryLimit);
+        Set<FileOffset> fileOffsets = strategy.findFileOffsets(collection, chunkKey, query, queryLimit, resultCacheEnabled);
         log.debug("Searched a full index with " + fileOffsets.size() + " offsets in " + (System.currentTimeMillis() - start) + "ms");
         return fileOffsets;
     }

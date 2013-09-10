@@ -157,14 +157,14 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         def query = new IndexQuery("testIndex", [queryClause])
         def expectedOffsets = ([12345l, 67890l] as Set)
         when:
-        def fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10)
+        def fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> true
         1 * futureMock.get() >> expectedOffsets
         1 * executorMock.submit(_) >> futureMock
         fileOffsets == expectedOffsets
         when:
-        fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10)
+        fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> false
         0 * executorMock.submit(_) >> futureMock
@@ -185,7 +185,7 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         def queryClause3 = new QueryClause(QueryOperation.EQ, 25000) // should not exist, so no result for it
         def queryClause4 = new QueryClause(QueryOperation.EQ, 5000)
         when:
-        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5)
+        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5, true)
         then:
         fileOffsets == ([new FileOffset(50000, 101000l, []), new FileOffset(50000, 103000l, []), new FileOffset(50000, 105000l, [])] as Set)
         cleanup:
@@ -202,12 +202,12 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def queryClause = new QueryClause(QueryOperation.EQ, 3333)
-        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
+        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
         then:
         fileOffsets == ([new FileOffset(50000, 103333l, [])] as Set)
         when:
         queryClause = new QueryClause(QueryOperation.EQ, 25000) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
+        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:

@@ -4,7 +4,6 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
-import org.jumbodb.database.service.query.index.basic.numeric.PseudoCacheForSnappy;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.DataStrategyManager;

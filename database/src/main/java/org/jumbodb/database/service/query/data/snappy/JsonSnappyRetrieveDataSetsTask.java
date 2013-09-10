@@ -60,7 +60,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 log.trace("Time for retrieving " + results + " only from cache " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
                 return results;
             }
-            long cacheResult = results;
+            int cacheResult = results;
             findLeftDatasetsAndWrite(leftOffsets);
             log.trace("Time for retrieving " + results + " (" + cacheResult + " from cache) datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
         }

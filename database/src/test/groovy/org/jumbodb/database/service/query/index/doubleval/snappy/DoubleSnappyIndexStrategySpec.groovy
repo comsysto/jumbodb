@@ -13,6 +13,7 @@ import org.jumbodb.database.service.query.index.IndexKey
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
+import org.springframework.cache.Cache
 import spock.lang.Specification
 
 import java.util.concurrent.ExecutorService
@@ -23,6 +24,19 @@ import java.util.concurrent.Future
  */
 class DoubleSnappyIndexStrategySpec extends Specification {
     def strategy = new DoubleSnappyIndexStrategy()
+
+
+    def setup() {
+        setupCache(strategy)
+    }
+
+    def setupCache(strategy) {
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
+    }
+
 
     def "verify strategy name"() {
         when:
@@ -106,6 +120,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        setupCache(strategy)
         strategy.onInitialize(cd)
         def queryClause = new QueryClause(QueryOperation.EQ, 12345d)
         def query = new IndexQuery("testIndex", [queryClause])
@@ -135,6 +150,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         def strategy = new DoubleSnappyIndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
+        setupCache(strategy)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         strategy.setIndexFileExecutor(executorMock)
         strategy.onInitialize(cd)
@@ -162,6 +178,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new DoubleSnappyIndexStrategy()
+        setupCache(strategy)
         def indexFile = DoubleDataGeneration.createFile()
         DoubleDataGeneration.createIndexFile(indexFile)
         def queryClause1 = new QueryClause(QueryOperation.EQ, 1000d)
@@ -180,6 +197,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new DoubleSnappyIndexStrategy()
+        setupCache(strategy)
         def indexFile = DoubleDataGeneration.createFile()
         def snappyChunks = DoubleDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
@@ -205,6 +223,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        setupCache(strategy)
         strategy.onInitialize(cd)
         when:
         def responsible = strategy.isResponsibleFor("testCollection", "testChunkKey", "testIndex")
@@ -224,6 +243,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         def strategy = new DoubleSnappyIndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
+        setupCache(strategy)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         when:
         strategy.onInitialize(cd)
@@ -290,6 +310,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        setupCache(strategy)
         when:
         strategy.onDataChanged(cd)
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
@@ -310,6 +331,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        setupCache(strategy)
         when:
         strategy.onDataChanged(cd)
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))

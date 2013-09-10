@@ -9,6 +9,8 @@ import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
 import org.jumbodb.database.service.query.index.IndexStrategyManager
+import org.springframework.cache.Cache
+import org.springframework.cache.CacheManager
 import org.springframework.scheduling.annotation.AsyncResult
 import spock.lang.Specification
 
@@ -39,12 +41,18 @@ class JumboSearcherSpec extends Specification {
         setup:
         def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def dataStrategyManagerMock = Mock(DataStrategyManager)
+        def cacheManagerMock = Mock(CacheManager)
+        def cacheMock = Mock(Cache)
         def js = createJumboSearcher()
+        js.setCacheManager(cacheManagerMock)
         js.setIndexStrategyManager(indexStrategyManagerMock)
         js.setDataStrategyManager(dataStrategyManagerMock)
         when:
         js.onDataChanged()
         then:
+        1 * cacheManagerMock.getCacheNames() >> ["testCache"]
+        1 * cacheManagerMock.getCache("testCache") >> cacheMock
+        1 * cacheMock.clear()
         1 * indexStrategyManagerMock.onDataChanged(_)
         1 * dataStrategyManagerMock.onDataChanged(_)
     }

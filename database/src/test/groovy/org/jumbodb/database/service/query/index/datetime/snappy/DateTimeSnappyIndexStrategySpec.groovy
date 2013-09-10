@@ -13,6 +13,7 @@ import org.jumbodb.database.service.query.index.IndexKey
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
+import org.springframework.cache.Cache
 import spock.lang.Specification
 
 import java.text.SimpleDateFormat
@@ -25,6 +26,13 @@ import java.util.concurrent.Future
  */
 class DateTimeSnappyIndexStrategySpec extends Specification {
     def strategy = new DateTimeSnappyIndexStrategy()
+
+    def setup() {
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
+    }
 
     def "verify strategy name"() {
         when:
@@ -108,9 +116,14 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
         strategy.onInitialize(cd)
         def queryClause = new QueryClause(QueryOperation.EQ, "2012-06-29 11:34:48")
         def query = new IndexQuery("testIndex", [queryClause])
+
         when:
         def groupedByIndex = strategy.groupByIndexFile("testCollection", "testChunkKey", query)
         def keys = groupedByIndex.keySet()
@@ -139,6 +152,10 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         strategy.setIndexFileExecutor(executorMock)
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
         strategy.onInitialize(cd)
         def queryClause = new QueryClause(QueryOperation.EQ, "2012-06-29 11:34:48")
         def query = new IndexQuery("testIndex", [queryClause])
@@ -166,10 +183,15 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def strategy = new DateTimeSnappyIndexStrategy()
         def indexFile = DateTimeDataGeneration.createFile()
         DateTimeDataGeneration.createIndexFile(indexFile)
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
         def queryClause1 = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
         def queryClause2 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:00")
         def queryClause3 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:01") // should not exist, so no result for it
         def queryClause4 = new QueryClause(QueryOperation.EQ, "2012-12-29 11:34:48")
+
         when:
         def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5)
         then:
@@ -185,6 +207,10 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def indexFile = DateTimeDataGeneration.createFile()
         def snappyChunks = DateTimeDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
         when:
         def queryClause = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
         def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
@@ -207,6 +233,10 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
         strategy.onInitialize(cd)
         when:
         def responsible = strategy.isResponsibleFor("testCollection", "testChunkKey", "testIndex")
@@ -227,6 +257,10 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         when:
         strategy.onInitialize(cd)
@@ -294,6 +328,10 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def strategy = new DateTimeSnappyIndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         when:
@@ -316,6 +354,10 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         when:
         strategy.onDataChanged(cd)

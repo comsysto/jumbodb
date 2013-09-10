@@ -47,6 +47,7 @@ buildscript {
 
 dependencies {
     compile "org.springframework:spring-context:$springVersion"
+    compile "org.springframework:spring-context-support:$springVersion"  // ehcache support
     compile "org.springframework:spring-test:$springVersion"
     compile "org.springframework:spring-web:$springVersion"
     compile "org.springframework:spring-webmvc:$springVersion"
@@ -54,6 +55,9 @@ dependencies {
     compile "org.springframework:spring-jmx:2.0.8"
     compile 'org.springframework:spring-mock:2.0.8'
     compile 'cglib:cglib:2.2.2'
+    compile ('net.sf.ehcache:ehcache:2.7.2') {
+        exclude module: 'ehcache-terracotta'
+    }
 
     compile 'commons-io:commons-io:2.4'
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'

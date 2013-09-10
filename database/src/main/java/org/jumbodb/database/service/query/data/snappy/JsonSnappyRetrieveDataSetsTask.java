@@ -7,14 +7,15 @@ import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.jumbodb.data.common.snappy.SnappyUtil;
-import org.jumbodb.database.service.query.index.basic.numeric.PseudoCacheForSnappy;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.data.common.snappy.SnappyChunks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
 import org.xerial.snappy.Snappy;
 
 import java.io.*;
@@ -25,16 +26,22 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private Logger log = LoggerFactory.getLogger(JsonSnappyRetrieveDataSetsTask.class);
 
     private final File file;
+    private final Cache datasetsByOffsetsCache;
+    private final Cache dataSnappyChunksCache;
     private final long fileLength;
     private final JumboQuery searchQuery;
     private final ResultCallback resultCallback;
     private JsonSnappyDataStrategy strategy;
     private final List<FileOffset> offsets;
     public static final byte[] EMPTY_BUFFER = new byte[0];
+    private int results = 0;
+    private JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
 
 
-    public JsonSnappyRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery, ResultCallback resultCallback, JsonSnappyDataStrategy strategy) {
+    public JsonSnappyRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery, ResultCallback resultCallback, JsonSnappyDataStrategy strategy, Cache datasetsByOffsetsCache, Cache dataSnappyChunksCache) {
         this.file = file;
+        this.datasetsByOffsetsCache = datasetsByOffsetsCache;
+        this.dataSnappyChunksCache = dataSnappyChunksCache;
         this.fileLength = file.length();
         this.searchQuery = searchQuery;
         this.resultCallback = resultCallback;
@@ -44,101 +51,122 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        Collections.sort(this.offsets);
-        JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        long start = System.currentTimeMillis();
+        if (searchQuery.getIndexQuery().size() == 0) {
+            fullScanData();
+        } else {
+            long start = System.currentTimeMillis();
+            List<FileOffset> leftOffsets = extractOffsetsFromCacheAndWriteResultForExisting();
+            if(leftOffsets.isEmpty()) {
+                return results;
+            }
+            long cacheResult = results;
+            findLeftDatasetsAndWrite(leftOffsets);
+            log.trace("Time for retrieving " + results + " (" + cacheResult + " from cache) datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+        }
+        return results;
+    }
+
+    private void findLeftDatasetsAndWrite(List<FileOffset> leftOffsets) throws ParseException {
+        FileInputStream fis = null;
+        BufferedInputStream bis = null;
+        try {
+            fis = new FileInputStream(file);
+            SnappyChunks snappyChunks = getSnappyChunksByFile();
+            Collections.sort(leftOffsets);
+            bis = new BufferedInputStream(fis);
+            byte[] readBufferCompressed = new byte[snappyChunks.getChunkSize() * 2];
+            byte[] readBufferUncompressed = new byte[snappyChunks.getChunkSize() * 2];
+            byte[] resultBuffer = EMPTY_BUFFER;
+            long resultBufferStartOffset = 0l;
+            long resultBufferEndOffset = 0l;
+            byte[] compressedLengthBuffer = new byte[4];
+            long uncompressedFileStreamPosition = 0l;
+            long compressedFileStreamPosition = 0l;
+            for (FileOffset offset : leftOffsets) {
+                long searchOffset = offset.getOffset();
+                // delete buffer when offset is not inside range and skip
+                if(resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
+                    long chunkIndex = (searchOffset / snappyChunks.getChunkSize());
+                    long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
+                    long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunks.getChunkSize());
+                    long chunkOffsetToSkip = chunkOffsetCompressed - compressedFileStreamPosition;
+                    long skip = skipToOffset(bis, chunkOffsetToSkip);
+                    compressedFileStreamPosition += skip;
+                    uncompressedFileStreamPosition = chunkOffsetUncompressed;
+                    resultBuffer = EMPTY_BUFFER;
+                    resultBufferStartOffset = uncompressedFileStreamPosition;
+                    resultBufferEndOffset = uncompressedFileStreamPosition;
+                }
+
+                // load to result buffer till line break
+                int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
+                int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
+//                    int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, (int)(searchOffset - resultBufferStartOffset));
+//                    int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
+                while((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
+                    int read1 = bis.read(compressedLengthBuffer);
+                    compressedFileStreamPosition += read1;
+                    int compressedLength = SnappyUtil.readInt(compressedLengthBuffer, 0);
+                    int read = bis.read(readBufferCompressed, 0, compressedLength);
+                    compressedFileStreamPosition += read;
+                    int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
+                    uncompressedFileStreamPosition += uncompressLength;
+                    datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
+                    resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
+//                        resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);
+                    resultBufferEndOffset = uncompressedFileStreamPosition - 1;
+                    resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
+                    datasetStartOffset = 0;
+                    lineBreakOffset = findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
+                }
+
+//                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : resultBuffer.length ;
+                int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
+//                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, 0, datasetLength);
+                byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
+                datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), dataSetFromOffsetsGroup);
+                if (matchingFilter(dataSetFromOffsetsGroup, searchQuery.getJsonQuery())
+                        && matchingFilter(dataSetFromOffsetsGroup, offset.getJsonQueries())) {
+                    if(!resultCallback.needsMore(searchQuery)) {
+                        return;
+                    }
+                    resultCallback.writeResult(dataSetFromOffsetsGroup);
+                    results++;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(fis);
+            IOUtils.closeQuietly(bis);
+        }
+    }
+
+    private void fullScanData() throws ParseException {
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         ChunkSkipableSnappyInputStream sis = null;
         BufferedReader br = null;
-        int results = 0;
-
         try {
-//            List<List<FileOffset>> offsetGroups = groupOffsetsByBufferSize(offsets, DEFAULT_BUFFER_SIZE);
             fis = new FileInputStream(file);
-             // ChunkSkipableSnappyInputStream and BufferedInputStream does not work together
-
-            if (searchQuery.getIndexQuery().size() == 0) {
-                bis = new BufferedInputStream(fis);
-                sis = new ChunkSkipableSnappyInputStream(bis);
-                br = new BufferedReader(new InputStreamReader(sis, "UTF-8"));
-                log.info("Full scan ");
-                long count = 0;
-                String line;
-                while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
-                    if (matchingFilter(line, jsonParser, searchQuery.getJsonQuery())) {
-                        resultCallback.writeResult(line.getBytes("UTF-8"));
-                        results++;
-                    }
-                    if (count % 100000 == 0) {
-                        log.info(file.getAbsolutePath() + ": " + count + " datasets");
-                    }
-                    count++;
+            bis = new BufferedInputStream(fis);
+            sis = new ChunkSkipableSnappyInputStream(bis);
+            br = new BufferedReader(new InputStreamReader(sis, "UTF-8"));
+            log.info("Full scan");
+            long count = 0;
+            String line;
+            while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
+                if (matchingFilter(line, searchQuery.getJsonQuery())) {
+                    resultCallback.writeResult(line.getBytes("UTF-8"));
+                    results++;
                 }
-            } else {
-                SnappyChunks snappyChunks = PseudoCacheForSnappy.getSnappyChunksByFile(file);
-                bis = new BufferedInputStream(fis);
-                byte[] readBufferCompressed = new byte[snappyChunks.getChunkSize() * 2];
-                byte[] readBufferUncompressed = new byte[snappyChunks.getChunkSize() * 2];
-                byte[] resultBuffer = EMPTY_BUFFER;
-                long resultBufferStartOffset = 0l;
-                long resultBufferEndOffset = 0l;
-                byte[] compressedLengthBuffer = new byte[4];
-                long uncompressedFileStreamPosition = 0l;
-                long compressedFileStreamPosition = 0l;
-                for (FileOffset offset : offsets) {
-                    long searchOffset = offset.getOffset();
-                    // delete buffer when offset is not inside range and skip
-                    if(resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
-                        long chunkIndex = (searchOffset / snappyChunks.getChunkSize());
-                        long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
-                        long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunks.getChunkSize());
-                        long chunkOffsetToSkip = chunkOffsetCompressed - compressedFileStreamPosition;
-                        long skip = skipToOffset(bis, chunkOffsetToSkip);
-                        compressedFileStreamPosition += skip;
-                        uncompressedFileStreamPosition = chunkOffsetUncompressed;
-                        resultBuffer = EMPTY_BUFFER;
-                        resultBufferStartOffset = uncompressedFileStreamPosition;
-                        resultBufferEndOffset = uncompressedFileStreamPosition;
-                    }
-
-                    // load to result buffer till line break
-                    int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
-                    int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
-//                    int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, (int)(searchOffset - resultBufferStartOffset));
-//                    int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
-                    while((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
-                        int read1 = bis.read(compressedLengthBuffer);
-                        compressedFileStreamPosition += read1;
-                        int compressedLength = SnappyUtil.readInt(compressedLengthBuffer, 0);
-                        int read = bis.read(readBufferCompressed, 0, compressedLength);
-                        compressedFileStreamPosition += read;
-                        int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
-                        uncompressedFileStreamPosition += uncompressLength;
-                        datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
-                        resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
-//                        resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);
-                        resultBufferEndOffset = uncompressedFileStreamPosition - 1;
-                        resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
-                        datasetStartOffset = 0;
-                        lineBreakOffset = findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
-                    }
-
-//                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : resultBuffer.length ;
-                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
-//                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, 0, datasetLength);
-                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
-                    if (matchingFilter(dataSetFromOffsetsGroup, jsonParser, searchQuery.getJsonQuery())
-                            && matchingFilter(dataSetFromOffsetsGroup, jsonParser, offset.getJsonQueries())) {
-                        if(!resultCallback.needsMore(searchQuery)) {
-                            return results;
-                        }
-                        resultCallback.writeResult(dataSetFromOffsetsGroup);
-                        results++;
-                    }
+                if (count % 100000 == 0) {
+                    log.info(file.getAbsolutePath() + ": " + count + " datasets");
                 }
+                count++;
             }
-            log.trace("Time for retrieving " + results + " datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -149,7 +177,38 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             IOUtils.closeQuietly(sis);
             IOUtils.closeQuietly(br);
         }
-        return results;
+    }
+
+    private List<FileOffset> extractOffsetsFromCacheAndWriteResultForExisting() throws IOException, ParseException {
+        List<FileOffset> notFoundOffsets = new ArrayList<FileOffset>(offsets.size());
+        for (FileOffset offset : offsets) {
+            Cache.ValueWrapper valueWrapper = datasetsByOffsetsCache.get(new CacheFileOffset(file, offset.getOffset()));
+            if(valueWrapper != null) {
+                byte[] dataSetFromOffsetsGroup = (byte[]) valueWrapper.get();
+                if (matchingFilter(dataSetFromOffsetsGroup, searchQuery.getJsonQuery())
+                        && matchingFilter(dataSetFromOffsetsGroup, offset.getJsonQueries())) {
+                    if(!resultCallback.needsMore(searchQuery)) {
+                        return Collections.emptyList(); // return empty list enough found!
+                    }
+                    resultCallback.writeResult(dataSetFromOffsetsGroup);
+                    results++;
+                }
+            }
+            else {
+                notFoundOffsets.add(offset);
+            }
+        }
+        return notFoundOffsets;
+    }
+
+    private SnappyChunks getSnappyChunksByFile() {
+        Cache.ValueWrapper valueWrapper = dataSnappyChunksCache.get(file);
+        if(valueWrapper != null) {
+            return (SnappyChunks) valueWrapper.get();
+        }
+        SnappyChunks snappyChunksByFile = SnappyChunksUtil.getSnappyChunksByFile(file);
+        dataSnappyChunksCache.put(file, snappyChunksByFile);
+        return snappyChunksByFile;
     }
 
     // in some cases you have to call skip in a buffered stream multiple times!
@@ -172,16 +231,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         System.arraycopy(lastBuffer, lastBuffer.length - length, last, 0, length);
         return last;
     }
-
-//    protected byte[] concat(byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
-////        if(resultBuffer.length == 0) {
-////            return readBuffer;
-////        }
-//        byte[] tmp = new byte[resultBuffer.length + readBufferLength];  // CARSTEN reuse buffer
-//        System.arraycopy(resultBuffer, 0, tmp, 0, resultBuffer.length);
-//        System.arraycopy(readBuffer, 0, tmp, resultBuffer.length, readBufferLength);
-//        return tmp;
-//    }
 
     protected byte[] concat(int datasetStartOffset, byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
         int resBufLen = resultBuffer.length - datasetStartOffset;
@@ -208,15 +257,15 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return result + 16;
     }
 
-    private boolean matchingFilter(byte[] s, JSONParser jsonParser, List<JsonQuery> jsonQueries) throws ParseException, IOException {
+    private boolean matchingFilter(byte[] s, List<JsonQuery> jsonQueries) throws ParseException, IOException {
         if (jsonQueries.size() == 0) {
             return true;
         }
         String in = new String(s, "UTF-8");
-        return matchingFilter(in, jsonParser, jsonQueries);
+        return matchingFilter(in, jsonQueries);
     }
 
-    private boolean matchingFilter(String s, JSONParser jsonParser, List<JsonQuery> jsonQueries) throws ParseException {
+    private boolean matchingFilter(String s, List<JsonQuery> jsonQueries) throws ParseException {
         if (jsonQueries.size() == 0) {
             return true;
         }

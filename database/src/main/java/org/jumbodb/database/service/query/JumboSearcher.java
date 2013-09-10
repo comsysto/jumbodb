@@ -16,6 +16,7 @@ import org.jumbodb.database.service.query.index.IndexStrategyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.cache.CacheManager;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -35,6 +36,7 @@ public class JumboSearcher {
     private ExecutorService indexExecutor;
     private ExecutorService chunkExecutor;
     private ObjectMapper jsonMapper;
+    private CacheManager cacheManager;
 
     public void onInitialize() {
         this.jsonMapper = new ObjectMapper();
@@ -52,7 +54,10 @@ public class JumboSearcher {
         this.collectionDefinition = getCollectionDefinition();
         this.indexStrategyManager.onDataChanged(collectionDefinition);
         this.dataStrategyManager.onDataChanged(collectionDefinition);
-        PseudoCacheForSnappy.clearCache();
+        Collection<String> cacheNames = cacheManager.getCacheNames();
+        for (String cacheName : cacheNames) {
+            cacheManager.getCache(cacheName).clear();
+        }
     }
 
     public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery, ResultCallback resultCallback) {
@@ -173,4 +178,8 @@ public class JumboSearcher {
         this.chunkExecutor = chunkExecutor;
     }
 
+    @Required
+    public void setCacheManager(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
+    }
 }

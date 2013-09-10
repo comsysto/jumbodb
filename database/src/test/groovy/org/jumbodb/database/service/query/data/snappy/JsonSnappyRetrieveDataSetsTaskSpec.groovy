@@ -7,6 +7,7 @@ import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
+import org.springframework.cache.Cache
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -38,6 +39,8 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
     def "integrated test indexed search"() {
         setup:
         def file = createTestFile()
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
         def resultCallback = Mock(ResultCallback)
         def dataStrategy = Mock(JsonSnappyDataStrategy)
         dataStrategy.matches(_, _) >> true
@@ -46,7 +49,7 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         jumboQuery.addIndexQuery("testIndex", Arrays.asList(new QueryClause(QueryOperation.EQ, "somevalue")))
         when:
         def offsets = [500l, 1000l, 1500l].collect { new FileOffset(123, it, []) } as Set
-        def task = new JsonSnappyRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy)
+        def task = new JsonSnappyRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
         def numberOfResults = task.call()
         then: "verify some grouped block loading"
         // implementation is a bit strange because internal spock cast from byte[] to Object[] fails
@@ -64,7 +67,7 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
 
         when:
         offsets = [0l].collect { new FileOffset(123, it, []) } as Set
-        task = new JsonSnappyRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy)
+        task = new JsonSnappyRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
         numberOfResults = task.call()
         then: "verify loading of the first data set"
         // implementation is a bit strange because internal spock cast from byte[] to Object[] fails
@@ -77,7 +80,7 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
 
         when:
         offsets = [50000l].collect { new FileOffset(123, it, []) } as Set
-        task = new JsonSnappyRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy)
+        task = new JsonSnappyRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
         numberOfResults = task.call()
         then: "verify loading of the last data set"
         // implementation is a bit strange because internal spock cast from byte[] to Object[] fails
@@ -90,7 +93,7 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
 
         when:
         offsets = [32750l].collect { new FileOffset(123, it, []) } as Set
-        task = new JsonSnappyRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy)
+        task = new JsonSnappyRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
         numberOfResults = task.call()
         then: "verify loading of a data set overlapping the snappy chunk (32768 byte)"
         // implementation is a bit strange because internal spock cast from byte[] to Object[] fails
@@ -107,13 +110,15 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
     def "integrated test scanned search"() {
         setup:
         def file = createTestFile()
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
         def resultCallback = Mock(ResultCallback)
         def dataStrategy = Mock(JsonSnappyDataStrategy)
         resultCallback.needsMore(_) >> true
         def jumboQuery = new JumboQuery()
         jumboQuery.addJsonQuery("number", Arrays.asList(new QueryClause(QueryOperation.EQ, 100010), new QueryClause(QueryOperation.EQ, 100020), new QueryClause(QueryOperation.EQ, 100030)))
         when:
-        def task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy)
+        def task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
         def numberOfResults = task.call()
         then: "verify matching datasets "
         // implementation is a bit strange because internal spock cast from byte[] to Object[] fails
@@ -138,10 +143,12 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
 
     def createDefaultTask() {
         def file = Mock(File)
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
         def resultCallback = Mock(ResultCallback)
         def dataStrategy = Mock(JsonSnappyDataStrategy)
         def jumboQuery = new JumboQuery()
-        new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy)
+        new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
     }
 
     @Unroll
@@ -219,22 +226,23 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
     def "matchingFilter"() {
         setup:
         def file = Mock(File)
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
         def resultCallback = Mock(ResultCallback)
         def dataStrategy = Mock(JsonSnappyDataStrategy)
-        def jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
         when:
         def jumboQuery = new JumboQuery()
-        def task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy)
+        def task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
         then: "should always be true and no match call because no criteria is given"
         0 * dataStrategy.matches(_, _)
-        task.matchingFilter('{"sample": "json"}', jsonParser, jumboQuery.getJsonQuery())
+        task.matchingFilter('{"sample": "json"}', jumboQuery.getJsonQuery())
 
         when:
         jumboQuery = new JumboQuery()
         jumboQuery.addJsonQuery("sample", [new QueryClause(QueryOperation.EQ, 'json')])
         jumboQuery.addJsonQuery("otherfield", [new QueryClause(QueryOperation.EQ, 'othervalue')])
-        task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy)
-        def matching = task.matchingFilter('{"sample": "json", "otherfield": "othervalue"}', jsonParser, jumboQuery.getJsonQuery())
+        task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        def matching = task.matchingFilter('{"sample": "json", "otherfield": "othervalue"}', jumboQuery.getJsonQuery())
         then: "if both criterias matches matching must be true"
         matching
         1 * dataStrategy.matches(_, 'json') >> true
@@ -244,8 +252,8 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         jumboQuery = new JumboQuery()
         jumboQuery.addJsonQuery("sample", [new QueryClause(QueryOperation.EQ, 'json')])
         jumboQuery.addJsonQuery("otherfield", [new QueryClause(QueryOperation.EQ, 'othervalue')])
-        task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy)
-        def notMatching = !task.matchingFilter('{"sample": "json", "otherfield": "otherNEvalue"}', jsonParser, jumboQuery.getJsonQuery())
+        task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        def notMatching = !task.matchingFilter('{"sample": "json", "otherfield": "otherNEvalue"}', jumboQuery.getJsonQuery())
         then: "if one criteria does not match matching must be false"
         notMatching
         1 * dataStrategy.matches(_, 'json') >> true
@@ -254,8 +262,8 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         when:
         jumboQuery = new JumboQuery()
         jumboQuery.addJsonQuery("sample", [new QueryClause(QueryOperation.EQ, 'jsonother'), new QueryClause(QueryOperation.EQ, 'json')])
-        task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy)
-        matching = task.matchingFilter('{"sample": "json", "otherfield": "otherNEvalue"}', jsonParser, jumboQuery.getJsonQuery())
+        task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        matching = task.matchingFilter('{"sample": "json", "otherfield": "otherNEvalue"}', jumboQuery.getJsonQuery())
         then: "if one criteria in the same clause matches it must be true"
         matching
         1 * dataStrategy.matches(_, 'json') >> true
@@ -264,8 +272,8 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         when:
         jumboQuery = new JumboQuery()
         jumboQuery.addJsonQuery("sample", [new QueryClause(QueryOperation.EQ, 'jsonother')])
-        task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy)
-        notMatching = !task.matchingFilter('{"sample": "json", "otherfield": "otherNEvalue"}', jsonParser, jumboQuery.getJsonQuery())
+        task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        notMatching = !task.matchingFilter('{"sample": "json", "otherfield": "otherNEvalue"}', jumboQuery.getJsonQuery())
         then: "if no criteria matches it must be false"
         notMatching
         1 * dataStrategy.matches(_, 'json') >> false
@@ -299,46 +307,4 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         "Hello world with a line break\nthis\npart\nis\nignored" | 6      | 23
         "Oh no the line break is missing!"                       | 6      | -1
     }
-
-//    def "getBufferByOffsetGroup(#offsetGroup) == #expectedBufferSize"() {
-//        setup:
-//        def task = createDefaultTask()
-//        expect:
-//        def fileOffsets = offsetGroup.collect { new FileOffset(123, it, []) }
-//        task.getBufferByOffsetGroup(fileOffsets).length == expectedBufferSize
-//        where:
-//        offsetGroup                    | expectedBufferSize
-//        [4l]                           | 16384 // default buffer size
-//        [1000l, 2000l, 67000l, 69999l] | 85383 // -1000 + default buffer size
-//        [1000l, 69999l]                | 85383 // -1000 + default buffer size
-//        [2000l, 102000l]               | 116384 // -2000 + default buffer size
-//    }
-    /*
-     @Unroll
-     def "groupOffsetsByBufferSize == #expectedGroups"() {
-         setup:
-         def task = createDefaultTask()
-         expect:
-         def fileOffsets = offsets.collect { new FileOffset(123, it, []) }
-         def expectedGroupsFileOffset = expectedGroups.collect { itArray -> itArray.collect { new FileOffset(123, it, []) }}
-         task.groupOffsetsByBufferSize(fileOffsets, bufferSize) == expectedGroupsFileOffset
-         where:
-         offsets                                             | bufferSize | expectedGroups
-         [1000l, 2000l, 5000l, 6000l, 7000l, 10000l, 11000l] | 1500       | [[1000l, 2000l], [5000l, 6000l, 7000l], [10000l, 11000l]]
-         [1000l, 2000l]                                      | 1500       | [[1000l, 2000l]]
-         []                                                  | 1500       | []
-     }
-
-     def "groupOffsetsByBufferSize test maximum offset group"() {
-         setup:
-         def task = createDefaultTask()
-         when:
-         def offsets = (1..2500).collect { new FileOffset(123, Long.valueOf(it * 500), [])}
-         def groups = task.groupOffsetsByBufferSize(offsets, 1000)
-         then: "all offsets are overlapping, but limit is 1000 per group"
-         groups.size() == 3
-         groups[0].size() == 1000
-         groups[1].size() == 1000
-         groups[2].size() == 500
-     }        */
 }

@@ -16,6 +16,7 @@ import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.cache.Cache;
 
 import java.io.*;
 import java.util.*;
@@ -32,6 +33,8 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
     private Logger log = LoggerFactory.getLogger(JsonSnappyDataStrategy.class);
 
     private ExecutorService retrieveDataExecutor;
+    private Cache dataSnappyChunksCache;
+    private Cache datasetsByOffsetsCache;
 
     private final Map<QueryOperation, JsonOperationSearch> OPERATIONS = createOperations();
 
@@ -73,7 +76,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         if (searchQuery.getIndexQuery().size() == 0) {
             log.debug("Running scanned search");
             for (File file : deliveryChunkDefinition.getDataFiles().values()) {
-                Future<Integer> future = retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery, resultCallback, this));
+                Future<Integer> future = retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery, resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache));
                 tasks.add(future);
                 resultCallback.collect(new FutureCancelableTask(future));
             }
@@ -86,7 +89,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
                 }
                 Set<FileOffset> offsets = fileOffsetsMap.get(fileNameHash);
                 if (offsets.size() > 0) {
-                    Future<Integer> future = retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this));
+                    Future<Integer> future = retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache));
                     tasks.add(future);
                     resultCallback.collect(new FutureCancelableTask(future));
                 }
@@ -139,6 +142,16 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
     @Required
     public void setRetrieveDataExecutor(ExecutorService retrieveDataExecutor) {
         this.retrieveDataExecutor = retrieveDataExecutor;
+    }
+
+    @Required
+    public void setDataSnappyChunksCache(Cache dataSnappyChunksCache) {
+        this.dataSnappyChunksCache = dataSnappyChunksCache;
+    }
+
+    @Required
+    public void setDatasetsByOffsetsCache(Cache datasetsByOffsetsCache) {
+        this.datasetsByOffsetsCache = datasetsByOffsetsCache;
     }
 
     @Override

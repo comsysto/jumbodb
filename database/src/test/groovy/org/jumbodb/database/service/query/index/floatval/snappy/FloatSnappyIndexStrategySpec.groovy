@@ -13,6 +13,7 @@ import org.jumbodb.database.service.query.index.IndexKey
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
+import org.springframework.cache.Cache
 import spock.lang.Specification
 
 import java.util.concurrent.ExecutorService
@@ -23,6 +24,17 @@ import java.util.concurrent.Future
  */
 class FloatSnappyIndexStrategySpec extends Specification {
     def strategy = new FloatSnappyIndexStrategy()
+
+    def setup() {
+        setupCache(strategy)
+    }
+
+    def setupCache(strategy) {
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
+    }
 
     def "verify strategy name"() {
         when:
@@ -106,6 +118,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        setupCache(strategy)
         strategy.onInitialize(cd)
         def queryClause = new QueryClause(QueryOperation.EQ, 12345f)
         def query = new IndexQuery("testIndex", [queryClause])
@@ -137,6 +150,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         strategy.setIndexFileExecutor(executorMock)
+        setupCache(strategy)
         strategy.onInitialize(cd)
         def queryClause = new QueryClause(QueryOperation.EQ, 12345f)
         def query = new IndexQuery("testIndex", [queryClause])
@@ -162,6 +176,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new FloatSnappyIndexStrategy()
+        setupCache(strategy)
         def indexFile = FloatDataGeneration.createFile()
         FloatDataGeneration.createIndexFile(indexFile)
         def queryClause1 = new QueryClause(QueryOperation.EQ, 1000f)
@@ -180,6 +195,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new FloatSnappyIndexStrategy()
+        setupCache(strategy)
         def indexFile = FloatDataGeneration.createFile()
         def snappyChunks = FloatDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
@@ -202,6 +218,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(FloatEqOperationSearch)
         def strategy = new FloatSnappyIndexStrategy()
+        setupCache(strategy)
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -222,6 +239,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(FloatEqOperationSearch)
         def strategy = new FloatSnappyIndexStrategy()
+        setupCache(strategy)
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -287,6 +305,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(FloatEqOperationSearch)
         def strategy = new FloatSnappyIndexStrategy()
+        setupCache(strategy)
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -307,6 +326,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(FloatEqOperationSearch)
         def strategy = new FloatSnappyIndexStrategy()
+        setupCache(strategy)
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)

@@ -47,6 +47,7 @@
         <property name="indexFileExecutor" ref="indexFileExecutor"/>
         <property name="indexBlockRangesCache" ref="indexBlockRangesCache"/>
         <property name="indexSnappyChunksCache" ref="indexSnappyChunksCache"/>
+        <property name="indexQueryCache" ref="indexQueryCache"/>
     </bean>
 
     <bean id="indexStrategyManager" class="org.jumbodb.database.service.query.index.IndexStrategyManager">
@@ -84,6 +85,10 @@
 
     <bean factory-bean="cacheManager" factory-method="getCache" id="indexBlockRangesCache">
         <constructor-arg value="index.block.ranges"/>
+    </bean>
+
+    <bean factory-bean="cacheManager" factory-method="getCache" id="indexQueryCache">
+        <constructor-arg value="index.query.offsets"/>
     </bean>
 
     <bean id="dataStrategyManager" class="org.jumbodb.database.service.query.data.DataStrategyManager">

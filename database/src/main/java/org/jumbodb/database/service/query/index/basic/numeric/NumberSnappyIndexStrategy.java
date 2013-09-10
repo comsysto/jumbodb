@@ -42,6 +42,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     private Map<IndexKey, List<IF>> indexFiles;
     private Cache indexSnappyChunksCache;
     private Cache indexBlockRangesCache;
+    private Cache indexQueryCache;
 
     protected final Map<QueryOperation, OperationSearch<T, IFV, IF>> OPERATIONS = createOperations();
 
@@ -175,6 +176,13 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
 
 
     protected Set<FileOffset> findOffsetForClause(final File indexFile, final RandomAccessFile indexRaf, QueryClause clause, final SnappyChunks snappyChunks, int queryLimit) throws IOException {
+
+        CacheIndexClause key = new CacheIndexClause(indexFile, clause.getQueryOperation(), clause.getValue());
+        Cache.ValueWrapper valueWrapper = indexQueryCache.get(key);
+        if(valueWrapper != null) {
+            return (Set<FileOffset>) valueWrapper.get();
+        }
+
         OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(clause.getQueryOperation());
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + clause.getQueryOperation());
@@ -237,14 +245,17 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                                 result.add(new FileOffset(fileNameHash, offset, clause.getQueryClauses()));
                             } else if(!result.isEmpty()) {
                                 // found some results, but here it isnt equal, that means end of results
+                                cacheResult(key, result);
                                 return result;
                             }
                             if(queryLimit != -1 && queryLimit < result.size()) {
+                                cacheResult(key, result);
                                 return result;
                             }
                         }
                         // nothing found in second block, so there isn't anything
                         if(i > 1 && result.isEmpty()) {
+                            cacheResult(key, result);
                             return result;
                         }
                     } finally {
@@ -255,6 +266,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                     currentChunk++;
                     i++;
                 }
+                cacheResult(key, result);
                 return result;
             } finally {
                 IOUtils.closeQuietly(dis);
@@ -262,7 +274,13 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                 IOUtils.closeQuietly(fis);
             }
         }
-        return Collections.emptySet();
+        Set<FileOffset> result = Collections.emptySet();
+        cacheResult(key, result);
+        return result;
+    }
+
+    private void cacheResult(CacheIndexClause key, Set<FileOffset> result) {
+        indexQueryCache.put(key, result);
     }
 
     public boolean acceptIndexFile(QueryClause queryClause, IF indexFile) {
@@ -315,6 +333,11 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     @Required
     public void setIndexBlockRangesCache(Cache indexBlockRangesCache) {
         this.indexBlockRangesCache = indexBlockRangesCache;
+    }
+
+    @Required
+    public void setIndexQueryCache(Cache indexQueryCache) {
+        this.indexQueryCache = indexQueryCache;
     }
 
     protected CollectionDefinition getCollectionDefinition() {

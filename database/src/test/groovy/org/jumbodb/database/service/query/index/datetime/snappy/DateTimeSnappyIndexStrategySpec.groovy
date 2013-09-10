@@ -32,6 +32,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         cacheMock.get(_) >> null
         strategy.setIndexSnappyChunksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
+        strategy.setIndexQueryCache(cacheMock)
     }
 
     def "verify strategy name"() {
@@ -187,6 +188,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         cacheMock.get(_) >> null
         strategy.setIndexSnappyChunksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
+        strategy.setIndexQueryCache(cacheMock)
         def queryClause1 = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
         def queryClause2 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:00")
         def queryClause3 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:01") // should not exist, so no result for it
@@ -211,6 +213,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         cacheMock.get(_) >> null
         strategy.setIndexSnappyChunksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
+        strategy.setIndexQueryCache(cacheMock)
         when:
         def queryClause = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
         def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)

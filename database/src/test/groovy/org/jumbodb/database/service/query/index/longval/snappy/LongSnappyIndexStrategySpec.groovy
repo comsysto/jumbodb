@@ -34,6 +34,7 @@ class LongSnappyIndexStrategySpec extends Specification {
         cacheMock.get(_) >> null
         strategy.setIndexSnappyChunksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
+        strategy.setIndexQueryCache(cacheMock)
     }
 
     def "verify strategy name"() {

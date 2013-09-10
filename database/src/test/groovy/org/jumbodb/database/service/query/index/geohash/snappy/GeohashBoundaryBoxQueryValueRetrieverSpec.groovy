@@ -13,18 +13,15 @@ class GeohashBoundaryBoxQueryValueRetrieverSpec extends Specification {
     def "verify boundary box parsing #queryValue"() {
         expect:
         def retriever = new GeohashBoundaryBoxQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, queryValue))
-        def value = retriever.getValue()
-        value instanceof GeohashBoundaryBox
-        value.getLatitude1() == queryValue[0][0]
-        value.getLongitude1() == queryValue[0][1]
-        value.getLatitude2() == queryValue[1][0]
-        value.getLongitude2() == queryValue[1][1]
+        def container = retriever.getValue()
+        container instanceof GeohashBoundaryBoxContainer
+        def value = container.getSplittedBoxes()[0] // upperLeftBox
         Integer.toBinaryString(value.getGeohashFirstMatchingBits()) == firstMatchingBits
         value.getBitsToShift() == numberOfMatchingBits
         where:
         queryValue                                       | firstMatchingBits                  | numberOfMatchingBits
         [[48.207688, 11.331185], [48.215382, 11.352847]] | "11111111111101000010010000010000" | 10 // olching
-        [[51.516652, -0.131793], [51.586833, 0.077033]]  | "1111010111010111011100010010000"  | 0 // london 0 meridian
+        [[51.516652d, -0.131793], [51.586833, 0.077033]] | "111101011101011101110"            | 10
     }
 
     def "expect exception on bullshit string"() {

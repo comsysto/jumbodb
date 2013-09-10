@@ -57,6 +57,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             long start = System.currentTimeMillis();
             List<FileOffset> leftOffsets = extractOffsetsFromCacheAndWriteResultForExisting();
             if(leftOffsets.isEmpty()) {
+                log.trace("Time for retrieving " + results + " only from cache " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
                 return results;
             }
             long cacheResult = results;

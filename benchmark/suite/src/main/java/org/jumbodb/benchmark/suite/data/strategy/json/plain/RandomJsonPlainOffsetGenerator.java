@@ -39,9 +39,6 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
         this.averageDataSetSize = benchmarkJob.getAverageDataSetSize();
     }
 
-    // CARSTEN
-    // retrieve dataset length
-    // first approach -> simply take file size and take random offsets.
 
 
     @Override
@@ -69,11 +66,6 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
             }
         }
         return result;
-    }
-
-    // ULF snappy....
-    private long readFileSize(File dataFile) {
-        return dataFile.length();
     }
 
     private String readDeliveryVersion(String inputFolder, String collectionName, String chunkKey) throws IOException {
@@ -115,12 +107,12 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
         }
         return result;
     }
+}
 
 
-    private static class DataFileFilter implements FilenameFilter {
-        @Override
-        public boolean accept(File dir, String name) {
-            return !(name.endsWith(".properties") || name.contains("_SUCCCESS") || name.endsWith(".snappy"));
-        }
+class DataFileFilter implements FilenameFilter {
+    @Override
+    public boolean accept(File dir, String name) {
+        return !(name.endsWith(".properties") || name.contains("_SUCCESS") || name.endsWith(".snappy"));
     }
 }

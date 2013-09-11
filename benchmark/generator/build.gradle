@@ -22,21 +22,6 @@ repositories {
 configurations {
     // this scope extracts the files and copies it into he same jar file, because ou can just use one jar file in emr
 }
-sourceSets {
-    main {
-        resources {
-            srcDir 'src/main/resources'
-            srcDir 'src/main/java'
-        }
-    }
-    test {
-        resources {
-            srcDir 'src/test/resources'
-            srcDir 'src/test/java'
-            srcDir 'src/test/groovy'
-        }
-    }
-}
 
 dependencies {
     compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"

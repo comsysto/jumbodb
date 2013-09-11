@@ -36,7 +36,7 @@ class NotFoundIndexStrategySpec extends Specification {
 
     def "findFileOffsets should throw an exception"() {
         when:
-        strategy.findFileOffsets("collection", "chunkKey", new IndexQuery(), 5)
+        strategy.findFileOffsets("collection", "chunkKey", new IndexQuery(), 5, true)
         then:
         thrown IllegalStateException
     }

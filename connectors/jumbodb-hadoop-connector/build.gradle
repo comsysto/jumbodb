@@ -32,7 +32,10 @@ dependencies {
     compile project(':commons:query')
     compile project(':commons:geo')
 
-    compile "org.apache.hadoop:hadoop-core:1.0.3"
+    compile ("org.apache.hadoop:hadoop-core:1.0.3") {
+        exclude group: 'org.mortbay.jetty'
+        exclude group: 'tomcat'
+    }
     compile 'commons-io:commons-io:2.3'
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.5"

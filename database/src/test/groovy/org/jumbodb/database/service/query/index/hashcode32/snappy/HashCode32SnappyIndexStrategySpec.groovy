@@ -13,6 +13,7 @@ import org.jumbodb.database.service.query.index.IndexKey
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.OperationSearch
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
+import org.springframework.cache.Cache
 import spock.lang.Specification
 
 import java.util.concurrent.ExecutorService
@@ -23,6 +24,18 @@ import java.util.concurrent.Future
  */
 class HashCode32SnappyIndexStrategySpec extends Specification {
     def strategy = new HashCode32SnappyIndexStrategy()
+
+    def setup() {
+        setupCache(strategy)
+    }
+
+    def setupCache(strategy) {
+        def cacheMock = Mock(Cache)
+        cacheMock.get(_) >> null
+        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexBlockRangesCache(cacheMock)
+        strategy.setIndexQueryCache(cacheMock)
+    }
 
     def "verify strategy name"() {
         when:
@@ -106,6 +119,7 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        setupCache(strategy)
         strategy.onInitialize(cd)
         def queryClause = new QueryClause(QueryOperation.EQ, 12345)
         def query = new IndexQuery("testIndex", [queryClause])
@@ -137,19 +151,20 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         strategy.setIndexFileExecutor(executorMock)
+        setupCache(strategy)
         strategy.onInitialize(cd)
         def queryClause = new QueryClause(QueryOperation.EQ, 12345)
         def query = new IndexQuery("testIndex", [queryClause])
         def expectedOffsets = ([12345l, 67890l] as Set)
         when:
-        def fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10)
+        def fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> true
         1 * futureMock.get() >> expectedOffsets
         1 * executorMock.submit(_) >> futureMock
         fileOffsets == expectedOffsets
         when:
-        fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10)
+        fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> false
         0 * executorMock.submit(_) >> futureMock
@@ -162,6 +177,7 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new HashCode32SnappyIndexStrategy()
+        setupCache(strategy)
         def indexFile = HashCode32DataGeneration.createFile()
         HashCode32DataGeneration.createIndexFile(indexFile)
         def queryClause1 = new QueryClause(QueryOperation.EQ, 1000)
@@ -169,7 +185,7 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         def queryClause3 = new QueryClause(QueryOperation.EQ, 25000) // should not exist, so no result for it
         def queryClause4 = new QueryClause(QueryOperation.EQ, 5000)
         when:
-        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5)
+        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5, true)
         then:
         fileOffsets == ([new FileOffset(50000, 101000l, []), new FileOffset(50000, 103000l, []), new FileOffset(50000, 105000l, [])] as Set)
         cleanup:
@@ -180,17 +196,18 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new HashCode32SnappyIndexStrategy()
+        setupCache(strategy)
         def indexFile = HashCode32DataGeneration.createFile()
         def snappyChunks = HashCode32DataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def queryClause = new QueryClause(QueryOperation.EQ, 3333)
-        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
+        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
         then:
         fileOffsets == ([new FileOffset(50000, 103333l, [])] as Set)
         when:
         queryClause = new QueryClause(QueryOperation.EQ, 25000) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5)
+        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -202,6 +219,7 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(HashCode32EqOperationSearch)
         def strategy = new HashCode32SnappyIndexStrategy()
+        setupCache(strategy)
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -222,6 +240,7 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(HashCode32EqOperationSearch)
         def strategy = new HashCode32SnappyIndexStrategy()
+        setupCache(strategy)
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -287,6 +306,7 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(HashCode32EqOperationSearch)
         def strategy = new HashCode32SnappyIndexStrategy()
+        setupCache(strategy)
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -307,9 +327,11 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(HashCode32EqOperationSearch)
         def strategy = new HashCode32SnappyIndexStrategy()
+        setupCache(strategy)
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        setupCache(strategy)
         when:
         strategy.onDataChanged(cd)
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))

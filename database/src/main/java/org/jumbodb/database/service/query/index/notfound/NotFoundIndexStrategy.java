@@ -28,7 +28,7 @@ public class NotFoundIndexStrategy implements IndexStrategy {
     }
 
     @Override
-    public Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit) {
+    public Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit, boolean resultCacheEnabled) {
         throw new IllegalStateException("No index strategy found for " + collection + " " + chunkKey);
     }
 

@@ -15,6 +15,15 @@ public class JumboQuery {
     private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
     private List<JsonQuery> jsonQuery = new LinkedList<JsonQuery>();
     private int limit = -1;
+    private boolean resultCacheEnabled = true;
+
+    public boolean isResultCacheEnabled() {
+        return resultCacheEnabled;
+    }
+
+    public void setResultCacheEnabled(boolean resultCacheEnabled) {
+        this.resultCacheEnabled = resultCacheEnabled;
+    }
 
     public int getLimit() {
         return limit;
@@ -62,6 +71,7 @@ public class JumboQuery {
                 "indexQuery=" + indexQuery +
                 ", jsonQuery=" + jsonQuery +
                 ", limit=" + limit +
+                ", resultCacheEnabled=" + resultCacheEnabled +
                 '}';
     }
 }

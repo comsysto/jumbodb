@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
+    <defaultCache maxElementsInMemory="10000" overflowToDisk="false"/>
+    <cache name="data.snappy.chunks" maxElementsInMemory="10000000" statistics="true" overflowToDisk="false" memoryStoreEvictionPolicy="LRU" eternal="true"/>
+    <cache name="data.datasets.byoffsets" maxElementsInMemory="1000000" statistics="true" overflowToDisk="false" memoryStoreEvictionPolicy="LRU" timeToIdleSeconds="86400"/>
+    <cache name="index.snappy.chunks" maxElementsInMemory="50000000" statistics="true" overflowToDisk="false" memoryStoreEvictionPolicy="LRU" eternal="true"/>
+    <cache name="index.block.ranges" maxElementsInMemory="50000000" statistics="true" overflowToDisk="false" memoryStoreEvictionPolicy="LRU" eternal="true"/>
+    <cache name="index.query.offsets" maxElementsInMemory="5000000" statistics="true" overflowToDisk="false" memoryStoreEvictionPolicy="LRU" timeToIdleSeconds="86400"/>
+</ehcache>

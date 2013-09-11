@@ -1,5 +1,6 @@
 package org.jumbodb.benchmark.suite.data.strategy.json.plain
 
+import org.apache.commons.lang.RandomStringUtils
 import org.jumbodb.benchmark.suite.result.BenchmarkJob
 import spock.lang.Shared
 import spock.lang.Specification
@@ -26,10 +27,12 @@ class JsonPlainDataStrategySpec extends Specification{
         dataFilesDir = new File(chunkDir, "1231-4325-12")
         dataFilesDir.mkdirs()
 
-        new File(dataFilesDir, "part-r-00000").createNewFile()
-        new File(dataFilesDir, "part-r-12314").createNewFile()
+        def dataFile1 = new File(dataFilesDir, "part-r-00000")
+        def dataFile2 = new File(dataFilesDir, "part-r-12314")
         def activeProperties = new File(chunkDir, "active.properties")
-        activeProperties.createNewFile()
+
+        dataFile1 << RandomStringUtils.random(50000)
+        dataFile2 << RandomStringUtils.random(100000)
 
         activeProperties << String.format("#Active Delivery%n")
         activeProperties << String.format("#Tue Sep 10 14:27:21 CEST 2013%n")
@@ -41,6 +44,18 @@ class JsonPlainDataStrategySpec extends Specification{
         inputDir.deleteDir()
     }
 
+
+    def "generate file offsets"(){
+        setup:
+        def benchmarkJob = new BenchmarkJob(inputDir, null, null, "mobile_phones", "march_delivery", -1, -1, 100, -1)
+        def generator = new RandomJsonPlainOffsetGenerator()
+        generator.configure(benchmarkJob)
+        expect:
+        def fileOffsets = generator.getFileOffsets()
+        100 == fileOffsets.size()
+        50 == fileOffsets.findAll{f -> f.file.name.equals("part-r-12314")}.size()
+        50 == fileOffsets.findAll{f -> f.file.name.equals("part-r-00000")}.size()
+    }
 
     def "read delivery version from properties file"(){
         setup:

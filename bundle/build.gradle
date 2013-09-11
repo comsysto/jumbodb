@@ -1,3 +1,5 @@
+//import org.gradle.api.tasks.application.CreateStartScripts
+
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'application'
@@ -26,7 +28,7 @@ sourceSets {
 }
 
 mainClassName = "org.jumbodb.starter.JumboDBStarter"
-
+applicationDefaultJvmArgs = ["-Xmx2G"]
 
 dependencies {
 //    compile 'javax.servlet:servlet-api:2.5'
@@ -53,7 +55,7 @@ def retrieveWarFileName() {
 
 def retrieveImportFileFileName() {
     def p = project(':importer:hadoop-json')
-    'hadoop-json-' + p.version
+    p.applicationName + '-' + p.version
 }
 
 def retrieveJarFileName() {
@@ -76,6 +78,11 @@ def locateWarPath() {
 def locateImporterPath() {
     def p = project(':importer:hadoop-json')
     new File(p.buildDir.path + '/distributions/' + retrieveImportFileFileName() + '.zip')
+}
+
+def locateHadoopJarPath() {
+    def p = project(':importer:hadoop-json')
+    p.libsDir
 }
 
 
@@ -102,7 +109,11 @@ task copyImporter(dependsOn: ':importer:hadoop-json:distZip') {
         }
 
         applicationDistribution.from(extractionPath + retrieveImportFileFileName() + "/") {
-            into 'tools/importer/'
+            into 'tools/import-cli/'
+        }
+
+        applicationDistribution.from(locateHadoopJarPath()) {
+            into 'tools/import-hadoop/'
         }
     }
 }

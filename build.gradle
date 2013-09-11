@@ -18,7 +18,7 @@ subprojects {
     apply plugin: 'eclipse'
   
     group = 'org.jumbodb'
-    version = '0.0.15-SNAPSHOT'
+    version = '0.0.16-SNAPSHOT'
 
     sourceCompatibility = 1.6
     targetCompatibility = 1.6
@@ -52,5 +52,5 @@ idea {
 // generate gradle bootstrapping
 // run gradle createWrapper
 task createWrapper(type: Wrapper) {
-  gradleVersion = '1.5'
+  gradleVersion = '1.7'
 }

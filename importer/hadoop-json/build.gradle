@@ -56,7 +56,8 @@ dependencies {
 
 
 mainClassName = "org.jumbodb.importer.hadoop.json.JsonImporterJob"
-
+applicationDefaultJvmArgs = ["-Xmx2G"]
+applicationName = "jumboimport"
 
 jar {
     from configurations.bundle.collect {

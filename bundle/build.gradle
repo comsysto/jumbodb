@@ -51,6 +51,11 @@ def retrieveWarFileName() {
     'jumbodb-' + p.version + '.war'
 }
 
+def retrieveImportFileFileName() {
+    def p = project(':importer:hadoop-json')
+    'hadoop-json-' + p.version
+}
+
 def retrieveJarFileName() {
     archivesBaseName + '-' + version + '.jar'
 }
@@ -58,15 +63,21 @@ def retrieveJarFileName() {
 def retrieveTargetWarPath() {
     '/war/' + retrieveWarFileName()
 }
+
 def retrieveTargetJarPath() {
     '/lib/' + retrieveJarFileName()
 }
-
 
 def locateWarPath() {
     def p = project(':database')
     new File(p.libsDir.path + '/' + retrieveWarFileName())
 }
+
+def locateImporterPath() {
+    def p = project(':importer:hadoop-json')
+    new File(p.buildDir.path + '/distributions/' + retrieveImportFileFileName() + '.zip')
+}
+
 
 task copyWar(dependsOn: ':database:war') {
     doLast {
@@ -79,6 +90,23 @@ task copyWar(dependsOn: ':database:war') {
 }
 jar.dependsOn copyWar
 
+task copyImporter(dependsOn: ':importer:hadoop-json:distZip') {
+    doLast {
+        def path = locateImporterPath()
+        println("Copying Importer " + path)
+        def zipPath = zipTree(path)
+        def extractionPath = buildDir.path + '/tmp.extracted/';
+        copy {
+            from zipPath
+            into extractionPath
+        }
+
+        applicationDistribution.from(extractionPath + retrieveImportFileFileName() + "/") {
+            into 'tools/importer/'
+        }
+    }
+}
+jar.dependsOn copyImporter
 
 jar {
     manifest {

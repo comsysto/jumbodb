@@ -1,8 +1,7 @@
 package org.jumbodb.benchmark.generator.runner;
 
-import org.apache.commons.io.IOUtils;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
 /**
@@ -23,9 +22,6 @@ public abstract class DataFileGenerationRunner implements Callable<Void>{
 
     @Override
     public Void call() throws Exception {
-        FileOutputStream fos = new FileOutputStream(new File(destFilePath));
-        BufferedOutputStream bos = new BufferedOutputStream(fos);
-
         OutputStream outputStream = openOutputStream(destFilePath);
 
         try{

@@ -1,12 +1,12 @@
 package org.jumbodb.benchmark.generator.job;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.benchmark.generator.DataCollectionGenerator;
+import org.jumbodb.benchmark.generator.PlainDataCollectionGenerator;
 import org.jumbodb.benchmark.generator.SnappyV1DataCollectionGenerator;
 import org.jumbodb.benchmark.generator.config.Collection;
 import org.jumbodb.benchmark.generator.config.GeneratorConfig;
-import org.jumbodb.benchmark.generator.PlainDataCollectionGenerator;
+import org.jumbodb.common.util.config.JSONConfigReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,14 +15,15 @@ public class DataDeliveryGenerator {
 
     private static DataDeliveryGenerator dataGenerator = new DataDeliveryGenerator();
 
+
     public static void main(String[] args) throws IOException {
         if (!checkConfigParams(args)) {
             throw new IllegalArgumentException("Data generator job expects config file start parameter");
         }
-        dataGenerator.run(new File(args[0]));
+        dataGenerator.run(args[0]);
     }
 
-    protected void run(File configFile) throws IOException {
+    protected void run(String configFile) throws IOException {
         GeneratorConfig config = parseConfigFile(configFile);
 
         for (Collection collection : config.getCollections()) {
@@ -43,8 +44,8 @@ public class DataDeliveryGenerator {
         }
     }
 
-    protected GeneratorConfig parseConfigFile(File configFile) throws IOException {
-        return new ObjectMapper().readValue(configFile, GeneratorConfig.class);
+    protected GeneratorConfig parseConfigFile(String configFile) throws IOException {
+        return JSONConfigReader.read(GeneratorConfig.class, configFile);
     }
 
     private static boolean checkConfigParams(String[] args) {

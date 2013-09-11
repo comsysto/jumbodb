@@ -4,6 +4,7 @@ import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -11,7 +12,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class ExportDeliveryService {
     private ExecutorService executorService;
-    private List<ExportDelivery> replications = Collections.synchronizedList(new LinkedList<ExportDelivery>()) ;
+    private List<ExportDelivery> replications = new CopyOnWriteArrayList<ExportDelivery>();
     private StorageManagement storageManagement;
 
     public void startReplication(StartReplication startReplication) {

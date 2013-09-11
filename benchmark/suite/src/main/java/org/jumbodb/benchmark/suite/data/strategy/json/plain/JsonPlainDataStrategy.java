@@ -34,6 +34,7 @@ public class JsonPlainDataStrategy implements DataStrategy {
     public BenchmarkJobResult execute() {
         List<Future<JsonPlainDataStrategyResult>> results = new LinkedList<Future<JsonPlainDataStrategyResult>>();
         HashMultimap<File, Long> groupOffsetsByFile = groupOffsetsByFile(fileOffsets);
+
         for (File file : groupOffsetsByFile.keySet()) {
             results.add(executorService.submit(new JsonPlainDataStrategyTask(file, groupOffsetsByFile.get(file))));
         }
@@ -43,8 +44,11 @@ public class JsonPlainDataStrategy implements DataStrategy {
     }
 
     private HashMultimap<File, Long> groupOffsetsByFile(List<FileOffset> fileOffsets) {
-        // TODO
-        return null;  //To change body of created methods use File | Settings | File Templates.
+        HashMultimap<File, Long> result = HashMultimap.create();
+        for (FileOffset fileOffset : fileOffsets) {
+            result.put(fileOffset.getFile(), fileOffset.getOffset());
+        }
+        return result;
     }
 
     @Override

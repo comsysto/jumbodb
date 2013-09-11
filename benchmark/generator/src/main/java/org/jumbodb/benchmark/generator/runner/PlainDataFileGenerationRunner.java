@@ -7,14 +7,11 @@ import java.io.*;
 
 public class PlainDataFileGenerationRunner extends DataFileGenerationRunner{
 
-    private final String destFilePath;
     private BufferedOutputStream bos;
     private FileOutputStream fos;
 
-
     public PlainDataFileGenerationRunner(String outputFilePath, int dataSetsPerFile, byte[][] randomizedJSONDocs) {
        super(outputFilePath, dataSetsPerFile, randomizedJSONDocs);
-       this.destFilePath = outputFilePath;
     }
 
     @Override

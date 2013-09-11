@@ -5,7 +5,7 @@ apply plugin: 'java'
 apply plugin: 'project-reports'
 apply plugin: 'eclipse'
 apply plugin: 'application'
-
+apply plugin: 'groovy'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -31,9 +31,14 @@ dependencies {
     compile 'com.google.guava:guava:13.0'
     compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
 //    compile 'net.minidev:json-smart:2.0-RC2'
+    compile project(':commons:util')
+    compile project(':commons:data')
+
 
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.0"
+    groovy "org.codehaus.groovy:groovy-all:2.0.8"
+    testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
 }
 
 mainClassName = "org.jumbodb.benchmark.suite.BenchmarkSuiteRunner"

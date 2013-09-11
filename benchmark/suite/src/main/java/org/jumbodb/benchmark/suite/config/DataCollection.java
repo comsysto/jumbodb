@@ -4,17 +4,26 @@ import java.util.List;
 
 public class DataCollection {
 
-    private String name;
+    private String collectionName;
+    private String chunkKey;
     private String description;
     private String offsetGenerator;
     private List<DataCollectionRun> runs;
 
-    public String getName() {
-        return name;
+    public String getCollectionName() {
+        return collectionName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCollectionName(String collectionName) {
+        this.collectionName = collectionName;
+    }
+
+    public String getChunkKey() {
+        return chunkKey;
+    }
+
+    public void setChunkKey(String chunkKey) {
+        this.chunkKey = chunkKey;
     }
 
     public String getDescription() {

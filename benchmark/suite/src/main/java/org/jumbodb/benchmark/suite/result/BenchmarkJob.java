@@ -16,19 +16,23 @@ public class BenchmarkJob {
     private File inputFolder;
     private Class<? extends OffsetGenerator> offsetGenerator;
     private String strategy;
-    private String collection;
+    private String collectionName;
+    private String chunkKey;
     private int numberOfThreads;
     private int datasetLoadGroupSize;
     private int numberOfSamplesPerRun;
+    private int averageDataSetSize;
 
-    public BenchmarkJob(File inputFolder, Class<? extends OffsetGenerator> offsetGenerator,  String strategy, String collection, int numberOfThreads, int datasetLoadGroupSize, int numberOfSamplesPerRun) {
+    public BenchmarkJob(File inputFolder, Class<? extends OffsetGenerator> offsetGenerator, String strategy, String collection, String chunkKey, int numberOfThreads, int datasetLoadGroupSize, int numberOfSamplesPerRun, int averageDataSetSize) {
         this.inputFolder = inputFolder;
         this.offsetGenerator = offsetGenerator;
         this.strategy = strategy;
-        this.collection = collection;
+        this.collectionName = collection;
+        this.chunkKey = chunkKey;
         this.numberOfThreads = numberOfThreads;
         this.datasetLoadGroupSize = datasetLoadGroupSize;
         this.numberOfSamplesPerRun = numberOfSamplesPerRun;
+        this.averageDataSetSize = averageDataSetSize;
     }
 
     public BenchmarkJobResult run() {
@@ -63,8 +67,12 @@ public class BenchmarkJob {
         return strategy;
     }
 
-    public String getCollection() {
-        return collection;
+    public String getCollectionName() {
+        return collectionName;
+    }
+
+    public String getChunkKey() {
+        return chunkKey;
     }
 
     public int getDatasetLoadGroupSize() {
@@ -79,12 +87,16 @@ public class BenchmarkJob {
         return numberOfSamplesPerRun;
     }
 
+    public int getAverageDataSetSize() {
+        return averageDataSetSize;
+    }
+
     @Override
     public String toString() {
         return "BenchmarkJob{" +
                 "offsetGenerator=" + offsetGenerator +
                 ", strategy='" + strategy + '\'' +
-                ", collection='" + collection + '\'' +
+                ", collection='" + collectionName + '\'' +
                 ", numberOfThreads=" + numberOfThreads +
                 ", datasetLoadGroupSize=" + datasetLoadGroupSize +
                 ", numberOfSamplesPerRun=" + numberOfSamplesPerRun +

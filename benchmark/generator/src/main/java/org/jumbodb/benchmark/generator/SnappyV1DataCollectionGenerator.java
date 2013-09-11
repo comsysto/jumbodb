@@ -1,8 +1,11 @@
 package org.jumbodb.benchmark.generator;
 
+import org.apache.commons.io.FilenameUtils;
 import org.jumbodb.benchmark.generator.runner.SnappyV1DataFileGenerationRunner;
-import org.xerial.snappy.SnappyOutputStream;
+import org.jumbodb.data.common.meta.DeliveryProperties;
 
+import java.io.File;
+import java.util.Date;
 import java.util.concurrent.Callable;
 
 /**
@@ -10,7 +13,12 @@ import java.util.concurrent.Callable;
  */
 public class SnappyV1DataCollectionGenerator extends DataCollectionGenerator {
 
-    public SnappyV1DataCollectionGenerator(String outputFolder, int numberOfFiles, int dataSetsPerFile, int dataSetSizeInChars, String collectionName, int parallelThreads) {
+    private static final String DELIVERY_PATH = "created_by_generator";
+    private static final String DELIVERY_STRATEGY = "JSON_SNAPPY_V1";
+
+
+    public SnappyV1DataCollectionGenerator(String outputFolder, int numberOfFiles, int dataSetsPerFile,
+            int dataSetSizeInChars, String collectionName, int parallelThreads) {
         super(outputFolder, numberOfFiles, dataSetsPerFile, dataSetSizeInChars, collectionName, parallelThreads);
     }
 
@@ -20,7 +28,11 @@ public class SnappyV1DataCollectionGenerator extends DataCollectionGenerator {
     }
 
     @Override
-    public void createDeliveryProperties(String dataFolder, String deliveryVersion, String description) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void createDeliveryProperties(String dataFolder, String deliveryVersion, String description){
+        DeliveryProperties.DeliveryMeta deliveryMeta = new DeliveryProperties.DeliveryMeta(deliveryVersion, description, new Date(),
+                DELIVERY_PATH, DELIVERY_STRATEGY);
+
+        String deliveryPropertiesPath = FilenameUtils.concat(dataFolder, DeliveryProperties.DEFAULT_FILENAME);
+        DeliveryProperties.write(new File(deliveryPropertiesPath), deliveryMeta);
     }
 }

@@ -1,9 +1,6 @@
 package org.jumbodb.benchmark.suite.data.strategy.json.plain;
 
-import org.jumbodb.benchmark.suite.offsets.FileOffset;
-
 import java.io.File;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -21,6 +18,9 @@ public class JsonPlainDataStrategyTask implements Callable<JsonPlainDataStrategy
 
     @Override
     public JsonPlainDataStrategyResult call() throws Exception {
+
+
+
         // TODO
         return null;
     }

@@ -10,6 +10,9 @@ public class DataCollectionRun {
     private List<Integer> numberOfThreads;
     private List<Integer> datasetLoadGroupSize;
     private int numberOfSamplesPerRun;
+    private int averageDataSetSize;
+
+
 
     public List<Integer> getNumberOfThreads() {
         return numberOfThreads;
@@ -41,6 +44,14 @@ public class DataCollectionRun {
 
     public void setStrategy(String strategy) {
         this.strategy = strategy;
+    }
+
+    public int getAverageDataSetSize() {
+        return averageDataSetSize;
+    }
+
+    public void setAverageDataSetSize(int averageDataSetSize) {
+        this.averageDataSetSize = averageDataSetSize;
     }
 
     @Override

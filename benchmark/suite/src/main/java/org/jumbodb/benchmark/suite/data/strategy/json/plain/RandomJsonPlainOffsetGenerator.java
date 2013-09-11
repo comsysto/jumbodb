@@ -1,14 +1,13 @@
 package org.jumbodb.benchmark.suite.data.strategy.json.plain;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.jumbodb.benchmark.suite.offsets.FileOffset;
 import org.jumbodb.benchmark.suite.offsets.OffsetGenerator;
 import org.jumbodb.benchmark.suite.result.BenchmarkJob;
+import org.jumbodb.common.util.file.DirectoryUtil;
 import org.jumbodb.data.common.meta.ActiveProperties;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.List;
 public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
 
     private static final String ACTIVE_PROPERTIES_FILE = "active.properties";
-    private static final String DELIVERY_VERSION_KEY = "deliveryVersion";
 
     private String inputFolder;
     private String collectionName;
@@ -34,7 +32,6 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
         this.chunkKey = benchmarkJob.getChunkKey();
         this.samplesPerRun = benchmarkJob.getNumberOfSamplesPerRun();
     }
-
 
     @Override
     public List<FileOffset> getFileOffsets() throws IOException {
@@ -63,18 +60,17 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
     }
 
     private String readDeliveryVersion(String inputFolder, String collectionName, String chunkKey) throws IOException {
-        File activePropertiesFile = concatenatePaths(inputFolder, collectionName, chunkKey,
+        File activePropertiesFile = DirectoryUtil.concatenatePaths(inputFolder, collectionName, chunkKey,
                 ACTIVE_PROPERTIES_FILE);
-
         return ActiveProperties.getActiveDeliveryVersion(activePropertiesFile);
     }
 
     private File[] listDataFiles(File dataFilesPath) {
-        return dataFilesPath.listFiles(new DataFileFilter());
+        return DirectoryUtil.listDataFiles(dataFilesPath);
     }
 
     private File getDataFilesPath(String deliveryVersion) {
-        return concatenatePaths(inputFolder, collectionName, chunkKey, deliveryVersion);
+        return DirectoryUtil.concatenatePaths(inputFolder, collectionName, chunkKey, deliveryVersion);
     }
 
     private int calculateSampleCount(int dataFileCount, int samplesPerRun, boolean lastFile) {
@@ -84,27 +80,5 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
         }
         int modulo = samplesPerRun % dataFileCount;
         return modulo == 0 ? defaultSamplesPerFile : modulo;
-    }
-
-    private File concatenatePaths(String ... pathFragments) {
-        if (ArrayUtils.isEmpty(pathFragments)) {
-            return null;
-        }
-        File result = new File(pathFragments[0]);
-        if (ArrayUtils.getLength(pathFragments) == 1){
-            return result;
-        }
-        for (int i = 1; i < pathFragments.length; i++) {
-            result = new File(result, pathFragments[i]);
-        }
-        return result;
-    }
-}
-
-
-class DataFileFilter implements FilenameFilter {
-    @Override
-    public boolean accept(File dir, String name) {
-        return !(name.endsWith(".properties") || name.contains("_SUCCESS") || name.endsWith(".snappy"));
     }
 }

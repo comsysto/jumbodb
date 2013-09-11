@@ -1,5 +1,4 @@
 package org.jumbodb.benchmark.suite.data.strategy.json.plain
-
 import org.apache.commons.lang.RandomStringUtils
 import org.jumbodb.benchmark.suite.result.BenchmarkJob
 import spock.lang.Shared
@@ -64,16 +63,6 @@ class RandomJsonPlainOffsetGeneratorSpec extends Specification{
         "1231-4325-12" == generator.readDeliveryVersion(inputDir.absolutePath, "mobile_phones", "march_delivery")
     }
 
-    def "list data files"(){
-        setup:
-        def generator = new RandomJsonPlainOffsetGenerator()
-        expect:
-        def dataFilesFound = generator.listDataFiles(dataFilesDir)
-        2 == dataFilesFound.length
-        "part-r-00000" == dataFilesFound[0].name
-        "part-r-12314" == dataFilesFound[1].name
-    }
-
     def "build data files path"(){
         setup:
         def benchmarkJob = new BenchmarkJob(new File(inputFolder), null, null, collectionName, chunkKey, -1, -1, -1, -1)
@@ -103,36 +92,5 @@ class RandomJsonPlainOffsetGeneratorSpec extends Specification{
         100         | 100000    | true      | 1000
         99          | 100000    | false     | 1010
         99          | 100000    | true      | 10
-    }
-
-    @Unroll("concatenation results in #expectedResult")
-    def "concatenate file paths"(){
-        setup:
-        def generator = new RandomJsonPlainOffsetGenerator()
-        expect:
-        expectedResult == generator.concatenatePaths(folders).absolutePath
-        where:
-        folders                             | expectedResult
-        ""                                  | new File("").absolutePath
-        "foo"                               | "${new File("").absolutePath}/foo"
-        "/var/tmp"                          | "/var/tmp"
-        ["/var", "tmp", "bla"] as String[]  | "/var/tmp/bla"
-        ["foo", "bar"] as String []         | "${new File("").absolutePath}/foo/bar"
-    }
-
-    @Unroll("#message #filename as data file")
-    def "filter data files"(){
-        setup:
-        def dataFileFilter = new DataFileFilter()
-        expect:
-        accept == dataFileFilter.accept(null, filename)
-        where:
-        filename                        | accept    | message
-        "part-r-00000"                  | true      | "accept"
-        "part-r-12314"                  | true      | "accept"
-        "delivery.properties"           | false     | "not accept"
-        "_SUCCESS"                      | false     | "not accept"
-        "_SUCCESS.chunks.snappy"        | false     | "not accept"
-        "part-r-00000.chunks.snappy"    | false     | "not accept"
     }
 }

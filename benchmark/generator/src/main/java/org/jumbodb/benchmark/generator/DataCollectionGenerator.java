@@ -4,8 +4,10 @@ package org.jumbodb.benchmark.generator;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.jumbodb.common.util.file.DirectoryUtil;
+import org.jumbodb.data.common.meta.ActiveProperties;
 
-import java.io.*;
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -20,6 +22,7 @@ public abstract class DataCollectionGenerator {
     private static final String JSON_DOC_SUFFIX = "\"}";
     private static final int NR_OF_BUFFERED_JSON_DOCS = 10000;
     private static final String DESCRIPTION = "Benchmark delivery";
+    private static final String ACTIVE_PROPERTIES_FILE_NAME = "active.properties";
     public static final String DEFAULT_CHUNK_NAME = "benchmark_delivery";
 
     private final String outputFolder;
@@ -42,15 +45,18 @@ public abstract class DataCollectionGenerator {
     }
 
     public void generateData() {
-        String dataFolder = getDataFolder(outputFolder, collectionName);
-        createDataFolder(dataFolder);
-        createDeliveryProperties(dataFolder, deliveryVersion, DESCRIPTION);
+        String chunkKeyDir = getChunkKeyDir(outputFolder, collectionName);
+        String dataFileDir = getDataDir(outputFolder, collectionName);
+
+        createDataFolder(dataFileDir);
+        createDeliveryProperties(dataFileDir, deliveryVersion, DESCRIPTION);
+        createActiveProperties(chunkKeyDir, deliveryVersion);
 
         final byte [][] randomizedJSONDocs = generateRandomizedJSONDocs(dataSetSizeInChars);
         List<Callable<Void>> generationRunners = Lists.newArrayList();
 
         for (int fileNo = 0; fileNo < numberOfFiles; fileNo++) {
-            String fileName = getDataFileName(dataFolder, fileNo);
+            String fileName = getDataFileName(dataFileDir, fileNo);
             generationRunners.add(createDataGenerationRunner(fileName, dataSetsPerFile, randomizedJSONDocs));
         }
         try {
@@ -60,7 +66,6 @@ public abstract class DataCollectionGenerator {
             throw new RuntimeException(e);
         }
     }
-
 
     private int nrOfThreadsToUse(){
         return parallelThreads >= 1 ? parallelThreads : Runtime.getRuntime().availableProcessors();
@@ -72,10 +77,13 @@ public abstract class DataCollectionGenerator {
         }
     }
 
-    private String getDataFolder(String outputFolder, String collectionName) {
-        String collectionPath = FilenameUtils.concat(outputFolder, collectionName);
-        String chunkPath = FilenameUtils.concat(collectionPath, DEFAULT_CHUNK_NAME);
-        return FilenameUtils.concat(chunkPath, deliveryVersion);
+    private String getChunkKeyDir(String outputFolder, String collectionName) {
+        return DirectoryUtil.concatenatePaths(outputFolder, collectionName, DEFAULT_CHUNK_NAME).getAbsolutePath();
+    }
+
+    private String getDataDir(String outputFolder, String collectionName) {
+        return DirectoryUtil.concatenatePaths(outputFolder, collectionName, DEFAULT_CHUNK_NAME, deliveryVersion)
+                .getAbsolutePath();
     }
 
     private String getDataFileName(String dataFileFolder, int fileNr) {
@@ -108,6 +116,12 @@ public abstract class DataCollectionGenerator {
     private int calculateRandomStringLength(int dataSetSizeInChars) {
         return dataSetSizeInChars - (JSON_DOC_SUFFIX.length() + JSON_DOC_PREFIX.length());
     }
+
+    private void createActiveProperties(String chunkKeyDir, String deliveryVersion) {
+        File activePropertiesFile = DirectoryUtil.concatenatePaths(chunkKeyDir, ACTIVE_PROPERTIES_FILE_NAME);
+        ActiveProperties.writeActiveFile(activePropertiesFile, deliveryVersion);
+    }
+
 
     public abstract Callable<Void> createDataGenerationRunner(String fileName, int dataSetsPerFile, byte[][] randomizedJSONDocs);
 

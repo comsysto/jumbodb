@@ -8,7 +8,7 @@ import spock.lang.Unroll
 /**
  * @author Ulf Gitschthaler
  */
-class JsonPlainDataStrategySpec extends Specification{
+class RandomJsonPlainOffsetGeneratorSpec extends Specification{
 
     @Shared
     def inputDir

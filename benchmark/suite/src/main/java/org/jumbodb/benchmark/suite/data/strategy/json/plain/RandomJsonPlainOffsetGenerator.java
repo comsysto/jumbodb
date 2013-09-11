@@ -5,14 +5,13 @@ import org.apache.commons.lang.math.RandomUtils;
 import org.jumbodb.benchmark.suite.offsets.FileOffset;
 import org.jumbodb.benchmark.suite.offsets.OffsetGenerator;
 import org.jumbodb.benchmark.suite.result.BenchmarkJob;
+import org.jumbodb.data.common.meta.ActiveProperties;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Carsten Hufe
@@ -67,9 +66,7 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
         File activePropertiesFile = concatenatePaths(inputFolder, collectionName, chunkKey,
                 ACTIVE_PROPERTIES_FILE);
 
-        Properties props = new Properties();
-        props.load(new FileInputStream(activePropertiesFile));
-        return (String) props.get(DELIVERY_VERSION_KEY);
+        return ActiveProperties.getActiveDeliveryVersion(activePropertiesFile);
     }
 
     private File[] listDataFiles(File dataFilesPath) {

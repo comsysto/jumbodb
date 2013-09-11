@@ -32,6 +32,8 @@ dependencies {
     compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
 //    compile 'net.minidev:json-smart:2.0-RC2'
     compile project(':commons:util')
+    compile project(':commons:data')
+
 
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.0"

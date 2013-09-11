@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * ULF won't work for one file only probably
  * @author Carsten Hufe
  */
 public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
@@ -27,7 +26,6 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
     private String collectionName;
     private String chunkKey;
     private int samplesPerRun;
-    private int averageDataSetSize;
 
 
     @Override
@@ -36,9 +34,7 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
         this.collectionName = benchmarkJob.getCollectionName();
         this.chunkKey = benchmarkJob.getChunkKey();
         this.samplesPerRun = benchmarkJob.getNumberOfSamplesPerRun();
-        this.averageDataSetSize = benchmarkJob.getAverageDataSetSize();
     }
-
 
 
     @Override
@@ -60,7 +56,6 @@ public class RandomJsonPlainOffsetGenerator implements OffsetGenerator {
             boolean lastFile = (i + 1) == dataFiles.length;
 
             for (int n=0; n < (lastFile ? lastSampleCount : defaultSampleCount); n++) {
-                // ULF have a look on this again
                 long offset = (long)(RandomUtils.nextDouble() * dataFile.length());
                 result.add(new FileOffset(dataFile, offset));
             }

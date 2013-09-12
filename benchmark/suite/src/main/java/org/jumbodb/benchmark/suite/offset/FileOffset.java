@@ -1,4 +1,4 @@
-package org.jumbodb.benchmark.suite.offsets;
+package org.jumbodb.benchmark.suite.offset;
 
 import java.io.File;
 

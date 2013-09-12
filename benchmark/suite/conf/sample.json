@@ -6,7 +6,7 @@
         {
             "collectionName": "first_collection",
             "chunkKey": "benchmark_delivery",
-            "offsetGenerator": "org.jumbodb.benchmark.suite.data.strategy.json.plain.RandomJsonPlainOffsetGenerator",
+            "offsetGenerator": "org.jumbodb.benchmark.suite.offset.generator.RandomOffsetGenerator",
             "description": "do somthing with it",
             "runs": [
                 {

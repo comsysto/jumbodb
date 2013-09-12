@@ -35,9 +35,10 @@ dependencies {
     compile project(':commons:data')
 
 
+    groovy "org.codehaus.groovy:groovy-all:2.0.8"
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.0"
-    groovy "org.codehaus.groovy:groovy-all:2.0.8"
+    testCompile 'cglib:cglib:2.2.2'
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
 }
 

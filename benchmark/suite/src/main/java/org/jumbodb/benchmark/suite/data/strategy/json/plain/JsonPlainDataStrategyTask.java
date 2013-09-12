@@ -1,7 +1,5 @@
 package org.jumbodb.benchmark.suite.data.strategy.json.plain;
 
-import com.google.common.collect.Lists;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Set;
@@ -22,15 +20,12 @@ public class JsonPlainDataStrategyTask implements Callable<JsonPlainDataStrategy
     @Override
     public JsonPlainDataStrategyResult call() throws Exception {
         FileInputStream fileInputStream = new FileInputStream(file);
-        Lists.newArrayList();
 
         for (Long offset : offsets) {
 
 
 
         }
-
-
         // TODO
         return null;
     }

@@ -3,8 +3,8 @@ package org.jumbodb.benchmark.suite.result;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.benchmark.suite.data.strategy.DataStrategies;
 import org.jumbodb.benchmark.suite.data.strategy.DataStrategy;
-import org.jumbodb.benchmark.suite.offsets.FileOffset;
-import org.jumbodb.benchmark.suite.offsets.OffsetGenerator;
+import org.jumbodb.benchmark.suite.offset.FileOffset;
+import org.jumbodb.benchmark.suite.offset.generator.OffsetGenerator;
 
 import java.io.File;
 import java.util.List;

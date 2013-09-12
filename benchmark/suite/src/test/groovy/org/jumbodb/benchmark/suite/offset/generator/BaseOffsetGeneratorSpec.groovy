@@ -1,5 +1,7 @@
-package org.jumbodb.benchmark.suite.data.strategy.json.plain
+package org.jumbodb.benchmark.suite.offset.generator
+
 import org.apache.commons.lang.RandomStringUtils
+import org.jumbodb.benchmark.suite.offset.FileOffset
 import org.jumbodb.benchmark.suite.result.BenchmarkJob
 import spock.lang.Shared
 import spock.lang.Specification
@@ -7,7 +9,7 @@ import spock.lang.Unroll
 /**
  * @author Ulf Gitschthaler
  */
-class RandomJsonPlainOffsetGeneratorSpec extends Specification{
+class BaseOffsetGeneratorSpec extends Specification {
 
     @Shared
     def inputDir
@@ -43,22 +45,20 @@ class RandomJsonPlainOffsetGeneratorSpec extends Specification{
         inputDir.deleteDir()
     }
 
-
     def "generate file offsets"(){
         setup:
         def benchmarkJob = new BenchmarkJob(inputDir, null, null, "mobile_phones", "march_delivery", -1, -1, 100, -1)
-        def generator = new RandomJsonPlainOffsetGenerator()
+        def generator = new FakeGenerator()
         generator.configure(benchmarkJob)
-        expect:
-        def fileOffsets = generator.getFileOffsets()
-        100 == fileOffsets.size()
-        50 == fileOffsets.findAll{f -> f.file.name.equals("part-r-12314")}.size()
-        50 == fileOffsets.findAll{f -> f.file.name.equals("part-r-00000")}.size()
+        when:
+        generator.getFileOffsets()
+        then:
+        thrown(UnsupportedOperationException.class)
     }
 
     def "read delivery version from properties file"(){
         setup:
-        def generator = new RandomJsonPlainOffsetGenerator()
+        def generator = new FakeGenerator()
         expect:
         "1231-4325-12" == generator.readDeliveryVersion(inputDir.absolutePath, "mobile_phones", "march_delivery")
     }
@@ -66,7 +66,7 @@ class RandomJsonPlainOffsetGeneratorSpec extends Specification{
     def "build data files path"(){
         setup:
         def benchmarkJob = new BenchmarkJob(new File(inputFolder), null, null, collectionName, chunkKey, -1, -1, -1, -1)
-        def generator = new RandomJsonPlainOffsetGenerator()
+        def generator = new FakeGenerator()
         generator.configure(benchmarkJob)
         when:
         def dataFilesPath = generator.getDataFilesPath(deliveryVersion)
@@ -83,7 +83,7 @@ class RandomJsonPlainOffsetGeneratorSpec extends Specification{
     @Unroll("sample calculation results in #expectedSamplesPerFile samples")
     def "calculate samples count"(){
         setup:
-        def generator = new RandomJsonPlainOffsetGenerator()
+        def generator = new FakeGenerator()
         expect:
         expectedSamplesPerFile == generator.calculateSampleCount(nrDataFiles, nrSamples, lastfile)
         where:
@@ -92,5 +92,12 @@ class RandomJsonPlainOffsetGeneratorSpec extends Specification{
         100         | 100000    | true      | 1000
         99          | 100000    | false     | 1010
         99          | 100000    | true      | 10
+    }
+
+    private static class FakeGenerator extends BaseOffsetGenerator {
+        @Override
+        List<FileOffset> generateFileOffsets(File[] dataFiles, int defaultSampleCount, int lastSampleCount) {
+            throw new UnsupportedOperationException("Don't use me!");
+        }
     }
 }

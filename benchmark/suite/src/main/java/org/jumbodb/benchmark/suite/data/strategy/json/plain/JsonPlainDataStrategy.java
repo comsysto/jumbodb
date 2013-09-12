@@ -2,7 +2,7 @@ package org.jumbodb.benchmark.suite.data.strategy.json.plain;
 
 import com.google.common.collect.HashMultimap;
 import org.jumbodb.benchmark.suite.data.strategy.DataStrategy;
-import org.jumbodb.benchmark.suite.offsets.FileOffset;
+import org.jumbodb.benchmark.suite.offset.FileOffset;
 import org.jumbodb.benchmark.suite.result.BenchmarkJob;
 import org.jumbodb.benchmark.suite.result.BenchmarkJobResult;
 

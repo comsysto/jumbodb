@@ -6,7 +6,7 @@ import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.benchmark.suite.config.BenchmarkSuiteConfig;
 import org.jumbodb.benchmark.suite.config.DataCollection;
 import org.jumbodb.benchmark.suite.config.DataCollectionRun;
-import org.jumbodb.benchmark.suite.offsets.OffsetGenerator;
+import org.jumbodb.benchmark.suite.offset.generator.OffsetGenerator;
 import org.jumbodb.benchmark.suite.result.BenchmarkJob;
 import org.jumbodb.benchmark.suite.result.BenchmarkJobResult;
 

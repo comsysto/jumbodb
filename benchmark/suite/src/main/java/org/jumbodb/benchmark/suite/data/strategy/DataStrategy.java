@@ -1,6 +1,6 @@
 package org.jumbodb.benchmark.suite.data.strategy;
 
-import org.jumbodb.benchmark.suite.offsets.FileOffset;
+import org.jumbodb.benchmark.suite.offset.FileOffset;
 import org.jumbodb.benchmark.suite.result.BenchmarkJob;
 import org.jumbodb.benchmark.suite.result.BenchmarkJobResult;
 

@@ -100,7 +100,7 @@ public class RandomOffsetGenerator extends BaseOffsetGenerator {
         return samplesPerFile > 0 ? samplesPerFile + 1 : 0;
     }
 
-    // TODO snappy
+    // TODO UlF CARSTEN snappy
     private long readFileSize(File dataFile){
         return dataFile.length();
     }

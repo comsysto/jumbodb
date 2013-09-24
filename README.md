@@ -13,8 +13,10 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 Already using Apache Hadoop for batch data deliveries? Need
 the efficient store for your analytical application?
 
-jumboDB allows you to store, index and query large amounts of
-data using Apache Hadoop core features
+jumboDB allows you to store, index and query huge amounts of
+data.
+
+jumboDB is the right store to provide easy and cheap access to Hadoop outputs.
 
 ## Big Data for the masses!
 
@@ -44,7 +46,7 @@ Optimized querying even for large result sets through
 multithreading and efficient data streaming (e.g. 100.000
 JSON documents returned in less than a second)
 
-7. Hadoop Connector and Java Driver available
+7. Hadoop Connector, Java Driver and R connector are available
 
 ## Setup JumboDB
 

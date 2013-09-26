@@ -8,15 +8,24 @@ Quick Installation: https://github.com/comsysto/jumbodb/wiki/Quick-installation-
 
 Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/database/
 
-## Data Store for low-latency Big Data Apps
+## What is it good for? 
 
-Already using Apache Hadoop for batch data deliveries? Need
-the efficient store for your analytical application?
+- data store for low-latency Big Data apps
+- allows you to store, index and query huge amounts of data
+- provide easy and cheap access to your Hadoop output (e.g. aggregated statistics)
+- data versionizing
+- make your hadoop outputs accessible to every application in a very short time (Billions of datasets)
+- only supports immutable data, you cannot insert and update single datasets
 
-jumboDB allows you to store, index and query huge amounts of
-data.
+## Core ideas of jumboDB
 
-jumboDB is the right store to provide easy and cheap access to Hadoop outputs.
+- process and index the data in a parallized environment like Hadoop (you can also run it locally)
+- all data is immutable, because data usally gets replaced or extended with further data deliveries from Hadoop
+- immutable data allows a good parallization of data search
+- preorganized and sorted data is better searchable, faster results
+- sorted data allows grouped read actions
+- compression helps to increase disk speed
+- don't keep all indexes in memory, because the data is to big!
 
 ## Big Data for the masses!
 
@@ -39,7 +48,7 @@ Schema flexibility for rapid application development
 
 5. Power and scalability of Apache Hadoop
 For batch processing, aggregation and indexing of your
-data.(e.g. writes up to 500.000 JSON documents per second)
+data.(e.g. writes up to 500.000 JSON documents per second into the data store)
 
 6. Low read latency for end-user apps
 Optimized querying even for large result sets through

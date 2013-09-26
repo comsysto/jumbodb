@@ -21,17 +21,6 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 - Works well on AWS infrastructure even provisionized EBS volumes
 - [Data delivery management and versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
 
-## Core ideas of jumboDB
-
-- Process and index the data in a parallelized environment like Hadoop (you can also run it locally)
-- All data is immutable, because data usally gets replaced or extended with further data deliveries from Hadoop
-- Immutable data allows an easy parallelization in data search
-- Preorganized and sorted data is better searchable and results in faster responses
-- Sorted data allows grouped read actions
-- Sort your data by the major use case to speed up queries
-- Compression helps to increase disk speed
-- Don't keep all indexes in memory, because the data is too big!
-
 ## Features
 
 - Indexing your JSON data 
@@ -47,6 +36,17 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 - Fast rollbacks
 - Java Driver and R Connector 
 - [Data delivery management and versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
+
+## Core ideas of jumboDB
+
+- Process and index the data in a parallelized environment like Hadoop (you can also run it locally)
+- All data is immutable, because data usally gets replaced or extended with further data deliveries from Hadoop
+- Immutable data allows an easy parallelization in data search
+- Preorganized and sorted data is better searchable and results in faster responses
+- Sorted data allows grouped read actions
+- Sort your data by the major use case to speed up queries
+- Compression helps to increase disk speed
+- Don't keep all indexes in memory, because the data is too big!
 
 ## Big Data for the masses!
 

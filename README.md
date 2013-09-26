@@ -10,22 +10,23 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 
 ## What is it good for? 
 
-- data store for low-latency Big Data apps
-- allows you to store, index and query huge amounts of data
-- provide easy and cheap access to your Hadoop output (e.g. aggregated statistics)
-- data versionizing, delivery management
+- as data store for low-latency 'Big Data' apps
+- store, index and query huge amounts of data
+- easy and cheap access to your Hadoop output (e.g. aggregated statistics)
+- data versionizing
+- data delivery management
 - make your Hadoop outputs accessible to every application in a very short time (Billions of datasets)
-- only supports immutable data, you cannot insert and update single datasets
+- only immutable data is supported, you cannot insert and update single datasets
 
 ## Core ideas of jumboDB
 
-- process and index the data in a parallized environment like Hadoop (you can also run it locally)
+- process and index the data in a parallelized environment like Hadoop (you can also run it locally)
 - all data is immutable, because data usally gets replaced or extended with further data deliveries from Hadoop
-- immutable data allows a good parallization of data search
-- preorganized and sorted data is better searchable, faster results
+- immutable data allows a easy parallelization in data search
+- preorganized and sorted data is better searchable and causes faster results
 - sorted data allows grouped read actions
 - compression helps to increase disk speed
-- don't keep all indexes in memory, because the data is to big!
+- don't keep all indexes in memory, because the data is too big!
 
 ## Big Data for the masses!
 

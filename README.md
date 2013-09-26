@@ -14,8 +14,8 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 - Fast analysis over 'Big Data' with low budget
 - Very fast imports (the limitation is the ethernet interface or disk)
 - Store, index and query huge amounts of data
-- Easy and cheap access to your Hadoop output (e.g. aggregated statistics)
-- Make your Hadoop outputs accessible to every application in a very short time (billions of datasets)
+- Make your Hadoop outputs accessible to every application (e.g. aggregated statistics)
+- Providing billions of datasets in a very short time
 - Only immutable data is supported, you cannot insert and update single datasets
 - [Data versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
 - [Data delivery management](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)

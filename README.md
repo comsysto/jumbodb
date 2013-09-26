@@ -43,6 +43,7 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 - High compression
 - No downtimes on import (data is available until next import is finished)
 - Fast rollbacks
+- Java Driver and R Connector 
 - [Data delivery management and versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
 
 ## Big Data for the masses!

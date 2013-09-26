@@ -18,7 +18,7 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 - Providing billions of datasets in a very short time
 - Storing terabytes of data on a single instance without any performance impact!
 - Only immutable data is supported, you cannot insert and update single datasets
-- Works well on AWS infrastructure even provisionized EBS volumes
+- Works well on AWS infrastructure even on provisionized EBS volumes
 - [Data delivery management and versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
 
 ## Features

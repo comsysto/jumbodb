@@ -16,6 +16,7 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 - Store, index and query huge amounts of data
 - Make your Hadoop outputs accessible to every application (e.g. aggregated statistics)
 - Providing billions of datasets in a very short time
+- Storing terabytes of data on a single instance without any performance impact!
 - Only immutable data is supported, you cannot insert and update single datasets
 - [Data delivery management and versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
 

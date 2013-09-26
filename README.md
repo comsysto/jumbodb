@@ -13,8 +13,8 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 - data store for low-latency Big Data apps
 - allows you to store, index and query huge amounts of data
 - provide easy and cheap access to your Hadoop output (e.g. aggregated statistics)
-- data versionizing
-- make your hadoop outputs accessible to every application in a very short time (Billions of datasets)
+- data versionizing, delivery management
+- make your Hadoop outputs accessible to every application in a very short time (Billions of datasets)
 - only supports immutable data, you cannot insert and update single datasets
 
 ## Core ideas of jumboDB

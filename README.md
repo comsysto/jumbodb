@@ -24,7 +24,7 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 
 - Process and index the data in a parallelized environment like Hadoop (you can also run it locally)
 - All data is immutable, because data usally gets replaced or extended with further data deliveries from Hadoop
-- Immutable data allows a easy parallelization in data search
+- Immutable data allows an easy parallelization in data search
 - Preorganized and sorted data is better searchable and results in faster responses
 - Sorted data allows grouped read actions
 - Sort your data by the major use case to speed up queries

@@ -17,8 +17,7 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 - Make your Hadoop outputs accessible to every application (e.g. aggregated statistics)
 - Providing billions of datasets in a very short time
 - Only immutable data is supported, you cannot insert and update single datasets
-- [Data versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
-- [Data delivery management](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
+- [Data delivery management and versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
 
 ## Core ideas of jumboDB
 

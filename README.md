@@ -10,23 +10,41 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 
 ## What is it good for? 
 
-- as data store for low-latency 'Big Data' apps
-- store, index and query huge amounts of data
-- easy and cheap access to your Hadoop output (e.g. aggregated statistics)
-- data versionizing
-- data delivery management
-- make your Hadoop outputs accessible to every application in a very short time (Billions of datasets)
-- only immutable data is supported, you cannot insert and update single datasets
+- As data store for low-latency 'Big Data' apps
+- Fast analysis over 'Big Data' with low budget
+- Very fast imports (the limitation is the ethernet interface or disk)
+- Store, index and query huge amounts of data
+- Easy and cheap access to your Hadoop output (e.g. aggregated statistics)
+- Make your Hadoop outputs accessible to every application in a very short time (billions of datasets)
+- Only immutable data is supported, you cannot insert and update single datasets
+- [Data versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
+- [Data delivery management](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
 
 ## Core ideas of jumboDB
 
-- process and index the data in a parallelized environment like Hadoop (you can also run it locally)
-- all data is immutable, because data usally gets replaced or extended with further data deliveries from Hadoop
-- immutable data allows a easy parallelization in data search
-- preorganized and sorted data is better searchable and causes faster results
-- sorted data allows grouped read actions
-- compression helps to increase disk speed
-- don't keep all indexes in memory, because the data is too big!
+- Process and index the data in a parallelized environment like Hadoop (you can also run it locally)
+- All data is immutable, because data usally gets replaced or extended with further data deliveries from Hadoop
+- Immutable data allows a easy parallelization in data search
+- Preorganized and sorted data is better searchable and results in faster responses
+- Sorted data allows grouped read actions
+- Sort your data by the major use case to speed up queries
+- Compression helps to increase disk speed
+- Don't keep all indexes in memory, because the data is too big!
+
+## Features
+
+- Indexing your JSON data 
+- Querying over indexed and non-indexed data
+- Geospatial indexes
+- Range queries (between, greather than, less than and so on)
+- Data replication (to another database)
+- Sharding and replication (planned, not yet implemented)
+- Fast imports
+- Multithreaded search
+- High compression
+- No downtimes on import (data is available until next import is finished)
+- Fast rollbacks
+- [Data delivery management and versionizing](https://github.com/comsysto/jumbodb/wiki/Data-Delivery-Concept)
 
 ## Big Data for the masses!
 

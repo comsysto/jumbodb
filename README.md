@@ -12,7 +12,6 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 
 - As data store for low-latency 'Big Data' apps
 - Fast analysis over 'Big Data' with low budget
-- Very fast imports (the limitation is the ethernet interface or disk)
 - Store, index and query huge amounts of data
 - Make your Hadoop outputs accessible to every application (e.g. aggregated statistics)
 - Providing billions of datasets in a very short time
@@ -29,7 +28,7 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 - Range queries (between, greather than, less than and so on)
 - Data replication (to another database)
 - Sharding and replication (planned, not yet implemented)
-- Fast imports
+- Very fast imports (the limitation is the ethernet interface or disk)
 - Multithreaded search
 - High compression
 - No downtimes on import (data is available until next import is finished)

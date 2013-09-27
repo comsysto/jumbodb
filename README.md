@@ -8,6 +8,8 @@ Quick Installation: https://github.com/comsysto/jumbodb/wiki/Quick-installation-
 
 Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/database/
 
+Twitter: @devproof http://twitter.com/devproof
+
 ## What is it good for? 
 
 - As data store for low-latency 'Big Data' apps

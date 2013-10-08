@@ -14,8 +14,11 @@ public class HashCode32RangePartitioner extends Partitioner<IntWritable, FileOff
     public int getPartition(IntWritable intWritable, FileOffsetWritable writables, int i) {
         long maxHash = ((long)Integer.MAX_VALUE) * 2;
         long section = (maxHash / ((long)i));
-        long hash = (long)intWritable.get() + Integer.MAX_VALUE;
+        long hash = (long)intWritable.get() + (long)Integer.MAX_VALUE;
         int partition = (int) (hash / section);
+        if(i == partition) {
+            partition--;
+        }
         return partition;
     }
 }

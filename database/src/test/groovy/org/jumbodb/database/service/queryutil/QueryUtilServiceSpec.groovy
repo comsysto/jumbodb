@@ -18,7 +18,7 @@ class QueryUtilServiceSpec extends Specification {
         { "indexQuery": [], "jsonQuery": [], "limit": 10}
         """
         when:
-        def queryResult = queryUtilService.findDocumentsByQuery("testCollection", query)
+        def queryResult = queryUtilService.findDocumentsByQuery("testCollection", query, 20)
         then:
         queryResult.getMessage() == null
         queryResult.getResults()[0] == [sample: "result", anumber: 4]
@@ -39,7 +39,7 @@ class QueryUtilServiceSpec extends Specification {
         { "indexQuery": [], "jsonQuery": [], "limit": 10}
         """
         when:
-        def queryResult = queryUtilService.findDocumentsByQuery("testCollection", query)
+        def queryResult = queryUtilService.findDocumentsByQuery("testCollection", query, 20)
         then:
         queryResult.getResults() == null
         queryResult.getMessage() == "test exception"

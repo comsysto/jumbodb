@@ -20,8 +20,8 @@ subprojects {
     group = 'org.jumbodb'
     version = '0.0.16-SNAPSHOT'
 
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
 
     repositories {
         mavenCentral()
@@ -52,5 +52,5 @@ idea {
 // generate gradle bootstrapping
 // run gradle createWrapper
 task createWrapper(type: Wrapper) {
-  gradleVersion = '1.7'
+  gradleVersion = '1.8'
 }

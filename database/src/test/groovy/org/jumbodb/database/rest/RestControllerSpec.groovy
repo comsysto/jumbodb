@@ -14,18 +14,17 @@ import spock.lang.Specification
  * @author Carsten Hufe
  */
 class RestControllerSpec extends Specification {
-    def a() {
-        def controller = new RestController()
-        def statusServiceMock = Mock(StatusService)
-        def storageManagementMock = Mock(StorageManagement)
-        def exportDeliveryServiceMock = Mock(ExportDeliveryService)
-        def queryUtilServiceMock = Mock(QueryUtilService)
-        controller.setExportDeliveryService(exportDeliveryServiceMock)
-        controller.setStatusService(statusServiceMock)
-        controller.setStorageManagement(storageManagementMock)
-        controller.setQueryUtilService(queryUtilServiceMock)
-
-    }
+//    def a() {
+//        def controller = new RestController()
+//        def statusServiceMock = Mock(StatusService)
+//        def storageManagementMock = Mock(StorageManagement)
+//        def exportDeliveryServiceMock = Mock(ExportDeliveryService)
+//        def queryUtilServiceMock = Mock(QueryUtilService)
+//        controller.setExportDeliveryService(exportDeliveryServiceMock)
+//        controller.setStatusService(statusServiceMock)
+//        controller.setStorageManagement(storageManagementMock)
+//        controller.setQueryUtilService(queryUtilServiceMock)
+//    }
 
 
     def "getStatus"() {
@@ -85,7 +84,7 @@ class RestControllerSpec extends Specification {
         when:
         controller.query("collection", "my_query") == returnValueMock
         then:
-        1 * queryUtilServiceMock.findDocumentsByQuery("collection", "my_query") >> returnValueMock
+        1 * queryUtilServiceMock.findDocumentsByQuery("collection", "my_query", -1) >> returnValueMock
     }
 
     def "activateChunkedVersionForAllCollections"() {

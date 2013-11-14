@@ -72,7 +72,13 @@ public class RestController {
     @RequestMapping(value = "/query/{collection}/", method = RequestMethod.POST)
     @ResponseBody
     public QueryResult query(@PathVariable String collection, @RequestBody String query) {
-        return queryUtilService.findDocumentsByQuery(collection, query);
+        return queryUtilService.findDocumentsByQuery(collection, query, -1);
+    }
+
+    @RequestMapping(value = "/query/{collection}/defaultLimit", method = RequestMethod.POST)
+    @ResponseBody
+    public QueryResult queryWithDefault(@PathVariable String collection, @RequestBody String query) {
+        return queryUtilService.findDocumentsByQuery(collection, query, 20);
     }
 
     @RequestMapping(value = "/query/{collection}/stream", method = RequestMethod.POST)

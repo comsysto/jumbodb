@@ -133,7 +133,7 @@ function BrowseCtrl($scope, $http) {
     }
 
     $scope.search = function(collection, query) {
-        $http.post('jumbodb/rest/query/' + collection + "/", query).success(function(data) {
+        $http.post('jumbodb/rest/query/' + collection + "/defaultLimit", query).success(function(data) {
             $scope.results = data;
             buildMessage(data);
         });

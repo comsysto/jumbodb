@@ -20,14 +20,14 @@ import java.util.Map;
 public class QueryUtilService {
     private JumboSearcher jumboSearcher;
 
-    public QueryResult findDocumentsByQuery(String collection, String query) {
+    public QueryResult findDocumentsByQuery(String collection, String query, Integer defaultLimit) {
         final ObjectMapper mapper = new ObjectMapper();
         long start = System.currentTimeMillis();
         final List<Map<String, Object>> result = new LinkedList<Map<String, Object>>();
         try {
             final JumboQuery jumboQuery = mapper.readValue(query, JumboQuery.class);
-            if(jumboQuery.getLimit() < 0) {
-                jumboQuery.setLimit(20);
+            if(jumboQuery.getLimit() == -1) {
+                jumboQuery.setLimit(defaultLimit);
             }
             jumboSearcher.findResultAndWriteIntoCallback(collection, jumboQuery, new ResultCallback() {
                 @Override

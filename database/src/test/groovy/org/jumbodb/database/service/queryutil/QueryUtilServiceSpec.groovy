@@ -30,7 +30,7 @@ class QueryUtilServiceSpec extends Specification {
         }
     }
 
-    def "on IOException"() {
+    def "on RuntimeException"() {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def queryUtilService = new QueryUtilService()
@@ -42,7 +42,7 @@ class QueryUtilServiceSpec extends Specification {
         def queryResult = queryUtilService.findDocumentsByQuery("testCollection", query, 20)
         then:
         queryResult.getResults() == null
-        queryResult.getMessage() == "test exception"
+        queryResult.getMessage() == "java.io.IOException: test exception"
         1 * jumboSearcherMock.findResultAndWriteIntoCallback("testCollection", _, _) >> {  collection, jumboQuery, resultWriter ->
             throw new IOException("test exception")
         }

@@ -7,8 +7,8 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: "groovy"
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 group = 'org.jumbodb.common.geo'
 archivesBaseName = 'jumbodb-geo'
@@ -26,7 +26,7 @@ configurations {
 dependencies {
     deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
     testCompile "org.mockito:mockito-core:1.9.5"
-    groovy "org.codehaus.groovy:groovy-all:2.0.8"
+    testCompile "org.codehaus.groovy:groovy-all:2.0.8"
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
 }
 

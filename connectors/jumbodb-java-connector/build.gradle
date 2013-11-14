@@ -2,8 +2,8 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: "groovy"
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 archivesBaseName = 'jumbodb-java-connector'
 
@@ -39,7 +39,7 @@ dependencies {
     compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
     compile 'org.slf4j:slf4j-api:1.7.5'
     testCompile "org.mockito:mockito-core:1.9.5"
-    groovy "org.codehaus.groovy:groovy-all:2.0.8"
+    testCompile "org.codehaus.groovy:groovy-all:2.0.8"
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
 }
 

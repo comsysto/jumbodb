@@ -80,34 +80,34 @@ public class RestController {
     public QueryResult queryWithDefault(@PathVariable String collection, @RequestBody String query) {
         return queryUtilService.findDocumentsByQuery(collection, query, 20);
     }
-
-    @RequestMapping(value = "/query/{collection}/stream", method = RequestMethod.POST)
-    public void queryStream(@PathVariable String collection, @RequestBody String query, final HttpServletResponse response) throws IOException {
-        // TODO extract and clean up
-        final AtomicInteger counter = new AtomicInteger(0);
-        queryUtilService.findDocumentsByQuery(collection, query, new ResultCallback() {
-             @Override
-             public void writeResult(byte[] result) throws IOException {
-                synchronized (response) {
-                    String s = new String(result, "UTF-8").trim();
-                    response.getWriter().println(s);
-                    response.getWriter().flush();
-                    counter.incrementAndGet();
-                }
-             }
-
-            @Override
-            public void collect(CancelableTask cancelableTask) {
-                // TODO implement timeout handling
-            }
-
-            @Override
-             public boolean needsMore(JumboQuery jumboQuery) throws IOException {
-                 return counter.get() < jumboQuery.getLimit();
-             }
-         });
-        response.getWriter().println(":EOF");
-    }
+//
+//    @RequestMapping(value = "/query/{collection}/stream", method = RequestMethod.POST)
+//    public void queryStream(@PathVariable String collection, @RequestBody String query, final HttpServletResponse response) throws IOException {
+//        // TOD extract and clean up
+//        final AtomicInteger counter = new AtomicInteger(0);
+//        queryUtilService.findDocumentsByQuery(collection, query, new ResultCallback() {
+//             @Override
+//             public void writeResult(byte[] result) throws IOException {
+//                synchronized (response) {
+//                    String s = new String(result, "UTF-8").trim();
+//                    response.getWriter().println(s);
+//                    response.getWriter().flush();
+//                    counter.incrementAndGet();
+//                }
+//             }
+//
+//            @Override
+//            public void collect(CancelableTask cancelableTask) {
+//                // TOD implement timeout handling
+//            }
+//
+//            @Override
+//             public boolean needsMore(JumboQuery jumboQuery) throws IOException {
+//                 return counter.get() < jumboQuery.getLimit();
+//             }
+//         });
+//        response.getWriter().println(":EOF");
+//    }
 
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}", method = RequestMethod.PUT)
     @ResponseBody

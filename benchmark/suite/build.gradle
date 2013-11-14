@@ -7,8 +7,8 @@ apply plugin: 'eclipse'
 apply plugin: 'application'
 apply plugin: 'groovy'
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 group = 'org.jumbodb.benchmark.suite'
 archivesBaseName = 'jumbodb-benchmark-suite'
@@ -35,7 +35,7 @@ dependencies {
     compile project(':commons:data')
 
 
-    groovy "org.codehaus.groovy:groovy-all:2.0.8"
+    testCompile "org.codehaus.groovy:groovy-all:2.0.8"
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.0"
     testCompile 'cglib:cglib:2.2.2'

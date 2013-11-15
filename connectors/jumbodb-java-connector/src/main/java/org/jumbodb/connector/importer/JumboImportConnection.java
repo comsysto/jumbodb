@@ -82,6 +82,12 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(indexInfo.getIndexStrategy());
             dos.flush();
             callback.onCopy(snappyOutputStream);
+            // CARSTEN dis.readUTF ?
+            // CARSTEN verify MD5 sum as result of onCopy
+            // CARSTEN if not equals should throw MD5Sum file exception
+            // --> hadoop will restart
+            // CARSTEN consider synchronisation job
+            // CARSTEN write MD5 sum of compressed and uncompressed file
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -98,6 +104,12 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(dataInfo.getDataStrategy());
             dos.flush();
             callback.onCopy(snappyOutputStream);
+            // CARSTEN dis.readUTF ?
+            // CARSTEN verify MD5 sum as result of onCopy
+            // CARSTEN if not equals should throw MD5Sum file exception
+            // --> hadoop will restart
+            // CARSTEN consider synchronisation job
+            // CARSTEN write MD5 sum of compressed and uncompressed file
         } catch (IOException e) {
             throw new UnhandledException(e);
         }

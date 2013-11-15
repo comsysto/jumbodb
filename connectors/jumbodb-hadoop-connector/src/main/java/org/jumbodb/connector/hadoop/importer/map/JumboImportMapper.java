@@ -1,6 +1,7 @@
 package org.jumbodb.connector.hadoop.importer.map;
 
 import org.apache.commons.lang.UnhandledException;
+import org.apache.hadoop.io.MD5Hash;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.apache.hadoop.conf.Configuration;
@@ -56,6 +57,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         FSDataInputStream fis = null;
         JumboImportConnection jumboImportConnection = new JumboImportConnection(host, port);
         try {
+
             Path path = key.getPath();
             FileSystem fs = FileSystem.get(new URI(path.toString()), context.getConfiguration());
             fis = fs.open(path);
@@ -122,10 +124,8 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
 
         // TODO make this nicer dont need the params ... because it's in the member variables
         public void copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, long fileSize, Context context, String filename, String collection)
-                throws IOException
-        {
-            try
-            {
+                throws IOException {
+            try {
                 copyBytes(in, out, buffSize, fileSize, context, filename, collection);
             } finally {
                 if (close) {
@@ -141,7 +141,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             int bytesRead = in.read(buf);
             long currentFileBytes = 0;
             while (bytesRead >= 0) {
-                out.write(buf, 0, bytesRead);
+                out.write(buf, 0, bytesRead); // CARSTEN genau hier MD5 mitberechnen
                 if ((ps != null) && (ps.checkError())) {
                     throw new IOException("Unable to write to output stream.");
                 }
@@ -162,6 +162,8 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
                 inputSplit.setCurrentlyCopied(bytesReadAll);
                 bytesRead = in.read(buf);
             }
+
+            // CARSTEN return MD5 sum
         }
 
         public void copyBytes(InputStream in, OutputStream out, long fileSize, Context context, String filename, String collection)

@@ -58,7 +58,7 @@ public class SnappyChunksUtil {
                 }
             };
             sos = new SnappyOutputStream(bos, chunkSize);
-            IOUtils.copy(dataInputStream, sos);
+            IOUtils.copyLarge(dataInputStream, sos, 0l, fileLength);
             sos.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);

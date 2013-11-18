@@ -229,3 +229,17 @@ function ReplicationCtrl($scope, $http, $timeout) {
         });
     }
 }
+
+function QueryMonitoringCtrl($scope, $http, $timeout) {
+	$scope.test = "testing...";
+}
+
+function ImportMonitoringCtrl($scope, $http, $timeout) {
+	$scope.test = "testing...";
+}
+
+function ServerMonitoringCtrl($scope, $http, $timeout){
+	$http.get('jumbodb/rest/status').success(function(data) {
+		$scope.status = data;
+	});
+}

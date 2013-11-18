@@ -48,7 +48,7 @@ public class NotFoundDataStrategy implements DataStrategy {
     }
 
     @Override
-    public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPath) {
+    public String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPath) {
         throw new IllegalStateException("Strategy " + information.getStrategy() + " was not found!");
     }
 }

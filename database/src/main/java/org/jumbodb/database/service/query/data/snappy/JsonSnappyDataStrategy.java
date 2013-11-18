@@ -52,9 +52,9 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
 
 
     @Override
-    public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
+    public String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
         String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/" + information.getFileName();
-        SnappyChunksUtil.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), SNAPPY_DATA_CHUNK_SIZE);
+        return SnappyChunksUtil.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), SNAPPY_DATA_CHUNK_SIZE);
     }
 
     @Override

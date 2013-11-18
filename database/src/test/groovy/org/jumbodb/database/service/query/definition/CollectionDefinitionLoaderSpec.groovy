@@ -5,11 +5,12 @@ import org.jumbodb.data.common.meta.DeliveryProperties
 import org.jumbodb.data.common.meta.IndexProperties
 import org.jumbodb.database.service.importer.ImportMetaData
 import org.jumbodb.database.service.importer.ImportMetaIndex
+import spock.lang.Specification
 
 /**
  * @author Carsten Hufe
  */
-class CollectionDefinitionLoaderSpec extends spock.lang.Specification {
+class CollectionDefinitionLoaderSpec extends Specification {
     def rootPath = File.createTempFile("test", "file").getParentFile()
     def dataPath = new File(rootPath.absolutePath + "/data/")
     def indexPath = new File(rootPath.absolutePath + "/index/")
@@ -18,8 +19,10 @@ class CollectionDefinitionLoaderSpec extends spock.lang.Specification {
         def versionPath = dataPath.absolutePath + "/" + collection + "/" + chunkKey + "/" + version + "/"
         new File(versionPath).mkdirs()
         new File(versionPath + "part0001").createNewFile()
+        new File(versionPath + "part0001.sha1").createNewFile()
         new File(versionPath + "part0001.chunks.snappy").createNewFile()
         new File(versionPath + "part0002").createNewFile()
+        new File(versionPath + "part0002.sha1").createNewFile()
         new File(versionPath + "part0002.chunks.snappy").createNewFile()
         def metaData = new DeliveryProperties.DeliveryMeta(version, "Some info", new Date(), "Data imported from", "TEST_STRATEGY")
         DeliveryProperties.write(new File(versionPath + "/delivery.properties"), metaData)

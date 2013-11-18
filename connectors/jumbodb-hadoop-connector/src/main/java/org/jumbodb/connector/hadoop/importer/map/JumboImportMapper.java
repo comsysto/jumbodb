@@ -1,7 +1,7 @@
 package org.jumbodb.connector.hadoop.importer.map;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.UnhandledException;
-import org.apache.hadoop.io.MD5Hash;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.apache.hadoop.conf.Configuration;
@@ -10,14 +10,13 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.jumbodb.connector.importer.DataInfo;
-import org.jumbodb.connector.importer.IndexInfo;
-import org.jumbodb.connector.importer.JumboImportConnection;
-import org.jumbodb.connector.importer.OnCopyCallback;
+import org.jumbodb.connector.importer.*;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * User: carsten
@@ -57,21 +56,17 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         FSDataInputStream fis = null;
         JumboImportConnection jumboImportConnection = new JumboImportConnection(host, port);
         try {
-
             Path path = key.getPath();
             FileSystem fs = FileSystem.get(new URI(path.toString()), context.getConfiguration());
             fis = fs.open(path);
             long fileLength = fs.getFileStatus(path).getLen();
             if(JumboConstants.DATA_TYPE_INDEX.equals(type)) {
-//                String collection = path.getParent().getParent().getName();
                 String fileName = path.getName();
-//                String indexName = path.getParent().getName();
                 IndexInfo indexInfo = new IndexInfo(collection, indexName, fileName, fileLength, deliveryKey, deliveryVersion, indexStrategy);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
                 jumboImportConnection.importIndex(indexInfo, copyDataCallback);
             }
             else if(JumboConstants.DATA_TYPE_DATA.equals(type)) {
-//                String collection = path.getParent().getName();
                 String fileName = path.getName();
                 DataInfo dataInfo = new DataInfo(collection, fileName, fileLength, deliveryKey, deliveryVersion, dataStrategy);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
@@ -82,6 +77,9 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             context.write(new Text("Imported " + path.toString()), NullWritable.get());
         } catch (URISyntaxException e) {
             context.setStatus("ABORTED " + e.toString());
+            throw new RuntimeException(e);
+        } catch (InvalidFileHashException e) {
+            context.setStatus("FAILED Invalid file hash");
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeStream(fis);
@@ -114,19 +112,19 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         }
 
         @Override
-        public void onCopy(OutputStream outputStream) {
+        public String onCopy(OutputStream outputStream) {
             try {
-                copyBytes(inputStream, outputStream, fileLength, context, filename, collection);
+                return copyBytes(inputStream, outputStream, fileLength, context, filename, collection);
             } catch (IOException e) {
                 throw new UnhandledException(e);
             }
         }
 
         // TODO make this nicer dont need the params ... because it's in the member variables
-        public void copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, long fileSize, Context context, String filename, String collection)
+        public String copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, long fileSize, Context context, String filename, String collection)
                 throws IOException {
             try {
-                copyBytes(in, out, buffSize, fileSize, context, filename, collection);
+                return copyBytes(in, out, buffSize, fileSize, context, filename, collection);
             } finally {
                 if (close) {
                     out.close();
@@ -135,13 +133,15 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             }
         }
 
-        public void copyBytes(InputStream in, OutputStream out, int buffSize, long fileSize, Context context, String filename, String collection)  throws IOException {
+        public String copyBytes(InputStream in, OutputStream out, int buffSize, long fileSize, Context context, String filename, String collection)  throws IOException {
             PrintStream ps = (out instanceof PrintStream) ? (PrintStream)out : null;
             byte[] buf = new byte[buffSize];
             int bytesRead = in.read(buf);
             long currentFileBytes = 0;
+            MessageDigest messageDigest = getSha1MessageDigest();
             while (bytesRead >= 0) {
-                out.write(buf, 0, bytesRead); // CARSTEN genau hier MD5 mitberechnen
+                out.write(buf, 0, bytesRead);
+                messageDigest.update(buf, 0, bytesRead);
                 if ((ps != null) && (ps.checkError())) {
                     throw new IOException("Unable to write to output stream.");
                 }
@@ -162,13 +162,20 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
                 inputSplit.setCurrentlyCopied(bytesReadAll);
                 bytesRead = in.read(buf);
             }
-
-            // CARSTEN return MD5 sum
+            return Hex.encodeHexString(messageDigest.digest());
         }
 
-        public void copyBytes(InputStream in, OutputStream out, long fileSize, Context context, String filename, String collection)
+        private MessageDigest getSha1MessageDigest() {
+            try {
+                return MessageDigest.getInstance("SHA-1");
+            } catch (NoSuchAlgorithmException e) {
+                throw new UnhandledException(e);
+            }
+        }
+
+        public String copyBytes(InputStream in, OutputStream out, long fileSize, Context context, String filename, String collection)
                 throws IOException  {
-            copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), true, fileSize, context, filename, collection);
+            return copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), true, fileSize, context, filename, collection);
         }
     }
 }

@@ -5,33 +5,33 @@
 <div class="row">
     <div class="col-md-12">
 
-        <div id="accordion2" class="accordion">
+        <div id="accordion2" class="panel-group">
             <div class="alert alert-error" ng-show="msg.error">
                 {{msg.message}}
             </div>
             <form class="form-horizontal" name="searchForm">
-                <div class="control-group">
-                    <label class="control-label" for="collection">Collection</label>
-                    <div class="controls">
-                        <select id="collection" ng-model="collection" ng-required="true" ng-change="setCurrentCollection()">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="collection">Collection</label>
+                    <div class="col-sm-8">
+                        <select id="collection" ng-model="collection" class="form-control" ng-required="true" ng-change="setCurrentCollection()">
                             <option ng-repeat="col in collections">{{col.collection}}</option>
                         </select>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="query">Query</label>
-                    <div class="controls">
-                        <textarea id="query" rows="6" class="input-xxlarge" ng-model="query" ng-required="true">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="query">Query</label>
+                    <div class="col-sm-8">
+                        <textarea id="query" rows="6" class="input-lg form-control" ng-model="query" ng-required="true">
                         </textarea>
                     </div>
                 </div>
-                <div class="control-group">
-                    <div class="controls">
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
                         <button type="submit" ng-disabled="searchForm.$invalid" class="btn" ng-click="search(collection, query)">Search</button>
                     </div>
                 </div>
 
-                <div class="control-group" ng-hide="!currentCollection">
+                <div class="form-group" ng-hide="!currentCollection">
                     <label class="control-label">Collection Information</label>
                     <div class="controls">
                         <p><b>Data strategy: </b> {{currentCollection.dataStrategy}}</p>

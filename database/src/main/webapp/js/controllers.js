@@ -1,245 +1,243 @@
-function OverviewCtrl($scope, $http) {
-    $http.get('jumbodb/rest/status').success(function(data) {
-        $scope.status = data;
-    });
+define(['angular' ], function (angular) {
+	'use strict';
 
-}
+	/* Controllers */
 
-function HelpCtrl($scope, $http) {
-}
+	return angular.module('jumbodb.controllers', [])
+		// Sample controller where service is being used
+		.controller('OverviewCtrl', ['$scope', '$http', function ($scope, $http) {
+			$http.get('jumbodb/rest/status').success(function(data) {
+				$scope.status = data;
+			});
+		}])
+		.controller("HelpCtrl", [function(){}])
+		// More involved example where controller is required from an external file
+		.controller('CollectionsListCtrl', ["$scope", "$http", function($scope, $http){
+			fetchData();
+			$scope.msg = {}
 
+			$scope.activateChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
+				if(confirm('Are you sure?')) {
+					$http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
+						fetchData();
+						buildMessage(data)
+					});
+				}
+			}
 
-function CollectionsListCtrl($scope, $http) {
-    fetchData();
-    $scope.msg = {}
+			$scope.deleteChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
+				if(confirm('Are you sure?')) {
+					$http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
+						fetchData();
+						buildMessage(data);
+					});
+				}
+			}
 
-    $scope.activateChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
-        if(confirm('Are you sure?')) {
-            $http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
-                fetchData();
-                buildMessage(data)
-            });
-        }
-    }
+			$scope.deleteCompleteCollection = function(collection) {
+				if(confirm('Are you sure?')) {
+					$http.delete('jumbodb/rest/collection/' + collection).success(function(data) {
+						fetchData();
+						buildMessage(data)
+					});
+				}
+			}
 
-    $scope.deleteChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
-        if(confirm('Are you sure?')) {
-            $http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
-                fetchData();
-                buildMessage(data);
-            });
-        }
-    }
+			function buildMessage(data) {
+				var msg = {};
+				msg.error = (data.type == 'delete')
+				msg.success = (data.type == 'activate')
+				msg.message = data.message;
+				$scope.msg = msg;
+			}
 
-    $scope.deleteCompleteCollection = function(collection) {
-        if(confirm('Are you sure?')) {
-            $http.delete('jumbodb/rest/collection/' + collection).success(function(data) {
-                fetchData();
-                buildMessage(data)
-            });
-        }
-    }
+			function fetchData() {
+				$http.get('jumbodb/rest/collections').success(function(data) {
+					$scope.collections = data;
+				});
+			}
+		}])
+		.controller('DeliveriesListCtrl', ["$scope", "$http"], function($scope, $http){
+			fetchData();
+			$scope.msg = {};
 
-    function buildMessage(data) {
-        var msg = {};
-        msg.error = (data.type == 'delete')
-        msg.success = (data.type == 'activate')
-        msg.message = data.message;
-        $scope.msg = msg;
-    }
+			// CARSTEN reuse ?
+			$scope.showReplication = false;
+			$scope.replication = {"port" :12001, "activate": true};
 
-    function fetchData() {
-        $http.get('jumbodb/rest/collections').success(function(data) {
-            $scope.collections = data;
-        });
-    }
-}
+			$scope.toggleReplication = function() {
+				$scope.showReplication = !$scope.showReplication;
+			}
 
-function DeliveriesListCtrl($scope, $http) {
-    fetchData();
-    $scope.msg = {};
+			$scope.startReplication = function(replication, delivery) {
+				replication.deliveryChunkKey = delivery.chunkKey;
+				replication.version = delivery.version;
+				$http.post('jumbodb/rest/replication', replication).success(function(data) {
+					buildMessage(data)
+					$scope.showReplication = false;
+				});
+			}
 
-    // CARSTEN reuse ?
-    $scope.showReplication = false;
-    $scope.replication = {"port" :12001, "activate": true};
+			$scope.activateChunkedVersionForAllCollections = function(chunkDeliveryKey, version) {
+				if(confirm('Are you sure?')) {
+					$http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
+						fetchData();
+						buildMessage(data)
+					});
+				}
+			}
 
-    $scope.toggleReplication = function() {
-        $scope.showReplication = !$scope.showReplication;
-    }
+			$scope.activateChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
+				if(confirm('Are you sure?')) {
+					$http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
+						fetchData();
+						buildMessage(data)
+					});
+				}
+			}
 
-    $scope.startReplication = function(replication, delivery) {
-        replication.deliveryChunkKey = delivery.chunkKey;
-        replication.version = delivery.version;
-        $http.post('jumbodb/rest/replication', replication).success(function(data) {
-            buildMessage(data)
-            $scope.showReplication = false;
-        });
-    }
+			$scope.deleteChunkedVersionForAllCollections = function(chunkDeliveryKey, version) {
+				if(confirm('Are you sure?')) {
+					$http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
+						fetchData();
+						buildMessage(data);
+					});
+				}
+			}
 
-    $scope.activateChunkedVersionForAllCollections = function(chunkDeliveryKey, version) {
-        if(confirm('Are you sure?')) {
-            $http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
-                fetchData();
-                buildMessage(data)
-            });
-        }
-    }
+			$scope.deleteChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
+				if(confirm('Are you sure?')) {
+					$http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
+						fetchData();
+						buildMessage(data);
+					});
+				}
+			}
 
-    $scope.activateChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
-        if(confirm('Are you sure?')) {
-            $http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
-                fetchData();
-                buildMessage(data)
-            });
-        }
-    }
+			function buildMessage(data) {
+				var msg = {};
+				msg.error = (data.type == 'delete')
+				msg.success = (data.type == 'activate' || data.type == 'success')
+				msg.message = data.message;
+				$scope.msg = msg;
+			}
 
-    $scope.deleteChunkedVersionForAllCollections = function(chunkDeliveryKey, version) {
-        if(confirm('Are you sure?')) {
-            $http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
-                fetchData();
-                buildMessage(data);
-            });
-        }
-    }
+			function fetchData() {
+				$http.get('jumbodb/rest/deliveries').success(function(data) {
+					$scope.deliveries = data;
+				});
+			}
+		})
+		.controller('HelpCtrl', [function(){}])
+		// More involved example where controller is required from an external file
+		.controller('BrowseCtrl', ['$scope', '$http', function($scope, $http) {
+			$scope.results = {};
+			$scope.collections = [];
+			$scope.query = "{\"limit\": 5}";
 
-    $scope.deleteChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
-        if(confirm('Are you sure?')) {
-            $http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
-                fetchData();
-                buildMessage(data);
-            });
-        }
-    }
+			$http.get('jumbodb/rest/query/collections').success(function(data) {
+				$scope.collections = data;
+			});
 
-    function buildMessage(data) {
-        var msg = {};
-        msg.error = (data.type == 'delete')
-        msg.success = (data.type == 'activate' || data.type == 'success')
-        msg.message = data.message;
-        $scope.msg = msg;
-    }
+			$scope.setCurrentCollection = function() {
+				var res = $scope.collections;
+				for(var i = 0; i < res.length; i++) {
+					if(res[i].collection == $scope.collection) {
+						$scope.currentCollection = res[i];
+						break;
+					}
+				}
+			}
 
-    function fetchData() {
-        $http.get('jumbodb/rest/deliveries').success(function(data) {
-            $scope.deliveries = data;
-        });
-    }
-}
+			$scope.search = function(collection, query) {
+				$http.post('jumbodb/rest/query/' + collection + "/defaultLimit", query).success(function(data) {
+					$scope.results = data;
+					buildMessage(data);
+				});
+			}
 
-function BrowseCtrl($scope, $http) {
-    $scope.results = {};
-    $scope.collections = [];
-    $scope.query = "{\"limit\": 5}";
+			$scope.formatJson = function(json) {
+				delete json["$$hashKey"]
+				var jsonStr = JSON.stringify(json, undefined, 3);
+				return syntaxHighlight(jsonStr);
+			}
 
-    $http.get('jumbodb/rest/query/collections').success(function(data) {
-        $scope.collections = data;
-    });
+			function buildMessage(data) {
+				var msg = {};
+				if(data.message) {
+					msg.error = true;
+					msg.message = data.message;
+					$scope.msg = msg;
+				}
+			}
 
-    $scope.setCurrentCollection = function() {
-        var res = $scope.collections;
-        for(var i = 0; i < res.length; i++) {
-            if(res[i].collection == $scope.collection) {
-                $scope.currentCollection = res[i];
-                break;
-            }
-        }
-    }
+			function syntaxHighlight(json) {
+				json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+				return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+					var cls = 'number';
+					if (/^"/.test(match)) {
+						if (/:$/.test(match)) {
+							cls = 'key';
+						} else {
+							cls = 'string';
+						}
+					} else if (/true|false/.test(match)) {
+						cls = 'boolean';
+					} else if (/null/.test(match)) {
+						cls = 'null';
+					}
+					return '<span class="' + cls + '">' + match + '</span>';
+				});
+			}
+		}])
+		.controller("ReplicationCtrl",["$scope", "$http", "$timeout"], function($scope, $http, $timeout) {
+			fetchData();
 
-    $scope.search = function(collection, query) {
-        $http.post('jumbodb/rest/query/' + collection + "/defaultLimit", query).success(function(data) {
-            $scope.results = data;
-            buildMessage(data);
-        });
-    }
+			$scope.abortReplication = function(id) {
+				if(confirm('Are you sure?')) {
+					$http.put('jumbodb/rest/replication/' + id).success(function(data) {
+						fetchData();
+						buildMessage(data);
+					});
+				}
+			}
 
-    $scope.formatJson = function(json) {
-        delete json["$$hashKey"]
-        var jsonStr = JSON.stringify(json, undefined, 3);
-        return syntaxHighlight(jsonStr);
-    }
+			$scope.deleteReplication = function(id) {
+				if(confirm('Are you sure?')) {
+					$http.delete('jumbodb/rest/replication/' + id).success(function(data) {
+						fetchData();
+						buildMessage(data);
+					});
+				}
+			}
 
-    function buildMessage(data) {
-        var msg = {};
-        if(data.message) {
-            msg.error = true;
-            msg.message = data.message;
-            $scope.msg = msg;
-        }
-    }
+			function buildMessage(data) {
+				var msg = {};
+				msg.error = (data.type == 'delete')
+				msg.message = data.message;
+				$scope.msg = msg;
+			}
 
-    function syntaxHighlight(json) {
-        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-            var cls = 'number';
-            if (/^"/.test(match)) {
-                if (/:$/.test(match)) {
-                    cls = 'key';
-                } else {
-                    cls = 'string';
-                }
-            } else if (/true|false/.test(match)) {
-                cls = 'boolean';
-            } else if (/null/.test(match)) {
-                cls = 'null';
-            }
-            return '<span class="' + cls + '">' + match + '</span>';
-        });
-    }
-}
-
-function ReplicationCtrl($scope, $http, $timeout) {
-    fetchData();
-
-    $scope.abortReplication = function(id) {
-        if(confirm('Are you sure?')) {
-            $http.put('jumbodb/rest/replication/' + id).success(function(data) {
-                fetchData();
-                buildMessage(data);
-            });
-        }
-    }
-
-    $scope.deleteReplication = function(id) {
-        if(confirm('Are you sure?')) {
-            $http.delete('jumbodb/rest/replication/' + id).success(function(data) {
-                fetchData();
-                buildMessage(data);
-            });
-        }
-    }
-
-    function buildMessage(data) {
-        var msg = {};
-        msg.error = (data.type == 'delete')
-        msg.message = data.message;
-        $scope.msg = msg;
-    }
-
-    $scope.fetch = function() {
-        $timeout(function() {
-            fetchData();
-            $scope.fetch();
-        }, 1000);
-    }
-    $scope.fetch();
-    function fetchData() {
-        $http.get('jumbodb/rest/replication').success(function(data) {
-            $scope.replications = data;
-        });
-    }
-}
-
-function QueryMonitoringCtrl($scope, $http, $timeout) {
-	$scope.test = "testing...";
-}
-
-function ImportMonitoringCtrl($scope, $http, $timeout) {
-	$scope.test = "testing...";
-}
-
-function ServerMonitoringCtrl($scope, $http, $timeout){
-	$http.get('jumbodb/rest/status').success(function(data) {
-		$scope.status = data;
-	});
-}
+			$scope.fetch = function() {
+				$timeout(function() {
+					fetchData();
+					$scope.fetch();
+				}, 1000);
+			}
+			$scope.fetch();
+			function fetchData() {
+				$http.get('jumbodb/rest/replication').success(function(data) {
+					$scope.replications = data;
+				});
+			}
+		})
+		.controller("QueryMonitoringCtrl", ["$scope", "$http"], function($scope, $http){
+			$scope.test = "testing...";
+		})
+		.controller("ImportMonitoringCtrl", ["$scope", "$http"], function($scope, $http){
+			$scope.test = "testing...";
+		})
+		.controller("ServerMonitoringCtrl", ["$scope", "$http"], function($scope, $http){
+			$scope.test = "testing...";
+		});
+});

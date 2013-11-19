@@ -37,6 +37,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
     private Cache datasetsByOffsetsCache;
 
     private final Map<QueryOperation, JsonOperationSearch> OPERATIONS = createOperations();
+    private CollectionDefinition collectionDefinition;
 
     private Map<QueryOperation, JsonOperationSearch> createOperations() {
         Map<QueryOperation, JsonOperationSearch> operations = new HashMap<QueryOperation, JsonOperationSearch>();
@@ -59,7 +60,11 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
 
     @Override
     public boolean isResponsibleFor(String collection, String chunkKey) {
-        return true; // TODO find out the real strategy
+        DeliveryChunkDefinition chunk = collectionDefinition.getChunk(collection, chunkKey);
+        if(chunk == null) {
+            return false;
+        }
+        return JSON_SNAPPY_V1.equals(chunk.getDataStrategy());
     }
 
     @Override
@@ -133,10 +138,12 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
 
     @Override
     public void onInitialize(CollectionDefinition collectionDefinition) {
+        this.collectionDefinition = collectionDefinition;
     }
 
     @Override
     public void onDataChanged(CollectionDefinition collectionDefinition) {
+        this.collectionDefinition = collectionDefinition;
     }
 
     @Required

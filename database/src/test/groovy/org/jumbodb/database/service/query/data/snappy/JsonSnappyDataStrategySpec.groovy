@@ -6,9 +6,11 @@ import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.importer.ImportMetaFileInformation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
+import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
 import org.xerial.snappy.SnappyInputStream
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.util.concurrent.ExecutorService
@@ -17,7 +19,7 @@ import java.util.concurrent.Future
 /**
  * @author Carsten Hufe
  */
-class JsonSnappyDataStrategySpec extends spock.lang.Specification {
+class JsonSnappyDataStrategySpec extends Specification {
     def strategy = new JsonSnappyDataStrategy()
 
     @Unroll
@@ -28,9 +30,32 @@ class JsonSnappyDataStrategySpec extends spock.lang.Specification {
         operation << QueryOperation.values()
     }
 
-    def "should responsible always because it's the only data strategy"() {
+    def "should be responsible, because collection, chunk and strategy are matching"() {
+        setup:
+        def cd = Mock(CollectionDefinition)
+        def dcd = new DeliveryChunkDefinition("collection", "chunk", [], [:], "JSON_SNAPPY_V1")
+        strategy.onInitialize(cd)
+        cd.getChunk("collection", "chunk") >> dcd
         expect:
         strategy.isResponsibleFor("collection", "chunk")
+    }
+
+    def "should not responsible, because different strategy name"() {
+        setup:
+        def cd = Mock(CollectionDefinition)
+        def dcd = new DeliveryChunkDefinition("collection", "chunk", [], [:], "WHATEVER_STRATEGY")
+        strategy.onInitialize(cd)
+        cd.getChunk("collection", "chunk") >> dcd
+        expect:
+        !strategy.isResponsibleFor("collection", "chunk")
+    }
+
+    def "should not responsible, because collection does not exist"() {
+        setup:
+        def cd = Mock(CollectionDefinition)
+        strategy.onInitialize(cd)
+        expect:
+        !strategy.isResponsibleFor("collection", "chunk")
     }
 
     def "verify strategy name"() {

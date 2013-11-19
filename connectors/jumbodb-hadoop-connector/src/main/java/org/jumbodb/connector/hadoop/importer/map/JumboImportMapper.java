@@ -120,7 +120,6 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             }
         }
 
-        // TODO make this nicer dont need the params ... because it's in the member variables
         public String copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, long fileSize, Context context, String filename, String collection)
                 throws IOException {
             try {

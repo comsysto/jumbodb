@@ -16,7 +16,7 @@ import java.net.Socket;
 public class DatabaseImportSession implements Closeable {
     private Logger log = LoggerFactory.getLogger(DatabaseImportSession.class);
 
-    public static final int PROTOCOL_VERSION = 3;
+    public static final int PROTOCOL_VERSION = 4;
     private Socket clientSocket;
     private int clientID;
     private InputStream inputStream;

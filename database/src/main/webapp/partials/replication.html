@@ -3,8 +3,8 @@
 </div>
 
 <div class="row">
-    <div class="span12">
-        <div id="accordion2" class="accordion">
+    <div class="col-md-12">
+        <div id="accordion2" class="panel-group">
             <div class="alert alert-error" ng-show="msg.error">
                 {{msg.message}}
             </div>
@@ -42,8 +42,8 @@
                         <p>Compressed Rate: {{replication.formattedCopyRateCompressed}}</p>
                     </td>
                     <td>
-                        <button class="btn btn-danger" ng-show="replication.state == 'WAITING' || replication.state == 'RUNNING'" ng-click="abortReplication(replication.id)" onclick="return confirm('Are you sure?');"><i class="icon-remove-sign icon-white"></i> Abort</button>
-                        <button class="btn btn-danger" ng-show="replication.state != 'WAITING' && replication.state != 'RUNNING'" ng-click="deleteReplication(replication.id)" onclick="return confirm('Are you sure?');"><i class="icon-trash icon-white"></i> Delete</button>
+                        <button class="btn btn-danger" ng-show="replication.state == 'WAITING' || replication.state == 'RUNNING'" ng-click="abortReplication(replication.id)"><i class="icon-remove-sign icon-white"></i> Abort</button>
+                        <button class="btn btn-danger" ng-show="replication.state != 'WAITING' && replication.state != 'RUNNING'" ng-click="deleteReplication(replication.id)"><i class="icon-trash icon-white"></i> Delete</button>
                     </td>
 
                 </tr>

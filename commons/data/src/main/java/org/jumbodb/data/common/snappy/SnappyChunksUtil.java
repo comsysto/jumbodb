@@ -41,9 +41,11 @@ public class SnappyChunksUtil {
         DataOutputStream snappyChunksDos = null;
         DigestOutputStream sha1DosRaw = null;
         DigestOutputStream sha1DosCompressed = null;
+        MessageDigest sha1DigestRaw = null;
+        MessageDigest sha1DigestCompressed = null;
         try {
-            MessageDigest sha1DigestRaw = MessageDigest.getInstance("SHA-1");
-            MessageDigest sha1DigestCompressed = MessageDigest.getInstance("SHA-1");
+            sha1DigestRaw = MessageDigest.getInstance("SHA1");
+            sha1DigestCompressed = MessageDigest.getInstance("SHA1");
             String absoluteImportPath = absoluteImportFile.getAbsolutePath() + "/";
             File storageFolderFile = new File(absoluteImportPath);
             if (!storageFolderFile.getParentFile().exists()) {
@@ -81,11 +83,6 @@ public class SnappyChunksUtil {
             sos = new SnappyOutputStream(bos, chunkSize);
             sha1DosRaw = new DigestOutputStream(sos, sha1DigestRaw);
             IOUtils.copyLarge(dataInputStream, sha1DosRaw, 0l, fileLength);
-            String sha1CompressHex = Hex.encodeHexString(sha1DigestCompressed.digest());
-            FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".sha1"), sha1CompressHex);
-            String sha1DigestRawHex = Hex.encodeHexString(sha1DigestRaw.digest());
-            FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".raw.sha1"), sha1DigestRawHex);
-            return sha1DigestRawHex;
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
@@ -99,8 +96,23 @@ public class SnappyChunksUtil {
             IOUtils.closeQuietly(fos);
             IOUtils.closeQuietly(snappyChunksDos);
             IOUtils.closeQuietly(snappyChunksFos);
-            IOUtils.closeQuietly(dataInputStream);
         }
+
+        // streams should be closed or flushed to get valid hashes!
+        try {
+            if(sha1DigestRaw != null) {
+                String sha1CompressHex = Hex.encodeHexString(sha1DigestCompressed.digest());
+                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".sha1"), sha1CompressHex);
+            }
+            if(sha1DigestCompressed != null) {
+                String sha1DigestRawHex = Hex.encodeHexString(sha1DigestRaw.digest());
+                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".raw.sha1"), sha1DigestRawHex);
+                return sha1DigestRawHex;
+            }
+        } catch(IOException e) {
+            throw new UnhandledException(e);
+        }
+        return "invalid_hash";
     }
 
     public static SnappyChunks getSnappyChunksByFile(File compressedFile) {

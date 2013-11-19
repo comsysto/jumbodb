@@ -126,6 +126,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             try {
                 return copyBytes(in, out, buffSize, fileSize, context, filename, collection);
             } finally {
+                out.flush();
                 if (close) {
                     out.close();
                     in.close();
@@ -167,7 +168,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
 
         private MessageDigest getSha1MessageDigest() {
             try {
-                return MessageDigest.getInstance("SHA-1");
+                return MessageDigest.getInstance("SHA1");
             } catch (NoSuchAlgorithmException e) {
                 throw new UnhandledException(e);
             }
@@ -175,7 +176,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
 
         public String copyBytes(InputStream in, OutputStream out, long fileSize, Context context, String filename, String collection)
                 throws IOException  {
-            return copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), true, fileSize, context, filename, collection);
+            return copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), false, fileSize, context, filename, collection);
         }
     }
 }

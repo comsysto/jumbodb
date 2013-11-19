@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.exporter;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.lang.UnhandledException;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.HttpMessageConversionException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -90,22 +92,28 @@ public class ExportDeliveryTask implements Runnable {
                         InputStream is = null;
                         DigestInputStream dis = null;
                         ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream, exportDelivery);
+                        MessageDigest md = null;
                         try {
-                            MessageDigest md = MessageDigest.getInstance("SHA1");
+                            md = MessageDigest.getInstance("SHA1");
                             is = storageManagement.getInputStream(dataInfo);
                             dis = new DigestInputStream(is, md);
                             IOUtils.copyLarge(dis, cos, 0l, dataInfo.getFileLength());
-                            return Hex.encodeHexString(md.digest());
+                            cos.flush();
                         } catch (IOException e) {
                             throw new UnhandledException(e);
                         } catch (NoSuchAlgorithmException e) {
                             throw new UnhandledException(e);
                         } finally {
                             exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
-                            IOUtils.closeQuietly(cos);
+//                            IOUtils.closeQuietly(cos);
                             IOUtils.closeQuietly(dis);
                             IOUtils.closeQuietly(is);
                         }
+                        if(md != null) {
+                            return Hex.encodeHexString(md.digest());
+
+                        }
+                        return "invalid_hash";
                     }
                 });
                 long timeDiff = System.currentTimeMillis() - start;
@@ -135,22 +143,27 @@ public class ExportDeliveryTask implements Runnable {
                         InputStream is = null;
                         DigestInputStream dis = null;
                         ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream, exportDelivery);
+                        MessageDigest md = null;
                         try {
-                            MessageDigest md = MessageDigest.getInstance("SHA1");
+                            md = MessageDigest.getInstance("SHA1");
                             is = storageManagement.getInputStream(indexInfo);
                             dis = new DigestInputStream(is, md);
                             IOUtils.copyLarge(dis, cos, 0l, indexInfo.getFileLength());
-                            return Hex.encodeHexString(md.digest());
+                            cos.flush();
                         } catch (IOException e) {
                             throw new UnhandledException(e);
                         } catch (NoSuchAlgorithmException e) {
                             throw new UnhandledException(e);
                         } finally {
                             exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
-                            IOUtils.closeQuietly(cos);
+//                            IOUtils.closeQuietly(cos);
                             IOUtils.closeQuietly(dis);
                             IOUtils.closeQuietly(is);
                         }
+                        if(md != null) {
+                            return Hex.encodeHexString(md.digest());
+                        }
+                        return "invalid_hash";
                     }
                 });
                 long timeDiff = System.currentTimeMillis() - start;

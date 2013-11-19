@@ -57,7 +57,7 @@ define(['angular' ], function (angular) {
 				});
 			}
 		}])
-		.controller('DeliveriesListCtrl', ["$scope", "$http"], function($scope, $http){
+		.controller('DeliveriesListCtrl', ["$scope", "$http", function($scope, $http){
 			fetchData();
 			$scope.msg = {};
 
@@ -127,7 +127,7 @@ define(['angular' ], function (angular) {
 					$scope.deliveries = data;
 				});
 			}
-		})
+		}])
 		.controller('HelpCtrl', [function(){}])
 		// More involved example where controller is required from an external file
 		.controller('BrowseCtrl', ['$scope', '$http', function($scope, $http) {
@@ -190,7 +190,7 @@ define(['angular' ], function (angular) {
 				});
 			}
 		}])
-		.controller("ReplicationCtrl",["$scope", "$http", "$timeout"], function($scope, $http, $timeout) {
+		.controller("ReplicationCtrl",["$scope", "$http", "$timeout", function($scope, $http, $timeout) {
 			fetchData();
 
 			$scope.abortReplication = function(id) {
@@ -230,14 +230,14 @@ define(['angular' ], function (angular) {
 					$scope.replications = data;
 				});
 			}
-		})
-		.controller("QueryMonitoringCtrl", ["$scope", "$http"], function($scope, $http){
+		}])
+		.controller("QueryMonitoringCtrl", ["$scope", "$http", function($scope, $http){
 			$scope.test = "testing...";
-		})
-		.controller("ImportMonitoringCtrl", ["$scope", "$http"], function($scope, $http){
+		}])
+		.controller("ImportMonitoringCtrl", ["$scope", "$http", function($scope, $http){
 			$scope.test = "testing...";
-		})
-		.controller("ServerMonitoringCtrl", ["$scope", "$http"], function($scope, $http){
+		}])
+		.controller("ServerMonitoringCtrl", ["$scope", "$http", function($scope, $http){
 			$scope.test = "testing...";
-		});
+		}]);
 });

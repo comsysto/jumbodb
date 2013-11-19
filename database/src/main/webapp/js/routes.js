@@ -1,18 +1,18 @@
-define([ 'angular', 'app', 'controllers' ], function(angular, app, Controllers) {
+define([ 'angular', 'app'], function(angular, app) {
 	'use strict';
 
 	return app.config([ '$routeProvider', function($routeProvider) {
 
 		$routeProvider.
-			when('/overview', {templateUrl: 'partials/overview.html', controller: Controllers.OverviewCtrl}).
-			when('/collections', {templateUrl: 'partials/collections.html', controller: Controllers.CollectionsListCtrl}).
-			when('/deliveries', {templateUrl: 'partials/deliveries.html', controller: Controllers.DeliveriesListCtrl}).
-			when('/browse', {templateUrl: 'partials/browse.html', controller: Controllers.BrowseCtrl}).
-			when('/replication', {templateUrl: 'partials/replication.html', controller: Controllers.ReplicationCtrl}).
-			when('/serverMonitoring', {templateUrl: 'partials/serverMonitoring.html', controller: Controllers.ServerMonitoringCtrl}).
-			when('/queryMonitoring', {templateUrl: 'partials/queryMonitoring.html', controller: Controllers.QueryMonitoringCtrl}).
-			when('/importMonitoring', {templateUrl: 'partials/importMonitoring.html', controller: Controllers.ImportMonitoringCtrl}).
-			when('/help', {templateUrl: 'partials/help.html', controller: Controllers.HelpCtrl}).
+			when('/overview', {templateUrl: 'partials/overview.html', controller: 'OverviewCtrl'}).
+			when('/collections', {templateUrl: 'partials/collections.html', controller: 'CollectionsListCtrl'}).
+			when('/deliveries', {templateUrl: 'partials/deliveries.html', controller: 'DeliveriesListCtrl'}).
+			when('/browse', {templateUrl: 'partials/browse.html', controller: 'BrowseCtrl'}).
+			when('/replication', {templateUrl: 'partials/replication.html', controller: 'ReplicationCtrl'}).
+			when('/serverMonitoring', {templateUrl: 'partials/serverMonitoring.html', controller: 'ServerMonitoringCtrl'}).
+			when('/queryMonitoring', {templateUrl: 'partials/queryMonitoring.html', controller: 'QueryMonitoringCtrl'}).
+			when('/importMonitoring', {templateUrl: 'partials/importMonitoring.html', controller: 'ImportMonitoringCtrl'}).
+			when('/help', {templateUrl: 'partials/help.html', controller: 'HelpCtrl'}).
 			otherwise({redirectTo: '/overview'});
 	} ]);
 

@@ -27,5 +27,5 @@ public interface DataStrategy {
     List<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);
-    void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPath);
+    String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPath);
 }

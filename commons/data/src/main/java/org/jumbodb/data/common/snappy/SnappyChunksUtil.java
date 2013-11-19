@@ -1,11 +1,17 @@
 package org.jumbodb.data.common.snappy;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.UnhandledException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,13 +23,29 @@ import java.util.List;
 public class SnappyChunksUtil {
     private static Logger log = LoggerFactory.getLogger(SnappyChunksUtil.class);
 
-    public static void copy(InputStream dataInputStream, File absoluteImportFile, long fileLength, int chunkSize) {
+    /**
+     * Copies stream to file
+     *
+     * @param dataInputStream
+     * @param absoluteImportFile
+     * @param fileLength
+     * @param chunkSize
+     * @return SHA-1 hash over uncompressed data
+     */
+    public static String copy(InputStream dataInputStream, File absoluteImportFile, long fileLength, int chunkSize) {
         OutputStream sos = null;
         DataOutputStream dos = null;
+        FileOutputStream fos = null;
         BufferedOutputStream bos = null;
         FileOutputStream snappyChunksFos = null;
         DataOutputStream snappyChunksDos = null;
+        DigestOutputStream sha1DosRaw = null;
+        DigestOutputStream sha1DosCompressed = null;
+        MessageDigest sha1DigestRaw = null;
+        MessageDigest sha1DigestCompressed = null;
         try {
+            sha1DigestRaw = MessageDigest.getInstance("SHA1");
+            sha1DigestCompressed = MessageDigest.getInstance("SHA1");
             String absoluteImportPath = absoluteImportFile.getAbsolutePath() + "/";
             File storageFolderFile = new File(absoluteImportPath);
             if (!storageFolderFile.getParentFile().exists()) {
@@ -49,8 +71,9 @@ public class SnappyChunksUtil {
 
             snappyChunksDos.writeLong(fileLength);
             snappyChunksDos.writeInt(chunkSize);
-            // CARSTEN pfui, cleanup when time!
-            bos = new BufferedOutputStream(new FileOutputStream(absoluteImportFile)) {
+            fos = new FileOutputStream(absoluteImportFile);
+            sha1DosCompressed = new DigestOutputStream(fos, sha1DigestCompressed);
+            bos = new BufferedOutputStream(sha1DosCompressed) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
                     finalSnappyChunksDos.writeInt(i2);
@@ -58,18 +81,38 @@ public class SnappyChunksUtil {
                 }
             };
             sos = new SnappyOutputStream(bos, chunkSize);
-            IOUtils.copy(dataInputStream, sos);
-            sos.flush();
+            sha1DosRaw = new DigestOutputStream(sos, sha1DigestRaw);
+            IOUtils.copyLarge(dataInputStream, sha1DosRaw, 0l, fileLength);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new UnhandledException(e);
         } finally {
+            IOUtils.closeQuietly(sha1DosRaw);
+            IOUtils.closeQuietly(sos);
             IOUtils.closeQuietly(dos);
             IOUtils.closeQuietly(bos);
-            IOUtils.closeQuietly(sos);
+            IOUtils.closeQuietly(sha1DosCompressed);
+            IOUtils.closeQuietly(fos);
             IOUtils.closeQuietly(snappyChunksDos);
             IOUtils.closeQuietly(snappyChunksFos);
-            IOUtils.closeQuietly(dataInputStream);
         }
+
+        // streams should be closed or flushed to get valid hashes!
+        try {
+            if(sha1DigestRaw != null) {
+                String sha1CompressHex = Hex.encodeHexString(sha1DigestCompressed.digest());
+                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".sha1"), sha1CompressHex);
+            }
+            if(sha1DigestCompressed != null) {
+                String sha1DigestRawHex = Hex.encodeHexString(sha1DigestRaw.digest());
+                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".raw.sha1"), sha1DigestRawHex);
+                return sha1DigestRawHex;
+            }
+        } catch(IOException e) {
+            throw new UnhandledException(e);
+        }
+        return "invalid_hash";
     }
 
     public static SnappyChunks getSnappyChunksByFile(File compressedFile) {

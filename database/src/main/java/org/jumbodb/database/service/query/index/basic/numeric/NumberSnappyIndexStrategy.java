@@ -304,9 +304,9 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
     @Override
-    public void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
+    public String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
         String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/" + information.getFileName();
-        SnappyChunksUtil.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), getSnappyChunkSize());
+        return SnappyChunksUtil.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), getSnappyChunkSize());
     }
 
     public abstract Map<QueryOperation, OperationSearch<T, IFV, IF>> getQueryOperationsStrategies();

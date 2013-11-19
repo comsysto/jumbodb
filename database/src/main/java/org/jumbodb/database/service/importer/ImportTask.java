@@ -61,16 +61,16 @@ public class ImportTask implements Runnable {
                 }
 
                 @Override
-                public void onImport(ImportMetaFileInformation information, InputStream dataInputStream) {
+                public String onImport(ImportMetaFileInformation information, InputStream dataInputStream) {
                     try {
                         File absoluteImportPath = new File(getTemporaryImportAbsolutePathByType(information));
                         if(information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
                             DataStrategy strategy = dataStrategyManager.getStrategy(information.getStrategy());
-                            strategy.onImport(information, dataInputStream, absoluteImportPath);
+                            return strategy.onImport(information, dataInputStream, absoluteImportPath);
                         }
                         else if(information.getFileType() == ImportMetaFileInformation.FileType.INDEX) {
                             IndexStrategy strategy = indexStrategyManager.getStrategy(information.getStrategy());
-                            strategy.onImport(information, dataInputStream, absoluteImportPath);
+                            return strategy.onImport(information, dataInputStream, absoluteImportPath);
                         }
                         else {
                             throw new RuntimeException("Unsupported file type: "+ information.getFileType());

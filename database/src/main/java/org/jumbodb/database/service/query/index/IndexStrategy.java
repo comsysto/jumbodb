@@ -23,5 +23,5 @@ public interface IndexStrategy {
     Set<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);
-    void onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile);
+    String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile);
 }

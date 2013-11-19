@@ -1,5 +1,7 @@
 package org.jumbodb.database.service.exporter;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.lang.UnhandledException;
@@ -8,10 +10,15 @@ import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.query.FileOffset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.converter.HttpMessageConversionException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -81,19 +88,32 @@ public class ExportDeliveryTask implements Runnable {
                 long start = System.currentTimeMillis();
                 imp.importData(dataInfo, new OnCopyCallback() {
                     @Override
-                    public void onCopy(OutputStream outputStream) {
+                    public String onCopy(OutputStream outputStream) {
                         InputStream is = null;
+                        DigestInputStream dis = null;
                         ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream, exportDelivery);
+                        MessageDigest md = null;
                         try {
+                            md = MessageDigest.getInstance("SHA1");
                             is = storageManagement.getInputStream(dataInfo);
-                            IOUtils.copy(is, cos);
+                            dis = new DigestInputStream(is, md);
+                            IOUtils.copyLarge(dis, cos, 0l, dataInfo.getFileLength());
+                            cos.flush();
                         } catch (IOException e) {
+                            throw new UnhandledException(e);
+                        } catch (NoSuchAlgorithmException e) {
                             throw new UnhandledException(e);
                         } finally {
                             exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
-                            IOUtils.closeQuietly(cos);
+//                            IOUtils.closeQuietly(cos);
+                            IOUtils.closeQuietly(dis);
                             IOUtils.closeQuietly(is);
                         }
+                        if(md != null) {
+                            return Hex.encodeHexString(md.digest());
+
+                        }
+                        return "invalid_hash";
                     }
                 });
                 long timeDiff = System.currentTimeMillis() - start;
@@ -119,19 +139,31 @@ public class ExportDeliveryTask implements Runnable {
                 long start = System.currentTimeMillis();
                 imp.importIndex(indexInfo, new OnCopyCallback() {
                     @Override
-                    public void onCopy(OutputStream outputStream) {
+                    public String onCopy(OutputStream outputStream) {
                         InputStream is = null;
+                        DigestInputStream dis = null;
                         ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream, exportDelivery);
+                        MessageDigest md = null;
                         try {
+                            md = MessageDigest.getInstance("SHA1");
                             is = storageManagement.getInputStream(indexInfo);
-                            IOUtils.copy(is, cos);
+                            dis = new DigestInputStream(is, md);
+                            IOUtils.copyLarge(dis, cos, 0l, indexInfo.getFileLength());
+                            cos.flush();
                         } catch (IOException e) {
+                            throw new UnhandledException(e);
+                        } catch (NoSuchAlgorithmException e) {
                             throw new UnhandledException(e);
                         } finally {
                             exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
-                            IOUtils.closeQuietly(cos);
+//                            IOUtils.closeQuietly(cos);
+                            IOUtils.closeQuietly(dis);
                             IOUtils.closeQuietly(is);
                         }
+                        if(md != null) {
+                            return Hex.encodeHexString(md.digest());
+                        }
+                        return "invalid_hash";
                     }
                 });
                 long timeDiff = System.currentTimeMillis() - start;

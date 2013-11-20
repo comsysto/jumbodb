@@ -25,11 +25,14 @@ public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<G
     @Override
     public boolean searchFinished(GeohashCoords currentValue, QueryValueRetriever queryValueRetriever, boolean resultsFound) {
         // test if geohash is still matching
+        if(!resultsFound) {
+            return false;
+        }
         GeohashBoundaryBoxContainer container = queryValueRetriever.getValue();
         GeohashBoundaryBox searchValue = container.getAppropriateBoundaryBox(currentValue);
         int searchedGeohash = searchValue.getGeohashFirstMatchingBits();
         int bitsToShift = searchValue.getBitsToShift();
-        return ((currentValue.getGeohash() >> bitsToShift) != searchedGeohash) && resultsFound;
+        return ((currentValue.getGeohash() >> bitsToShift) != searchedGeohash);
     }
 
     @Override

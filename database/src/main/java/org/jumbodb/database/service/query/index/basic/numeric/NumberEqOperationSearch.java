@@ -16,6 +16,11 @@ public abstract class NumberEqOperationSearch<T, S, IFV, IF extends NumberSnappy
         return findFirstMatchingChunk(fileDataRetriever, snappyChunks, searchValue);
     }
 
+    @Override
+    public boolean searchFinished(T currentValue, QueryValueRetriever queryValueRetriever, boolean resultsFound) {
+        return resultsFound;
+    }
+
     protected long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, SnappyChunks snappyChunks, S searchValue) throws IOException {
         int numberOfChunks = snappyChunks.getNumberOfChunks();
         int fromChunk = 0;

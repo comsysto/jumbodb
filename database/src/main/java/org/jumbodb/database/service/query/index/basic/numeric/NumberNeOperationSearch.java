@@ -21,9 +21,6 @@ public abstract class NumberNeOperationSearch<T, IFV, IF extends NumberSnappyInd
         while(toChunk != 0) {
             int currentChunk = (toChunk - fromChunk) / 2;
             BlockRange<T> blockRange = fileDataRetriever.getBlockRange(currentChunk);
-//            byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
-//            T firstInt = strategy.readFirstValue(uncompressed);
-//            T lastInt = strategy.readLastValue(uncompressed);
             T firstInt = blockRange.getFirstValue();
             T lastInt = blockRange.getLastValue();
 
@@ -37,6 +34,11 @@ public abstract class NumberNeOperationSearch<T, IFV, IF extends NumberSnappyInd
 
         }
         return 0;
+    }
+
+    @Override
+    public boolean searchFinished(T currentValue, QueryValueRetriever queryValueRetriever, boolean resultsFound) {
+        return resultsFound;
     }
 
     public abstract boolean ne(T val1, T val2);

@@ -61,11 +61,6 @@ public class GeohashWithinRangeMeterBoxOperationSearch extends NumberEqOperation
         int bitsToShift = searchValue.getBitsToShift();
         int from = snappyIndexFile.getFrom() >> bitsToShift;
         int to = snappyIndexFile.getTo() >> bitsToShift;
-//        System.out.println("Geohash     " + Integer.toBinaryString(geohash));
-//        System.out.println("from        " + Integer.toBinaryString(snappyIndexFile.getFrom()));
-//        System.out.println("to          " + Integer.toBinaryString(snappyIndexFile.getTo()));
-//        System.out.println("from        " + Integer.toBinaryString(from));
-//        System.out.println("to          " + Integer.toBinaryString(to));
         return geohash >= from && geohash <= to;
     }
 

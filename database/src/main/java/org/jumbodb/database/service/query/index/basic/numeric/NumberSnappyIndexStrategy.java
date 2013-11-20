@@ -253,7 +253,9 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                             long offset = byteDis.readLong();
                             if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
                                 result.add(new FileOffset(fileNameHash, offset, clause.getQueryClauses()));
-                            } else if(!result.isEmpty()) {
+                            }
+                            else if(integerOperationSearch.searchFinished(currentValue, queryValueRetriever, result.size() > 0)) {
+//                            else if(!result.isEmpty()) {
                                 // found some results, but here it isnt equal, that means end of results
                                 return result;
                             }

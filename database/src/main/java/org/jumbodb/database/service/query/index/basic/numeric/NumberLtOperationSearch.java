@@ -16,4 +16,8 @@ public abstract class NumberLtOperationSearch<T, IFV, IF extends NumberSnappyInd
         return 0;
     }
 
+    @Override
+    public boolean searchFinished(T currentValue, QueryValueRetriever queryValueRetriever, boolean resultsFound) {
+        return resultsFound;
+    }
 }

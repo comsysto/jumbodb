@@ -13,5 +13,14 @@ public interface OperationSearch<T, IFV, IF extends NumberSnappyIndexFile<IFV>> 
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, IF snappyIndexFile);
     long findFirstMatchingChunk(FileDataRetriever<T> indexRaf, QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException;
     boolean matching(T currentValue, QueryValueRetriever queryValueRetriever);
+
+    /**
+     * Gets called when matching returns false and the question is if we should stop the search
+     * @param currentValue
+     * @param queryValueRetriever
+     * @param resultsFound
+     * @return
+     */
+    boolean searchFinished(T currentValue, QueryValueRetriever queryValueRetriever, boolean resultsFound);
     QueryValueRetriever getQueryValueRetriever(QueryClause queryClause);
 }

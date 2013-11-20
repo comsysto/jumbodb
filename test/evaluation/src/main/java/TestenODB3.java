@@ -22,13 +22,21 @@ public class TestenODB3 {
 //        System.out.println(daily);
 //        System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
 
-        JumboQueryConnection jumboDriver = new JumboQueryConnection("smartsteps-dev01.ec2.smartste.ps", 12002);
+        JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
         JumboQuery query = new JumboQuery();
-//        query.addIndexQuery("cellid", Arrays.asList(new QueryClause(QueryOperation.EQ, "1122331441214")));
-//        query.addJsonQuery("cellid", Arrays.asList(new QueryClause(QueryOperation.EQ, "1122331441214")));
+//        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, -0.027180d)))));
+//        query.addJsonQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, -0.027180d)))));
+//        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, 0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
+//        query.addJsonQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, 0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
+
+
+        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
+//        query.addJsonQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
+
+
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find("br.cells", Map.class, query);
-        System.out.println(daily);
+        List<Map> daily = jumboDriver.find("uk.usercentric.cells", Map.class, query);
+        System.out.println(daily.get(0).get("centerLatLon"));
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }
 }

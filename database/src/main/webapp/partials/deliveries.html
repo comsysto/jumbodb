@@ -22,7 +22,7 @@
                             </span>
                             <span class="label label-success offset2" ng-show="delivery.allRunning">All running </span>
                             <span class="label label-warning offset2" ng-show="delivery.someRunning">Some running </span>
-                            <span class="label offset2" ng-show="delivery.noneRunning">None running </span>
+                            <span class="label offset2 label-default" ng-show="delivery.noneRunning">None running </span>
                         </div>
                         <div style="font-size: smaller;">{{delivery.info}}</div>
                         <div style="font-size: smaller;">{{delivery.date}} - {{delivery.formatedCompressedSize}} compressed data - {{delivery.formatedUncompressedSize}} uncompressed data - {{delivery.formatedIndexSize}} index</div>

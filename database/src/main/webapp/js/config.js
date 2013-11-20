@@ -1,16 +1,20 @@
 require.config({
 	//baseUrl : "js",
 	paths: {
-		angular: "/jumbodb/jumbodb/resources/angularjs/angular"
-		//angularRoute: '/jumbodb/jumbodb/resources/angularjs/angular-route'
-
+		angular: "../jumbodb/resources/angularjs/angular",
+		angularUiBootstrap: '../jumbodb/resources/angular-ui-bootstrap/ui-bootstrap',
+		angularUiBootstrapTpls: '../jumbodb/resources/angular-ui-bootstrap/ui-bootstrap-tpls'
 	},
 	shim: {
-		'angular' : {'exports' : 'angular'}
-		//'angularRoute': ['angular']
+		'angular' : {exports : 'angular'},
+		'angularUiBootstrap': {exports : 'angularUi',
+								deps: ['angular']},
+		'angularUiBootstrapTpls': {deps: ['angular', 'angularUiBootstrap']}
 	},
 	priority: [
-		"angular"
+		"angular",
+		"angularUiBootstrap",
+		"angularUiBootstrapTpls"
 	]
 });
 

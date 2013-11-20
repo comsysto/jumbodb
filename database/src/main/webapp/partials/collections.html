@@ -49,7 +49,7 @@
                                     <td>{{version.formatedIndexSize}}</td>
                                     <td>
                                         <span class="label label-success" ng-show="version.active">Running</span>
-                                        <button class="btn btn-primary" ng-click="activateChunkedVersionInCollection(collection.name, chunk.key, version.version)" ng-hide="version.active" href=""><i class="glyphicon glyphicon-hand-right"></i> Activate</button>
+                                        <button class="btn btn-default" ng-click="activateChunkedVersionInCollection(collection.name, chunk.key, version.version)" ng-hide="version.active" href=""><i class="glyphicon glyphicon-hand-right"></i> Activate</button>
                                     </td>
                                     <td><button class="btn btn-danger" ng-click="deleteChunkedVersionInCollection(collection.name, chunk.key, version.version)"><i class="glyphicon glyphicon-trash"></i></button></td>
 

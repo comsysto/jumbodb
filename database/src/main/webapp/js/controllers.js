@@ -238,8 +238,5 @@ define(['angular' ], function (angular) {
 				{content: "Query information under construction..", title: "Query", active: false},
 				{content: "Import information under construction..", title: "Import", active: false}
 			];
-		}])
-		.controller("ServerMonitoringCtrl", ["$scope", "$http", function($scope, $http){
-			$scope.test = "testing...";
 		}]);
 });

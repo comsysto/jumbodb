@@ -16,7 +16,7 @@ import java.net.Socket;
 public class DatabaseImportSession implements Closeable {
     private Logger log = LoggerFactory.getLogger(DatabaseImportSession.class);
 
-    public static final int PROTOCOL_VERSION = 3;
+    public static final int PROTOCOL_VERSION = 4;
     private Socket clientSocket;
     private int clientID;
     private InputStream inputStream;
@@ -52,8 +52,9 @@ public class DatabaseImportSession implements Closeable {
             ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, null, fileLength, deliveryKey, deliveryVersion, dataStrategy);
             bufferedInputStream = new BufferedInputStream(inputStream, 32768);
             snappyInputStream = new SnappyInputStream(bufferedInputStream);
-            importHandler.onImport(meta, snappyInputStream);
-
+            String sha1Hash = importHandler.onImport(meta, snappyInputStream);
+            dataOutputStream.writeUTF(sha1Hash);
+            dataOutputStream.flush();
         } else if(":cmd:import:collection:index".equals(cmd)) {
             ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.INDEX;
             String collection = dataInputStream.readUTF();
@@ -66,8 +67,9 @@ public class DatabaseImportSession implements Closeable {
             ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, indexName, fileLength, deliveryKey, deliveryVersion, indexStrategy);
             bufferedInputStream = new BufferedInputStream(inputStream, 32768);
             snappyInputStream = new SnappyInputStream(bufferedInputStream);
-            importHandler.onImport(meta, snappyInputStream);
-
+            String sha1Hash = importHandler.onImport(meta, snappyInputStream);
+            dataOutputStream.writeUTF(sha1Hash);
+            dataOutputStream.flush();
         } else if(":cmd:import:collection:meta:data".equals(cmd)) {
             String collection = dataInputStream.readUTF();
             String deliveryKey = dataInputStream.readUTF();
@@ -103,7 +105,6 @@ public class DatabaseImportSession implements Closeable {
         } else {
             throw new UnsupportedOperationException("Unsupported command: " + cmd);
         }
-
     }
 
     @Override

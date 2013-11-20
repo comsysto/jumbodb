@@ -16,7 +16,7 @@ import java.util.Properties;
  */
 public class DeliveryProperties {
     public static final String DEFAULT_FILENAME = "delivery.properties";
-    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm";  // TODO support with seconds, but be downwards compatible
+    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm";
 
     public static String getStrategy(File deliveryPropsFile) {
         return getDeliveryMeta(deliveryPropsFile).getStrategy();

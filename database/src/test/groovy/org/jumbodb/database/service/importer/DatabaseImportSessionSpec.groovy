@@ -13,15 +13,16 @@ class DatabaseImportSessionSpec extends Specification {
         setup:
         def cmdStream = new ByteArrayOutputStream()
         def cmds = new DataOutputStream(cmdStream)
+        def sendBytes = "Hello World".getBytes("UTF-8")
         cmds.writeUTF(":cmd:import:collection:data") // send command
         cmds.writeUTF("test_collection") // send collection
         cmds.writeUTF("file_name_part001") // send collection
-        cmds.writeLong(1234567l) // send file length
+        cmds.writeLong(sendBytes.length) // send file length
         cmds.writeUTF("test_delivery_key")
         cmds.writeUTF("test_delivery_version")
         cmds.writeUTF("TEST_STRATEGY")
         def snappyOut = new SnappyOutputStream(cmdStream)
-        snappyOut.write("Hello World".getBytes("UTF-8"))
+        snappyOut.write(sendBytes)
         snappyOut.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -44,12 +45,14 @@ class DatabaseImportSessionSpec extends Specification {
             assert info.getFileType() == ImportMetaFileInformation.FileType.DATA
             assert info.getCollection() == "test_collection"
             assert info.getIndexName() == null
-            assert info.getFileLength() == 1234567l
+            assert info.getFileLength() == 11l
             assert info.getDeliveryVersion() == "test_delivery_version"
             assert info.getDeliveryKey() == "test_delivery_key"
             assert info.getStrategy() == "TEST_STRATEGY"
             assert info.getFileName() == "file_name_part001"
+            return "sha1testhash"
         }
+        dataInputStream.readUTF() == "sha1testhash"
         cleanup:
         dataInputStream.close()
         cmds.close()
@@ -62,16 +65,17 @@ class DatabaseImportSessionSpec extends Specification {
         setup:
         def cmdStream = new ByteArrayOutputStream()
         def cmds = new DataOutputStream(cmdStream)
+        def sendBytes = "Hello World".getBytes("UTF-8")
         cmds.writeUTF(":cmd:import:collection:index") // send command
         cmds.writeUTF("test_collection") // send collection
         cmds.writeUTF("test_index") // send index name
         cmds.writeUTF("file_name_part001") // send file
-        cmds.writeLong(1234567l) // send file length
+        cmds.writeLong(sendBytes.length) // send file length
         cmds.writeUTF("test_delivery_key")
         cmds.writeUTF("test_delivery_version")
         cmds.writeUTF("TEST_STRATEGY")
         def snappyOut = new SnappyOutputStream(cmdStream)
-        snappyOut.write("Hello World".getBytes("UTF-8"))
+        snappyOut.write(sendBytes)
         snappyOut.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -94,12 +98,14 @@ class DatabaseImportSessionSpec extends Specification {
             assert info.getFileType() == ImportMetaFileInformation.FileType.INDEX
             assert info.getCollection() == "test_collection"
             assert info.getIndexName() == "test_index"
-            assert info.getFileLength() == 1234567l
+            assert info.getFileLength() == 11l
             assert info.getDeliveryVersion() == "test_delivery_version"
             assert info.getDeliveryKey() == "test_delivery_key"
             assert info.getStrategy() == "TEST_STRATEGY"
             assert info.getFileName() == "file_name_part001"
+            return "sha1testhash"
         }
+        dataInputStream.readUTF() == "sha1testhash"
         cleanup:
         dataInputStream.close()
         cmds.close()

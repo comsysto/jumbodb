@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class JumboOutputFormat extends TextOutputFormat<Text, NullWritable> {
     @Override
-    public void checkOutputSpecs(JobContext job) throws FileAlreadyExistsException, IOException {
+    public void checkOutputSpecs(JobContext job) throws IOException {
         // CARSTEN implement all spec checks odb.
         super.checkOutputSpecs(job);
     }

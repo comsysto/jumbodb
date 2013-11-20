@@ -70,7 +70,7 @@ public class JumboImportConnection implements Closeable {
         }
     }
 
-    public void importIndex(IndexInfo indexInfo, OnCopyCallback callback) {
+    public void importIndex(IndexInfo indexInfo, OnCopyCallback callback) throws InvalidFileHashException {
         try {
             dos.writeUTF(":cmd:import:collection:index");
             dos.writeUTF(indexInfo.getCollection());
@@ -81,13 +81,17 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(indexInfo.getDeliveryVersion());
             dos.writeUTF(indexInfo.getIndexStrategy());
             dos.flush();
-            callback.onCopy(snappyOutputStream);
+            String sha1Hash = callback.onCopy(snappyOutputStream);
+            String sha1HashRemote = dis.readUTF();
+            if(!sha1Hash.equals(sha1HashRemote)) {
+                throw new InvalidFileHashException("SHA-1 hash for index-file " + indexInfo.getCollection() + "/" + indexInfo.getIndexName() + "/" + indexInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+            }
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
     }
 
-    public void importData(DataInfo dataInfo, OnCopyCallback callback) {
+    public void importData(DataInfo dataInfo, OnCopyCallback callback) throws InvalidFileHashException {
         try {
             dos.writeUTF(":cmd:import:collection:data");
             dos.writeUTF(dataInfo.getCollection());
@@ -97,7 +101,11 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(dataInfo.getDeliveryVersion());
             dos.writeUTF(dataInfo.getDataStrategy());
             dos.flush();
-            callback.onCopy(snappyOutputStream);
+            String sha1Hash = callback.onCopy(snappyOutputStream);
+            String sha1HashRemote = dis.readUTF();
+            if(!sha1Hash.equals(sha1HashRemote)) {
+                throw new InvalidFileHashException("SHA-1 hash for data-file " + dataInfo.getCollection() + "/" + dataInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+            }
         } catch (IOException e) {
             throw new UnhandledException(e);
         }

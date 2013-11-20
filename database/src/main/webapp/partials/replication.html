@@ -29,7 +29,7 @@
                     <td>{{replication.state}}</td>
                     <td>
                         <div class="progress progress-striped {{replication.state == 'RUNNING' && 'active'||''}}">
-                            <div class="bar" style="width: {{replication.percentage}}%;">{{replication.percentage}}%</div>
+                            <div class="progress-bar" style="width: {{replication.percentage}}%;">{{replication.percentage}}%</div>
                         </div>
                         <p>
                             {{replication.deliveryChunkKey}} - {{replication.version}}

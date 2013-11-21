@@ -12,9 +12,9 @@ class GeohashBoundaryBoxQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify boundary box parsing #queryValue"() {
         expect:
-        def retriever = new GeohashBoundaryBoxQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, queryValue))
+        def retriever = new GeohashQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, queryValue))
         def container = retriever.getValue()
-        container instanceof GeohashBoundaryBoxContainer
+        container instanceof GeohashContainer
         def value = container.getSplittedBoxes()[0] // upperLeftBox
         Integer.toBinaryString(value.getGeohashFirstMatchingBits()) == firstMatchingBits
         value.getBitsToShift() == numberOfMatchingBits
@@ -26,7 +26,7 @@ class GeohashBoundaryBoxQueryValueRetrieverSpec extends Specification {
 
     def "expect exception on bullshit string"() {
         when:
-        new GeohashBoundaryBoxQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, ["bullshit", "andso"]))
+        new GeohashQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, ["bullshit", "andso"]))
         then:
         thrown ClassCastException
     }

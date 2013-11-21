@@ -4,17 +4,25 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Carsten Hufe
  */
-public class GeohashBoundaryBoxContainer {
+public class GeohashContainer {
     // leftTop, rightTop
     // leftBottom, rightBottom
 
     private List<GeohashBoundaryBox> splittedBoxes = new LinkedList<GeohashBoundaryBox>();
     private Map<GeohashCoords, GeohashBoundaryBox> localCache = new HashMap<GeohashCoords, GeohashBoundaryBox>();
+    private RangeMeterBox rangeMeterBox;
+
+    public RangeMeterBox getRangeMeterBox() {
+        return rangeMeterBox;
+    }
+
+    public void setRangeMeterBox(RangeMeterBox rangeMeterBox) {
+        this.rangeMeterBox = rangeMeterBox;
+    }
 
     public boolean add(GeohashBoundaryBox geohashBoundaryBox) {
         return splittedBoxes.add(geohashBoundaryBox);

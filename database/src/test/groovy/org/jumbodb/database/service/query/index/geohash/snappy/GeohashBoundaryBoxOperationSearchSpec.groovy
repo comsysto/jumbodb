@@ -4,7 +4,6 @@ import org.jumbodb.common.geo.geohash.GeoHash
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -80,6 +79,6 @@ class GeohashBoundaryBoxOperationSearchSpec extends Specification {
         when:
         def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, [[1f, 2f], [3f, 4f]]))
         then:
-        valueRetriever instanceof GeohashBoundaryBoxQueryValueRetriever
+        valueRetriever instanceof GeohashQueryValueRetriever
     }
 }

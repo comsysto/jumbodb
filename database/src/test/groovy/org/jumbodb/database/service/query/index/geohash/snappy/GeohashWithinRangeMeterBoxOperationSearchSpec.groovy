@@ -20,15 +20,17 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
         def geohash = GeoHash.withBitPrecision(testValue[0], testValue[1], 32).intValue()
         operation.matching(new GeohashCoords(geohash, testValue[0], testValue[1]), operation.getQueryValueRetriever(queryClause)) == isEqual
         where:
-        value                          | testValue              | isEqual
-        [[48.207688, 11.331185], 1]    | [48.208416, 11.332958] | false  // olching
-        [[48.207688, 11.331185], 864]  | [48.200000, 11.332958] | false // olching
-        [[48.207688, 11.331185], 865]  | [48.200000, 11.332958] | true // olching
-        [[48.207688, 11.331185], 1000] | [48.200000, 11.332958] | true // olching
-        // FIXME london problem with zero meridian
-//        [[51.516652, -0.131793], 100]  | [51.536652, -0.010000] | true // london
-////        [[51.516652, -0.131793], 1000]  | [51.536652, 0.0100000] | true // london
-////        [[51.516652, -0.131793], 1000]  | [51.536652, 0.0000000] | true // london
+        value                           | testValue              | isEqual
+        [[48.207688, 11.331185], 1]     | [48.208416, 11.332958] | false  // olching
+        [[48.207688, 11.331185], 864]   | [48.200000, 11.332958] | false // olching
+        [[48.207688, 11.331185], 865]   | [48.200000, 11.332958] | true // olching
+        [[48.207688, 11.331185], 1000]  | [48.200000, 11.332958] | true // olching
+        [[51.516652, -0.131793], 8713]  | [51.536652, -0.010000] | true // london
+        [[51.516652, -0.131793], 8712]  | [51.536652, -0.010000] | false // london
+        [[51.516652, -0.131793], 10056] | [51.536652, 0.0100000] | true // london
+        [[51.516652, -0.131793], 10055] | [51.536652, 0.0100000] | false // london
+        [[51.516652, -0.131793], 9383]  | [51.536652, 0.0000000] | true // london
+        [[51.516652, -0.131793], 9382]  | [51.536652, 0.0000000] | false // london
     }
 
     @Unroll
@@ -51,7 +53,7 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
         [[5.0, 5.0], 1]        | 1
         [[1.0, 20.48], 200000] | 6
         [[9.9, 20.48], 1]      | 9
-        [[9.9, 20.48], 200000] | 9
+        [[9.9, 20.48], 200000] | 0 // before 9
         [[10.0, 20.48], 1]     | 9
         [[10.0, 20.48], 1]     | 9 // outside
     }
@@ -71,7 +73,7 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
         [[1.0, 20.48], 1]      | -1073671086   | -1062627760 | true
         [[1.0, 20.48], 1]      | -1073671086   | -1062627760 | true
         [[1.0, 20.49], 1]      | -1073671086   | -1062627760 | false
-        [[9.9, 20.48], 200000] | -1073671086   | -1062627760 | false
+        [[9.9, 20.48], 200000] | -1073671086   | -1062627760 | true // before false?
 
     }
 
@@ -79,6 +81,6 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
         when:
         def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1f, 2f], 5]))
         then:
-        valueRetriever instanceof GeohashWithingRangeMeterQueryValueRetriever
+        valueRetriever instanceof GeohashQueryValueRetriever
     }
 }

@@ -96,6 +96,6 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
     }
 
     public boolean throwErrorOnInvalidDataset() {
-        return false;
+        return true;
     }
 }

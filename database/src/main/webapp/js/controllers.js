@@ -1,14 +1,12 @@
-define(['angular' ], function (angular) {
+define(['angular', "js/monitoring/monitoringControllers.js" ], function (angular) {
 	'use strict';
 
 	/* Controllers */
 
-	return angular.module('jumbodb.controllers', [])
+	return angular.module('jumbodb.controllers', ['jumbodb.monitoringControllers'])
 		// Sample controller where service is being used
 		.controller('OverviewCtrl', ['$scope', '$http', function ($scope, $http) {
-			$http.get('jumbodb/rest/status').success(function(data) {
-				$scope.status = data;
-			});
+			$scope.overviewTemplate = 'partials/monitoring/serverMonitoring.html';
 		}])
 		.controller("HelpCtrl", [function(){}])
 		// More involved example where controller is required from an external file
@@ -232,11 +230,11 @@ define(['angular' ], function (angular) {
 			}
 		}])
 		.controller("MonitoringCtrl", ["$scope", "$http", function($scope, $http){
-
 			$scope.tabs = [
-				{content: "Server Information under construction..", title: "Server", active: true},
-				{content: "Query information under construction..", title: "Query", active: false},
-				{content: "Import information under construction..", title: "Import", active: false}
+				//TODO Check again if it is possible to supply controllers here!  (Is there a better way to encapsulate sub views?  )
+				{template: "partials/monitoring/serverMonitoring.html", title: "Server", active: true},
+				{template: "partials/monitoring/queryMonitoring.html", title: "Query", active: false},
+				{template: "partials/monitoring/importMonitoring.html",  title: "Import", active: false}
 			];
 		}]);
 });

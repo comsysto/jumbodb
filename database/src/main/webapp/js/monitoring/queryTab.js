@@ -6,24 +6,96 @@
  * To change this template use File | Settings | File Templates.
  */
 define([], function () {
+	var collectionDataColumnName = "Collection",
+		htmlSelectorForChartDiv = "div#firstChart";
+
+	function setBasicChartSettings(myChart) {
+		myChart.setBounds(60, 30, "80%", 305);
+		var x = myChart.addCategoryAxis("x", "Date");
+		x.addOrderRule("Date");
+		myChart.addMeasureAxis("y", "Queries");
+		myChart.addSeries(collectionDataColumnName, dimple.plot.area);
+
+	}
+
+	function addLegendTitle(svg) {
+		// This block simply adds the legend title. I put it into a d3 data
+		// object to split it onto 2 lines.  This technique works with any
+		// number of lines, it isn't dimple specific.
+		svg.selectAll("title_text")
+			.data(["Click legend to", "show/hide collections:"])
+			.enter()
+			.append("text")
+			.attr("x", 499)
+			.attr("y", function (d, i) {
+				return 90 + i * 14;
+			})
+			.style("font-family", "sans-serif")
+			.style("font-size", "10px")
+			.style("color", "Black")
+			.text(function (d) {
+				return d;
+			});
+	}
+
+	function makeLegendsSelectable(myChart, svg, data, myLegend) {
+		// This is a critical step.  By doing this we orphan the legend. This
+		// means it will not respond to graph updates.  Without this the legend
+		// will redraw when the chart refreshes removing the unchecked item and
+		// also dropping the events we define below.
+		myChart.legends = [];
+		//addLegendTitle(svg);
+		// Get a unique list of Owner values to use when filtering
+		var filterValues = dimple.getUniqueValues(data, collectionDataColumnName);
+		// Get all the rectangles from our now orphaned legend
+		myLegend.shapes.selectAll("rect")
+			// Add a click event to each rectangle
+			.on("click", function (e) {
+				// This indicates whether the item is already visible or not
+				var hide = false;
+				var newFilters = [];
+				// If the filters contain the clicked shape hide it
+				filterValues.forEach(function (f) {
+					if (f === e.aggField.slice(-1)[0]) {
+						hide = true;
+					} else {
+						newFilters.push(f);
+					}
+				});
+				// Hide the shape or show it
+				if (hide) {
+					d3.select(this).style("opacity", 0.2);
+				} else {
+					newFilters.push(e.aggField.slice(-1)[0]);
+					d3.select(this).style("opacity", 0.8);
+				}
+				// Update the filters
+				filterValues = newFilters;
+				// Filter the data
+				myChart.data = dimple.filterData(data, collectionDataColumnName, filterValues);
+				// Passing a duration parameter makes the chart animate. Without
+				// it there is no transition
+				myChart.draw(800);
+			});
+	}
 
 	return {
 		template: "partials/monitoring/queryMonitoring.html",
 		title: "Query",
 		active: false,
 		select: function (){
-			$("div#firstChart").html("");
-			var svg = dimple.newSvg("div#firstChart", $("div#firstChart").width(), $("div#firstChart").height());
-			var data = [
-				{ "Word":"Hello", "Awesomeness":2000 },
-				{ "Word":"World", "Awesomeness":3000 }
-			];
-			var chart = new dimple.chart(svg, data);
-			chart.addCategoryAxis("x", "Word");
-			chart.addMeasureAxis("y", "Awesomeness");
-			chart.addSeries(null, dimple.plot.bar);
-			chart.draw();
+			$(htmlSelectorForChartDiv).html("");
+			//n
+			var svg = dimple.newSvg(htmlSelectorForChartDiv, $(htmlSelectorForChartDiv).width() - 20, $(htmlSelectorForChartDiv).height());
+			d3.tsv("js/monitoring/example_data.tsv", function (data) {
+				var myChart = new dimple.chart(svg, data);
+				setBasicChartSettings(myChart);
+				var myLegend = myChart.addLegend("85%", "10%", 20, 500, "left");
+				myChart.draw();
+				makeLegendsSelectable(myChart, svg, data, myLegend);
+			});
 		}
 	}
 });
+
 

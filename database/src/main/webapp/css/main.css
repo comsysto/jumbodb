@@ -32,6 +32,8 @@ body {
     margin: -20px -20px 20px;
 }
 
+
+
 /* Styles you shouldn't keep as they are for displaying this base example only */
 .content .col-md-10,
 .content .col-md-4 {
@@ -80,6 +82,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 .null { color: blue; }
 .key { color: black; font-weight: bold}
 
+h3.chartHeadline{
+    margin-top: 30px;
+}
 /*.table {*/
     /*font-size: 12px;*/
 /*}*/

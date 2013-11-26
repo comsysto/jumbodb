@@ -5,15 +5,15 @@
  * Time: 4:11 PM
  * To change this template use File | Settings | File Templates.
  */
-define([], function () {
+define(["dimple"], function () {
 	var collectionDataColumnName = "Collection",
-		htmlSelectorForChartDiv = "div#firstChart";
+		xPositionOfLegend = "86%";
 
-	function setBasicChartSettings(myChart) {
+	function setBasicChartSettings(myChart, columnName) {
 		myChart.setBounds(60, 30, "80%", 305);
 		var x = myChart.addCategoryAxis("x", "Date");
 		x.addOrderRule("Date");
-		myChart.addMeasureAxis("y", "Queries");
+		myChart.addMeasureAxis("y", columnName);
 		myChart.addSeries(collectionDataColumnName, dimple.plot.area);
 
 	}
@@ -26,9 +26,9 @@ define([], function () {
 			.data(["Click legend to", "show/hide collections:"])
 			.enter()
 			.append("text")
-			.attr("x", 499)
+			.attr("x", xPositionOfLegend)
 			.attr("y", function (d, i) {
-				return 90 + i * 14;
+				return 30 + i * 14;
 			})
 			.style("font-family", "sans-serif")
 			.style("font-size", "10px")
@@ -44,7 +44,7 @@ define([], function () {
 		// will redraw when the chart refreshes removing the unchecked item and
 		// also dropping the events we define below.
 		myChart.legends = [];
-		//addLegendTitle(svg);
+		addLegendTitle(svg);
 		// Get a unique list of Owner values to use when filtering
 		var filterValues = dimple.getUniqueValues(data, collectionDataColumnName);
 		// Get all the rectangles from our now orphaned legend
@@ -79,21 +79,25 @@ define([], function () {
 			});
 	}
 
+	function addChart(htmlSelectorForChartDiv, columnName) {
+		$(htmlSelectorForChartDiv).html("");
+		var svg = dimple.newSvg(htmlSelectorForChartDiv, $(htmlSelectorForChartDiv).width() - 20, $(htmlSelectorForChartDiv).height());
+		d3.tsv("js/monitoring/example_data.tsv", function (data) {
+			var myChart = new dimple.chart(svg, data);
+			setBasicChartSettings(myChart, columnName);
+			var myLegend = myChart.addLegend(xPositionOfLegend, "10%", 20, 500, "left");
+			myChart.draw();
+			makeLegendsSelectable(myChart, svg, data, myLegend);
+		});
+	}
+
 	return {
 		template: "partials/monitoring/queryMonitoring.html",
 		title: "Query",
 		active: false,
 		select: function (){
-			$(htmlSelectorForChartDiv).html("");
-			//n
-			var svg = dimple.newSvg(htmlSelectorForChartDiv, $(htmlSelectorForChartDiv).width() - 20, $(htmlSelectorForChartDiv).height());
-			d3.tsv("js/monitoring/example_data.tsv", function (data) {
-				var myChart = new dimple.chart(svg, data);
-				setBasicChartSettings(myChart);
-				var myLegend = myChart.addLegend("86%", "10%", 20, 500, "left");
-				myChart.draw();
-				makeLegendsSelectable(myChart, svg, data, myLegend);
-			});
+			addChart("div#firstChart", "Queries");
+			addChart("div#secondChart", "SizeOfReturnedData");
 		}
 	}
 });

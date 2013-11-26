@@ -1,9 +1,9 @@
-define(['angular', "js/monitoring/queryTab.js", "js/monitoring/monitoringControllers.js" ], function (angular, queryTab) {
+define(['angular', "js/monitoring/queryTabConfig.js", "js/monitoring/serverTabConfig.js", "js/monitoring/importTabConfig.js" ], function (angular, queryTabConfig, serverTabConfig, importTabConfig) {
 	'use strict';
 
 	/* Controllers */
 
-	return angular.module('jumbodb.controllers', ['jumbodb.monitoringControllers'])
+	return angular.module('jumbodb.controllers', [])
 		// Sample controller where service is being used
 		.controller('OverviewCtrl', ['$scope', '$http', function ($scope, $http) {
 			$scope.overviewTemplate = 'partials/monitoring/serverMonitoring.html';
@@ -233,9 +233,9 @@ define(['angular', "js/monitoring/queryTab.js", "js/monitoring/monitoringControl
 			$scope.loadTabContent = function(tab){tab.select()};
 			$scope.tabs = [
 				//TODO Check again if it is possible to supply controllers here!  (Is there a better way to encapsulate sub views?  )
-				{template: "partials/monitoring/serverMonitoring.html", title: "Server", active: true, select: function(){}},
-				queryTab,
-				{template: "partials/monitoring/importMonitoring.html",  title: "Import", active: false, select: function(){}}
+				serverTabConfig,
+				queryTabConfig,
+				importTabConfig
 			];
 		}]);
 });

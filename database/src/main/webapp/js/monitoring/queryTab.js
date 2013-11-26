@@ -90,7 +90,7 @@ define([], function () {
 			d3.tsv("js/monitoring/example_data.tsv", function (data) {
 				var myChart = new dimple.chart(svg, data);
 				setBasicChartSettings(myChart);
-				var myLegend = myChart.addLegend("85%", "10%", 20, 500, "left");
+				var myLegend = myChart.addLegend("86%", "10%", 20, 500, "left");
 				myChart.draw();
 				makeLegendsSelectable(myChart, svg, data, myLegend);
 			});

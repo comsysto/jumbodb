@@ -4,6 +4,10 @@
     <title></title>
 </head>
 <body>
+<div class="page-header">
+    <h2>Monitoring</h2>
+</div>
+
 <div>
     <tabset select="alert('55')">
         <tab ng-repeat="tab in tabs" heading="{{tab.title}}" active="tab.active" disabled="tab.disabled" select="loadTabContent(tab)">

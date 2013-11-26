@@ -9,6 +9,7 @@ import org.jumbodb.database.service.query.index.IndexStrategyManager
 import spock.lang.Specification
 
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.ThreadPoolExecutor
 
 /**
  * @author Carsten Hufe
@@ -22,7 +23,7 @@ class ImportServerSpec extends Specification {
         def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def config = new JumboConfiguration(12002, 12001, Mock(File), Mock(File))
         def importServer = new ImportServer(config, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock)
-        def executorMock = Mock(ExecutorService)
+        def executorMock = Mock(ThreadPoolExecutor)
         importServer.setExecutorService(executorMock)
         importServer.start()
         when:
@@ -44,7 +45,7 @@ class ImportServerSpec extends Specification {
         def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def config = new JumboConfiguration(13002, 13001, Mock(File), Mock(File))
         def importServer = new ImportServer(config, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock)
-        def executorMock = Mock(ExecutorService)
+        def executorMock = Mock(ThreadPoolExecutor)
         importServer.setExecutorService(executorMock)
         importServer.start()
         when:

@@ -73,6 +73,10 @@ public class ImportServer {
     public boolean isServerActive() {
         return serverActive;
     }
+
+    public void setExecutorService(ThreadPoolExecutor executorService) {
+        this.executorService = executorService;
+    }
 }
 
 

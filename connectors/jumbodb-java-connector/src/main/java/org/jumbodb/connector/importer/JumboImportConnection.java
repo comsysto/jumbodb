@@ -29,6 +29,9 @@ public class JumboImportConnection implements Closeable {
             mcos = createMonitorCountingOutputStream(outputStream);
             dos = new DataOutputStream(mcos);
             bufferedOutputStream = new BufferedOutputStream(mcos, JumboConstants.BUFFER_SIZE);   // make configurable
+            // THIS is only luck that it works, because snappy writes it header in constructor to stream!
+            // But because it's wrapped in a BufferedStream it works, this one sends the data on next flush
+            // We should fix this
             snappyOutputStream = new SnappyOutputStream(bufferedOutputStream);
             dis = new DataInputStream(socket.getInputStream());
             int protocolVersion = dis.readInt();

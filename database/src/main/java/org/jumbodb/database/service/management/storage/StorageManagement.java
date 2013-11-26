@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.UnhandledException;
 
 import java.io.*;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -23,12 +22,14 @@ import org.jumbodb.data.common.meta.ActiveProperties;
 import org.jumbodb.data.common.meta.DeliveryProperties;
 import org.jumbodb.data.common.meta.IndexProperties;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
+import org.jumbodb.database.service.importer.ImportServer;
 import org.jumbodb.database.service.management.storage.dto.collections.DeliveryChunk;
 import org.jumbodb.database.service.management.storage.dto.collections.DeliveryVersion;
 import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
 import org.jumbodb.database.service.management.storage.dto.deliveries.VersionedJumboCollection;
 import org.jumbodb.database.service.management.storage.dto.index.CollectionIndex;
+import org.jumbodb.database.service.management.storage.dto.maintenance.TemporaryFiles;
 import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilCollection;
 import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilIndex;
 import org.jumbodb.database.service.query.JumboSearcher;
@@ -36,8 +37,6 @@ import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.xerial.snappy.SnappyInputStream;
 
 /**
@@ -53,15 +52,50 @@ public class StorageManagement {
 
     private JumboConfiguration config;
     private JumboSearcher jumboSearcher;
+    private ImportServer importServer;
 
 
-    public StorageManagement(JumboConfiguration config, JumboSearcher jumboSearcher) {
+    public StorageManagement(JumboConfiguration config, JumboSearcher jumboSearcher, ImportServer importServer) {
         this.config = config;
         this.jumboSearcher = jumboSearcher;
+        this.importServer = importServer;
     }
 
     private void onDataChanged() {
         jumboSearcher.onDataChanged();
+    }
+
+    public TemporaryFiles getMaintenanceTemporaryFilesInfo() {
+        File tempDataPath = getTempDataPath();
+        long dataSize = 0l;
+        if(tempDataPath.exists()) {
+            dataSize = FileUtils.sizeOfDirectory(tempDataPath);
+        }
+        File tempIndexPath = getTempIndexPath();
+        long indexSize = 0l;
+        if(tempIndexPath.exists()) {
+            indexSize = FileUtils.sizeOfDirectory(tempIndexPath);
+        }
+        String sizeFormated = FileUtils.byteCountToDisplaySize(dataSize + indexSize);
+        File[] files = tempDataPath.listFiles(FOLDER_FILTER);
+        return new TemporaryFiles(sizeFormated, files != null ? files.length : 0, importServer.isImportRunning());
+    }
+
+    public void maintenanceCleanupTemporaryFiles() {
+        try {
+            FileUtils.deleteDirectory(getTempDataPath());
+            FileUtils.deleteDirectory(getTempIndexPath());
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
+    private File getTempIndexPath() {
+        return new File(config.getIndexPath().getAbsolutePath() + "/.tmp/");
+    }
+
+    private File getTempDataPath() {
+        return new File(config.getDataPath().getAbsolutePath() + "/.tmp/");
     }
 
     public List<QueryUtilCollection> findQueryableCollections() {

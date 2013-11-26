@@ -13,6 +13,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * User: carsten
@@ -23,7 +24,7 @@ public class ImportServer {
     private Logger log = LoggerFactory.getLogger(ImportServer.class);
 
     private boolean serverActive = false;
-    private ExecutorService executorService = Executors.newCachedThreadPool();
+    private ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newCachedThreadPool();
     private JumboConfiguration config;
     private JumboSearcher jumboSearcher;
     private DataStrategyManager dataStrategyManager;
@@ -65,12 +66,12 @@ public class ImportServer {
         serverSocket.close();
     }
 
-    public boolean isServerActive() {
-        return serverActive;
+    public boolean isImportRunning() {
+        return executorService.getActiveCount() > 0;
     }
 
-    public void setExecutorService(ExecutorService executorService) {
-        this.executorService = executorService;
+    public boolean isServerActive() {
+        return serverActive;
     }
 }
 

@@ -38,12 +38,7 @@ body {
     min-height: 500px;
 }
 
-/* Give a quick and non-cross-browser friendly divider */
-.content .col-md-4 {
-    padding-left: 9px;
-    margin-left: 10px;
-    border-left: 1px solid #eee;
-}
+
 
 .topbar .btn {
     border: 0;

@@ -2,14 +2,19 @@ require.config({
 	//baseUrl : "js",
 	paths: {
 		angular: "../jumbodb/resources/angularjs/angular",
-		angularUiBootstrap: '../jumbodb/resources/angular-ui-bootstrap/ui-bootstrap',
-		angularUiBootstrapTpls: '../jumbodb/resources/angular-ui-bootstrap/ui-bootstrap-tpls'
+		angularUiBootstrap: 'libs/ui-bootstrap-0.7.0',
+		angularUiBootstrapTpls: 'libs/ui-bootstrap-tpls-0.7.0',
+		dimple: 'libs/dimple.v1.1.2',
+		d3js: "../jumbodb/resources/d3js/d3",
+		underscore:'../jumbodb/resources/underscorejs/underscore'
 	},
 	shim: {
 		'angular' : {exports : 'angular'},
 		'angularUiBootstrap': {exports : 'angularUi',
 								deps: ['angular']},
-		'angularUiBootstrapTpls': {deps: ['angular', 'angularUiBootstrap']}
+		'angularUiBootstrapTpls': {deps: ['angular', 'angularUiBootstrap']},
+		'dimple' : {deps: ['d3js']},
+		'underscore':{exports:'_'}
 	},
 	priority: [
 		"angular",

@@ -1,4 +1,4 @@
-define(['angular' ], function (angular) {
+define(['angular', 'dimple', 'underscore' ], function (angular) {
 	'use strict';
 
 	/* Controllers */
@@ -10,7 +10,19 @@ define(['angular' ], function (angular) {
 			});
 		}])
 		.controller('queryMonitoringController', ['$scope', '$http', function ($scope, $http) {
-			$scope.test = "test query..";
+			this.drawNumberOfQueriesChart = function (){
+				var svg = dimple.newSvg("div#firstChart", $("div#firstChart").width(), $("div#firstChart").height());
+				var data = [
+					{ "Word":"Hello", "Awesomeness":2000 },
+					{ "Word":"World", "Awesomeness":3000 }
+				];
+				var chart = new dimple.chart(svg, data);
+				chart.addCategoryAxis("x", "Word");
+				chart.addMeasureAxis("y", "Awesomeness");
+				chart.addSeries(null, dimple.plot.bar);
+				chart.draw();
+			};
+
 		}])
 		.controller('importMonitoringController', ['$scope', '$http', function ($scope, $http) {
 			$scope.test = "test import..";

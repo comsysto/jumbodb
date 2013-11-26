@@ -1,4 +1,4 @@
-define(['angular', "js/monitoring/monitoringControllers.js" ], function (angular) {
+define(['angular', "js/monitoring/queryTab.js", "js/monitoring/monitoringControllers.js" ], function (angular, queryTab) {
 	'use strict';
 
 	/* Controllers */
@@ -230,10 +230,11 @@ define(['angular', "js/monitoring/monitoringControllers.js" ], function (angular
 			}
 		}])
 		.controller("MonitoringCtrl", ["$scope", "$http", function($scope, $http){
+			$scope.loadTabContent = function(tab){tab.select()};
 			$scope.tabs = [
 				//TODO Check again if it is possible to supply controllers here!  (Is there a better way to encapsulate sub views?  )
 				{template: "partials/monitoring/serverMonitoring.html", title: "Server", active: true},
-				{template: "partials/monitoring/queryMonitoring.html", title: "Query", active: false},
+				queryTab,
 				{template: "partials/monitoring/importMonitoring.html",  title: "Import", active: false}
 			];
 		}]);

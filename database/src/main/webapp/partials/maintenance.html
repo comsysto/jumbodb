@@ -1,0 +1,29 @@
+<div class="page-header">
+    <h2>Maintenance</h2>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-success" ng-show="msg.success">
+            {{msg.message}}
+        </div>
+        <div class="alert alert-danger" ng-show="msg.error">
+            {{msg.message}}
+        </div>
+        <h3>Data from aborted and failed imports</h3>
+        <p/>
+        <p>
+            Number of failed imports: {{info.numberOfAbortedDeliveries}}
+        </p>
+        <p>
+            Allocated temporary data: {{info.temporaryDataSize}}
+        </p>
+        <p>
+            Import running: {{info.importRunning}}
+        </p>
+        <p>
+            <button class="btn btn-danger" ng-click="cleanupTemporaryFiles()"><i class="icon-trash icon-white"></i> Cleanup temporary data</button>
+        </p>
+    </div>
+</div>

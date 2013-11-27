@@ -166,11 +166,15 @@ public class RestController {
         return storageManagement.getMaintenanceTemporaryFilesInfo();
     }
 
-    @RequestMapping(value = "/maintenance/tmp/cleanup", method = RequestMethod.POST)
+    @RequestMapping(value = "/maintenance/tmp/cleanup", method = RequestMethod.DELETE)
     @ResponseBody
     public Message maintenanceCleanup() {
-        storageManagement.maintenanceCleanupTemporaryFiles();
-        return new Message("success", "Deleted temporary files of aborted deliveries!");
+        try {
+            storageManagement.maintenanceCleanupTemporaryFiles();
+            return new Message("success", "Deleted temporary files of aborted deliveries!");
+        } catch(Exception e) {
+            return new Message("error", "Exception: " + e.getMessage());
+        }
     }
 
 

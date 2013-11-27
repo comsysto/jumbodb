@@ -128,6 +128,32 @@ define(['angular' ], function (angular) {
 				});
 			}
 		}])
+		.controller('MaintenanceCtrl', ['$scope', '$http', function($scope, $http){
+            $scope.info = {};
+            $scope.msg = {};
+            fetchData();
+
+            $scope.cleanupTemporaryFiles = function() {
+                $http.delete('jumbodb/rest/maintenance/tmp/cleanup').success(function(data) {
+                    fetchData();
+                    buildMessage(data);
+                });
+            }
+
+            function buildMessage(data) {
+                var msg = {};
+                msg.error = (data.type == 'error')
+                msg.success = (data.type == 'success')
+                msg.message = data.message;
+                $scope.msg = msg;
+            }
+
+            function fetchData() {
+                $http.get('jumbodb/rest/maintenance/tmp/info').success(function(data) {
+                    $scope.info = data;
+                });
+            }
+        }])
 		.controller('HelpCtrl', [function(){}])
 		// More involved example where controller is required from an external file
 		.controller('BrowseCtrl', ['$scope', '$http', function($scope, $http) {

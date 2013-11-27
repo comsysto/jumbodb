@@ -83,6 +83,9 @@ public class StorageManagement {
 
     public void maintenanceCleanupTemporaryFiles() {
         try {
+            if(importServer.isImportRunning()) {
+               throw new IllegalStateException("Import is running, so cleanup is not possible!");
+            }
             FileUtils.deleteDirectory(getTempDataPath());
             FileUtils.deleteDirectory(getTempIndexPath());
         } catch (IOException e) {

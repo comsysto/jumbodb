@@ -60,7 +60,7 @@ class StorageManagementSpec extends Specification {
         then:
         info.getNumberOfAbortedDeliveries() == 0
         info.getTemporaryDataSize() == "0 bytes"
-        1 * importServerMock.isImportRunning() >> false
+        2 * importServerMock.isImportRunning() >> false
     }
 
     def "findQueryableCollections should return two queryable collections"() {

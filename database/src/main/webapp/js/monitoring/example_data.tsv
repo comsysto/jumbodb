@@ -1,4 +1,4 @@
-Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData	Cost of Sales	Price
+Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData	ResponseTimes(ms)	Price
 01/01/2011	Jan-11	br.collection.name.shops	Aperture	Delta	12	Standard	1765	97.25	242.48	54.08
 01/01/2011	Jan-11	br.collection.name.shops	Aperture	Eta	12	Standard	673	13.41	81.12	47.44
 01/01/2011	Jan-11	uk.collection.name.shops	Aperture	Omicron	8	Standard	1100	99.16	232.52	83.2

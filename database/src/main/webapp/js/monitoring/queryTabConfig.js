@@ -9,12 +9,12 @@ define(["dimple"], function () {
 	var collectionDataColumnName = "Collection",
 		xPositionOfLegend = "86%";
 
-	function setBasicChartSettings(myChart, columnName) {
+	function setBasicChartSettings(myChart, columnName, chartType) {
 		myChart.setBounds(60, 30, "80%", 305);
 		var x = myChart.addCategoryAxis("x", "Date");
 		x.addOrderRule("Date");
 		myChart.addMeasureAxis("y", columnName);
-		myChart.addSeries(collectionDataColumnName, dimple.plot.area);
+		myChart.addSeries(collectionDataColumnName, chartType);
 
 	}
 
@@ -75,16 +75,16 @@ define(["dimple"], function () {
 				myChart.data = dimple.filterData(data, collectionDataColumnName, filterValues);
 				// Passing a duration parameter makes the chart animate. Without
 				// it there is no transition
-				myChart.draw(800);
+				myChart.draw(600, false);
 			});
 	}
 
-	function addChart(htmlSelectorForChartDiv, columnName) {
+	function addChart(htmlSelectorForChartDiv, columnName, chartType) {
 		$(htmlSelectorForChartDiv).html("");
 		var svg = dimple.newSvg(htmlSelectorForChartDiv, $(htmlSelectorForChartDiv).width() - 20, $(htmlSelectorForChartDiv).height());
 		d3.tsv("js/monitoring/example_data.tsv", function (data) {
 			var myChart = new dimple.chart(svg, data);
-			setBasicChartSettings(myChart, columnName);
+			setBasicChartSettings(myChart, columnName, chartType);
 			var myLegend = myChart.addLegend(xPositionOfLegend, "10%", 20, 500, "left");
 			myChart.draw();
 			makeLegendsSelectable(myChart, svg, data, myLegend);
@@ -96,8 +96,9 @@ define(["dimple"], function () {
 		title: "Query",
 		active: false,
 		select: function (){
-			addChart("div#firstChart", "Queries");
-			addChart("div#secondChart", "SizeOfReturnedData");
+			addChart("div#firstChart", "Queries", dimple.plot.area);
+			addChart("div#secondChart", "SizeOfReturnedData", dimple.plot.area);
+			addChart("div#thirdChart", "ResponseTimes(ms)", dimple.plot.line);
 		}
 	}
 });

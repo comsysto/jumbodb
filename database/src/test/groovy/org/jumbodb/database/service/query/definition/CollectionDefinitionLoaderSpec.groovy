@@ -7,6 +7,8 @@ import org.jumbodb.database.service.importer.ImportMetaData
 import org.jumbodb.database.service.importer.ImportMetaIndex
 import spock.lang.Specification
 
+import java.text.SimpleDateFormat
+
 /**
  * @author Carsten Hufe
  */
@@ -15,7 +17,8 @@ class CollectionDefinitionLoaderSpec extends Specification {
     def dataPath = new File(rootPath.absolutePath + "/data/")
     def indexPath = new File(rootPath.absolutePath + "/index/")
 
-    def createDataCollectionVersion(collection, chunkKey, version) {
+    def createDataCollectionVersion(collection, chunkKey, version, date) {
+        def sdf = new SimpleDateFormat("yyyy-MM-dd")
         def versionPath = dataPath.absolutePath + "/" + collection + "/" + chunkKey + "/" + version + "/"
         new File(versionPath).mkdirs()
         new File(versionPath + "part0001").createNewFile()
@@ -24,7 +27,7 @@ class CollectionDefinitionLoaderSpec extends Specification {
         new File(versionPath + "part0002").createNewFile()
         new File(versionPath + "part0002.sha1").createNewFile()
         new File(versionPath + "part0002.chunks.snappy").createNewFile()
-        def metaData = new DeliveryProperties.DeliveryMeta(version, "Some info", new Date(), "Data imported from", "TEST_STRATEGY")
+        def metaData = new DeliveryProperties.DeliveryMeta(version, "Some info", sdf.parse(date), "Data imported from", "TEST_STRATEGY")
         DeliveryProperties.write(new File(versionPath + "/delivery.properties"), metaData)
     }
 
@@ -57,8 +60,8 @@ class CollectionDefinitionLoaderSpec extends Specification {
 
     def "verify loaded data structure"() {
         setup:
-        createDataCollectionVersion("testCollection1", "firstChunk", "version1")
-        createDataCollectionVersion("testCollection1", "firstChunk", "version2")
+        createDataCollectionVersion("testCollection1", "firstChunk", "version1", "2012-01-01")
+        createDataCollectionVersion("testCollection1", "firstChunk", "version2", "2012-01-02")
         createIndexCollectionVersion("testCollection1", "firstChunk", "version1")
         createIndexCollectionVersion("testCollection1", "firstChunk", "version2")
         writeActiveProperties("testCollection1", "firstChunk", "version2")

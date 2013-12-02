@@ -76,6 +76,7 @@ define(["dimple"], function () {
 				// Passing a duration parameter makes the chart animate. Without
 				// it there is no transition
 				myChart.draw(600, false);
+
 			});
 	}
 
@@ -83,6 +84,7 @@ define(["dimple"], function () {
 		$(htmlSelectorForChartDiv).html("");
 		var svg = dimple.newSvg(htmlSelectorForChartDiv, $(htmlSelectorForChartDiv).width() - 20, $(htmlSelectorForChartDiv).height());
 		d3.tsv("js/monitoring/example_data.tsv", function (data) {
+
 			var myChart = new dimple.chart(svg, data);
 			setBasicChartSettings(myChart, columnName, chartType);
 			var myLegend = myChart.addLegend(xPositionOfLegend, "10%", 20, 500, "left");
@@ -96,8 +98,8 @@ define(["dimple"], function () {
 		title: "Query",
 		active: false,
 		select: function (){
-			addChart("div#firstChart", "Queries", dimple.plot.area);
-			addChart("div#secondChart", "SizeOfReturnedData", dimple.plot.area);
+			addChart("div#firstChart", "Queries",  dimple.plot.bubble);
+			addChart("div#secondChart", "SizeOfReturnedData", dimple.plot.bubble);
 			addChart("div#thirdChart", "ResponseTimes(ms)", dimple.plot.line);
 		}
 	}

@@ -179,6 +179,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/03/2011	Mar-11	uk.collection.name.shops	Tyrell Corp	Kappa	12	Standard	3275	98.66	567.98	68.26
 01/03/2011	Mar-11	uk.collection.name.shops	Tyrell Corp	Kappa	18	Standard	17963	99.13	2561.47	56.13
 01/03/2011	Mar-11	br.wifi.events	Wayne Ent	Pi	12	Giftset	0	56.92	175.42	77.84
+01/03/2011	Mar-11	uk.wifi.events	Wayne Ent	Pi	12	Giftset	0	56.92	175.42	77.84
 01/03/2011	Mar-11	br.wifi.available.dates	Aperture	Delta	12	Standard	633	20.32	100.25	62.34
 01/03/2011	Mar-11	uk.wifi.available.dates	Aperture	Eta	12	Standard	710	4.76	85.73	47.53
 01/03/2011	Mar-11	uk.wifi.available.dates	Aperture	Omicron	8	Standard	6704	45.51	1292.54	75.89
@@ -1080,7 +1081,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/03/2012	Mar-12	uk.wifi.available.dates	Tyrell Corp	Kappa	18	Standard	14006	29.18	2039.21	57.31
 01/03/2012	Mar-12	uk.wifi.available.dates	Wayne Ent	Pi	12	Giftset	430	10.98	88.89	81.37
 01/04/2012	Apr-12	br.collection.name.shops	Aperture	Delta	12	Standard	2080	99.08	298.59	56.5
-01/04/2012	Apr-12	uk.collection.name.shops	Aperture	Eta	12	Standard	789	14.33	94.43	47.11
+01/04/2012	Apr-12	br.collection.name.shops	Aperture	Eta	12	Standard	789	14.33	94.43	47.11
 01/04/2012	Apr-12	uk.collection.name.shops	Aperture	Omicron	8	Standard	374	32.37	79.59	83.76
 01/04/2012	Apr-12	uk.collection.name.shops	Aperture	Omicron	12	Deluxe	484	53.64	101.2	82.3
 01/04/2012	Apr-12	uk.collection.name.shops	Aperture	Omicron	12	Giftset	3485	99.21	766.88	86.61
@@ -1116,7 +1117,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/04/2012	Apr-12	br.wifi.events	Tyrell Corp	Kappa	18	Standard	9250	98.18	1397.89	59.48
 01/04/2012	Apr-12	uk.wifi.events	Wayne Ent	Pi	12	Giftset	0	66.93	106.81	76.72
 01/04/2012	Apr-12	br.wifi.available.dates	Aperture	Delta	12	Standard	883	24.04	131.93	58.81
-01/04/2012	Apr-12	uk.wifi.available.dates	Aperture	Eta	12	Standard	733	4.48	87.63	47.06
+01/04/2012	Apr-12	br.wifi.available.dates	Aperture	Eta	12	Standard	733	4.48	87.63	47.06
 01/04/2012	Apr-12	uk.wifi.available.dates	Aperture	Omicron	8	Standard	47877	48.7	7395.23	60.8
 01/04/2012	Apr-12	uk.wifi.available.dates	Aperture	Omicron	12	Deluxe	439	11.88	96.83	86.82
 01/04/2012	Apr-12	uk.wifi.available.dates	Aperture	Omicron	12	Giftset	2903	42.23	658.75	89.32
@@ -1327,12 +1328,12 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/07/2012	Jul-12	uk.collection.name.shops	Rekall	Beta	18	Standard	5094	97.54	1255.85	97.04
 01/07/2012	Jul-12	uk.collection.name.shops	Rekall	Beta	60	Standard	649	30.08	167.5	101.58
 01/07/2012	Jul-12	uk.collection.name.shops	Stark Ind	Omega	12	Standard	434	67.37	69.44	62.98
-01/07/2012	Jul-12	uk.wifi.events	Tyrell Corp	Kappa	8	Standard	1077	92.39	213.31	77.96
-01/07/2012	Jul-12	uk.wifi.events	Tyrell Corp	Kappa	12	Standard	3073	98.74	546.91	70.05
+01/07/2012	Jul-12	br.wifi.events	Tyrell Corp	Kappa	8	Standard	1077	92.39	213.31	77.96
+01/07/2012	Jul-12	br.wifi.events	Tyrell Corp	Kappa	12	Standard	3073	98.74	546.91	70.05
 01/07/2012	Jul-12	uk.wifi.events	Tyrell Corp	Kappa	18	Standard	4139	93.9	683.27	64.98
 01/07/2012	Jul-12	uk.wifi.events	Wayne Ent	Pi	12	Giftset	417	65.23	90.65	85.56
-01/07/2012	Jul-12	uk.wifi.available.dates	Aperture	Delta	12	Standard	703	19.82	105.25	58.93
-01/07/2012	Jul-12	uk.wifi.available.dates	Aperture	Eta	12	Standard	514	4.11	61.51	47.11
+01/07/2012	Jul-12	br.wifi.available.dates	Aperture	Delta	12	Standard	703	19.82	105.25	58.93
+01/07/2012	Jul-12	br.wifi.available.dates	Aperture	Eta	12	Standard	514	4.11	61.51	47.11
 01/07/2012	Jul-12	uk.wifi.available.dates	Aperture	Omicron	8	Standard	3603	21.12	629.15	68.73
 01/07/2012	Jul-12	uk.wifi.available.dates	Aperture	Omicron	12	Deluxe	364	9.33	87.87	95.02
 01/07/2012	Jul-12	uk.wifi.available.dates	Aperture	Omicron	12	Giftset	2015	37.95	499.57	97.59
@@ -1367,7 +1368,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/07/2012	Jul-12	uk.wifi.available.dates	Tyrell Corp	Kappa	12	Standard	4583	39.24	861.94	74.03
 01/07/2012	Jul-12	uk.wifi.available.dates	Tyrell Corp	Kappa	18	Standard	1084	21.23	205.81	74.73
 01/07/2012	Jul-12	uk.wifi.available.dates	Wayne Ent	Pi	12	Giftset	964	10.96	153.93	62.85
-01/08/2012	Aug-12	uk.collection.name.shops	Aperture	Delta	12	Standard	2753	98.2	374.8	53.59
+01/08/2012	Aug-12	br.collection.name.shops	Aperture	Delta	12	Standard	2753	98.2	374.8	53.59
 01/08/2012	Aug-12	uk.collection.name.shops	Aperture	Eta	12	Standard	715	15.02	81.38	44.8
 01/08/2012	Aug-12	uk.collection.name.shops	Aperture	Omicron	8	Standard	373	30.32	82.94	87.52
 01/08/2012	Aug-12	uk.collection.name.shops	Aperture	Omicron	12	Deluxe	352	43.92	78.08	87.31
@@ -1401,9 +1402,9 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/08/2012	Aug-12	uk.collection.name.shops	Stark Ind	Omega	12	Standard	351	55.41	56.21	63.03
 01/08/2012	Aug-12	uk.collection.name.shops	Tyrell Corp	Kappa	8	Standard	1147	86.14	221.81	76.12
 01/08/2012	Aug-12	uk.collection.name.shops	Tyrell Corp	Kappa	12	Standard	3502	99.86	623.52	70.08
-01/08/2012	Aug-12	uk.wifi.events	Tyrell Corp	Kappa	18	Standard	5737	94.79	896.81	61.53
+01/08/2012	Aug-12	br.wifi.events	Tyrell Corp	Kappa	18	Standard	5737	94.79	896.81	61.53
 01/08/2012	Aug-12	uk.wifi.events	Wayne Ent	Pi	12	Giftset	488	63.46	101.25	81.67
-01/08/2012	Aug-12	uk.wifi.available.dates	Aperture	Delta	12	Standard	921	16.39	132.94	56.81
+01/08/2012	Aug-12	br.wifi.available.dates	Aperture	Delta	12	Standard	921	16.39	132.94	56.81
 01/08/2012	Aug-12	uk.wifi.available.dates	Aperture	Eta	12	Standard	589	3.13	67.03	44.79
 01/08/2012	Aug-12	uk.wifi.available.dates	Aperture	Omicron	8	Standard	35723	57.47	5511.15	60.72
 01/08/2012	Aug-12	uk.wifi.available.dates	Aperture	Omicron	12	Deluxe	273	6.7	65.14	93.92
@@ -1439,7 +1440,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/08/2012	Aug-12	uk.wifi.available.dates	Tyrell Corp	Kappa	12	Standard	4813	28.44	907.85	74.24
 01/08/2012	Aug-12	uk.wifi.available.dates	Tyrell Corp	Kappa	18	Standard	1828	17.85	306.41	65.98
 01/08/2012	Aug-12	uk.wifi.available.dates	Wayne Ent	Pi	12	Giftset	298	5.83	54.73	72.3
-01/09/2012	Sep-12	uk.collection.name.shops	Aperture	Delta	12	Standard	1579	95.92	227.17	56.63
+01/09/2012	Sep-12	br.collection.name.shops	Aperture	Delta	12	Standard	1579	95.92	227.17	56.63
 01/09/2012	Sep-12	uk.collection.name.shops	Aperture	Eta	12	Standard	1062	17.86	111.25	41.23
 01/09/2012	Sep-12	uk.collection.name.shops	Aperture	Omicron	8	Standard	358	28.75	76.98	84.63
 01/09/2012	Sep-12	uk.collection.name.shops	Aperture	Omicron	12	Deluxe	322	42.19	70.51	86.18
@@ -1471,11 +1472,11 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/09/2012	Sep-12	uk.collection.name.shops	Rekall	Beta	18	Standard	9643	97.46	2197.54	89.7
 01/09/2012	Sep-12	uk.collection.name.shops	Rekall	Beta	60	Standard	728	33.48	189.92	102.68
 01/09/2012	Sep-12	uk.collection.name.shops	Stark Ind	Omega	12	Standard	326	41.26	52.12	62.93
-01/09/2012	Sep-12	uk.wifi.events	Tyrell Corp	Kappa	8	Standard	963	65.39	185.1	75.66
+01/09/2012	Sep-12	br.wifi.events	Tyrell Corp	Kappa	8	Standard	963	65.39	185.1	75.66
 01/09/2012	Sep-12	uk.wifi.events	Tyrell Corp	Kappa	12	Standard	3719	99.51	660.66	69.92
 01/09/2012	Sep-12	uk.wifi.events	Tyrell Corp	Kappa	18	Standard	3836	96.03	582.09	59.73
 01/09/2012	Sep-12	uk.wifi.events	Wayne Ent	Pi	12	Giftset	576	61.35	120.65	82.44
-01/09/2012	Sep-12	uk.wifi.available.dates	Aperture	Delta	12	Standard	849	20.09	119.3	55.31
+01/09/2012	Sep-12	br.wifi.available.dates	Aperture	Delta	12	Standard	849	20.09	119.3	55.31
 01/09/2012	Sep-12	uk.wifi.available.dates	Aperture	Eta	12	Standard	758	4.56	79.67	41.37
 01/09/2012	Sep-12	uk.wifi.available.dates	Aperture	Omicron	8	Standard	25705	45.07	4062.31	62.2
 01/09/2012	Sep-12	uk.wifi.available.dates	Aperture	Omicron	12	Deluxe	307	8.9	72.59	93.06
@@ -1485,7 +1486,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/09/2012	Sep-12	uk.wifi.available.dates	Aperture	Sigma	12	Giftset	353	13.44	132.17	147.37
 01/09/2012	Sep-12	uk.wifi.available.dates	Aperture	Sigma	12	Standard	1030	27.66	400.11	152.9
 01/09/2012	Sep-12	uk.wifi.available.dates	Aperture	Tau	12	Standard	338	13.72	69.52	80.96
-01/09/2012	Sep-12	uk.wifi.events	Aperture	Delta	12	Standard	849	20.09	119.3	55.31
+01/09/2012	Sep-12	br.wifi.events	Aperture	Delta	12	Standard	849	20.09	119.3	55.31
 01/09/2012	Sep-12	uk.wifi.events	Aperture	Eta	12	Standard	758	4.56	79.67	41.37
 01/09/2012	Sep-12	uk.wifi.events	Aperture	Omicron	8	Standard	25705	45.07	4062.31	62.2
 01/09/2012	Sep-12	uk.wifi.events	Aperture	Omicron	12	Deluxe	307	8.9	72.59	93.06
@@ -1495,7 +1496,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/09/2012	Sep-12	uk.wifi.events	Aperture	Sigma	12	Giftset	353	13.44	132.17	147.37
 01/09/2012	Sep-12	uk.wifi.events	Aperture	Sigma	12	Standard	1030	27.66	400.11	152.9
 01/09/2012	Sep-12	uk.wifi.events	Aperture	Tau	12	Standard	338	13.72	69.52	80.96
-01/09/2012	Sep-12	uk.wifi.available.dates	Black Mesa	Epsilon	12	Standard	406	5.92	58.52	56.73
+01/09/2012	Sep-12	br.wifi.available.dates	Black Mesa	Epsilon	12	Standard	406	5.92	58.52	56.73
 01/09/2012	Sep-12	uk.wifi.available.dates	Black Mesa	Iota	12	Giftset	270	12.83	64.3	93.74
 01/09/2012	Sep-12	uk.wifi.available.dates	Black Mesa	Iota	12	Standard	1225	30.56	284.86	91.53
 01/09/2012	Sep-12	uk.wifi.available.dates	Black Mesa	Lambda	8	Standard	514	14.01	84.47	64.68
@@ -1521,7 +1522,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/09/2012	Sep-12	uk.wifi.available.dates	Tyrell Corp	Kappa	12	Standard	4459	35.32	854.61	75.44
 01/09/2012	Sep-12	uk.wifi.available.dates	Tyrell Corp	Kappa	18	Standard	2094	27.9	314.62	59.14
 01/09/2012	Sep-12	uk.wifi.available.dates	Wayne Ent	Pi	12	Giftset	458	6.09	63.79	54.82
-01/10/2012	Oct-12	uk.collection.name.shops	Aperture	Delta	12	Standard	1984	96.81	279.71	55.49
+01/10/2012	Oct-12	br.collection.name.shops	Aperture	Delta	12	Standard	1984	96.81	279.71	55.49
 01/10/2012	Oct-12	uk.collection.name.shops	Aperture	Eta	12	Standard	1141	16.35	116.92	40.33
 01/10/2012	Oct-12	uk.collection.name.shops	Aperture	Omicron	8	Standard	268	30.17	58.88	86.48
 01/10/2012	Oct-12	uk.collection.name.shops	Aperture	Omicron	12	Deluxe	412	44.05	92.32	88.19
@@ -1557,7 +1558,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/10/2012	Oct-12	uk.collection.name.shops	Tyrell Corp	Kappa	12	Standard	2908	99.46	521.9	70.64
 01/10/2012	Oct-12	uk.wifi.events	Tyrell Corp	Kappa	18	Standard	18926	97.63	2922.43	60.78
 01/10/2012	Oct-12	uk.wifi.events	Wayne Ent	Pi	12	Giftset	606	63.81	126.33	82.05
-01/10/2012	Oct-12	uk.wifi.available.dates	Aperture	Delta	12	Standard	948	21.76	138.75	57.61
+01/10/2012	Oct-12	br.wifi.available.dates	Aperture	Delta	12	Standard	948	21.76	138.75	57.61
 01/10/2012	Oct-12	uk.wifi.available.dates	Aperture	Eta	12	Standard	989	4.98	101.62	40.44
 01/10/2012	Oct-12	uk.wifi.available.dates	Aperture	Omicron	8	Standard	40907	54.8	7098.97	68.31
 01/10/2012	Oct-12	uk.wifi.available.dates	Aperture	Omicron	12	Deluxe	395	9.16	95.84	95.5
@@ -1593,7 +1594,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/10/2012	Oct-12	uk.wifi.available.dates	Tyrell Corp	Kappa	12	Standard	3362	41.35	655.27	76.72
 01/10/2012	Oct-12	uk.wifi.available.dates	Tyrell Corp	Kappa	18	Standard	20936	38.25	3209.46	60.34
 01/10/2012	Oct-12	uk.wifi.available.dates	Wayne Ent	Pi	12	Giftset	131	4.72	27.07	81.33
-01/11/2012	Nov-12	uk.collection.name.shops	Aperture	Delta	12	Standard	1472	97.55	212.72	56.88
+01/11/2012	Nov-12	br.collection.name.shops	Aperture	Delta	12	Standard	1472	97.55	212.72	56.88
 01/11/2012	Nov-12	uk.collection.name.shops	Aperture	Eta	12	Standard	862	15.14	96.68	44.15
 01/11/2012	Nov-12	uk.collection.name.shops	Aperture	Omicron	8	Standard	290	30.4	65.01	88.24
 01/11/2012	Nov-12	uk.collection.name.shops	Aperture	Omicron	12	Deluxe	372	40.68	82.66	87.46
@@ -1627,9 +1628,9 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/11/2012	Nov-12	uk.collection.name.shops	Stark Ind	Omega	12	Standard	380	38.02	60.6	62.77
 01/11/2012	Nov-12	uk.collection.name.shops	Tyrell Corp	Kappa	8	Standard	991	63.51	191.85	76.2
 01/11/2012	Nov-12	uk.collection.name.shops	Tyrell Corp	Kappa	12	Standard	2306	98.74	426.23	72.75
-01/11/2012	Nov-12	uk.wifi.events	Tyrell Corp	Kappa	18	Standard	9765	98.36	1545.59	62.3
+01/11/2012	Nov-12	br.wifi.events	Tyrell Corp	Kappa	18	Standard	9765	98.36	1545.59	62.3
 01/11/2012	Nov-12	uk.wifi.events	Wayne Ent	Pi	12	Giftset	758	77.94	150.99	78.41
-01/11/2012	Nov-12	uk.wifi.available.dates	Aperture	Delta	12	Standard	785	18.8	118.16	59.25
+01/11/2012	Nov-12	br.wifi.available.dates	Aperture	Delta	12	Standard	785	18.8	118.16	59.25
 01/11/2012	Nov-12	uk.wifi.available.dates	Aperture	Eta	12	Standard	806	4.11	90.32	44.11
 01/11/2012	Nov-12	uk.wifi.available.dates	Aperture	Omicron	8	Standard	35326	54.93	6269.11	69.85
 01/11/2012	Nov-12	uk.wifi.available.dates	Aperture	Omicron	12	Deluxe	322	8.56	77.87	95.19
@@ -1665,7 +1666,7 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/11/2012	Nov-12	uk.wifi.available.dates	Tyrell Corp	Kappa	12	Standard	3135	34.07	631	79.22
 01/11/2012	Nov-12	uk.wifi.available.dates	Tyrell Corp	Kappa	18	Standard	7093	32.13	1124.11	62.38
 01/11/2012	Nov-12	uk.wifi.available.dates	Wayne Ent	Pi	12	Giftset	172	5.85	36.26	82.98
-01/12/2012	Dec-12	uk.collection.name.shops	Aperture	Delta	12	Standard	1553	98.19	224.14	56.81
+01/12/2012	Dec-12	br.collection.name.shops	Aperture	Delta	12	Standard	1553	98.19	224.14	56.81
 01/12/2012	Dec-12	uk.collection.name.shops	Aperture	Eta	12	Standard	928	17.48	103.87	44.06
 01/12/2012	Dec-12	uk.collection.name.shops	Aperture	Omicron	8	Standard	470	33.84	105.05	87.97
 01/12/2012	Dec-12	uk.collection.name.shops	Aperture	Omicron	12	Deluxe	721	48.42	160.24	87.48
@@ -1698,10 +1699,10 @@ Date	Month	Collection	Owner	Brand	Pack Size	Pack Type	Queries	SizeOfReturnedData
 01/12/2012	Dec-12	uk.collection.name.shops	Rekall	Beta	60	Standard	974	50.46	262.19	105.96
 01/12/2012	Dec-12	uk.collection.name.shops	Stark Ind	Omega	12	Standard	625	36.61	100.93	63.56
 01/12/2012	Dec-12	uk.collection.name.shops	Tyrell Corp	Kappa	8	Standard	1416	64.3	274.58	76.33
-01/12/2012	Dec-12	uk.wifi.events	Tyrell Corp	Kappa	12	Standard	5180	99.33	902.41	68.57
+01/12/2012	Dec-12	br.wifi.events	Tyrell Corp	Kappa	12	Standard	5180	99.33	902.41	68.57
 01/12/2012	Dec-12	uk.wifi.events	Tyrell Corp	Kappa	18	Standard	11113	99.07	1772.06	62.76
 01/12/2012	Dec-12	uk.wifi.events	Wayne Ent	Pi	12	Giftset	1380	74.75	274.82	78.38
-01/12/2012	Dec-12	uk.wifi.available.dates	Aperture	Delta	12	Standard	808	20.13	123.47	60.15
+01/12/2012	Dec-12	br.wifi.available.dates	Aperture	Delta	12	Standard	808	20.13	123.47	60.15
 01/12/2012	Dec-12	uk.wifi.available.dates	Aperture	Eta	12	Standard	709	4.11	79.43	44.1
 01/12/2012	Dec-12	uk.wifi.available.dates	Aperture	Omicron	8	Standard	32105	46.36	5601.16	68.67
 01/12/2012	Dec-12	uk.wifi.available.dates	Aperture	Omicron	12	Deluxe	519	10.91	125.36	95.08

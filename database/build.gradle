@@ -93,6 +93,8 @@ dependencies {
 //    compile 'org.webjars:angular-ui-bootstrap:0.6.0-1'
     compile 'org.webjars:d3js:3.3.5'
     compile 'org.webjars:underscorejs:1.5.2'
+    compile 'org.webjars:sockjs-client:0.3.4'
+    compile 'org.webjars:stomp-websocket:2.3.0'
 
 
     testCompile "org.codehaus.groovy:groovy-all:2.0.8"
@@ -122,6 +124,7 @@ dependencies {
     compile("org.springframework:spring-messaging:$springVersion")
     compile("org.projectreactor:reactor-tcp:1.0.0.RC1")
     compile("com.fasterxml.jackson.core:jackson-databind:2.3.0")
+
 
 }
 

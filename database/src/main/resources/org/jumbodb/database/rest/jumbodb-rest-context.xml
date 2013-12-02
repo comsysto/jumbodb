@@ -19,6 +19,8 @@
     <mvc:resources mapping="/resources/requirejs/**" location="classpath:/META-INF/resources/webjars/requirejs/2.1.8/" />
     <mvc:resources mapping="/resources/d3js/**" location="classpath:/META-INF/resources/webjars/d3js/3.3.5/" />
     <mvc:resources mapping="/resources/underscorejs/**" location="classpath:/META-INF/resources/webjars/underscorejs/1.5.2/" />
+    <mvc:resources mapping="/resources/sockjs/**" location="classpath:/META-INF/resources/webjars/sockjs-client/0.3.4/" />
+    <mvc:resources mapping="/resources/stomp/**" location="classpath:/META-INF/resources/webjars/stomp-websocket/2.3.0/" />
 
     <context:component-scan base-package="org.jumbodb.database.rest">
     </context:component-scan>
@@ -67,4 +69,6 @@
             </util:list>
         </property>
     </bean>
+
+
 </beans>

@@ -5,7 +5,7 @@
  * Time: 4:11 PM
  * To change this template use File | Settings | File Templates.
  */
-define(["dimple"], function () {
+define(["dimple", "sockjs", "stomp"], function () {
 	var collectionDataColumnName = "Collection",
 		xPositionOfLegend = "86%";
 
@@ -93,6 +93,42 @@ define(["dimple"], function () {
 		});
 	}
 
+	function initializeWebSocket(){
+		var stompClient = null;
+		connect();
+		window.setTimeout(function(){sendName()}, 3000);
+
+
+
+
+		function connect() {
+			var socket = new SockJS('hello');
+			stompClient = Stomp.over(socket);
+			stompClient.connect('', '', function(frame) {
+				//setConnected(true);
+				console.log('Connected: ' + frame);
+				stompClient.subscribe('/queue/greetings', function(greeting){
+					showGreeting(JSON.parse(greeting.body).content);
+				});
+			});
+		}
+
+		function disconnect() {
+			stompClient.disconnect();
+			setConnected(false);
+			console.log("Disconnected");
+		}
+
+		function sendName() {
+			var name = "alica";
+			stompClient.send("/app/hello", {}, JSON.stringify({ 'message': name }));
+		}
+
+		function showGreeting(message) {
+			alert(message);
+		}
+	}
+
 	return {
 		template: "partials/monitoring/queryMonitoring.html",
 		title: "Query",
@@ -101,6 +137,8 @@ define(["dimple"], function () {
 			addChart("div#firstChart", "Queries",  dimple.plot.bubble);
 			addChart("div#secondChart", "SizeOfReturnedData", dimple.plot.bubble);
 			addChart("div#thirdChart", "ResponseTimes(ms)", dimple.plot.line);
+
+			initializeWebSocket();
 		}
 	}
 });

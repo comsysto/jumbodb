@@ -6,7 +6,9 @@ require.config({
 		angularUiBootstrapTpls: 'libs/ui-bootstrap-tpls-0.7.0',
 		dimple: 'libs/dimple.v1.1.2',
 		d3js: "../jumbodb/resources/d3js/d3",
-		underscore:'../jumbodb/resources/underscorejs/underscore'
+		underscore:'../jumbodb/resources/underscorejs/underscore',
+		sockjs: '../jumbodb/resources/sockjs/sockjs',
+		stomp: '../jumbodb/resources/stomp/stomp'
 	},
 	shim: {
 		'angular' : {exports : 'angular'},
@@ -14,7 +16,9 @@ require.config({
 								deps: ['angular']},
 		'angularUiBootstrapTpls': {deps: ['angular', 'angularUiBootstrap']},
 		'dimple' : {deps: ['d3js']},
-		'underscore':{exports:'_'}
+		'underscore':{exports:'_'},
+		'sockjs': {exports: 'sockjs'},
+		'stomp' : {exports: 'stomp'}
 	},
 	priority: [
 		"angular",

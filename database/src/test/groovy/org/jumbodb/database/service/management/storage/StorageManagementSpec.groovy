@@ -1,7 +1,11 @@
 package org.jumbodb.database.service.management.storage
 
 import com.google.common.io.Files
+import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
+import org.apache.commons.lang.RandomStringUtils
+import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang.math.RandomUtils
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.connector.importer.IndexInfo
 import org.jumbodb.data.common.meta.ActiveProperties
@@ -9,6 +13,7 @@ import org.jumbodb.data.common.meta.DeliveryProperties
 import org.jumbodb.data.common.meta.IndexProperties
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.configuration.JumboConfiguration
+import org.jumbodb.database.service.importer.ImportServer
 import org.jumbodb.database.service.query.JumboSearcher
 import org.jumbodb.database.service.query.data.DataStrategy
 import org.jumbodb.database.service.query.index.IndexStrategy
@@ -20,10 +25,49 @@ import spock.lang.Unroll
  */
 class StorageManagementSpec extends Specification {
 
+    def "getMaintenanceTemporaryFilesInfo"() {
+        setup:
+        def jumboSearcherMock = Mock(JumboSearcher)
+        def importServerMock = Mock(ImportServer)
+        def dataDir = Files.createTempDir()
+        def dataContent = RandomStringUtils.randomAscii(1024 * 1024)
+        FileUtils.write(new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery/part0001"), dataContent)
+        def indexDir = Files.createTempDir()
+        FileUtils.write(new File(indexDir.getAbsolutePath() + "/.tmp/test_delivery/part0001"), dataContent)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
+        when:
+        def info = storageManagement.getMaintenanceTemporaryFilesInfo()
+        then:
+        info.isImportRunning()
+        info.getNumberOfAbortedDeliveries() == 1
+        info.getTemporaryDataSize() == "2 MB"
+        1 * importServerMock.isImportRunning() >> true
+    }
+
+    def "maintenanceCleanupTemporaryFiles"() {
+        setup:
+        def jumboSearcherMock = Mock(JumboSearcher)
+        def importServerMock = Mock(ImportServer)
+        def dataDir = Files.createTempDir()
+        def dataContent = RandomStringUtils.randomAscii(1024 * 1024)
+        FileUtils.write(new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery/part0001"), dataContent)
+        def indexDir = Files.createTempDir()
+        FileUtils.write(new File(indexDir.getAbsolutePath() + "/.tmp/test_delivery/part0001"), dataContent)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
+        when:
+        storageManagement.maintenanceCleanupTemporaryFiles()
+        def info = storageManagement.getMaintenanceTemporaryFilesInfo()
+        then:
+        info.getNumberOfAbortedDeliveries() == 0
+        info.getTemporaryDataSize() == "0 bytes"
+        2 * importServerMock.isImportRunning() >> false
+    }
+
     def "findQueryableCollections should return two queryable collections"() {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -36,7 +80,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         def querableCollections = storageManagement.findQueryableCollections()
         then:
@@ -71,6 +115,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -83,7 +128,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         expect:
         storageManagement.getActiveDeliveryVersion(collection, delivery) == expectedVersion
         cleanup:
@@ -102,6 +147,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -114,7 +160,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         def collections = storageManagement.getJumboCollections()
         then:
@@ -164,6 +210,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -176,7 +223,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         def metaIndex = storageManagement.getMetaIndexForDelivery("test_delivery1", "version1")
         then:
@@ -206,6 +253,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -218,7 +266,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         def metaIndex = storageManagement.getMetaIndexForDelivery("test_delivery3", "version4")
         def indexInfos = storageManagement.getIndexInfoForDelivery(metaIndex)
@@ -265,6 +313,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -277,7 +326,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         def metaIndex = storageManagement.getMetaDataForDelivery("test_delivery3", "version4", true)
         def dataInfos = storageManagement.getDataInfoForDelivery(metaIndex)
@@ -301,6 +350,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -313,7 +363,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         def metaIndex = storageManagement.getMetaIndexForDelivery("test_delivery3", "version4")
         def indexInfos = storageManagement.getIndexInfoForDelivery(metaIndex)
@@ -329,6 +379,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -341,7 +392,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         def metaData = storageManagement.getMetaDataForDelivery("test_delivery3", "version4", true)
         def dataInfos = storageManagement.getDataInfoForDelivery(metaData)
@@ -357,6 +408,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -369,7 +421,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         storageManagement.activateChunkedVersionForAllCollections("test_delivery1", "version1")
         then:
@@ -387,6 +439,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -399,7 +452,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         storageManagement.activateChunkedVersionInCollection("test_collection1", "test_delivery1", "version1")
         then:
@@ -417,6 +470,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -429,7 +483,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         storageManagement.deleteCompleteCollection("test_collection1")
         def collections = storageManagement.getJumboCollections()
@@ -446,6 +500,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -458,7 +513,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         storageManagement.deleteChunkedVersionForAllCollections("test_delivery1", "version1")
         def collections = storageManagement.getJumboCollections()
@@ -479,6 +534,7 @@ class StorageManagementSpec extends Specification {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataStrategyMock = Mock(DataStrategy)
+        def importServerMock = Mock(ImportServer)
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
@@ -491,7 +547,7 @@ class StorageManagementSpec extends Specification {
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
         createDefaultFileStructure(dataDir, indexDir)
-        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
         storageManagement.deleteChunkedVersionInCollection("test_collection1", "test_delivery1", "version1")
         def collections = storageManagement.getJumboCollections()

@@ -5,6 +5,7 @@ import org.jumbodb.database.service.exporter.StartReplication
 import org.jumbodb.database.service.management.status.StatusService
 import org.jumbodb.database.service.management.status.dto.ServerInformation
 import org.jumbodb.database.service.management.storage.StorageManagement
+import org.jumbodb.database.service.management.storage.dto.maintenance.TemporaryFiles
 import org.jumbodb.database.service.queryutil.QueryUtilService
 import org.jumbodb.database.service.queryutil.dto.QueryResult
 import spock.lang.Specification
@@ -14,29 +15,27 @@ import spock.lang.Specification
  * @author Carsten Hufe
  */
 class RestControllerSpec extends Specification {
-//    def a() {
-//        def controller = new RestController()
-//        def statusServiceMock = Mock(StatusService)
-//        def storageManagementMock = Mock(StorageManagement)
-//        def exportDeliveryServiceMock = Mock(ExportDeliveryService)
-//        def queryUtilServiceMock = Mock(QueryUtilService)
-//        controller.setExportDeliveryService(exportDeliveryServiceMock)
-//        controller.setStatusService(statusServiceMock)
-//        controller.setStorageManagement(storageManagementMock)
-//        controller.setQueryUtilService(queryUtilServiceMock)
-//    }
-
-
-    def "getStatus"() {
+    def "maintenanceInfo"() {
         setup:
         def controller = new RestController()
-        def statusServiceMock = Mock(StatusService)
-        def returnValueMock = Mock(ServerInformation)
-        controller.setStatusService(statusServiceMock)
+        def storageManagementMock = Mock(StorageManagement)
+        controller.setStorageManagement(storageManagementMock)
+        def returnValueMock = Mock(TemporaryFiles)
         when:
-        controller.getStatus() == returnValueMock
+        controller.maintenanceInfo() == returnValueMock
         then:
-        1 * statusServiceMock.getStatus() >> returnValueMock
+        1 * storageManagementMock.getMaintenanceTemporaryFilesInfo() >> returnValueMock
+    }
+
+    def "maintenanceCleanup"() {
+        setup:
+        def controller = new RestController()
+        def storageManagementMock = Mock(StorageManagement)
+        controller.setStorageManagement(storageManagementMock)
+        when:
+        controller.maintenanceCleanup()
+        then:
+        1 * storageManagementMock.maintenanceCleanupTemporaryFiles()
     }
 
     def "getJumboCollections"() {

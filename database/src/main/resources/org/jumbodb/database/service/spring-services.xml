@@ -136,6 +136,7 @@
     <bean id="storageManagement" class="org.jumbodb.database.service.management.storage.StorageManagement">
         <constructor-arg ref="jumboConfig"/>
         <constructor-arg ref="jumboSearcher"/>
+        <constructor-arg ref="importServer"/>
     </bean>
 
     <bean id="statusService" class="org.jumbodb.database.service.management.status.StatusService">

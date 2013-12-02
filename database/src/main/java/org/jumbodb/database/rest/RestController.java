@@ -1,7 +1,5 @@
 package org.jumbodb.database.rest;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.rest.dto.Message;
 import org.jumbodb.database.service.exporter.ExportDelivery;
 import org.jumbodb.database.service.exporter.ExportDeliveryService;
@@ -11,25 +9,15 @@ import org.jumbodb.database.service.management.status.dto.ServerInformation;
 import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.management.storage.dto.collections.JumboCollection;
 import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
+import org.jumbodb.database.service.management.storage.dto.maintenance.TemporaryFiles;
 import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilCollection;
-import org.jumbodb.database.service.query.CancelableTask;
-import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.queryutil.QueryUtilService;
 import org.jumbodb.database.service.queryutil.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.NumberFormat;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * User: carsten
@@ -171,6 +159,24 @@ public class RestController {
         exportDeliveryService.deleteReplication(id);
         return new Message("delete", "Replication was deleted.");
     }
+
+    @RequestMapping(value = "/maintenance/tmp/info", method = RequestMethod.GET)
+    @ResponseBody
+    public TemporaryFiles maintenanceInfo() {
+        return storageManagement.getMaintenanceTemporaryFilesInfo();
+    }
+
+    @RequestMapping(value = "/maintenance/tmp/cleanup", method = RequestMethod.DELETE)
+    @ResponseBody
+    public Message maintenanceCleanup() {
+        try {
+            storageManagement.maintenanceCleanupTemporaryFiles();
+            return new Message("success", "Deleted temporary files of aborted deliveries!");
+        } catch(Exception e) {
+            return new Message("error", "Exception: " + e.getMessage());
+        }
+    }
+
 
     @Autowired
     public void setStatusService(StatusService statusService) {

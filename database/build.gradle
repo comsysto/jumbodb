@@ -83,7 +83,7 @@ dependencies {
     compile project(':commons:geo')
     compile project(':connectors:jumbodb-java-connector')
 
-//    providedCompile 'javax.servlet:servlet-api:2.5'
+    //providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
     compile "org.webjars:jquery:1.9.1"
     compile "org.webjars:jquery-ui:1.9.2"
@@ -100,7 +100,7 @@ dependencies {
 
     testCompile "org.mockito:mockito-core:1.9.5"
 
-//    providedCompile 'javax.servlet:jsp-api:2.0'
+    //providedCompile 'javax.servlet:jsp-api:2.0'
     providedCompile "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
 //    providedCompile "org.apache.tomcat.embed:tomcat-embed-logging-log4j:${tomcatVersion}"
     providedCompile "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
@@ -115,6 +115,13 @@ dependencies {
 
     cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion"
     cargo "org.codehaus.cargo:cargo-ant:$cargoVersion"
+
+    //dependencies for websocket service
+   // compile("org.springframework.boot:spring-boot-starter-web:0.5.0.M6")
+    compile("org.springframework:spring-websocket:$springVersion")
+    compile("org.springframework:spring-messaging:$springVersion")
+    compile("org.projectreactor:reactor-tcp:1.0.0.RC1")
+    compile("com.fasterxml.jackson.core:jackson-databind:2.3.0")
 
 }
 

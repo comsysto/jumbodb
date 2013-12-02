@@ -5,7 +5,7 @@ package org.jumbodb.connector.importer;
  * Date: 2/26/13
  * Time: 4:48 PM
  */
-public class IndexInfo {
+public class IndexInfo implements Comparable<IndexInfo> {
     private String collection;
     private String indexName;
     private String filename;
@@ -52,6 +52,10 @@ public class IndexInfo {
         return indexStrategy;
     }
 
+    @Override
+    public int compareTo(IndexInfo o) {
+        return indexName.compareTo(o.indexName);
+    }
 
     @Override
     public String toString() {

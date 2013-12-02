@@ -20,6 +20,8 @@ import org.jumbodb.database.service.query.index.IndexStrategy
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.text.SimpleDateFormat
+
 /**
  * @author Carsten Hufe
  */
@@ -172,10 +174,10 @@ class StorageManagementSpec extends Specification {
         collections[0].getChunks()[0].getKey() == "test_delivery1"
         collections[0].getChunks()[0].getUncompressedSize() == 52l
         collections[0].getChunks()[0].getVersions().size() == 2
-        collections[0].getChunks()[0].getVersions()[0].getVersion() == "version1"
+        collections[0].getChunks()[0].getVersions()[0].getVersion() == "version2"
         collections[0].getChunks()[0].getVersions()[0].getInfo() == "some info"
         collections[0].getChunks()[0].getVersions()[0].getUncompressedSize() == 26l
-        collections[0].getChunks()[0].getVersions()[1].getVersion() == "version2"
+        collections[0].getChunks()[0].getVersions()[1].getVersion() == "version1"
         collections[0].getChunks()[0].getVersions()[1].getInfo() == "some info"
         collections[0].getChunks()[0].getVersions()[1].getUncompressedSize() == 26l
         collections[0].getChunks()[1].getKey() == "test_delivery2"
@@ -566,17 +568,17 @@ class StorageManagementSpec extends Specification {
     }
 
     def createDefaultFileStructure(File dataDir, File indexDir) {
-        makeDataCollection(dataDir, "test_collection1", "test_delivery1", "version1")
-        makeDataCollection(dataDir, "test_collection1", "test_delivery1", "version2")
+        makeDataCollection(dataDir, "test_collection1", "test_delivery1", "version1", "2013-12-01")
+        makeDataCollection(dataDir, "test_collection1", "test_delivery1", "version2", "2013-12-02")
         activateVersion(dataDir, "test_collection1", "test_delivery1", "version2")
 
-        makeDataCollection(dataDir, "test_collection1", "test_delivery2", "version3")
+        makeDataCollection(dataDir, "test_collection1", "test_delivery2", "version3", "2013-12-03")
         activateVersion(dataDir, "test_collection1", "test_delivery2", "version3")
 
-        makeDataCollection(dataDir, "test_collection2", "test_delivery1", "version1") // yes thats correct version1
+        makeDataCollection(dataDir, "test_collection2", "test_delivery1", "version1", "2013-12-01") // yes thats correct version1
         activateVersion(dataDir, "test_collection2", "test_delivery1", "version1")
 
-        makeDataCollection(dataDir, "test_collection3", "test_delivery3", "version4")
+        makeDataCollection(dataDir, "test_collection3", "test_delivery3", "version4", "2013-12-04")
         makeIndex(indexDir, "test_collection3", "test_delivery3", "version4", "test_index1")
         makeIndex(indexDir, "test_collection3", "test_delivery3", "version4", "test_index2")
         activateVersion(dataDir, "test_collection3", "test_delivery3", "version4")
@@ -589,14 +591,15 @@ class StorageManagementSpec extends Specification {
 
     }
 
-    def makeDataCollection(dataDir, collection, deliveryKey, version) {
+    def makeDataCollection(dataDir, collection, deliveryKey, version, date) {
+        def sdf = new SimpleDateFormat("yyyy-MM-dd")
         def path = dataDir.getAbsolutePath() + "/$collection/$deliveryKey/$version/"
         def bytes = "The real data".getBytes("UTF-8")
         SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), new File(path + "part0001"), bytes.length, 32768)
         SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), new File(path + "part0002"), bytes.length, 32768)
         def propsFile = new File(path + DeliveryProperties.DEFAULT_FILENAME)
         Files.createParentDirs(propsFile)
-        def meta = new DeliveryProperties.DeliveryMeta(version, "some info", new Date(), "source path", "test_data_strategy")
+        def meta = new DeliveryProperties.DeliveryMeta(version, "some info", sdf.parse(date), "source path", "test_data_strategy")
         DeliveryProperties.write(propsFile, meta)
     }
 

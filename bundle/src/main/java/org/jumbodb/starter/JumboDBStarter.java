@@ -24,8 +24,7 @@ public class JumboDBStarter {
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(9000);
         tomcat.setBaseDir(findApplicationPath() + "/work/");
-        Context context = tomcat.addWebapp("/", applicationPath);
-        context.setEffectiveMajorVersion(3);
+        tomcat.addWebapp("/", applicationPath);
         tomcat.start();
         tomcat.getServer().await();
     }

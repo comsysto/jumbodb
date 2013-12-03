@@ -16,8 +16,7 @@ public class JumboDevelopmentStarter {
     public static void main(String[] args) throws LifecycleException, ServletException {
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(9000);
-        Context context = tomcat.addWebapp("/", new File("./database/src/main/webapp/").getAbsolutePath());
-        context.setEffectiveMajorVersion(3);
+        tomcat.addWebapp("/", new File("./database/src/main/webapp/").getAbsolutePath());
         tomcat.start();
         tomcat.getServer().await();
     }

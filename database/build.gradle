@@ -111,9 +111,9 @@ dependencies {
     providedCompile "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
     providedCompile "org.eclipse.jdt.core.compiler:ecj:3.6"
 
+//    tomcat 'javax.servlet:javax.servlet-api:3.0.1'
     tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
     tomcat "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
-//    tomcat 'javax.servlet:javax.servlet-api:3.0.1'
     tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
         exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
     }

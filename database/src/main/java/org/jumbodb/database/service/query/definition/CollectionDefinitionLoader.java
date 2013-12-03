@@ -68,6 +68,7 @@ public class CollectionDefinitionLoader {
         for (File dataFile : dataFiles) {
             resDataFiles.put(dataFile.getName().hashCode(), dataFile);
         }
+        Collections.sort(resIndexFiles);
         return new DeliveryChunkDefinition(collectionName, chunkKey, resIndexFiles, resDataFiles, getDataStrategy(collectionDataFolder));
     }
 

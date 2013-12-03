@@ -94,34 +94,23 @@ define(["dimple", "sockjs", "stomp"], function () {
 	}
 
 	function initializeWebSocket(){
-		var stompClient = null;
-		connect();
-		window.setTimeout(function(){sendName()}, 3000);
 
+		var socket = new SockJS('hello');
+		var stompClient = Stomp.over(socket);
+		stompClient.connect('', '', function(frame) {
+			//setConnected(true);
+			console.log('Connected: ' + frame);
+			stompClient.subscribe('/queue/greetings', function(greeting){
+				showGreeting(JSON.parse(greeting.body).content);
 
-
-
-		function connect() {
-			var socket = new SockJS('hello');
-			stompClient = Stomp.over(socket);
-			stompClient.connect('', '', function(frame) {
-				//setConnected(true);
-				console.log('Connected: ' + frame);
-				stompClient.subscribe('/queue/greetings', function(greeting){
-					showGreeting(JSON.parse(greeting.body).content);
-				});
 			});
-		}
+		});
+		return stompClient;
+
 
 		function disconnect() {
 			stompClient.disconnect();
-			setConnected(false);
 			console.log("Disconnected");
-		}
-
-		function sendName() {
-			var name = "alica";
-			stompClient.send("/app/hello", {}, JSON.stringify({ 'message': name }));
 		}
 
 		function showGreeting(message) {
@@ -129,16 +118,27 @@ define(["dimple", "sockjs", "stomp"], function () {
 		}
 	}
 
+	function sendName(stompClient) {
+		var name = "alica";
+		stompClient.send("/app/hello", {}, JSON.stringify({ 'message': name }));
+	}
+
 	return {
 		template: "partials/monitoring/queryMonitoring.html",
 		title: "Query",
 		active: false,
-		select: function (){
+		select: function (scope){
 			addChart("div#firstChart", "Queries",  dimple.plot.bubble);
 			addChart("div#secondChart", "SizeOfReturnedData", dimple.plot.bubble);
 			addChart("div#thirdChart", "ResponseTimes(ms)", dimple.plot.line);
 
-			initializeWebSocket();
+			var stompClient = initializeWebSocket();
+			scope.sayHello = function(){
+				sendName(stompClient);
+			}
+
+
+
 		}
 	}
 });

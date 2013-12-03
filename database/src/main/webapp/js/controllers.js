@@ -256,12 +256,13 @@ define(['angular', "js/monitoring/queryTabConfig.js", "js/monitoring/serverTabCo
 			}
 		}])
 		.controller("MonitoringCtrl", ["$scope", "$http", function($scope, $http){
-			$scope.loadTabContent = function(tab){tab.select()};
+			$scope.loadTabContent = function(tab){tab.select($scope)};
 			$scope.tabs = [
 				//TODO Check again if it is possible to supply controllers here!  (Is there a better way to encapsulate sub views?  )
 				serverTabConfig,
 				queryTabConfig,
 				importTabConfig
 			];
+
 		}]);
 });

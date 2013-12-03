@@ -5,7 +5,7 @@ import java.io.File;
 /**
  * @author Carsten Hufe
  */
-public class IndexDefinition {
+public class IndexDefinition implements Comparable<IndexDefinition> {
     private String name;
     private File path;
     private String strategy;
@@ -26,6 +26,11 @@ public class IndexDefinition {
 
     public String getStrategy() {
         return strategy;
+    }
+
+    @Override
+    public int compareTo(IndexDefinition o) {
+        return name.compareTo(o.name);
     }
 
     @Override

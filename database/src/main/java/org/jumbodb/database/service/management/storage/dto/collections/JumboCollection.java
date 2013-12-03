@@ -94,7 +94,7 @@ public class JumboCollection implements Comparable<JumboCollection> {
 
     @Override
     public int compareTo(JumboCollection jumboCollection) {
-        return getName().compareTo(jumboCollection.getName());
+        return name.compareTo(jumboCollection.name);
     }
 
     @Override

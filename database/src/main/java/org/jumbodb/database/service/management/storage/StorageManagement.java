@@ -493,6 +493,7 @@ public class StorageManagement {
                 }
             }
         }
+        Collections.sort(result);
         return result;
     }
 
@@ -539,6 +540,7 @@ public class StorageManagement {
                 result.add(new IndexInfo(index.getCollection(), index.getIndexName(), indexFile.getName(), fileLength, index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexStrategy()));
             }
         }
+        Collections.sort(result);
         return result;
     }
 

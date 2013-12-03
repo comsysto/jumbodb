@@ -5,7 +5,7 @@ package org.jumbodb.connector.importer;
  * Date: 2/28/13
  * Time: 1:32 PM
  */
-public class MetaIndex {
+public class MetaIndex implements Comparable<MetaIndex> {
     private String collection;
     private String deliveryKey;
     private String deliveryVersion;
@@ -44,6 +44,11 @@ public class MetaIndex {
 
     public String getIndexSourceFields() {
         return indexSourceFields;
+    }
+
+    @Override
+    public int compareTo(MetaIndex o) {
+        return indexName.compareTo(o.indexName);
     }
 
     @Override

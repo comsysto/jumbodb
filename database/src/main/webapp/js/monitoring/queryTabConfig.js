@@ -95,7 +95,7 @@ define(["dimple", "sockjs", "stomp"], function () {
 
 	function initializeWebSocket(){
 
-		var socket = new SockJS('hello');
+		var socket = new SockJS('jumbodb/hello');
 		var stompClient = Stomp.over(socket);
 		stompClient.connect('', '', function(frame) {
 			//setConnected(true);

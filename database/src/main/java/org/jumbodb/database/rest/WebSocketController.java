@@ -9,11 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Created with IntelliJ IDEA.
  * User: alica
  * Date: 12/2/13
  * Time: 7:39 PM
- * To change this template use File | Settings | File Templates.
  */
 @Controller
 public class WebSocketController {
@@ -30,5 +28,6 @@ public class WebSocketController {
         Thread.sleep(3000); // simulated delay
         Greeting greeting = new Greeting("Hello, " + message.getMessage() + "!");
         messagingTemplate.convertAndSend("/queue/greetings", greeting);
+        System.out.println(message);
     }
 }

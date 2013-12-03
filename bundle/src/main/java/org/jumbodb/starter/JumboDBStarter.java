@@ -1,5 +1,6 @@
 package org.jumbodb.starter;
 
+import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.lang.StringUtils;
@@ -23,7 +24,8 @@ public class JumboDBStarter {
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(9000);
         tomcat.setBaseDir(findApplicationPath() + "/work/");
-        tomcat.addWebapp("/",  applicationPath);
+        Context context = tomcat.addWebapp("/", applicationPath);
+        context.setEffectiveMajorVersion(3);
         tomcat.start();
         tomcat.getServer().await();
     }

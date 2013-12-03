@@ -103,7 +103,9 @@ dependencies {
     testCompile "org.mockito:mockito-core:1.9.5"
 
     //providedCompile 'javax.servlet:jsp-api:2.0'
+//    providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
     providedCompile "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+
 //    providedCompile "org.apache.tomcat.embed:tomcat-embed-logging-log4j:${tomcatVersion}"
     providedCompile "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
     providedCompile "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
@@ -111,6 +113,7 @@ dependencies {
 
     tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
     tomcat "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+//    tomcat 'javax.servlet:javax.servlet-api:3.0.1'
     tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
         exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
     }
@@ -119,7 +122,7 @@ dependencies {
     cargo "org.codehaus.cargo:cargo-ant:$cargoVersion"
 
     //dependencies for websocket service
-   // compile("org.springframework.boot:spring-boot-starter-web:0.5.0.M6")
+    // compile("org.springframework.boot:spring-boot-starter-web:0.5.0.M6")
     compile("org.springframework:spring-websocket:$springVersion")
     compile("org.springframework:spring-messaging:$springVersion")
     compile("org.projectreactor:reactor-tcp:1.0.0.RC1")

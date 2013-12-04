@@ -134,9 +134,9 @@ public class JumboQueryConnection {
         SnappyOutputStream sos = null;
         DataOutputStream dos = null;
         InputStream is = null;
+        BufferedInputStream bis = null;
         SnappyInputStream sis = null;
         DataInputStream dis = null;
-//        List<T> result = new LinkedList<T>();
         int results = 0;
         try {
             sock = new Socket(host, port);
@@ -145,7 +145,8 @@ public class JumboQueryConnection {
             sos = new SnappyOutputStream(os);
             dos = new DataOutputStream(sos);
             is = sock.getInputStream();
-            sis = new SnappyInputStream(is);
+            bis = new BufferedInputStream(is, 32 * 1024);
+            sis = new SnappyInputStream(bis);
             dis = new DataInputStream(sis);
             dos.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION);
             dos.writeUTF(":cmd:query");
@@ -208,6 +209,7 @@ public class JumboQueryConnection {
             IOUtils.closeQuietly(os);
             IOUtils.closeQuietly(dis);
             IOUtils.closeQuietly(sis);
+            IOUtils.closeQuietly(bis);
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(sock);
         }

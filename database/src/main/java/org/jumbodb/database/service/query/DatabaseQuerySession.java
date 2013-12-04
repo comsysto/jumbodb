@@ -27,6 +27,7 @@ public class DatabaseQuerySession implements Closeable {
     private SnappyInputStream snappyInputStream;
     private DataInputStream dataInputStream;
     private OutputStream outputStream;
+//    private BufferedOutputStream bufferedOutputStream;
     private SnappyOutputStream snappyOutputStream;
     private DataOutputStream dataOutputStream;
 
@@ -36,6 +37,7 @@ public class DatabaseQuerySession implements Closeable {
         snappyInputStream = new SnappyInputStream(inputStream);
         dataInputStream = new DataInputStream(snappyInputStream);
         outputStream = clientSocket.getOutputStream();
+//        bufferedOutputStream = new BufferedOutputStream(outputStream, 32 * 1024);
         snappyOutputStream = new SnappyOutputStream(outputStream);
         dataOutputStream = new DataOutputStream(snappyOutputStream);
     }
@@ -109,6 +111,7 @@ public class DatabaseQuerySession implements Closeable {
         IOUtils.closeQuietly(inputStream);
         IOUtils.closeQuietly(dataOutputStream);
         IOUtils.closeQuietly(snappyOutputStream);
+//        IOUtils.closeQuietly(bufferedOutputStream);
         IOUtils.closeQuietly(outputStream);
         IOUtils.closeQuietly(clientSocket);
     }

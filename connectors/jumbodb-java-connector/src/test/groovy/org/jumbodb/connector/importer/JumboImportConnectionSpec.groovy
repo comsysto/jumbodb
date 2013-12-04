@@ -26,12 +26,13 @@ class JumboImportConnectionSpec extends Specification {
         serverSocket = new ServerSocket(12001);
         Thread.start {
             clientSocket = serverSocket.accept();
-            is = clientSocket.getInputStream()
-            sis = new SnappyInputStream(is)
-            dis = new DataInputStream(sis)
             os = clientSocket.getOutputStream()
             sos = new SnappyOutputStream(os)
             dos = new DataOutputStream(sos)
+            dos.flush()
+            is = clientSocket.getInputStream()
+            sis = new SnappyInputStream(is)
+            dis = new DataInputStream(sis)
         }
         jis = new JumboImportConnection("localhost", 12001)
     }
@@ -160,7 +161,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.flush()
         }
         jis.importData(dataInfo, copyCallBackMock)
-        jis.getByteCount() == 206 // data length + meta data
+        jis.getByteCount() == 212 // data length + meta data
     }
 
     def "import data with invalid SHA1 hash"() {

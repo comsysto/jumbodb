@@ -39,6 +39,7 @@ public class JumboImportConnection implements Closeable {
             sis = new SnappyInputStream(is);
             dis = new DataInputStream(sis);
             dos.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION);
+            dos.flush();
         } catch (IOException e) {
             throw new UnhandledException(e);
         }

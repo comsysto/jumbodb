@@ -20,6 +20,7 @@ public class JumboImportConnection implements Closeable {
     private Socket socket;
     private OutputStream os;
     private MonitorCountingOutputStream mcos;
+    private BufferedOutputStream bos;
     private SnappyOutputStream sos;
     private DataOutputStream dos;
     private InputStream is;
@@ -31,7 +32,8 @@ public class JumboImportConnection implements Closeable {
             socket = new Socket(host, port);
             os = socket.getOutputStream();
             mcos = createMonitorCountingOutputStream(os);
-            sos = new SnappyOutputStream(mcos);
+            bos = new BufferedOutputStream(mcos);
+            sos = new SnappyOutputStream(bos);
             dos = new DataOutputStream(sos);
             is = socket.getInputStream();
             sis = new SnappyInputStream(is);
@@ -212,6 +214,7 @@ public class JumboImportConnection implements Closeable {
     public void close() throws IOException {
         IOUtils.closeQuietly(dos);
         IOUtils.closeQuietly(sos);
+        IOUtils.closeQuietly(bos);
         IOUtils.closeQuietly(mcos);
         IOUtils.closeQuietly(os);
         IOUtils.closeQuietly(dis);

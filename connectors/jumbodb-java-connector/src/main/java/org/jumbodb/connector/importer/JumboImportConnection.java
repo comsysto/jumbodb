@@ -32,14 +32,14 @@ public class JumboImportConnection implements Closeable {
             socket = new Socket(host, port);
             os = socket.getOutputStream();
             mcos = createMonitorCountingOutputStream(os);
-            bos = new BufferedOutputStream(mcos);
+            bos = new BufferedOutputStream(mcos, JumboConstants.BUFFER_SIZE);
             sos = new SnappyOutputStream(bos);
             dos = new DataOutputStream(sos);
             is = socket.getInputStream();
             sis = new SnappyInputStream(is);
             dis = new DataInputStream(sis);
             dos.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION);
-            dos.flush();
+//            dos.flush();
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -88,7 +88,7 @@ public class JumboImportConnection implements Closeable {
             dos.flush();
             String command = dis.readUTF();
             if(":copy".equals(command)) {
-                String sha1Hash = callback.onCopy(dos);
+                String sha1Hash = callback.onCopy(sos);
                 String afterCopyCommand = dis.readUTF();
                 if(":verify:sha1".equals(afterCopyCommand)) {
                     String sha1HashRemote = dis.readUTF();
@@ -135,7 +135,7 @@ public class JumboImportConnection implements Closeable {
             dos.flush();
             String command = dis.readUTF();
             if(":copy".equals(command)) {
-                String sha1Hash = callback.onCopy(dos);
+                String sha1Hash = callback.onCopy(sos);
                 String afterCopyCommand = dis.readUTF();
                 if(":verify:sha1".equals(afterCopyCommand)) {
                     String sha1HashRemote = dis.readUTF();

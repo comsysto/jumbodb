@@ -161,7 +161,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.flush()
         }
         jis.importData(dataInfo, copyCallBackMock)
-        jis.getByteCount() == 212 // data length + meta data
+        jis.getByteCount() == 206 // data length + meta data
     }
 
     def "import data with invalid SHA1 hash"() {

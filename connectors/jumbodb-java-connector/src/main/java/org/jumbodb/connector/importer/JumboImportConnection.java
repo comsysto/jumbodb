@@ -3,6 +3,9 @@ package org.jumbodb.connector.importer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.connector.JumboConstants;
+import org.jumbodb.connector.exception.JumboCommonException;
+import org.jumbodb.connector.exception.JumboWrongVersionException;
+import org.xerial.snappy.SnappyInputStream;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
@@ -15,29 +18,25 @@ import java.net.Socket;
  */
 public class JumboImportConnection implements Closeable {
     private Socket socket;
-    private OutputStream outputStream;
-    private BufferedOutputStream bufferedOutputStream;
+    private OutputStream os;
     private MonitorCountingOutputStream mcos;
-    private SnappyOutputStream snappyOutputStream;
+    private SnappyOutputStream sos;
     private DataOutputStream dos;
+    private InputStream is;
+    private SnappyInputStream sis;
     private DataInputStream dis;
 
     public JumboImportConnection(String host, int port) {
         try {
             socket = new Socket(host, port);
-            outputStream = socket.getOutputStream();
-            mcos = createMonitorCountingOutputStream(outputStream);
-            dos = new DataOutputStream(mcos);
-            bufferedOutputStream = new BufferedOutputStream(mcos, JumboConstants.BUFFER_SIZE);   // make configurable
-            // THIS is only luck that it works, because snappy writes it header in constructor to stream!
-            // But because it's wrapped in a BufferedStream it works, this one sends the data on next flush
-            // We should fix this
-            snappyOutputStream = new SnappyOutputStream(bufferedOutputStream);
-            dis = new DataInputStream(socket.getInputStream());
-            int protocolVersion = dis.readInt();
-            if(protocolVersion != JumboConstants.IMPORT_PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version - Got " + protocolVersion + ", but expected " + JumboConstants.IMPORT_PROTOCOL_VERSION);
-            }
+            os = socket.getOutputStream();
+            mcos = createMonitorCountingOutputStream(os);
+            sos = new SnappyOutputStream(mcos);
+            dos = new DataOutputStream(sos);
+            is = socket.getInputStream();
+            sis = new SnappyInputStream(is);
+            dis = new DataInputStream(sis);
+            dos.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION);
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -84,14 +83,41 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(indexInfo.getDeliveryVersion());
             dos.writeUTF(indexInfo.getIndexStrategy());
             dos.flush();
-            String sha1Hash = callback.onCopy(snappyOutputStream);
-            String sha1HashRemote = dis.readUTF();
-            if(!sha1Hash.equals(sha1HashRemote)) {
-                throw new InvalidFileHashException("SHA-1 hash for index-file " + indexInfo.getCollection() + "/" + indexInfo.getIndexName() + "/" + indexInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+            String command = dis.readUTF();
+            if(":copy".equals(command)) {
+                String sha1Hash = callback.onCopy(dos);
+                String afterCopyCommand = dis.readUTF();
+                if(":verify:sha1".equals(afterCopyCommand)) {
+                    String sha1HashRemote = dis.readUTF();
+                    if(!sha1Hash.equals(sha1HashRemote)) {
+                        throw new InvalidFileHashException("SHA-1 hash for index-file " + indexInfo.getCollection() + "/" + indexInfo.getIndexName() + "/" + indexInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+                    }
+                }
+                else {
+                    handleErrors(afterCopyCommand);
+                }
+            } else {
+                handleErrors(command);
             }
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
+    }
+
+    private void handleErrors(String command) throws IOException {
+        if(command.startsWith(":error")) {
+            handleError(command, dis.readUTF());
+        }
+        else {
+            throw new IllegalStateException("Unknown command: " + command);
+        }
+    }
+
+    private void handleError(String command, String message) {
+        if(":error:wrongversion".equals(command)) {
+            throw new JumboWrongVersionException(message);
+        }
+        throw new JumboCommonException("Error on import [" + command + "]: " + message);
     }
 
     public void importData(DataInfo dataInfo, OnCopyCallback callback) throws InvalidFileHashException {
@@ -104,10 +130,22 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(dataInfo.getDeliveryVersion());
             dos.writeUTF(dataInfo.getDataStrategy());
             dos.flush();
-            String sha1Hash = callback.onCopy(snappyOutputStream);
-            String sha1HashRemote = dis.readUTF();
-            if(!sha1Hash.equals(sha1HashRemote)) {
-                throw new InvalidFileHashException("SHA-1 hash for data-file " + dataInfo.getCollection() + "/" + dataInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+            String command = dis.readUTF();
+            if(":copy".equals(command)) {
+                String sha1Hash = callback.onCopy(dos);
+                String afterCopyCommand = dis.readUTF();
+                if(":verify:sha1".equals(afterCopyCommand)) {
+                    String sha1HashRemote = dis.readUTF();
+                    if(!sha1Hash.equals(sha1HashRemote)) {
+                        throw new InvalidFileHashException("SHA-1 hash for data-file " + dataInfo.getCollection() + "/" + dataInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+                    }
+                }
+                else {
+                    handleErrors(afterCopyCommand);
+                }
+            }
+            else {
+                handleErrors(command);
             }
         } catch (IOException e) {
             throw new UnhandledException(e);
@@ -124,8 +162,16 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(metaIndex.getIndexStrategy());
             dos.writeUTF(metaIndex.getIndexSourceFields());
             dos.flush();
+            handleOkCommand();
         } catch (IOException e) {
             throw new UnhandledException(e);
+        }
+    }
+
+    private void handleOkCommand() throws IOException {
+        String command = dis.readUTF();
+        if(!":ok".equals(command)) {
+            handleErrors(command);
         }
     }
 
@@ -140,6 +186,7 @@ public class JumboImportConnection implements Closeable {
             dos.writeBoolean(metaData.isActivate());
             dos.writeUTF(metaData.getInfo());
             dos.flush();
+            handleOkCommand();
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -155,6 +202,7 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(deliveryKey);
             dos.writeUTF(deliveryVersion);
             dos.flush();
+            handleOkCommand();
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -162,12 +210,13 @@ public class JumboImportConnection implements Closeable {
 
     @Override
     public void close() throws IOException {
-        IOUtils.closeQuietly(bufferedOutputStream);
-        IOUtils.closeQuietly(snappyOutputStream);
-        IOUtils.closeQuietly(mcos);
-        IOUtils.closeQuietly(outputStream);
         IOUtils.closeQuietly(dos);
+        IOUtils.closeQuietly(sos);
+        IOUtils.closeQuietly(mcos);
+        IOUtils.closeQuietly(os);
         IOUtils.closeQuietly(dis);
+        IOUtils.closeQuietly(sis);
+        IOUtils.closeQuietly(is);
         IOUtils.closeQuietly(socket);
     }
 }

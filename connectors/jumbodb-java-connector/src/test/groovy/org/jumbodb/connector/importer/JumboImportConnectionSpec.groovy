@@ -2,7 +2,9 @@ package org.jumbodb.connector.importer
 
 import org.apache.commons.io.IOUtils
 import org.jumbodb.connector.JumboConstants
+import org.jumbodb.connector.exception.JumboWrongVersionException
 import org.xerial.snappy.SnappyInputStream
+import org.xerial.snappy.SnappyOutputStream
 import spock.lang.Specification
 
 /**
@@ -13,18 +15,23 @@ class JumboImportConnectionSpec extends Specification {
     ServerSocket serverSocket
     Socket clientSocket
     InputStream is
+    SnappyInputStream sis
     DataInputStream dis
+    OutputStream os
+    SnappyOutputStream sos
     DataOutputStream dos
+
 
     def setup() {
         serverSocket = new ServerSocket(12001);
         Thread.start {
             clientSocket = serverSocket.accept();
             is = clientSocket.getInputStream()
-            dis = new DataInputStream(is)
-            dos = new DataOutputStream(clientSocket.getOutputStream())
-            dos.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
-            dos.flush()
+            sis = new SnappyInputStream(is)
+            dis = new DataInputStream(sis)
+            os = clientSocket.getOutputStream()
+            sos = new SnappyOutputStream(os)
+            dos = new DataOutputStream(sos)
         }
         jis = new JumboImportConnection("localhost", 12001)
     }
@@ -38,6 +45,7 @@ class JumboImportConnectionSpec extends Specification {
     def "exists delivery version #deliveryExists"() {
         expect:
         Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:delivery:version:exists"
             assert dis.readUTF() == "my_chunk"
             assert dis.readUTF() == "my_version"
@@ -64,6 +72,7 @@ class JumboImportConnectionSpec extends Specification {
         }
         expect:
         Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:index"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "my_index"
@@ -72,9 +81,11 @@ class JumboImportConnectionSpec extends Specification {
             assert dis.readUTF() == "my_delivery"
             assert dis.readUTF() == "my_version"
             assert dis.readUTF() == "INDEX_STRATEGY"
-            def sis = new SnappyInputStream(is)
-            def data = IOUtils.toByteArray(sis, dataToSend.length)
+            dos.writeUTF(":copy");
+            dos.flush()
+            def data = IOUtils.toByteArray(dis, dataToSend.length)
             assert IOUtils.toString(data, "UTF-8") == dataToSendStr
+            dos.writeUTF(":verify:sha1")
             dos.writeUTF("this_is_the_expected_hash")
             dos.flush()
         }
@@ -95,6 +106,7 @@ class JumboImportConnectionSpec extends Specification {
             }
         }
         Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:index"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "my_index"
@@ -103,9 +115,11 @@ class JumboImportConnectionSpec extends Specification {
             assert dis.readUTF() == "my_delivery"
             assert dis.readUTF() == "my_version"
             assert dis.readUTF() == "INDEX_STRATEGY"
-            def sis = new SnappyInputStream(is)
-            def data = IOUtils.toByteArray(sis, dataToSend.length)
+            dos.writeUTF(":copy");
+            dos.flush()
+            def data = IOUtils.toByteArray(dis, dataToSend.length)
             assert IOUtils.toString(data, "UTF-8") == dataToSendStr
+            dos.writeUTF(":verify:sha1")
             dos.writeUTF("this_is_an_invalid_hash")
             dos.flush()
         }
@@ -129,6 +143,7 @@ class JumboImportConnectionSpec extends Specification {
         }
         expect:
         Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:data"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "part0005"
@@ -136,14 +151,16 @@ class JumboImportConnectionSpec extends Specification {
             assert dis.readUTF() == "my_delivery"
             assert dis.readUTF() == "my_version"
             assert dis.readUTF() == "DATA_STRATEGY"
-            def sis = new SnappyInputStream(is)
-            def data = IOUtils.toByteArray(sis, dataToSend.length)
+            dos.writeUTF(":copy");
+            dos.flush()
+            def data = IOUtils.toByteArray(dis, dataToSend.length)
             assert IOUtils.toString(data, "UTF-8") == dataToSendStr
+            dos.writeUTF(":verify:sha1")
             dos.writeUTF("this_is_the_expected_hash")
             dos.flush()
         }
         jis.importData(dataInfo, copyCallBackMock)
-        jis.getByteCount() == 205 // data length + meta data
+        jis.getByteCount() == 206 // data length + meta data
     }
 
     def "import data with invalid SHA1 hash"() {
@@ -160,6 +177,7 @@ class JumboImportConnectionSpec extends Specification {
             }
         }
         Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:data"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "part0005"
@@ -167,9 +185,11 @@ class JumboImportConnectionSpec extends Specification {
             assert dis.readUTF() == "my_delivery"
             assert dis.readUTF() == "my_version"
             assert dis.readUTF() == "DATA_STRATEGY"
-            def sis = new SnappyInputStream(is)
-            def data = IOUtils.toByteArray(sis, dataToSend.length)
+            dos.writeUTF(":copy");
+            dos.flush()
+            def data = IOUtils.toByteArray(dis, dataToSend.length)
             assert IOUtils.toString(data, "UTF-8") == dataToSendStr
+            dos.writeUTF(":verify:sha1")
             dos.writeUTF("this_is_an_invalid_hash")
             dos.flush()
         }
@@ -183,6 +203,7 @@ class JumboImportConnectionSpec extends Specification {
         def metaInfo = new MetaIndex("my_collection", "my_delivery", "my_version", "my_index", "MY_INDEX_STRATEGY", "the defined source fields")
         expect:
         Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:meta:index"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "my_delivery"
@@ -190,6 +211,8 @@ class JumboImportConnectionSpec extends Specification {
             assert dis.readUTF() == "my_index"
             assert dis.readUTF() == "MY_INDEX_STRATEGY"
             assert dis.readUTF() == "the defined source fields"
+            dos.writeUTF(":ok")
+            dos.flush()
         }
         jis.sendMetaIndex(metaInfo)
     }
@@ -199,6 +222,7 @@ class JumboImportConnectionSpec extends Specification {
         def metaInfo = new MetaData("my_collection", "my_delivery", "my_version", "MY_DATA_STRATEGY", "A path", true, "some additional info")
         expect:
         Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:meta:data"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "my_delivery"
@@ -207,15 +231,36 @@ class JumboImportConnectionSpec extends Specification {
             assert dis.readUTF() == "A path"
             assert dis.readBoolean()
             assert dis.readUTF() == "some additional info"
+            dos.writeUTF(":ok")
+            dos.flush()
         }
         jis.sendMetaData(metaInfo)
     }
 
     def "sendFinishedNotification"() {
         expect:
+        Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
+            assert dis.readUTF() == ":cmd:import:finished"
+            assert dis.readUTF() == "my_delivery"
+            assert dis.readUTF() == "my_version"
+            dos.writeUTF(":ok")
+            dos.flush()
+        }
         jis.sendFinishedNotification("my_delivery", "my_version")
-        assert dis.readUTF() == ":cmd:import:finished"
-        assert dis.readUTF() == "my_delivery"
-        assert dis.readUTF() == "my_version"
+    }
+
+    def "handle wrong version"() {
+        when:
+        Thread.start {
+            dis.readInt()
+            dos.writeUTF(":error:wrongversion")
+            dos.writeUTF("my message")
+            dos.flush()
+        }
+        jis.sendFinishedNotification("my_delivery", "my_version")
+        then:
+        def ex = thrown JumboWrongVersionException
+        ex.getMessage() == "my message"
     }
 }

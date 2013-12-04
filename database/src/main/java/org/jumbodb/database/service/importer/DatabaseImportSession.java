@@ -5,6 +5,7 @@ import org.jumbodb.connector.JumboConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyInputStream;
+import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
@@ -22,8 +23,8 @@ public class DatabaseImportSession implements Closeable {
     private InputStream inputStream;
     private SnappyInputStream snappyInputStream;
     private DataInputStream dataInputStream;
-    private BufferedInputStream bufferedInputStream;
     private OutputStream outputStream;
+    private SnappyOutputStream snappyOutputStream;
     private DataOutputStream dataOutputStream;
 
 
@@ -34,11 +35,20 @@ public class DatabaseImportSession implements Closeable {
 
     public void runImport(ImportHandler importHandler) throws IOException {
         outputStream = clientSocket.getOutputStream();
-        dataOutputStream = new DataOutputStream(outputStream);
-        dataOutputStream.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION);
-        dataOutputStream.flush();
+        snappyOutputStream = new SnappyOutputStream(outputStream);
+        dataOutputStream = new DataOutputStream(snappyOutputStream);
         inputStream = clientSocket.getInputStream();
-        dataInputStream = new DataInputStream(inputStream);
+        snappyInputStream = new SnappyInputStream(inputStream);
+        dataInputStream = new DataInputStream(snappyInputStream);
+
+        int protocolVersion = dataInputStream.readInt();
+        if(protocolVersion != JumboConstants.IMPORT_PROTOCOL_VERSION) {
+            dataOutputStream.writeUTF(":error:wrongversion");
+            dataOutputStream.writeUTF("Wrong protocol version - Got " + protocolVersion + ", but expected " + JumboConstants.IMPORT_PROTOCOL_VERSION);
+            dataOutputStream.flush();
+            return;
+        }
+
         String cmd = dataInputStream.readUTF();
         log.info("ClientID " + clientID + " with command " + cmd);
         if(":cmd:import:collection:data".equals(cmd)) {
@@ -49,10 +59,11 @@ public class DatabaseImportSession implements Closeable {
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();
             String dataStrategy = dataInputStream.readUTF();
+            dataOutputStream.writeUTF(":copy");
+            dataOutputStream.flush();
             ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, null, fileLength, deliveryKey, deliveryVersion, dataStrategy);
-            bufferedInputStream = new BufferedInputStream(inputStream, 32768);
-            snappyInputStream = new SnappyInputStream(bufferedInputStream);
-            String sha1Hash = importHandler.onImport(meta, snappyInputStream);
+            String sha1Hash = importHandler.onImport(meta, dataInputStream);
+            dataOutputStream.writeUTF(":verify:sha1");
             dataOutputStream.writeUTF(sha1Hash);
             dataOutputStream.flush();
         } else if(":cmd:import:collection:index".equals(cmd)) {
@@ -64,10 +75,11 @@ public class DatabaseImportSession implements Closeable {
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();
             String indexStrategy = dataInputStream.readUTF();
+            dataOutputStream.writeUTF(":copy");
+            dataOutputStream.flush();
             ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, indexName, fileLength, deliveryKey, deliveryVersion, indexStrategy);
-            bufferedInputStream = new BufferedInputStream(inputStream, 32768);
-            snappyInputStream = new SnappyInputStream(bufferedInputStream);
-            String sha1Hash = importHandler.onImport(meta, snappyInputStream);
+            String sha1Hash = importHandler.onImport(meta, dataInputStream);
+            dataOutputStream.writeUTF(":verify:sha1");
             dataOutputStream.writeUTF(sha1Hash);
             dataOutputStream.flush();
         } else if(":cmd:import:collection:meta:data".equals(cmd)) {
@@ -83,6 +95,8 @@ public class DatabaseImportSession implements Closeable {
             if(activate) {
                 importHandler.onActivateDelivery(meta);
             }
+            dataOutputStream.writeUTF(":ok");
+            dataOutputStream.flush();
         } else if(":cmd:import:collection:meta:index".equals(cmd)) {
             String collection = dataInputStream.readUTF();
             String deliveryKey = dataInputStream.readUTF();
@@ -92,6 +106,8 @@ public class DatabaseImportSession implements Closeable {
             String indexSourceFields = dataInputStream.readUTF();
             ImportMetaIndex meta = new ImportMetaIndex(collection, deliveryKey, deliveryVersion, indexName, strategy, indexSourceFields);
             importHandler.onCollectionMetaIndex(meta);
+            dataOutputStream.writeUTF(":ok");
+            dataOutputStream.flush();
         } else if(":cmd:import:delivery:version:exists".equals(cmd)) {
 //            String collection = dataInputStream.readUTF();
             String deliveryKey = dataInputStream.readUTF();
@@ -102,6 +118,8 @@ public class DatabaseImportSession implements Closeable {
         } else if(":cmd:import:finished".equals(cmd)) {
             log.info(":cmd:import:finished");
             importHandler.onFinished(dataInputStream.readUTF(), dataInputStream.readUTF());
+            dataOutputStream.writeUTF(":ok");
+            dataOutputStream.flush();
         } else {
             throw new UnsupportedOperationException("Unsupported command: " + cmd);
         }
@@ -109,11 +127,11 @@ public class DatabaseImportSession implements Closeable {
 
     @Override
     public void close() throws IOException {
-        IOUtils.closeQuietly(snappyInputStream);
         IOUtils.closeQuietly(dataInputStream);
-        IOUtils.closeQuietly(bufferedInputStream);
+        IOUtils.closeQuietly(snappyInputStream);
         IOUtils.closeQuietly(inputStream);
         IOUtils.closeQuietly(dataOutputStream);
+        IOUtils.closeQuietly(snappyOutputStream);
         IOUtils.closeQuietly(outputStream);
         IOUtils.closeQuietly(clientSocket);
     }

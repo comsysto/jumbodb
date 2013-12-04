@@ -20,7 +20,7 @@ public class JumboImportConnection implements Closeable {
     private Socket socket;
     private OutputStream os;
     private MonitorCountingOutputStream mcos;
-    private BufferedOutputStream bos;
+//    private BufferedOutputStream bos;
     private SnappyOutputStream sos;
     private DataOutputStream dos;
     private InputStream is;
@@ -32,14 +32,14 @@ public class JumboImportConnection implements Closeable {
             socket = new Socket(host, port);
             os = socket.getOutputStream();
             mcos = createMonitorCountingOutputStream(os);
-            bos = new BufferedOutputStream(mcos, JumboConstants.BUFFER_SIZE);
-            sos = new SnappyOutputStream(bos);
+//            bos = new BufferedOutputStream(mcos, JumboConstants.BUFFER_SIZE);
+            sos = new SnappyOutputStream(mcos);
             dos = new DataOutputStream(sos);
             is = socket.getInputStream();
             sis = new SnappyInputStream(is);
             dis = new DataInputStream(sis);
             dos.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION);
-            dos.flush();
+//            dos.flush();
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -88,7 +88,7 @@ public class JumboImportConnection implements Closeable {
             dos.flush();
             String command = dis.readUTF();
             if(":copy".equals(command)) {
-                String sha1Hash = callback.onCopy(sos);
+                String sha1Hash = callback.onCopy(dos);
                 String afterCopyCommand = dis.readUTF();
                 if(":verify:sha1".equals(afterCopyCommand)) {
                     String sha1HashRemote = dis.readUTF();
@@ -135,7 +135,7 @@ public class JumboImportConnection implements Closeable {
             dos.flush();
             String command = dis.readUTF();
             if(":copy".equals(command)) {
-                String sha1Hash = callback.onCopy(sos);
+                String sha1Hash = callback.onCopy(dos);
                 String afterCopyCommand = dis.readUTF();
                 if(":verify:sha1".equals(afterCopyCommand)) {
                     String sha1HashRemote = dis.readUTF();
@@ -215,7 +215,7 @@ public class JumboImportConnection implements Closeable {
     public void close() throws IOException {
         IOUtils.closeQuietly(dos);
         IOUtils.closeQuietly(sos);
-        IOUtils.closeQuietly(bos);
+//        IOUtils.closeQuietly(bos);
         IOUtils.closeQuietly(mcos);
         IOUtils.closeQuietly(os);
         IOUtils.closeQuietly(dis);

@@ -145,7 +145,7 @@ public class JumboQueryConnection {
             sos = new SnappyOutputStream(os);
             dos = new DataOutputStream(sos);
             is = sock.getInputStream();
-            bis = new BufferedInputStream(is, 32 * 1024);
+            bis = new BufferedInputStream(is);
             sis = new SnappyInputStream(bis);
             dis = new DataInputStream(sis);
             dos.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION);

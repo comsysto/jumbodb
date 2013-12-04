@@ -21,7 +21,7 @@ public class DatabaseImportSession implements Closeable {
     private Socket clientSocket;
     private int clientID;
     private InputStream inputStream;
-//    private BufferedInputStream bufferedInputStream;
+    private BufferedInputStream bufferedInputStream;
     private SnappyInputStream snappyInputStream;
     private DataInputStream dataInputStream;
     private OutputStream outputStream;
@@ -39,8 +39,8 @@ public class DatabaseImportSession implements Closeable {
         snappyOutputStream = new SnappyOutputStream(outputStream);
         dataOutputStream = new DataOutputStream(snappyOutputStream);
         inputStream = clientSocket.getInputStream();
-//        bufferedInputStream = new BufferedInputStream(inputStream);
-        snappyInputStream = new SnappyInputStream(inputStream);
+        bufferedInputStream = new BufferedInputStream(inputStream);
+        snappyInputStream = new SnappyInputStream(bufferedInputStream);
         dataInputStream = new DataInputStream(snappyInputStream);
 
         int protocolVersion = dataInputStream.readInt();
@@ -131,7 +131,7 @@ public class DatabaseImportSession implements Closeable {
     public void close() throws IOException {
         IOUtils.closeQuietly(dataInputStream);
         IOUtils.closeQuietly(snappyInputStream);
-//        IOUtils.closeQuietly(bufferedInputStream);
+        IOUtils.closeQuietly(bufferedInputStream);
         IOUtils.closeQuietly(inputStream);
         IOUtils.closeQuietly(dataOutputStream);
         IOUtils.closeQuietly(snappyOutputStream);

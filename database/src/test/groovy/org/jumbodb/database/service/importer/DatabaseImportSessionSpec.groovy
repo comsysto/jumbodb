@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.importer
 
+import org.jumbodb.connector.JumboConstants
 import org.jumbodb.database.service.query.DatabaseQuerySession
 import org.xerial.snappy.SnappyInputStream
 import org.xerial.snappy.SnappyOutputStream
@@ -35,7 +36,7 @@ class DatabaseImportSessionSpec extends Specification {
         session.runImport(importHandlerMock)
         def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        dataInputStream.readInt() == DatabaseImportSession.PROTOCOL_VERSION
+        dataInputStream.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
 
         1 * importHandlerMock.onImport(_, _) >> { info, importInputStream ->
             assert importInputStream != null
@@ -88,7 +89,7 @@ class DatabaseImportSessionSpec extends Specification {
         session.runImport(importHandlerMock)
         def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        dataInputStream.readInt() == DatabaseImportSession.PROTOCOL_VERSION
+        dataInputStream.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
 
         1 * importHandlerMock.onImport(_, _) >> { info, importInputStream ->
             assert importInputStream != null
@@ -137,7 +138,7 @@ class DatabaseImportSessionSpec extends Specification {
         session.runImport(importHandlerMock)
         def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        dataInputStream.readInt() == DatabaseImportSession.PROTOCOL_VERSION
+        dataInputStream.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
 
         1 * importHandlerMock.onCollectionMetaData(_) >> { metaDatas ->
             def metaData = metaDatas[0]
@@ -180,7 +181,7 @@ class DatabaseImportSessionSpec extends Specification {
         session.runImport(importHandlerMock)
         def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        dataInputStream.readInt() == DatabaseImportSession.PROTOCOL_VERSION
+        dataInputStream.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
         1 * importHandlerMock.onCollectionMetaData(_)
         1 * importHandlerMock.onActivateDelivery(_) >> { metaDatas ->
             def metaData = metaDatas[0]
@@ -221,7 +222,7 @@ class DatabaseImportSessionSpec extends Specification {
         session.runImport(importHandlerMock)
         def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        dataInputStream.readInt() == DatabaseImportSession.PROTOCOL_VERSION
+        dataInputStream.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
 
         1 * importHandlerMock.onCollectionMetaIndex(_) >> { metaIndexes ->
             def metaIndex = metaIndexes[0]
@@ -259,7 +260,7 @@ class DatabaseImportSessionSpec extends Specification {
         session.runImport(importHandlerMock)
         def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        dataInputStream.readInt() == DatabaseImportSession.PROTOCOL_VERSION
+        dataInputStream.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
         1 * importHandlerMock.onFinished("test_delivery_key", "test_delivery_version")
         cleanup:
         dataInputStream.close()
@@ -288,7 +289,7 @@ class DatabaseImportSessionSpec extends Specification {
         session.runImport(importHandlerMock)
         def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        dataInputStream.readInt() == DatabaseImportSession.PROTOCOL_VERSION
+        dataInputStream.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
         dataInputStream.readBoolean() == true
         1 * importHandlerMock.existsDeliveryVersion("test_delivery_key", "test_delivery_version") >> true
         cleanup:
@@ -317,7 +318,7 @@ class DatabaseImportSessionSpec extends Specification {
         session.runImport(importHandlerMock)
         def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        dataInputStream.readInt() == DatabaseImportSession.PROTOCOL_VERSION
+        dataInputStream.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
         dataInputStream.readBoolean() == false
         1 * importHandlerMock.existsDeliveryVersion("test_delivery_key", "test_delivery_version") >> false
         cleanup:

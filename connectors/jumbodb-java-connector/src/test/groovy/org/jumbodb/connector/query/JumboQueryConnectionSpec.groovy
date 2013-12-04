@@ -9,6 +9,7 @@ import org.jumbodb.connector.exception.JumboCommonException
 import org.jumbodb.connector.exception.JumboIndexMissingException
 import org.jumbodb.connector.exception.JumboTimeoutException
 import org.jumbodb.connector.exception.JumboUnknownException
+import org.jumbodb.connector.exception.JumboWrongVersionException
 import org.jumbodb.connector.importer.JumboImportConnection
 import org.xerial.snappy.SnappyInputStream
 import org.xerial.snappy.SnappyOutputStream
@@ -22,10 +23,11 @@ class JumboQueryConnectionSpec extends Specification {
     ServerSocket serverSocket
     Socket clientSocket
     InputStream is
+    SnappyInputStream sis
     DataInputStream dis
+    SnappyOutputStream sos
     DataOutputStream dos
     JumboQuery jumboQuery
-    SnappyOutputStream sos
 
     def setup() {
         jqc = new JumboQueryConnection("localhost", 12002)
@@ -47,18 +49,17 @@ class JumboQueryConnectionSpec extends Specification {
     def initiateConnection() {
         clientSocket = serverSocket.accept();
         is = clientSocket.getInputStream();
-        dis = new DataInputStream(is);
+        sis = new SnappyInputStream(is)
+        dis = new DataInputStream(sis);
         sos = new SnappyOutputStream(clientSocket.getOutputStream());
         dos = new DataOutputStream(sos);
-        dos.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION)
-        dos.flush()
-        sos.flush()
     }
 
     def "find with result"() {
         expect:
         Thread.start {
             initiateConnection()
+            assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:query"
             assert dis.readUTF() == "my_collection"
             assert dis.readInt() == 161
@@ -75,7 +76,6 @@ class JumboQueryConnectionSpec extends Specification {
             dos.writeInt(-1)
             dos.writeUTF(":result:end")
             dos.flush()
-            sos.flush()
         }
         def result = jqc.find("my_collection", Map.class, jumboQuery)
         result.size() == 1
@@ -86,6 +86,7 @@ class JumboQueryConnectionSpec extends Specification {
         expect:
         Thread.start {
             initiateConnection()
+            assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:query"
             assert dis.readUTF() == "my_collection"
             assert dis.readInt() == 161
@@ -102,8 +103,8 @@ class JumboQueryConnectionSpec extends Specification {
             dos.writeInt(-1)
             dos.writeUTF(":result:end")
             dos.flush()
-            sos.flush()
         }
+
         def result = jqc.findWithStreamedResult("my_collection", Map.class, jumboQuery)
         def it = result.iterator()
         it.hasNext()
@@ -124,6 +125,7 @@ class JumboQueryConnectionSpec extends Specification {
 
     private void triggerError(String error, String message) {
         initiateConnection()
+        assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
         assert dis.readUTF() == ":cmd:query"
         assert dis.readUTF() == "my_collection"
         assert dis.readInt() == 161
@@ -132,7 +134,6 @@ class JumboQueryConnectionSpec extends Specification {
         dos.writeUTF(error)
         dos.writeUTF(message)
         dos.flush()
-        sos.flush()
     }
 
     def "find common error"() {
@@ -178,10 +179,22 @@ class JumboQueryConnectionSpec extends Specification {
         ex.message == "custom message"
     }
 
+    def "wrong protocol version"() {
+        when:
+        Thread.start {
+            triggerError(":error:wrongversion", "custom message")
+        }
+        jqc.find("my_collection", Map.class, jumboQuery)
+        then:
+        def ex = thrown JumboWrongVersionException
+        ex.message == "custom message"
+    }
+
     def "find missing result end command causes exception"() {
         when:
         Thread.start {
             initiateConnection()
+            assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:query"
             assert dis.readUTF() == "my_collection"
             assert dis.readInt() == 161
@@ -189,7 +202,6 @@ class JumboQueryConnectionSpec extends Specification {
             dos.writeInt(-1)
             dos.writeUTF("invalid command")
             dos.flush()
-            sos.flush()
         }
         jqc.find("my_collection", Map.class, jumboQuery)
         then:

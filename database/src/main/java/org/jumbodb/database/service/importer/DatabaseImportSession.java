@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.importer;
 
 import org.apache.commons.io.IOUtils;
+import org.jumbodb.connector.JumboConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyInputStream;
@@ -16,7 +17,6 @@ import java.net.Socket;
 public class DatabaseImportSession implements Closeable {
     private Logger log = LoggerFactory.getLogger(DatabaseImportSession.class);
 
-    public static final int PROTOCOL_VERSION = 4;
     private Socket clientSocket;
     private int clientID;
     private InputStream inputStream;
@@ -35,7 +35,7 @@ public class DatabaseImportSession implements Closeable {
     public void runImport(ImportHandler importHandler) throws IOException {
         outputStream = clientSocket.getOutputStream();
         dataOutputStream = new DataOutputStream(outputStream);
-        dataOutputStream.writeInt(PROTOCOL_VERSION);
+        dataOutputStream.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION);
         dataOutputStream.flush();
         inputStream = clientSocket.getInputStream();
         dataInputStream = new DataInputStream(inputStream);

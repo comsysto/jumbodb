@@ -2,6 +2,7 @@ package org.jumbodb.database.service.management.status
 
 import com.google.common.io.Files
 import org.apache.commons.lang.StringUtils
+import org.jumbodb.connector.JumboConstants
 import org.jumbodb.database.service.configuration.JumboConfiguration
 import org.jumbodb.database.service.importer.DatabaseImportSession
 import org.jumbodb.database.service.management.status.dto.ServerInformation
@@ -28,8 +29,8 @@ class StatusServiceSpec extends Specification {
         info.getImportPort() == 12001
         info.getDataPath() == dataDir.getAbsolutePath()
         info.getIndexPath() == indexDir.getAbsolutePath()
-        info.getQueryProtocolVersion() == DatabaseQuerySession.PROTOCOL_VERSION.toString()
-        info.getImportProtocolVersion() == DatabaseImportSession.PROTOCOL_VERSION.toString()
+        info.getQueryProtocolVersion() == JumboConstants.QUERY_PROTOCOL_VERSION.toString()
+        info.getImportProtocolVersion() == JumboConstants.IMPORT_PROTOCOL_VERSION.toString()
         info.getNumberOfQueries() > 0l // damn static variables for CI
         info.getNumberOfResults() > 0l // damn static variables for CI
         StringUtils.isNotBlank(info.getAllocatedMemory())

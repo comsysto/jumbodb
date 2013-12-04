@@ -7,13 +7,11 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.connector.JumboConstants;
-import org.jumbodb.connector.exception.JumboCommonException;
-import org.jumbodb.connector.exception.JumboIndexMissingException;
-import org.jumbodb.connector.exception.JumboTimeoutException;
-import org.jumbodb.connector.exception.JumboUnknownException;
+import org.jumbodb.connector.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyInputStream;
+import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
@@ -133,10 +131,10 @@ public class JumboQueryConnection {
         long start = System.currentTimeMillis();
         Socket sock = null;
         OutputStream os = null;
+        SnappyOutputStream sos = null;
         DataOutputStream dos = null;
         InputStream is = null;
-        BufferedInputStream bufferedInputStream = null;
-        SnappyInputStream snappyInputStream = null;
+        SnappyInputStream sis = null;
         DataInputStream dis = null;
 //        List<T> result = new LinkedList<T>();
         int results = 0;
@@ -144,21 +142,18 @@ public class JumboQueryConnection {
             sock = new Socket(host, port);
 
             os = sock.getOutputStream();
-            dos = new DataOutputStream(os);
+            sos = new SnappyOutputStream(os);
+            dos = new DataOutputStream(sos);
             is = sock.getInputStream();
-            bufferedInputStream = new BufferedInputStream(is);
-            snappyInputStream = new SnappyInputStream(bufferedInputStream);
-            dis = new DataInputStream(snappyInputStream);
-            int protocolVersion = dis.readInt();
-            if(protocolVersion != JumboConstants.QUERY_PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version. Got " + protocolVersion + ", but expected " + JumboConstants.QUERY_PROTOCOL_VERSION);
-            }
+            sis = new SnappyInputStream(is);
+            dis = new DataInputStream(sis);
+            dos.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION);
             dos.writeUTF(":cmd:query");
             dos.writeUTF(collection);
             byte[] queryBytes = jsonMapper.writeValueAsBytes(searchQuery);
             dos.writeInt(queryBytes.length);
             dos.write(queryBytes);
-
+            dos.flush();
             int byteArrayLength;
             byte[] jsonByteArray = new byte[1024];
             while((byteArrayLength = dis.readInt()) > -1) {
@@ -177,6 +172,11 @@ public class JumboQueryConnection {
                 String message = dis.readUTF();
                 log.error("Unknown error: " + message);
                 throw new JumboUnknownException(message);
+            }
+            else if(cmd.equals(":error:wrongversion")) {
+                String message = dis.readUTF();
+                log.error("Wrong version: " + message);
+                throw new JumboWrongVersionException(message);
             }
             else if(cmd.equals(":error:common")) {
                 String message = dis.readUTF();
@@ -204,10 +204,10 @@ public class JumboQueryConnection {
             throw new UnhandledException(e);
         } finally {
             IOUtils.closeQuietly(dos);
+            IOUtils.closeQuietly(sos);
             IOUtils.closeQuietly(os);
             IOUtils.closeQuietly(dis);
-            IOUtils.closeQuietly(bufferedInputStream);
-            IOUtils.closeQuietly(snappyInputStream);
+            IOUtils.closeQuietly(sis);
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(sock);
         }

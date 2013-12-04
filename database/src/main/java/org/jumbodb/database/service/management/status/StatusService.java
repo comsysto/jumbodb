@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.management.status;
 
+import org.jumbodb.connector.JumboConstants;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.importer.DatabaseImportSession;
 import org.jumbodb.database.service.management.status.dto.ServerInformation;
@@ -47,8 +48,8 @@ public class StatusService {
         status.setQueryPort(config.getQueryPort());
         status.setStartupTime(dateFormat.format(GlobalStatistics.getStartupTime()));
         status.setTotalFreeMemory(format.format((freeMemory + (maxMemory - allocatedMemory)) / divideMB) + " MB");
-        status.setQueryProtocolVersion(String.valueOf(DatabaseQuerySession.PROTOCOL_VERSION));
-        status.setImportProtocolVersion(String.valueOf(DatabaseImportSession.PROTOCOL_VERSION));
+        status.setQueryProtocolVersion(String.valueOf(JumboConstants.QUERY_PROTOCOL_VERSION));
+        status.setImportProtocolVersion(String.valueOf(JumboConstants.IMPORT_PROTOCOL_VERSION));
         status.setDataDiskFreeSpace(format.format(dataDiskFreeSpace / divideMB) + " MB");
         status.setDataDiskTotalSpace(format.format(dataDiskTotalSpace / divideMB) + " MB");
         status.setDataDiskUsedSpacePerc((double)(((dataDiskTotalSpace - dataDiskFreeSpace) * 100) / dataDiskTotalSpace));

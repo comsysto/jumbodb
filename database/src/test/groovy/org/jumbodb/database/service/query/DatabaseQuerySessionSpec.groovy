@@ -1,7 +1,11 @@
 package org.jumbodb.database.service.query
 
+import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.UnhandledException
+import org.jumbodb.connector.JumboConstants
+import org.xerial.snappy.SnappyCodec
 import org.xerial.snappy.SnappyInputStream
+import org.xerial.snappy.SnappyOutputStream
 import spock.lang.Specification
 
 /**
@@ -13,11 +17,14 @@ class DatabaseQuerySessionSpec extends Specification {
         setup:
         def query = '{"sample": "query"}'
         def cmdStream = new ByteArrayOutputStream()
-        def cmds = new DataOutputStream(cmdStream)
+        def snappyOutputStream = new SnappyOutputStream(cmdStream)
+        def cmds = new DataOutputStream(snappyOutputStream)
+        cmds.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:query") // send command
         cmds.writeUTF("test_collection") // send collection
         cmds.writeInt(query.length()) // send length
         cmds.write(query.getBytes("UTF-8")) // send query
+        cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
         def socketMock = Mock(Socket)
@@ -29,7 +36,6 @@ class DatabaseQuerySessionSpec extends Specification {
         session.query(queryHandlerMock)
         def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
         then:
-        dataInputStream.readInt() == DatabaseQuerySession.PROTOCOL_VERSION
         1 * queryHandlerMock.onQuery("test_collection", query.getBytes("UTF-8"), _) >> { col, bytes, writer ->
             writer.writeResult("Hello World 1".getBytes("UTF-8"))
             writer.writeResult("Hello World 2".getBytes("UTF-8"))
@@ -63,11 +69,13 @@ class DatabaseQuerySessionSpec extends Specification {
         setup:
         def query = '{"sample": "query"}'
         def cmdStream = new ByteArrayOutputStream()
-        def cmds = new DataOutputStream(cmdStream)
+        def cmds = new DataOutputStream(new SnappyOutputStream(cmdStream))
+        cmds.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:query") // send command
         cmds.writeUTF("test_collection") // send collection
         cmds.writeInt(query.length()) // send length
         cmds.write(query.getBytes("UTF-8")) // send query
+        cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
         def socketMock = Mock(Socket)
@@ -82,7 +90,6 @@ class DatabaseQuerySessionSpec extends Specification {
         1 * queryHandlerMock.onQuery("test_collection", query.getBytes("UTF-8"), _) >> {
             throw new JumboCollectionMissingException("Collection is missing")
         }
-        dataInputStream.readInt() == DatabaseQuerySession.PROTOCOL_VERSION
         dataInputStream.readInt() == -1
         dataInputStream.readUTF() == ":error:collection:missing"
         dataInputStream.readUTF() == "Collection is missing"
@@ -99,11 +106,13 @@ class DatabaseQuerySessionSpec extends Specification {
         setup:
         def query = '{"sample": "query"}'
         def cmdStream = new ByteArrayOutputStream()
-        def cmds = new DataOutputStream(cmdStream)
+        def cmds = new DataOutputStream(new SnappyOutputStream(cmdStream))
+        cmds.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:query") // send command
         cmds.writeUTF("test_collection") // send collection
         cmds.writeInt(query.length()) // send length
         cmds.write(query.getBytes("UTF-8")) // send query
+        cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
         def socketMock = Mock(Socket)
@@ -118,7 +127,6 @@ class DatabaseQuerySessionSpec extends Specification {
         1 * queryHandlerMock.onQuery("test_collection", query.getBytes("UTF-8"), _) >> {
             throw new JumboIndexMissingException("Index is missing")
         }
-        dataInputStream.readInt() == DatabaseQuerySession.PROTOCOL_VERSION
         dataInputStream.readInt() == -1
         dataInputStream.readUTF() == ":error:collection:index:missing"
         dataInputStream.readUTF() == "Index is missing"
@@ -134,11 +142,13 @@ class DatabaseQuerySessionSpec extends Specification {
         setup:
         def query = '{"sample": "query"}'
         def cmdStream = new ByteArrayOutputStream()
-        def cmds = new DataOutputStream(cmdStream)
+        def cmds = new DataOutputStream(new SnappyOutputStream(cmdStream))
+        cmds.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:query") // send command
         cmds.writeUTF("test_collection") // send collection
         cmds.writeInt(query.length()) // send length
         cmds.write(query.getBytes("UTF-8")) // send query
+        cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
         def socketMock = Mock(Socket)
@@ -153,7 +163,6 @@ class DatabaseQuerySessionSpec extends Specification {
         1 * queryHandlerMock.onQuery("test_collection", query.getBytes("UTF-8"), _) >> {
             throw new JumboCommonException("Common exception")
         }
-        dataInputStream.readInt() == DatabaseQuerySession.PROTOCOL_VERSION
         dataInputStream.readInt() == -1
         dataInputStream.readUTF() == ":error:common"
         dataInputStream.readUTF() == "Common exception"
@@ -167,8 +176,11 @@ class DatabaseQuerySessionSpec extends Specification {
 
     def "eof exception"() {
         setup:
-        def query = '{"sample": "query"}'
-        def inputStream = new ByteArrayInputStream(new byte[0])
+        def value = new ByteArrayOutputStream()
+        def snappy = new SnappyOutputStream(value)
+        snappy.flush()
+
+        def inputStream = new ByteArrayInputStream(value.toByteArray())
         def outputStream = new ByteArrayOutputStream()
         def socketMock = Mock(Socket)
         socketMock.getInputStream() >> inputStream
@@ -179,8 +191,7 @@ class DatabaseQuerySessionSpec extends Specification {
         session.query(queryHandlerMock)
         def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
         then:
-        0 * queryHandlerMock.onQuery("test_collection", query.getBytes("UTF-8"), _)
-        dataInputStream.readInt() == DatabaseQuerySession.PROTOCOL_VERSION
+        0 * queryHandlerMock.onQuery(_, _, _)
         dataInputStream.available() == 0
         cleanup:
         dataInputStream.close()
@@ -194,11 +205,13 @@ class DatabaseQuerySessionSpec extends Specification {
         setup:
         def query = '{"sample": "query"}'
         def cmdStream = new ByteArrayOutputStream()
-        def cmds = new DataOutputStream(cmdStream)
+        def cmds = new DataOutputStream(new SnappyOutputStream(cmdStream))
+        cmds.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:query") // send command
         cmds.writeUTF("test_collection") // send collection
         cmds.writeInt(query.length()) // send length
         cmds.write(query.getBytes("UTF-8")) // send query
+        cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
         def socketMock = Mock(Socket)
@@ -213,10 +226,43 @@ class DatabaseQuerySessionSpec extends Specification {
         1 * queryHandlerMock.onQuery("test_collection", query.getBytes("UTF-8"), _) >> {
             throw new RuntimeException("Unhandled")
         }
-        dataInputStream.readInt() == DatabaseQuerySession.PROTOCOL_VERSION
         dataInputStream.readInt() == -1
         dataInputStream.readUTF() == ":error:unknown"
         dataInputStream.readUTF().startsWith("An unknown error occured on server side, check database log for further information:")
+        cleanup:
+        dataInputStream.close()
+        cmds.close()
+        inputStream.close()
+        outputStream.close()
+        session.close()
+    }
+
+    def "wrong version exception"() {
+        setup:
+        def query = '{"sample": "query"}'
+        def cmdStream = new ByteArrayOutputStream()
+        def cmds = new DataOutputStream(new SnappyOutputStream(cmdStream))
+        cmds.writeInt(Integer.MAX_VALUE) // wrong version
+        cmds.writeUTF(":cmd:query") // send command
+        cmds.writeUTF("test_collection") // send collection
+        cmds.writeInt(query.length()) // send length
+        cmds.write(query.getBytes("UTF-8")) // send query
+        cmds.flush()
+        def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
+        def outputStream = new ByteArrayOutputStream()
+        def socketMock = Mock(Socket)
+        socketMock.getInputStream() >> inputStream
+        socketMock.getOutputStream() >> outputStream
+        def queryHandlerMock = Mock(DatabaseQuerySession.QueryHandler)
+        def session = new DatabaseQuerySession(socketMock, 1)
+        when:
+        session.query(queryHandlerMock)
+        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
+        then:
+        0 * queryHandlerMock.onQuery(_, _, _)
+        dataInputStream.readInt() == -1
+        dataInputStream.readUTF() == ":error:wrongversion"
+        dataInputStream.readUTF().startsWith("Wrong protocol version. Got 2147483647, but expected")
         cleanup:
         dataInputStream.close()
         cmds.close()

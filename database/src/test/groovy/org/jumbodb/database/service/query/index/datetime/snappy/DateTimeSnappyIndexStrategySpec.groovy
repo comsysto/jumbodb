@@ -315,12 +315,12 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         def meta = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.INDEX, "part00001.odx", "collection", "testindex", indexFileContent.length, "deliveryKey", "deliveryVersion", "STRATEGY")
         when:
-        def sha1Hash = strategy.onImport(meta, new ByteArrayInputStream(indexFileContent), indexFolder)
+        def md5hash = strategy.onImport(meta, new ByteArrayInputStream(indexFileContent), indexFolder)
         then:
         new File(indexFolder.getAbsolutePath() + "/part00001.odx").exists()
         new File(indexFolder.getAbsolutePath() + "/part00001.odx.chunks.snappy").exists()
         SnappyChunksUtil.getSnappyChunksByFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx")).getLength() == indexFileContent.length
-        sha1Hash == "abd42b88a891fbed1c220da0ad4e5701b0aa9c90"
+        md5hash == "03b9b35287a8cbe7bc720177d5bc9da0"
         cleanup:
         indexFolder.delete()
 

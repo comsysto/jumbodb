@@ -550,7 +550,8 @@ public class StorageManagement {
         IOFileFilter notChunksSnappy = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".chunks.snappy"));
         IOFileFilter notProperties = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".properties"));
         IOFileFilter notSha1 = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".sha1"));
-        FilenameFilter ioFileFilter = FileFilterUtils.and(notChunksSnappy, notProperties, notSha1);
+        IOFileFilter notMd5 = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".md5"));
+        FilenameFilter ioFileFilter = FileFilterUtils.and(notChunksSnappy, notProperties, notSha1, notMd5);
         for (MetaData data : metaDatas) {
             File dataFolder = findCollectionChunkedVersionDataFolder(data.getCollection(), data.getDeliveryKey(), data.getDeliveryVersion());
             File[] files = dataFolder.listFiles(ioFileFilter);

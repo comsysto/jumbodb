@@ -33,10 +33,10 @@ class ImportTaskSpec extends Specification {
         importTask.run()
         then:
         1 * importSessionMock.runImport(_) >> { importHandler ->
-            assert importHandler[0].onImport(metaInfo, inputStreamMock) == "sha1hash"
+            assert importHandler[0].onImport(metaInfo, inputStreamMock) == "md5hash"
         }
         1 * dataStrategyManagerMock.getStrategy("test_strategy") >> dataStrategyMock
-        1 * dataStrategyMock.onImport(metaInfo, inputStreamMock, new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection")) >> "sha1hash"
+        1 * dataStrategyMock.onImport(metaInfo, inputStreamMock, new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection")) >> "md5hash"
         cleanup:
         dataDir.delete()
         indexDir.delete()
@@ -62,10 +62,10 @@ class ImportTaskSpec extends Specification {
         importTask.run()
         then:
         1 * importSessionMock.runImport(_) >> { importHandler ->
-            assert importHandler[0].onImport(metaInfo, inputStreamMock) == "sha1hash"
+            assert importHandler[0].onImport(metaInfo, inputStreamMock) == "md5hash"
         }
         1 * indexStrategyManagerMock.getStrategy("test_strategy") >> indexStrategyMock
-        1 * indexStrategyMock.onImport(metaInfo, inputStreamMock, new File(indexDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection/test_index_name")) >> "sha1hash"
+        1 * indexStrategyMock.onImport(metaInfo, inputStreamMock, new File(indexDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection/test_index_name")) >> "md5hash"
         cleanup:
         dataDir.delete()
         indexDir.delete()

@@ -64,6 +64,7 @@ public class CollectionDefinitionLoader {
         ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".properties")));
         ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".chunks.snappy")));
         ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".sha1")));
+        ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".md5")));
         File[] dataFiles = collectionDataFolder.listFiles((FilenameFilter) ands);
         for (File dataFile : dataFiles) {
             resDataFiles.put(dataFile.getName().hashCode(), dataFile);

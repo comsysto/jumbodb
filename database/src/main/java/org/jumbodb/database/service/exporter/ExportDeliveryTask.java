@@ -94,7 +94,7 @@ public class ExportDeliveryTask implements Runnable {
                         ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream, exportDelivery);
                         MessageDigest md = null;
                         try {
-                            md = MessageDigest.getInstance("SHA1");
+                            md = MessageDigest.getInstance("MD5");
                             is = storageManagement.getInputStream(dataInfo);
                             dis = new DigestInputStream(is, md);
                             IOUtils.copyLarge(dis, cos, 0l, dataInfo.getFileLength());
@@ -145,7 +145,7 @@ public class ExportDeliveryTask implements Runnable {
                         ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream, exportDelivery);
                         MessageDigest md = null;
                         try {
-                            md = MessageDigest.getInstance("SHA1");
+                            md = MessageDigest.getInstance("MD5");
                             is = storageManagement.getInputStream(indexInfo);
                             dis = new DigestInputStream(is, md);
                             IOUtils.copyLarge(dis, cos, 0l, indexInfo.getFileLength());

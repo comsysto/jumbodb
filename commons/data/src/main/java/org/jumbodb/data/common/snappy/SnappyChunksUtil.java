@@ -30,7 +30,7 @@ public class SnappyChunksUtil {
      * @param absoluteImportFile
      * @param fileLength
      * @param chunkSize
-     * @return SHA-1 hash over uncompressed data
+     * @return hash over uncompressed data
      */
     public static String copy(InputStream dataInputStream, File absoluteImportFile, long fileLength, int chunkSize) {
         OutputStream sos = null;
@@ -39,13 +39,13 @@ public class SnappyChunksUtil {
         BufferedOutputStream bos = null;
         FileOutputStream snappyChunksFos = null;
         DataOutputStream snappyChunksDos = null;
-        DigestOutputStream sha1DosRaw = null;
-        DigestOutputStream sha1DosCompressed = null;
-        MessageDigest sha1DigestRaw = null;
-        MessageDigest sha1DigestCompressed = null;
+        DigestOutputStream md5DosRaw = null;
+     //   DigestOutputStream sha1DosCompressed = null;
+        MessageDigest md5DigestRaw = null;
+     //   MessageDigest sha1DigestCompressed = null;
         try {
-            sha1DigestRaw = MessageDigest.getInstance("SHA1");
-            sha1DigestCompressed = MessageDigest.getInstance("SHA1");
+            md5DigestRaw = MessageDigest.getInstance("MD5");
+     //       sha1DigestCompressed = MessageDigest.getInstance("SHA1");
             String absoluteImportPath = absoluteImportFile.getAbsolutePath() + "/";
             File storageFolderFile = new File(absoluteImportPath);
             if (!storageFolderFile.getParentFile().exists()) {
@@ -72,8 +72,8 @@ public class SnappyChunksUtil {
             snappyChunksDos.writeLong(fileLength);
             snappyChunksDos.writeInt(chunkSize);
             fos = new FileOutputStream(absoluteImportFile);
-            sha1DosCompressed = new DigestOutputStream(fos, sha1DigestCompressed);
-            bos = new BufferedOutputStream(sha1DosCompressed) {
+         //   sha1DosCompressed = new DigestOutputStream(fos, sha1DigestCompressed);
+            bos = new BufferedOutputStream(fos) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
                     finalSnappyChunksDos.writeInt(i2);
@@ -81,18 +81,18 @@ public class SnappyChunksUtil {
                 }
             };
             sos = new SnappyOutputStream(bos, chunkSize);
-            sha1DosRaw = new DigestOutputStream(sos, sha1DigestRaw);
-            IOUtils.copyLarge(dataInputStream, sha1DosRaw, 0l, fileLength);
+            md5DosRaw = new DigestOutputStream(sos, md5DigestRaw);
+            IOUtils.copyLarge(dataInputStream, md5DosRaw, 0l, fileLength);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
             throw new UnhandledException(e);
         } finally {
-            IOUtils.closeQuietly(sha1DosRaw);
+            IOUtils.closeQuietly(md5DosRaw);
             IOUtils.closeQuietly(sos);
             IOUtils.closeQuietly(dos);
             IOUtils.closeQuietly(bos);
-            IOUtils.closeQuietly(sha1DosCompressed);
+         //   IOUtils.closeQuietly(sha1DosCompressed);
             IOUtils.closeQuietly(fos);
             IOUtils.closeQuietly(snappyChunksDos);
             IOUtils.closeQuietly(snappyChunksFos);
@@ -100,14 +100,14 @@ public class SnappyChunksUtil {
 
         // streams should be closed or flushed to get valid hashes!
         try {
-            if(sha1DigestRaw != null) {
+/*            if(md5DigestRaw != null) {
                 String sha1CompressHex = Hex.encodeHexString(sha1DigestCompressed.digest());
                 FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".sha1"), sha1CompressHex);
-            }
-            if(sha1DigestCompressed != null) {
-                String sha1DigestRawHex = Hex.encodeHexString(sha1DigestRaw.digest());
-                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".raw.sha1"), sha1DigestRawHex);
-                return sha1DigestRawHex;
+            }  */
+            if(md5DigestRaw != null) {
+                String md5DigestRawHex = Hex.encodeHexString(md5DigestRaw.digest());
+                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".raw.md5"), md5DigestRawHex);
+                return md5DigestRawHex;
             }
         } catch(IOException e) {
             throw new UnhandledException(e);

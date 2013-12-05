@@ -40,6 +40,7 @@ public class DatabaseQuerySession implements Closeable {
         bufferedOutputStream = new BufferedOutputStream(outputStream);
         snappyOutputStream = new SnappyOutputStream(bufferedOutputStream);
         dataOutputStream = new DataOutputStream(snappyOutputStream);
+        dataOutputStream.flush(); // cause snappy header
     }
 
     public void query(QueryHandler queryHandler) throws IOException {

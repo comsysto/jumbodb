@@ -58,7 +58,7 @@ class JumboImportConnectionSpec extends Specification {
         deliveryExists << [true, false]
     }
 
-    def "import index with valid SHA1 hash"() {
+    def "import index with valid MD5 hash"() {
         setup:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
@@ -86,14 +86,14 @@ class JumboImportConnectionSpec extends Specification {
             dos.flush()
             def data = IOUtils.toByteArray(dis, dataToSend.length)
             assert IOUtils.toString(data, "UTF-8") == dataToSendStr
-            dos.writeUTF(":verify:sha1")
+            dos.writeUTF(":verify:md5")
             dos.writeUTF("this_is_the_expected_hash")
             dos.flush()
         }
         jis.importIndex(indexInfo, copyCallBackMock)
     }
 
-    def "import index with invalid SHA1 hash"() {
+    def "import index with invalid MD5 hash"() {
         when:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
@@ -120,7 +120,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.flush()
             def data = IOUtils.toByteArray(dis, dataToSend.length)
             assert IOUtils.toString(data, "UTF-8") == dataToSendStr
-            dos.writeUTF(":verify:sha1")
+            dos.writeUTF(":verify:md5")
             dos.writeUTF("this_is_an_invalid_hash")
             dos.flush()
         }
@@ -129,7 +129,7 @@ class JumboImportConnectionSpec extends Specification {
         thrown InvalidFileHashException
     }
 
-    def "import data with valid SHA1 hash"() {
+    def "import data with valid MD5 hash"() {
         setup:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
@@ -156,7 +156,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.flush()
             def data = IOUtils.toByteArray(dis, dataToSend.length)
             assert IOUtils.toString(data, "UTF-8") == dataToSendStr
-            dos.writeUTF(":verify:sha1")
+            dos.writeUTF(":verify:md5")
             dos.writeUTF("this_is_the_expected_hash")
             dos.flush()
         }
@@ -164,7 +164,7 @@ class JumboImportConnectionSpec extends Specification {
         jis.getByteCount() == 206 // data length + meta data
     }
 
-    def "import data with invalid SHA1 hash"() {
+    def "import data with invalid MD5 hash"() {
         when:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
@@ -190,7 +190,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.flush()
             def data = IOUtils.toByteArray(dis, dataToSend.length)
             assert IOUtils.toString(data, "UTF-8") == dataToSendStr
-            dos.writeUTF(":verify:sha1")
+            dos.writeUTF(":verify:md5")
             dos.writeUTF("this_is_an_invalid_hash")
             dos.flush()
         }

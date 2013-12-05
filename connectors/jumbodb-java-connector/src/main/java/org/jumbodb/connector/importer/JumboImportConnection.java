@@ -88,12 +88,12 @@ public class JumboImportConnection implements Closeable {
             dos.flush();
             String command = dis.readUTF();
             if(":copy".equals(command)) {
-                String sha1Hash = callback.onCopy(dos);
+                String md5Hash = callback.onCopy(dos);
                 String afterCopyCommand = dis.readUTF();
-                if(":verify:sha1".equals(afterCopyCommand)) {
-                    String sha1HashRemote = dis.readUTF();
-                    if(!sha1Hash.equals(sha1HashRemote)) {
-                        throw new InvalidFileHashException("SHA-1 hash for index-file " + indexInfo.getCollection() + "/" + indexInfo.getIndexName() + "/" + indexInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+                if(":verify:md5".equals(afterCopyCommand)) {
+                    String md5HashRemote = dis.readUTF();
+                    if(!md5Hash.equals(md5HashRemote)) {
+                        throw new InvalidFileHashException("MD5 hash for index-file " + indexInfo.getCollection() + "/" + indexInfo.getIndexName() + "/" + indexInfo.getFilename() + " is invalid (local: " + md5Hash + " / remote: " + md5HashRemote + ")");
                     }
                 }
                 else {
@@ -135,12 +135,12 @@ public class JumboImportConnection implements Closeable {
             dos.flush();
             String command = dis.readUTF();
             if(":copy".equals(command)) {
-                String sha1Hash = callback.onCopy(dos);
+                String md5Hash = callback.onCopy(dos);
                 String afterCopyCommand = dis.readUTF();
-                if(":verify:sha1".equals(afterCopyCommand)) {
-                    String sha1HashRemote = dis.readUTF();
-                    if(!sha1Hash.equals(sha1HashRemote)) {
-                        throw new InvalidFileHashException("SHA-1 hash for data-file " + dataInfo.getCollection() + "/" + dataInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+                if(":verify:md5".equals(afterCopyCommand)) {
+                    String md5HashRemote = dis.readUTF();
+                    if(!md5Hash.equals(md5HashRemote)) {
+                        throw new InvalidFileHashException("MD5 hash for data-file " + dataInfo.getCollection() + "/" + dataInfo.getFilename() + " is invalid (local: " + md5Hash + " / remote: " + md5HashRemote + ")");
                     }
                 }
                 else {

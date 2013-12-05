@@ -50,11 +50,11 @@ class DatabaseImportSessionSpec extends Specification {
             assert info.getDeliveryKey() == "test_delivery_key"
             assert info.getStrategy() == "TEST_STRATEGY"
             assert info.getFileName() == "file_name_part001"
-            return "sha1testhash"
+            return "md5testhash"
         }
         dataInputStream.readUTF() == ":copy"
-        dataInputStream.readUTF() == ":verify:sha1"
-        dataInputStream.readUTF() == "sha1testhash"
+        dataInputStream.readUTF() == ":verify:md5"
+        dataInputStream.readUTF() == "md5testhash"
         cleanup:
         dataInputStream.close()
         cmds.close()
@@ -104,11 +104,11 @@ class DatabaseImportSessionSpec extends Specification {
             assert info.getDeliveryKey() == "test_delivery_key"
             assert info.getStrategy() == "TEST_STRATEGY"
             assert info.getFileName() == "file_name_part001"
-            return "sha1testhash"
+            return "md5testhash"
         }
         dataInputStream.readUTF() == ":copy"
-        dataInputStream.readUTF() == ":verify:sha1"
-        dataInputStream.readUTF() == "sha1testhash"
+        dataInputStream.readUTF() == ":verify:md5"
+        dataInputStream.readUTF() == "md5testhash"
         cleanup:
         dataInputStream.close()
         cmds.close()

@@ -138,7 +138,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             byte[] buf = new byte[buffSize];
             int bytesRead = in.read(buf);
             long currentFileBytes = 0;
-            MessageDigest messageDigest = getSha1MessageDigest();
+            MessageDigest messageDigest = getMd5MessageDigest();
             while (bytesRead >= 0) {
                 out.write(buf, 0, bytesRead);
                 messageDigest.update(buf, 0, bytesRead);
@@ -165,9 +165,9 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             return Hex.encodeHexString(messageDigest.digest());
         }
 
-        private MessageDigest getSha1MessageDigest() {
+        private MessageDigest getMd5MessageDigest() {
             try {
-                return MessageDigest.getInstance("SHA1");
+                return MessageDigest.getInstance("MD5");
             } catch (NoSuchAlgorithmException e) {
                 throw new UnhandledException(e);
             }

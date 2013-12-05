@@ -64,9 +64,9 @@ public class DatabaseImportSession implements Closeable {
             dataOutputStream.writeUTF(":copy");
             dataOutputStream.flush();
             ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, null, fileLength, deliveryKey, deliveryVersion, dataStrategy);
-            String sha1Hash = importHandler.onImport(meta, dataInputStream);
-            dataOutputStream.writeUTF(":verify:sha1");
-            dataOutputStream.writeUTF(sha1Hash);
+            String md5Hash = importHandler.onImport(meta, dataInputStream);
+            dataOutputStream.writeUTF(":verify:md5");
+            dataOutputStream.writeUTF(md5Hash);
             dataOutputStream.flush();
         } else if(":cmd:import:collection:index".equals(cmd)) {
             ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.INDEX;
@@ -80,9 +80,9 @@ public class DatabaseImportSession implements Closeable {
             dataOutputStream.writeUTF(":copy");
             dataOutputStream.flush();
             ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, indexName, fileLength, deliveryKey, deliveryVersion, indexStrategy);
-            String sha1Hash = importHandler.onImport(meta, dataInputStream);
-            dataOutputStream.writeUTF(":verify:sha1");
-            dataOutputStream.writeUTF(sha1Hash);
+            String md5Hash = importHandler.onImport(meta, dataInputStream);
+            dataOutputStream.writeUTF(":verify:md5");
+            dataOutputStream.writeUTF(md5Hash);
             dataOutputStream.flush();
         } else if(":cmd:import:collection:meta:data".equals(cmd)) {
             String collection = dataInputStream.readUTF();

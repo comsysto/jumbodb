@@ -292,12 +292,12 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         def meta = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.INDEX, "part00001.odx", "collection", "testindex", indexFileContent.length, "deliveryKey", "deliveryVersion", "STRATEGY")
         when:
-        def sha1hash = strategy.onImport(meta, new ByteArrayInputStream(indexFileContent), indexFolder)
+        def md5hash = strategy.onImport(meta, new ByteArrayInputStream(indexFileContent), indexFolder)
         then:
         new File(indexFolder.getAbsolutePath() + "/part00001.odx").exists()
         new File(indexFolder.getAbsolutePath() + "/part00001.odx.chunks.snappy").exists()
         SnappyChunksUtil.getSnappyChunksByFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx")).getLength() == indexFileContent.length
-        sha1hash == "a0016062e376ebe705378af50f8f2ab932c9365d"
+        md5hash == "8e30fdf7186b5d460a0ffe26b0d78cc7"
         cleanup:
         indexFolder.delete()
 

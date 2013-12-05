@@ -72,12 +72,12 @@ class JsonSnappyDataStrategySpec extends Specification {
         def tmpTargetPath = tmpTargetFile.getParentFile()
         def information = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.DATA, tmpTargetFile.getName(), "collection", "index name", strToWrite.size(), "deliverykey", "version", JsonSnappyDataStrategy.JSON_SNAPPY_V1)
         when:
-        def sha1Hash = strategy.onImport(information, byteArrayInputStream, tmpTargetPath)
+        def md5Hash = strategy.onImport(information, byteArrayInputStream, tmpTargetPath)
         def is = new SnappyInputStream(new FileInputStream(tmpTargetFile))
         def reader = new BufferedReader(new InputStreamReader(is))
         then:
         reader.readLine() == strToCompare
-        sha1Hash == "371ade508ac7d7549439463808b57d04e972c358"
+        md5Hash == "d6abbaae7c2c3b32eaa5767455113437"
         cleanup:
         is.close()
         reader.close()

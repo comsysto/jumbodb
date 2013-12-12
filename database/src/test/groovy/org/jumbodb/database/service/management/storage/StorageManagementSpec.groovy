@@ -101,10 +101,10 @@ class StorageManagementSpec extends Specification {
         querableCollections[2].getDataStrategy() == "test_data_strategy"
         querableCollections[2].getSupportedOperations() as Set == [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT] as Set
         querableCollections[2].getIndexes().size() == 2
-        querableCollections[2].getIndexes()[0].getName() == "test_index2"
+        querableCollections[2].getIndexes()[0].getName() == "test_index1"
         querableCollections[2].getIndexes()[0].getStrategy() == "test_index_strategy"
         querableCollections[2].getIndexes()[0].getSupportedOperations() as Set == [QueryOperation.BETWEEN, QueryOperation.EQ] as Set
-        querableCollections[2].getIndexes()[1].getName() == "test_index1"
+        querableCollections[2].getIndexes()[1].getName() == "test_index2"
         querableCollections[2].getIndexes()[1].getStrategy() == "test_index_strategy"
         querableCollections[2].getIndexes()[1].getSupportedOperations() as Set == [QueryOperation.BETWEEN, QueryOperation.EQ] as Set
         cleanup:

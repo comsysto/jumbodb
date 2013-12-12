@@ -54,7 +54,11 @@ public class IndexInfo implements Comparable<IndexInfo> {
 
     @Override
     public int compareTo(IndexInfo o) {
-        return indexName.compareTo(o.indexName);
+        int i = indexName.compareTo(o.indexName);
+        if(i != 0) {
+            return i;
+        }
+        return filename.compareTo(o.filename);
     }
 
     @Override

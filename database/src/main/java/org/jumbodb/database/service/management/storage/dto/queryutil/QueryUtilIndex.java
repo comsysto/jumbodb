@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
-public class QueryUtilIndex {
+public class QueryUtilIndex implements Comparable<QueryUtilIndex> {
     private String name;
     private String strategy;
     private List<QueryOperation> supportedOperations;
@@ -42,6 +42,11 @@ public class QueryUtilIndex {
         if (strategy != null ? !strategy.equals(that.strategy) : that.strategy != null) return false;
 
         return true;
+    }
+
+    @Override
+    public int compareTo(QueryUtilIndex o) {
+        return name.compareTo(o.name);
     }
 
     @Override

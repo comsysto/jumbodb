@@ -120,7 +120,9 @@ public class StorageManagement {
                     supportedOperations.addAll(dataStrategy.getSupportedOperations());
                 }
             }
-            result.add(new QueryUtilCollection(collection.getName(), new ArrayList<QueryUtilIndex>(resultIndexes), dataStrategyName, new ArrayList<QueryOperation>(supportedOperations)));
+            List<QueryUtilIndex> indexes = new ArrayList<QueryUtilIndex>(resultIndexes);
+            Collections.sort(indexes);
+            result.add(new QueryUtilCollection(collection.getName(), indexes, dataStrategyName, new ArrayList<QueryOperation>(supportedOperations)));
         }
         return result;
     }

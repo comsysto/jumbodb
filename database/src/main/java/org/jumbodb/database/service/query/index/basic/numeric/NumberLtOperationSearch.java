@@ -17,6 +17,11 @@ public abstract class NumberLtOperationSearch<T, IFV, IF extends NumberSnappyInd
     }
 
     @Override
+    public boolean matchingChunk(T currentValue, QueryValueRetriever queryValueRetriever) {
+        return matching(currentValue, queryValueRetriever);
+    }
+
+    @Override
     public boolean searchFinished(T currentValue, QueryValueRetriever queryValueRetriever, boolean resultsFound) {
         return resultsFound;
     }

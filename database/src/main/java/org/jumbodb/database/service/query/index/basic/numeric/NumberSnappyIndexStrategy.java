@@ -225,7 +225,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         long numberOfChunks = snappyChunks.getNumberOfChunks();
 //        log.trace("findFirstMatchingChunk currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");
 
-        int i = 0;
+        int checkedChunks = 0;
+        int matchedChunks = 0;
         if(currentChunk >= 0) {
             FileInputStream fis = null;
             BufferedInputStream bis = null;
@@ -251,6 +252,9 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                             T currentValue = readValueFromDataInput(byteDis);
                             int fileNameHash = byteDis.readInt();
                             long offset = byteDis.readLong();
+                            if(integerOperationSearch.matchingChunk(currentValue, queryValueRetriever)) {
+                                matchedChunks++;
+                            }
                             if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
                                 result.add(new FileOffset(fileNameHash, offset, clause.getQueryClauses()));
                             }
@@ -264,7 +268,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                             }
                         }
                         // nothing found in second block, so there isn't anything
-                        if(i > 1 && result.isEmpty()) {
+                        if(checkedChunks > 1 && matchedChunks == 0) {
+                        //    System.out.println("blub" + checkedChunks);
                             return result;
                         }
                     } finally {
@@ -273,7 +278,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                     }
 
                     currentChunk++;
-                    i++;
+                    checkedChunks++;
                 }
                 return result;
             } finally {

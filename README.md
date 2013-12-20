@@ -10,6 +10,8 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 
 Twitter: @devproof http://twitter.com/devproof
 
+Latest version: 0.0.20 (20th Dec 2013)
+
 ## What is it good for? 
 
 - As data store for low-latency 'Big Data' apps

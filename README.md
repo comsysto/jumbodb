@@ -26,8 +26,8 @@ Latest version: 0.0.20 (20th Dec 2013)
 
 ## Features
 
-- Indexing your JSON data 
-- Querying over indexed and non-indexed data
+- Index your JSON data 
+- Query over indexed and non-indexed data
 - Geospatial indexes
 - Range queries (between, greather than, less than and so on)
 - Data replication (to another database)

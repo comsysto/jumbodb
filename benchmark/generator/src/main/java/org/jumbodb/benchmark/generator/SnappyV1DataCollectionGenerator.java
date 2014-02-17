@@ -1,6 +1,7 @@
 package org.jumbodb.benchmark.generator;
 
 import org.apache.commons.io.FilenameUtils;
+import org.jumbodb.benchmark.generator.config.GenerationContext;
 import org.jumbodb.benchmark.generator.runner.SnappyV1DataFileGenerationRunner;
 import org.jumbodb.data.common.meta.DeliveryProperties;
 
@@ -16,15 +17,16 @@ public class SnappyV1DataCollectionGenerator extends DataCollectionGenerator {
     private static final String DELIVERY_PATH = "created_by_generator";
     private static final String DELIVERY_STRATEGY = "JSON_SNAPPY_V1";
 
+    private final GenerationContext context;
 
-    public SnappyV1DataCollectionGenerator(String outputFolder, int numberOfFiles, int dataSetsPerFile,
-            int dataSetSizeInChars, String collectionName, int parallelThreads) {
-        super(outputFolder, numberOfFiles, dataSetsPerFile, dataSetSizeInChars, collectionName, parallelThreads);
+    public SnappyV1DataCollectionGenerator(GenerationContext context) {
+        super(context);
+        this.context = context;
     }
 
     @Override
-    public Callable<Void> createDataGenerationRunner(String fileName, int dataSetsPerFile, byte[][] randomizedJSONDocs) {
-        return new SnappyV1DataFileGenerationRunner(fileName, dataSetsPerFile, randomizedJSONDocs);
+    public Callable<Void> createDataGenerationRunner(String fileName, GenerationContext dataSetsPerFile, byte[][] randomizedJSONDocs) {
+        return new SnappyV1DataFileGenerationRunner(fileName, context, randomizedJSONDocs);
     }
 
     @Override

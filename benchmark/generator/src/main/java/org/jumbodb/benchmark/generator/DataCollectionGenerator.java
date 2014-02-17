@@ -4,12 +4,12 @@ package org.jumbodb.benchmark.generator;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.jumbodb.benchmark.generator.config.GenerationContext;
 import org.jumbodb.common.util.file.DirectoryUtil;
 import org.jumbodb.data.common.meta.ActiveProperties;
 
 import java.io.File;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,39 +25,27 @@ public abstract class DataCollectionGenerator {
     private static final String ACTIVE_PROPERTIES_FILE_NAME = "active.properties";
     public static final String DEFAULT_CHUNK_NAME = "benchmark_delivery";
 
-    private final String outputFolder;
-    private final int numberOfFiles;
-    private final int dataSetsPerFile;
-    private final int dataSetSizeInChars;
-    private final String collectionName;
-    private final String deliveryVersion = UUID.randomUUID().toString();
-    private final int parallelThreads;
+    private final GenerationContext context;
 
 
-    public DataCollectionGenerator(String outputFolder, int numberOfFiles, int dataSetsPerFile, int dataSetSizeInChars,
-                                   String collectionName, int parallelThreads) {
-        this.outputFolder = outputFolder;
-        this.numberOfFiles = numberOfFiles;
-        this.dataSetsPerFile = dataSetsPerFile;
-        this.dataSetSizeInChars = dataSetSizeInChars;
-        this.collectionName = collectionName;
-        this.parallelThreads = parallelThreads;
+    protected DataCollectionGenerator(GenerationContext context) {
+        this.context = context;
     }
 
     public void generateData() {
-        String chunkKeyDir = getChunkKeyDir(outputFolder, collectionName);
-        String dataFileDir = getDataDir(outputFolder, collectionName);
+        String chunkKeyDir = getChunkKeyDir(context.getOutputFolder(), context.getCollectionName());
+        String dataFileDir = getDataDir(context.getOutputFolder(), context.getCollectionName());
 
         createDataFolder(dataFileDir);
-        createDeliveryProperties(dataFileDir, deliveryVersion, DESCRIPTION);
-        createActiveProperties(chunkKeyDir, deliveryVersion);
+        createDeliveryProperties(dataFileDir, context.getDeliveryVersion(), DESCRIPTION);
+        createActiveProperties(chunkKeyDir, context.getDeliveryVersion());
 
-        final byte [][] randomizedJSONDocs = generateRandomizedJSONDocs(dataSetSizeInChars);
+        final byte [][] randomizedJSONDocs = generateRandomizedJSONDocs(context.getDataSetSizeInChars());
         List<Callable<Void>> generationRunners = Lists.newArrayList();
 
-        for (int fileNo = 0; fileNo < numberOfFiles; fileNo++) {
+        for (int fileNo = 0; fileNo < context.getNumberOfFiles(); fileNo++) {
             String fileName = getDataFileName(dataFileDir, fileNo);
-            generationRunners.add(createDataGenerationRunner(fileName, dataSetsPerFile, randomizedJSONDocs));
+            generationRunners.add(createDataGenerationRunner(fileName, context, randomizedJSONDocs));
         }
         try {
             ExecutorService executorService = Executors.newFixedThreadPool(nrOfThreadsToUse());
@@ -67,8 +55,13 @@ public abstract class DataCollectionGenerator {
         }
     }
 
+    public abstract Callable<Void> createDataGenerationRunner(String fileName, GenerationContext dataSetsPerFile, byte[][] randomizedJSONDocs);
+
+    public abstract void createDeliveryProperties(String dataFolder, String deliveryVersion, String description);
+
+
     private int nrOfThreadsToUse(){
-        return parallelThreads >= 1 ? parallelThreads : Runtime.getRuntime().availableProcessors();
+        return context.getParallelThreads() >= 1 ? context.getParallelThreads() : Runtime.getRuntime().availableProcessors();
     }
 
     private void createDataFolder(String dataFolder) {
@@ -82,8 +75,8 @@ public abstract class DataCollectionGenerator {
     }
 
     private String getDataDir(String outputFolder, String collectionName) {
-        return DirectoryUtil.concatenatePaths(outputFolder, collectionName, DEFAULT_CHUNK_NAME, deliveryVersion)
-                .getAbsolutePath();
+        return DirectoryUtil.concatenatePaths(outputFolder, collectionName, DEFAULT_CHUNK_NAME,
+                context.getDeliveryVersion()).getAbsolutePath();
     }
 
     private String getDataFileName(String dataFileFolder, int fileNr) {
@@ -121,9 +114,4 @@ public abstract class DataCollectionGenerator {
         File activePropertiesFile = DirectoryUtil.concatenatePaths(chunkKeyDir, ACTIVE_PROPERTIES_FILE_NAME);
         ActiveProperties.writeActiveFile(activePropertiesFile, deliveryVersion);
     }
-
-
-    public abstract Callable<Void> createDataGenerationRunner(String fileName, int dataSetsPerFile, byte[][] randomizedJSONDocs);
-
-    public abstract void createDeliveryProperties(String dataFolder, String deliveryVersion, String description);
 }

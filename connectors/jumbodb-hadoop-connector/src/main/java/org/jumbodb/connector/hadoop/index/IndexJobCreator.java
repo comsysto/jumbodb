@@ -6,6 +6,7 @@ import org.jumbodb.connector.hadoop.configuration.IndexField;
 import org.jumbodb.connector.hadoop.configuration.JumboCustomImportJob;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.data.SnappyDataV1InputFormat;
 import org.jumbodb.connector.hadoop.index.strategy.datetime.snappy.GenericJsonDateTimeIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonDoubleIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.floatval.snappy.GenericJsonFloatIndexMapper;
@@ -52,7 +53,7 @@ public class IndexJobCreator {
     public static IndexControlledJob createGenericIndexJob(Configuration conf, JumboGenericImportJob genericImportJob, IndexField indexField) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         Path output = new Path(genericImportJob.getIndexOutputPath().toString() + "/" + indexField.getIndexName());
-        Job job = new Job(conf, "Index " + indexField.getIndexName() + " Job " + genericImportJob.getInputPath());
+        Job job = Job.getInstance(conf, "Index " + indexField.getIndexName() + " Job " + genericImportJob.getInputPath());
         FileInputFormat.addInputPath(job, genericImportJob.getSortedInputPath());
         FileOutputFormat.setOutputPath(job, output);
         FileOutputFormat.setCompressOutput(job, false);
@@ -61,6 +62,7 @@ public class IndexJobCreator {
         job.getConfiguration().set(JumboConfigurationUtil.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
+        job.setInputFormatClass(SnappyDataV1InputFormat.class);  // CARSTEN make configurable
         job.setNumReduceTasks(indexField.getNumberOfOutputFiles());
         job.setMapOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
@@ -83,12 +85,13 @@ public class IndexJobCreator {
         AbstractIndexMapper abstractIndexMapper = createInstance(mapper);
         String indexName = abstractIndexMapper.getIndexName();
         Path output = new Path(customImportJob.getIndexOutputPath().toString() + "/" + indexName);
-        Job job = new Job(conf, "Index " + mapper.getSimpleName() + " Job " + customImportJob.getSortedInputPath());
+        Job job = Job.getInstance(conf, "Index " + mapper.getSimpleName() + " Job " + customImportJob.getSortedInputPath());
         FileInputFormat.addInputPath(job, customImportJob.getSortedInputPath());
         FileOutputFormat.setOutputPath(job, output);
         FileOutputFormat.setCompressOutput(job, false);
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
+        job.setInputFormatClass(SnappyDataV1InputFormat.class);  // CARSTEN make configurable
         job.setNumReduceTasks(abstractIndexMapper.getNumberOfOutputFiles());
         job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setMapOutputValueClass(abstractIndexMapper.getOutputValueClass());

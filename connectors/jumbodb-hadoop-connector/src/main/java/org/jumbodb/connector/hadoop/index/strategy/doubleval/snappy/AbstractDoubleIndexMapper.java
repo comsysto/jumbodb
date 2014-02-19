@@ -1,7 +1,6 @@
 package org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy;
 
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -51,7 +50,7 @@ public abstract class AbstractDoubleIndexMapper<T> extends AbstractIndexMapper<T
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return DoubleIndexOutputFormat.class;
+        return DoubleSnappyIndexV1OutputFormat.class;
     }
 
     public abstract Double getIndexableValue(T input);

@@ -50,7 +50,7 @@ public abstract class AbstractHashCode32IndexMapper<T> extends AbstractIndexMapp
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return HashCode32IndexOutputFormat.class;
+        return HashCode32SnappyIndexV1OutputFormat.class;
     }
 
     public abstract String getIndexableValue(T input);

@@ -6,7 +6,6 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.common.geo.geohash.GeoHash;
-import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 
 import java.io.IOException;
@@ -61,7 +60,7 @@ public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return GeohashIndexOutputFormat.class;
+        return GeohashSnappyIndexV1OutputFormat.class;
     }
 
     public abstract List<Double> getIndexableValue(T input);

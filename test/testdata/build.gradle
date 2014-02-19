@@ -40,13 +40,13 @@ sourceSets {
 dependencies {
     compile 'com.esotericsoftware.kryo:kryo:2.20'
     compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
-    compile "org.apache.hadoop:hadoop-core:1.0.3"
+    compile "org.apache.hadoop:hadoop-core:$hadoopVersion"
     compile 'com.google.guava:guava:r09'
     compile 'commons-io:commons-io:2.3'
     compile 'commons-lang:commons-lang:2.5'
     compile 'commons-collections:commons-collections:3.2.1'
     compile 'com.google.guava:guava:13.0'
-    compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
+    compile 'org.xerial.snappy:snappy-java:$snappyVersion'
     compile 'org.msgpack:msgpack:0.6.7'
     compile 'net.minidev:json-smart:2.0-RC2'
 //    compile 'de.undercouch:bson4jackson:2.0.0'

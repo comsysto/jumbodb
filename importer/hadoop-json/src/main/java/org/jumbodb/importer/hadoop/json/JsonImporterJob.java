@@ -16,8 +16,7 @@ import org.jumbodb.connector.hadoop.JumboJobCreator;
 import org.jumbodb.connector.hadoop.configuration.FinishedNotification;
 import org.jumbodb.connector.hadoop.configuration.ImportDefinition;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
-import org.jumbodb.connector.hadoop.index.map.GenericJsonStringSortMapper;
-import org.jumbodb.connector.hadoop.index.output.TextValueOutputFormat;
+import org.jumbodb.connector.hadoop.index.output.data.SnappyDataV1OutputFormat;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,41 +45,34 @@ public class JsonImporterJob extends Configured implements Tool {
         String jsonConfPath = args[0];
 
         ImportDefinition importDefinition = JumboConfigurationUtil.loadJsonConfigurationAndUpdateHadoop(jsonConfPath, conf);
-        List<JumboGenericImportJob> importJobs = JumboConfigurationUtil.convertToGenericImportJobs(importDefinition);
+        List<JumboGenericImportJob> importJobs = JumboConfigurationUtil.convertToGenericImportJobs(conf, importDefinition);
 
         JobControl control = new JobControl("JsonImporterJob");
 
         for (JumboGenericImportJob importJob : importJobs) {
-            ControlledJob controlledSortJob = null;
-            if(importJob.getSort() != null && importJob.getSort().size() > 0) {
-                Job sortJob = new Job(conf, "Sort Job " + importJob.getCollectionName());
-                JumboConfigurationUtil.setSortConfig(sortJob, importJob.getSort());
-                JumboConfigurationUtil.setSortDatePatternConfig(sortJob, importJob.getSortDatePattern());
-                FileInputFormat.addInputPath(sortJob, importJob.getInputPath());
-                FileOutputFormat.setOutputPath(sortJob, importJob.getSortedOutputPath());
-                sortJob.setJarByClass(JsonImporterJob.class);
-                sortJob.setMapperClass(JumboConfigurationUtil.getSortMapperByType(importJob.getSortType()));
-                sortJob.setMapOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
-                sortJob.setMapOutputValueClass(Text.class);
-                sortJob.setOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
-                sortJob.setOutputValueClass(Text.class);
-                sortJob.setNumReduceTasks(importDefinition.getNumberOfOutputFiles());
-                sortJob.setOutputFormatClass(TextValueOutputFormat.class);
-                controlledSortJob = new ControlledJob(sortJob, Collections.<ControlledJob>emptyList());
-                control.addJob(controlledSortJob);
-            }
+            Job sortJob = Job.getInstance(conf, "Sort Job " + importJob.getCollectionName());
+            JumboConfigurationUtil.setSortConfig(sortJob, importJob.getSort());
+            JumboConfigurationUtil.setSortDatePatternConfig(sortJob, importJob.getSortDatePattern());
+            FileInputFormat.addInputPath(sortJob, importJob.getInputPath());
+            FileOutputFormat.setOutputPath(sortJob, importJob.getSortedOutputPath());
+            sortJob.setJarByClass(JsonImporterJob.class);
+            sortJob.setMapperClass(JumboConfigurationUtil.getSortMapperByType(importJob.getSortType()));
+            sortJob.setMapOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
+            sortJob.setMapOutputValueClass(Text.class);
+            sortJob.setOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
+            sortJob.setOutputValueClass(Text.class);
+            sortJob.setNumReduceTasks(importDefinition.getNumberOfOutputFiles());
+            sortJob.setOutputFormatClass(SnappyDataV1OutputFormat.class);
+            ControlledJob controlledSortJob = new ControlledJob(sortJob, Collections.<ControlledJob>emptyList());
+            control.addJob(controlledSortJob);
 
-            if(conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
-                List<ControlledJob> jumboIndexAndImportJob = JumboJobCreator.createIndexAndImportJob(conf,  importJob);
-                System.out.println("Number of Jumbo Index and Import Jobs " + jumboIndexAndImportJob.size());
-                if(controlledSortJob != null) {
-                    for (ControlledJob current : jumboIndexAndImportJob) {
-                        current.addDependingJob(controlledSortJob);
-                    }
-                }
-                control.addJobCollection(jumboIndexAndImportJob);
-                System.out.println("Number of Jumbo Index and Import JobsWaiting Jobs " + control.getWaitingJobList().size());
+            List<ControlledJob> jumboIndexAndImportJob = JumboJobCreator.createIndexAndImportJob(conf,  importJob);
+            System.out.println("Number of Jumbo Index and Import Jobs " + jumboIndexAndImportJob.size());
+            for (ControlledJob current : jumboIndexAndImportJob) {
+                current.addDependingJob(controlledSortJob);
             }
+            control.addJobCollection(jumboIndexAndImportJob);
+            System.out.println("Waiting Jobs " + control.getWaitingJobList().size());
 
         }
 

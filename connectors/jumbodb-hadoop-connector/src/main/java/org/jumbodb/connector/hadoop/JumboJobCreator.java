@@ -25,10 +25,8 @@ import java.util.UUID;
  * Time: 3:42 PM
  */
 public class JumboJobCreator {
-
-
     public static List<ControlledJob> createIndexAndImportJob(Configuration conf, JumboGenericImportJob genericImportJob) throws IOException {
-        if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
+        if (conf.get(JumboConstants.DELIVERY_VERSION) == null) {
             conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
         }
         List<ControlledJob> controlledJobs = new LinkedList<ControlledJob>();
@@ -40,19 +38,20 @@ public class JumboJobCreator {
         for (IndexField indexField : genericImportJob.getIndexes()) {
             IndexJobCreator.IndexControlledJob indexJob = IndexJobCreator.createGenericIndexJob(conf, genericImportJob, indexField);
             ControlledJob controlledIndexJob = indexJob.getControlledJob();
-            List<ControlledJob> indexImportJobs = ImportJobCreator.createIndexImportJobs(conf, genericImportJob, indexField);
-
-            for (ControlledJob controlledJob : indexImportJobs) {
-                controlledJob.addDependingJob(controlledIndexJob);
-            }
             controlledJobs.add(controlledIndexJob);
-            controlledJobs.addAll(indexImportJobs);
+            if (conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
+                List<ControlledJob> indexImportJobs = ImportJobCreator.createIndexImportJobs(conf, genericImportJob, indexField);
+                for (ControlledJob controlledJob : indexImportJobs) {
+                    controlledJob.addDependingJob(controlledIndexJob);
+                }
+                controlledJobs.addAll(indexImportJobs);
+            }
         }
         return controlledJobs;
     }
 
     public static List<ControlledJob> createIndexAndImportJob(Configuration conf, JumboCustomImportJob jumboCustomImportJob) throws IOException {
-        if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
+        if (conf.get(JumboConstants.DELIVERY_VERSION) == null) {
             conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
         }
         List<ControlledJob> controlledJobs = new LinkedList<ControlledJob>();
@@ -63,14 +62,18 @@ public class JumboJobCreator {
         for (Class<? extends AbstractIndexMapper> map : jumboCustomImportJob.getMapper()) {
             IndexJobCreator.IndexControlledJob indexJob = IndexJobCreator.createCustomIndexJob(conf, jumboCustomImportJob, map);
             ControlledJob controlledIndexJob = indexJob.getControlledJob();
-
-            IndexField indexInformation = IndexJobCreator.getIndexInformation(map);
-            List<ControlledJob> indexImportJob = ImportJobCreator.createIndexImportJobs(conf, jumboCustomImportJob, indexInformation);
-            for (ControlledJob controlledJob : indexImportJob) {
-                controlledJob.addDependingJob(controlledIndexJob);
-            }
             controlledJobs.add(controlledIndexJob);
-            controlledJobs.addAll(indexImportJob);
+            if (conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
+
+
+                IndexField indexInformation = IndexJobCreator.getIndexInformation(map);
+                List<ControlledJob> indexImportJob = ImportJobCreator.createIndexImportJobs(conf, jumboCustomImportJob, indexInformation);
+                for (ControlledJob controlledJob : indexImportJob) {
+                    controlledJob.addDependingJob(controlledIndexJob);
+                }
+                controlledJobs.addAll(indexImportJob);
+
+            }
         }
         return controlledJobs;
     }
@@ -78,7 +81,7 @@ public class JumboJobCreator {
     public static void sendMetaIndex(BaseJumboImportJob genericImportJob, IndexField indexField, Configuration conf) {
 
         String type = conf.get(JumboConstants.DATA_TYPE);
-        if(!JumboConstants.DATA_TYPE_INDEX.equals(type)) {
+        if (!JumboConstants.DATA_TYPE_INDEX.equals(type)) {
             return;
         }
         for (ImportHost importHost : genericImportJob.getHosts()) {
@@ -98,7 +101,7 @@ public class JumboJobCreator {
 
     public static void sendMetaData(BaseJumboImportJob genericImportJob, Configuration conf) {
         String type = conf.get(JumboConstants.DATA_TYPE);
-        if(!JumboConstants.DATA_TYPE_DATA.equals(type)) {
+        if (!JumboConstants.DATA_TYPE_DATA.equals(type)) {
             return;
         }
         for (ImportHost importHost : genericImportJob.getHosts()) {
@@ -107,7 +110,7 @@ public class JumboJobCreator {
                 jumbo = new JumboImportConnection(importHost.getHost(), importHost.getPort());
                 String collection = genericImportJob.getCollectionName();
                 boolean activate = genericImportJob.isActivateDelivery();
-                MetaData metaData = new MetaData(collection, genericImportJob.getDeliveryChunkKey(), conf.get(JumboConstants.DELIVERY_VERSION), genericImportJob.getDataStrategy(),genericImportJob.getInputPath().toString(), activate, genericImportJob.getDescription());
+                MetaData metaData = new MetaData(collection, genericImportJob.getDeliveryChunkKey(), conf.get(JumboConstants.DELIVERY_VERSION), genericImportJob.getDataStrategy(), genericImportJob.getInputPath().toString(), activate, genericImportJob.getDescription());
                 jumbo.sendMetaData(metaData);
             } finally {
                 IOUtils.closeStream(jumbo);
@@ -130,10 +133,10 @@ public class JumboJobCreator {
     }
 
     public static void sendFinishedNotification(FinishedNotification finishedNotification, JobControl jobControl, Configuration conf) {
-        if(!conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
+        if (!conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
             return;
         }
-        if(jobControl.getFailedJobList().size() == 0
+        if (jobControl.getFailedJobList().size() == 0
                 && jobControl.allFinished()) {
             sendFinishedNotification(finishedNotification, conf);
         }

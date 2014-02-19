@@ -48,7 +48,7 @@ public abstract class AbstractFloatIndexMapper<T> extends AbstractIndexMapper<T>
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return FloatIndexOutputFormat.class;
+        return FloatSnappyIndexV1OutputFormat.class;
     }
 
     public abstract Float getIndexableValue(T input);

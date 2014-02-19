@@ -51,7 +51,7 @@ public abstract class AbstractHashCode64IndexMapper<T> extends AbstractIndexMapp
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return HashCode64IndexOutputFormat.class;
+        return HashCode64SnappyIndexV1OutputFormat.class;
     }
 
     public abstract String getIndexableValue(T input);

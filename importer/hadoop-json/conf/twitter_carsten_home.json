@@ -1,0 +1,32 @@
+{
+    "description": "Carstens Twitter Test Import",
+    "deliveryChunkKey": "first_delivery",
+    "hosts": [
+
+    ],
+    "datePattern": "EEE MMM dd HH:mm:ss Z yyyy",
+    "output": "file:///C:/Development/data/twitter/output/",
+    "numberOfOutputFiles": 5,
+    "hadoop": [],
+    "importCollection": [
+        {
+            "input": "file:///C:/Development/data/twitter/input/",
+            "collectionName": "carsten.twitter",
+            "sort": ["geo.coordinates"],
+            "sortType": "GEOHASH",
+            "dataStrategy": "JSON_SNAPPY_V1",
+            "indexes": [
+                {
+                    "indexName": "screen_name",
+                    "fields": ["user.screen_name"],
+                    "indexStrategy": "HASHCODE64_SNAPPY_V1"
+                },
+                {
+                    "indexName": "created_at",
+                    "fields": ["created_at"],
+                    "indexStrategy": "DATETIME_SNAPPY_V1"
+                }
+            ]
+        }
+    ]
+}

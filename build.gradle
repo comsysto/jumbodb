@@ -1,7 +1,8 @@
 group = 'org.jumbodb'
 
 repositories {
-    mavenCentral()
+  //  mavenCentral()
+	maven{ url "http://repo2.maven.org/maven2/" }
     maven{ url "http://repository-comsysto.forge.cloudbees.com/release" }
     maven{ url "http://repository-comsysto.forge.cloudbees.com/snapshot/" }
     maven{ url "http://maven.springframework.org/release" }

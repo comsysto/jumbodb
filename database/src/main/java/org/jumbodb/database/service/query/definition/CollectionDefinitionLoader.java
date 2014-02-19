@@ -20,6 +20,7 @@ public class CollectionDefinitionLoader {
     public static final FileFilter FOLDER_INSTANCE = (FileFilter) DirectoryFileFilter.INSTANCE;
 
     public static CollectionDefinition loadCollectionDefinition(File dataPath, File indexPath) {
+        // CARSTEN change implementation for new format
         Map<String, Collection<DeliveryChunkDefinition>> result = new HashMap<String, Collection<DeliveryChunkDefinition>>();
         File[] dataCollectionDirectories = dataPath.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
         if(dataCollectionDirectories == null) {
@@ -62,7 +63,7 @@ public class CollectionDefinitionLoader {
         }
         AndFileFilter ands = new AndFileFilter();
         ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".properties")));
-        ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".chunks.snappy")));
+        ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".chunks")));
         ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".sha1")));
         ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".md5")));
         File[] dataFiles = collectionDataFolder.listFiles((FilenameFilter) ands);

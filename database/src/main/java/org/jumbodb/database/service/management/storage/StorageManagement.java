@@ -127,6 +127,7 @@ public class StorageManagement {
         return result;
     }
 
+    // CARSTEN remove
     public void deleteCompleteCollection(String collectionName) {
         log.info("deleteCompleteCollection (" + collectionName + ")");
         // nothing to activate, because collection is away
@@ -159,6 +160,7 @@ public class StorageManagement {
         onDataChanged();
     }
 
+    // CARSTEN remove
     public void deleteChunkedVersionInCollection(String collection, String chunkDeliveryKey, String version) {
         log.info("deleteChunkedVersionInCollection (" + collection + ", " + chunkDeliveryKey + ", " + version + ")");
         deleteChunkedVersionInCollectionWithoutRestart(collection, chunkDeliveryKey, version);
@@ -239,6 +241,7 @@ public class StorageManagement {
         return collectionDirectories;
     }
 
+    // CARSTEN remove
     public void activateChunkedVersionInCollection(String collection, String chunkDeliveryKey, String version) {
         log.info("activateChunkedVersionInCollection (" + collection + ", " + chunkDeliveryKey + ", " + version + ")");
 
@@ -533,12 +536,12 @@ public class StorageManagement {
     public List<IndexInfo> getIndexInfoForDelivery(List<MetaIndex> metaIndex) {
         List<IndexInfo> result = new LinkedList<IndexInfo>();
         for (MetaIndex index : metaIndex) {
-            // TODO fix me implementation details of strategy
+            // CARSTEN fix me implementation details of strategy
             File indexFolder = findCollectionChunkedVersionIndexFolder(index.getCollection(), index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexName());
-            FilenameFilter ioFileFilter = FileFilterUtils.suffixFileFilter(".odx");
+            FilenameFilter ioFileFilter = FileFilterUtils.suffixFileFilter(".idx");
             File[] files = indexFolder.listFiles(ioFileFilter);
             for (File indexFile : files) {
-                long fileLength = getSizeFromSnappyChunk(new File(indexFile.getAbsolutePath() + ".chunks.snappy"));
+                long fileLength = getSizeFromSnappyChunk(new File(indexFile.getAbsolutePath() + ".chunks"));
                 result.add(new IndexInfo(index.getCollection(), index.getIndexName(), indexFile.getName(), fileLength, index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexStrategy()));
             }
         }
@@ -546,10 +549,10 @@ public class StorageManagement {
         return result;
     }
 
-    // TODO fix me implementation details of strategy
+    // CARSTEN fix me implementation details of strategy
     public List<DataInfo> getDataInfoForDelivery(List<MetaData> metaDatas) {
         List<DataInfo> result = new LinkedList<DataInfo>();
-        IOFileFilter notChunksSnappy = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".chunks.snappy"));
+        IOFileFilter notChunksSnappy = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".chunks"));
         IOFileFilter notProperties = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".properties"));
         IOFileFilter notSha1 = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".sha1"));
         IOFileFilter notMd5 = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".md5"));
@@ -558,7 +561,7 @@ public class StorageManagement {
             File dataFolder = findCollectionChunkedVersionDataFolder(data.getCollection(), data.getDeliveryKey(), data.getDeliveryVersion());
             File[] files = dataFolder.listFiles(ioFileFilter);
             for (File dataFile : files) {
-                long fileLength = getSizeFromSnappyChunk(new File(dataFile.getAbsolutePath() + ".chunks.snappy"));
+                long fileLength = getSizeFromSnappyChunk(new File(dataFile.getAbsolutePath() + ".chunks"));
                 result.add(new DataInfo(data.getCollection(), dataFile.getName(), fileLength, data.getDeliveryKey(), data.getDeliveryVersion(), data.getDataStrategy()));
             }
         }

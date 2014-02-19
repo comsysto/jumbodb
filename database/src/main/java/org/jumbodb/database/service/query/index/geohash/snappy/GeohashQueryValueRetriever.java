@@ -12,10 +12,8 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
-// CARSTEN rename
 public class GeohashQueryValueRetriever implements QueryValueRetriever {
 
-    // CARSTEN rename
     private GeohashContainer value = new GeohashContainer();
 
     // four boxes where a geohash can start with a different value

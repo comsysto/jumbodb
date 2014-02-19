@@ -36,10 +36,13 @@ public class DatabaseImportSession implements Closeable {
 
     public void runImport(ImportHandler importHandler) throws IOException {
         outputStream = clientSocket.getOutputStream();
+        // CARSTEN disable compressed stream
         snappyOutputStream = new SnappyOutputStream(outputStream);
         dataOutputStream = new DataOutputStream(snappyOutputStream);
         inputStream = clientSocket.getInputStream();
+        // CARSTEN enable buffer stream
 //        bufferedInputStream = new BufferedInputStream(inputStream);
+        // CARSTEN disable compressed stream
         snappyInputStream = new SnappyInputStream(inputStream);
         dataInputStream = new DataInputStream(snappyInputStream);
 
@@ -69,6 +72,7 @@ public class DatabaseImportSession implements Closeable {
             dataOutputStream.writeUTF(md5Hash);
             dataOutputStream.flush();
         } else if(":cmd:import:collection:index".equals(cmd)) {
+            // CARSTEN is meta still required?
             ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.INDEX;
             String collection = dataInputStream.readUTF();
             String indexName = dataInputStream.readUTF();
@@ -85,6 +89,7 @@ public class DatabaseImportSession implements Closeable {
             dataOutputStream.writeUTF(md5Hash);
             dataOutputStream.flush();
         } else if(":cmd:import:collection:meta:data".equals(cmd)) {
+            // CARSTEN is meta still required?
             String collection = dataInputStream.readUTF();
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();

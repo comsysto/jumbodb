@@ -32,11 +32,14 @@ dependencies {
     compile project(':commons:query')
     compile project(':commons:geo')
 
+//    compile ("org.apache.hadoop:hadoop-mapreduce-client-core:$hadoopVersion")
+//    compile ("org.apache.hadoop:hadoop-mapreduce-client-app:$hadoopVersion")
+//    compile ("org.apache.hadoop:hadoop-common:$hadoopVersion")
     compile ("org.apache.hadoop:hadoop-client:$hadoopVersion") {
         exclude group: 'org.mortbay.jetty'
         exclude group: 'tomcat'
     }
-    compile 'commons-io:commons-io:2.3'
+        compile 'commons-io:commons-io:2.3'
     compile "org.xerial.snappy:snappy-java:$snappyVersion"
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.5"

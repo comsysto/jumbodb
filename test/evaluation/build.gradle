@@ -40,7 +40,7 @@ sourceSets {
 dependencies {
     compile 'com.esotericsoftware.kryo:kryo:2.20'
     compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
-    compile "org.apache.hadoop:hadoop-core:$hadoopVersion"
+    compile "org.apache.hadoop:hadoop-client:$hadoopVersion"
     compile 'com.google.guava:guava:r09'
     compile 'commons-io:commons-io:2.3'
     compile 'commons-lang:commons-lang:2.5'

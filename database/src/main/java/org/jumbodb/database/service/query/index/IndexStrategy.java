@@ -23,5 +23,6 @@ public interface IndexStrategy {
     Set<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);
+    // CARSTEN remove
     String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile);
 }

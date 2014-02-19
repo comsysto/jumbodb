@@ -9,7 +9,6 @@ import org.jumbodb.common.geo.geohash.GeoHash;
 
 public class RandomGeohashes {
 
-    // TODO: could possibly be less brute-force here and be more scientific
 // about possible failure points
     public static Iterable<GeoHash> fullRange() {
         return new Iterable<GeoHash>() {

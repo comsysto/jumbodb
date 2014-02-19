@@ -10,6 +10,6 @@ public class SnappyChunksPathFilter implements PathFilter {
     @Override
     public boolean accept(Path path) {
         String name = path.getName();
-        return !name.endsWith(".chunks");
+        return !name.endsWith(".chunks") && !name.endsWith(".md5");
     }
 }

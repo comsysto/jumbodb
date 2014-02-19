@@ -61,7 +61,6 @@ define(['angular' ], function (angular) {
 			fetchData();
 			$scope.msg = {};
 
-			// CARSTEN reuse ?
 			$scope.showReplication = false;
 			$scope.replication = {"port" :12001, "activate": true};
 

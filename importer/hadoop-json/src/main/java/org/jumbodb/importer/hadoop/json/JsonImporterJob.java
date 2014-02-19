@@ -74,6 +74,9 @@ public class JsonImporterJob extends Configured implements Tool {
             control.addJobCollection(jumboIndexAndImportJob);
             System.out.println("Waiting Jobs " + control.getWaitingJobList().size());
 
+            // CARSTEN write delivery meta data
+            // CARSTEN write index meta data
+
         }
 
         Thread t = new Thread(control);

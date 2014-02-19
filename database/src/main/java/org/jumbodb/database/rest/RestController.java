@@ -104,6 +104,7 @@ public class RestController {
         return new Message("activate", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' on all collections has been activated.");
     }
 
+    // CARSTEN remove
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}/{collection}", method = RequestMethod.PUT)
     @ResponseBody
     public Message activateChunkedVersionInCollection(@PathVariable String chunkDeliveryKey, @PathVariable String version, @PathVariable String collection) {
@@ -118,6 +119,7 @@ public class RestController {
         return new Message("delete", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' (incl. all collections) has been deleted.");
     }
 
+    // CARSTEN remove
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}/{collection}", method = RequestMethod.DELETE)
     @ResponseBody
     public Message deleteChunkedVersionInCollection(@PathVariable String chunkDeliveryKey, @PathVariable String version, @PathVariable String collection) {
@@ -125,6 +127,7 @@ public class RestController {
         return new Message("delete", "Version '" + version + "' for '" + collection + "' has been deleted.");
     }
 
+    // CARSTEN remove
     @RequestMapping(value = "/collection/{collection}", method = RequestMethod.DELETE)
     @ResponseBody
     public Message deleteCompleteCollection(@PathVariable String collection) {

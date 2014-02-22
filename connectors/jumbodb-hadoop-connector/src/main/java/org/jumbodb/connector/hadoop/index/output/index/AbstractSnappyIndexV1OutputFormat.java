@@ -6,10 +6,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.jumbodb.connector.hadoop.JumboMetaUtil;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.BufferedOutputStream;
@@ -76,14 +78,16 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
 
         @Override
         public void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-            dataOutputStream.close();
-            countingOutputStream.close();
-            snappyOutputStream.close();
-            bufferedOutputStream.close();
-            digestStream.close();
-            fileOut.close();
+            IOUtils.closeStream(dataOutputStream);
+            IOUtils.closeStream(countingOutputStream);
+            IOUtils.closeStream(snappyOutputStream);
+            IOUtils.closeStream(bufferedOutputStream);
+            IOUtils.closeStream(digestStream);
+            IOUtils.closeStream(fileOut);
             writeMd5Digest();
             writeSnappyChunks();
+            JumboMetaUtil.writeIndexMetaData(file.getParent(), getStrategy(), taskAttemptContext);
+
         }
 
         private void writeMd5Digest() throws IOException {
@@ -118,5 +122,7 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
     protected abstract void write(T k, OV v, DataOutputStream out) throws IOException, InterruptedException;
 
     protected abstract int getSnappyBlockSize();
+
+    protected abstract String getStrategy();
 
 }

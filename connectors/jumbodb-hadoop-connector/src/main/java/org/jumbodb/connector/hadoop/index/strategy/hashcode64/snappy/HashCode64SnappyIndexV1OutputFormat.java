@@ -20,4 +20,9 @@ public class HashCode64SnappyIndexV1OutputFormat extends AbstractSnappyIndexV1Ou
     protected int getSnappyBlockSize() {
         return 32 * 1020; // must be a multiple of 20! (8 byte long data, 4 byte file name hash, 8 byte offset)
     }
+
+    @Override
+    protected String getStrategy() {
+        return AbstractHashCode64IndexMapper.HASHCODE64_SNAPPY_V1;
+    }
 }

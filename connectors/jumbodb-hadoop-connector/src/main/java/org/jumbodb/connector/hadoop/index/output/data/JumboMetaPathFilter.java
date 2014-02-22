@@ -6,10 +6,10 @@ import org.apache.hadoop.fs.PathFilter;
 /**
  * @author Carsten Hufe
  */
-public class SnappyChunksPathFilter implements PathFilter {
+public class JumboMetaPathFilter implements PathFilter {
     @Override
     public boolean accept(Path path) {
         String name = path.getName();
-        return !name.endsWith(".chunks") && !name.endsWith(".md5");
+        return !name.endsWith(".chunks") && !name.endsWith(".md5")  && !name.endsWith(".properties");
     }
 }

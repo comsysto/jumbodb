@@ -20,4 +20,9 @@ public class IntegerSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1Outpu
     protected int getSnappyBlockSize() {
         return 32 * 1024; // must be a multiple of 16! (4 byte integer data, 4 byte file name hash, 8 byte offset)
     }
+
+    @Override
+    protected String getStrategy() {
+        return AbstractIntegerIndexMapper.INTEGER_SNAPPY_V1;
+    }
 }

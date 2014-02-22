@@ -29,8 +29,8 @@ public class DeliveryProperties {
     public static DeliveryMeta getDeliveryMeta(File file) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties properties = PropertiesHelper.loadProperties(file);
-        String deliveryVersion = properties.getProperty("deliveryVersion");
-        String info = properties.getProperty("info");
+        String deliveryVersion = properties.getProperty("deliveryVersion"); // CARSTEN remove
+        String info = properties.getProperty("info"); // CARSTEN remove
         String date = properties.getProperty("date");
         String sourcePath = properties.getProperty("sourcePath");
         String strategy = properties.getProperty("strategy");
@@ -42,6 +42,7 @@ public class DeliveryProperties {
 
     }
 
+    // CARSTEN remove
     public static void write(File deliveryInfoFile, DeliveryMeta deliveryMeta) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties deliveryInfo = new Properties();

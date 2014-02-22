@@ -31,7 +31,7 @@ public class ImportJobCreator {
     private static ControlledJob createJumboJob(Configuration conf, Path importPath, Path reportOutputPath, String type, BaseJumboImportJob genericImportJob, ImportHost importHost, IndexField indexField) throws IOException {
         String jobName = "jumboDB Import " + importHost.getHost() + " " + importPath.toString() + ":" + type;
         System.out.println(jobName);
-        Job job = new Job(conf, jobName);
+        Job job = Job.getInstance(conf, jobName);
         JumboInputFormat.setDataType(job, type);
         JumboInputFormat.setImportPath(job, importPath);
         JumboInputFormat.setIndexName(job, indexField != null ? indexField.getIndexName() : "not_set");

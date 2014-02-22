@@ -5,9 +5,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.jumbodb.connector.hadoop.JumboMetaUtil;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.BufferedOutputStream;
@@ -16,10 +19,14 @@ import java.io.IOException;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
+    public static final String STRATEGY_KEY = "JSON_SNAPPY_V1";
     public static final int SNAPPY_BLOCK_SIZE = 32768;
 
 
@@ -78,7 +85,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             Path path = file.suffix(".md5");
             FSDataOutputStream fsDataOutputStream = fs.create(path, false);
             fsDataOutputStream.write(digestRawHex.getBytes("UTF-8"));
-            fsDataOutputStream.close();
+            IOUtils.closeStream(fsDataOutputStream);
         }
 
         @Override
@@ -92,12 +99,22 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
 
         @Override
         public synchronized void close(TaskAttemptContext context) throws IOException {
-            dataOutputStream.close();
-            snappyOutputStream.close();
-            bufferedOutputStream.close();
-            digestOutputStream.close();
-            fileOut.close();
+            IOUtils.closeStream(dataOutputStream);
+            IOUtils.closeStream(snappyOutputStream);
+            IOUtils.closeStream(bufferedOutputStream);
+            IOUtils.closeStream(digestOutputStream);
+            IOUtils.closeStream(fileOut);
             writeSnappyChunks();
+            JumboMetaUtil.writeCollectionMetaData(file.getParent(), STRATEGY_KEY, context);
+        }
+
+        private String getSourcePaths(TaskAttemptContext context) {
+            Path[] inputPaths = FileInputFormat.getInputPaths(context);
+            StringBuilder buf = new StringBuilder();
+            for (Path inputPath : inputPaths) {
+                buf.append(inputPath.toString()).append(';');
+            }
+            return buf.toString();
         }
 
         private void writeSnappyChunks() throws IOException {
@@ -110,9 +127,9 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             for (Integer chunkSize : chunkSizes) {
                 dos.writeInt(chunkSize);
             }
-            digestStream.close();
-            dos.close();
-            fsDataOutputStream.close();
+            IOUtils.closeStream(digestStream);
+            IOUtils.closeStream(dos);
+            IOUtils.closeStream(fsDataOutputStream);
             writeMd5Digest(path, digestStream);
         }
     }

@@ -151,10 +151,7 @@ public class JumboConfigurationUtil {
         }
     }
 
-    public static List<JumboGenericImportJob> convertToGenericImportJobs(Configuration conf, ImportDefinition importDefinition) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        String dateStamp = sdf.format(new Date());
-
+    public static List<JumboGenericImportJob> convertToGenericImportJobs(Configuration conf, ImportDefinition importDefinition, String outputWithDate) {
         List<JumboGenericImportJob> result = new LinkedList<JumboGenericImportJob>();
         for (ImportCollection importCollection : importDefinition.getImportCollection()) {
             JumboGenericImportJob job = new JumboGenericImportJob();
@@ -171,13 +168,10 @@ public class JumboConfigurationUtil {
                     indexField.setDatePattern(importDefinition.getDatePattern());
                 }
             }
-
-            String output = StringUtils.isNotBlank(importCollection.getOutput()) ? importCollection.getOutput() : importDefinition.getOutput();
-            String outputWithDate = output + "/" + dateStamp + "/";
             String subPath = importDefinition.getDeliveryChunkKey() + "/" + generateVersion(conf) + "/" + importCollection.getCollectionName() + "/";
-            String outputData = outputWithDate + "data/" + subPath;
-            String outputIndex = outputWithDate + "index/" + subPath;
-            String outputLog = outputWithDate + "log/" + subPath;
+            String outputData = outputWithDate + "/data/" + subPath;
+            String outputIndex = outputWithDate + "/index/" + subPath;
+            String outputLog = outputWithDate + "/log/" + subPath;
             job.setSortDatePattern(importCollection.getSortDatePattern() != null ? importCollection.getSortDatePattern() : importDefinition.getDatePattern());
             job.setSortType(importCollection.getSortType());
             job.setInputPath(new Path(importCollection.getInput()));
@@ -187,6 +181,13 @@ public class JumboConfigurationUtil {
             result.add(job);
         }
         return result;
+    }
+
+    public static String getOutputPathWithDateStamp(ImportDefinition importDefinition) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        String dateStamp = sdf.format(new Date());
+        String output = importDefinition.getOutput();
+        return output + "/" + dateStamp;
     }
 
     public static Set<FinishedNotification> convertToFinishedNotifications(ImportDefinition importDefinition) {

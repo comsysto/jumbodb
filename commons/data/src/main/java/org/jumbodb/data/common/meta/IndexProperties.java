@@ -26,7 +26,7 @@ public class IndexProperties {
     public static IndexMeta getIndexMeta(File file) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties properties = PropertiesHelper.loadProperties(file);
-        String deliveryVersion = properties.getProperty("deliveryVersion");
+        String deliveryVersion = properties.getProperty("deliveryVersion"); // CARSTEN remove
         String date = properties.getProperty("date");
         String indexName = properties.getProperty("indexName");
         String strategy = properties.getProperty("strategy");
@@ -38,6 +38,7 @@ public class IndexProperties {
         }
     }
 
+    // CARSTEN remove
     public static void write(File indexFile, IndexMeta indexMeta) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties indexInfo = new Properties();

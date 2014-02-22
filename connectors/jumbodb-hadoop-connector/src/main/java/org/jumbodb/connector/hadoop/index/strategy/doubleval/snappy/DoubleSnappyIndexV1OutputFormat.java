@@ -20,4 +20,9 @@ public class DoubleSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1Output
     protected int getSnappyBlockSize() {
         return 32 * 1020; // must be a multiple of 20! (8 byte double data, 4 byte file name hash, 8 byte offset)
     }
+
+    @Override
+    protected String getStrategy() {
+        return AbstractDoubleIndexMapper.DOUBLE_SNAPPY_V_1;
+    }
 }

@@ -21,4 +21,9 @@ public class GeohashSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1Outpu
     protected int getSnappyBlockSize() {
         return 48 * 1024; // must be a multiple of 24! (4 byte geo hash, 4 byte latitude, 4 byte longitude, 4 byte file name hash, 8 byte offset)
     }
+
+    @Override
+    protected String getStrategy() {
+        return AbstractGeohashIndexMapper.GEOHASH_SNAPPY_V1;
+    }
 }

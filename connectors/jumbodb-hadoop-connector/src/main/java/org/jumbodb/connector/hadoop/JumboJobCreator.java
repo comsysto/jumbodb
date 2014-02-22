@@ -78,6 +78,7 @@ public class JumboJobCreator {
         return controlledJobs;
     }
 
+    // CARSTEN remove
     public static void sendMetaIndex(BaseJumboImportJob genericImportJob, IndexField indexField, Configuration conf) {
 
         String type = conf.get(JumboConstants.DATA_TYPE);
@@ -99,6 +100,7 @@ public class JumboJobCreator {
     }
 
 
+    // CARSTEN remove
     public static void sendMetaData(BaseJumboImportJob genericImportJob, Configuration conf) {
         String type = conf.get(JumboConstants.DATA_TYPE);
         if (!JumboConstants.DATA_TYPE_DATA.equals(type)) {

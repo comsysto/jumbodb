@@ -2,7 +2,6 @@ package org.jumbodb.connector.hadoop.index.output.data;
 
 import com.google.common.base.Charsets;
 import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -11,9 +10,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.LineRecordReader;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +24,7 @@ public class SnappyDataV1InputFormat extends FileInputFormat<LongWritable, Text>
     protected List<FileStatus> listStatus(JobContext job) throws IOException {
         List<FileStatus> fileStatuses = super.listStatus(job);
         List<FileStatus> result = new LinkedList<FileStatus>();
-        SnappyChunksPathFilter filter = new SnappyChunksPathFilter();
+        JumboMetaPathFilter filter = new JumboMetaPathFilter();
         for (FileStatus fileStatuse : fileStatuses) {
             Path path = fileStatuse.getPath();
             if(filter.accept(path)) {

@@ -3,6 +3,7 @@ package org.jumbodb.connector.hadoop.index.strategy.longval.snappy;
 import org.apache.hadoop.io.LongWritable;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.index.output.index.AbstractSnappyIndexV1OutputFormat;
+import org.jumbodb.connector.hadoop.index.strategy.hashcode64.snappy.AbstractHashCode64IndexMapper;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -19,5 +20,10 @@ public class LongSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1OutputFo
     @Override
     protected int getSnappyBlockSize() {
         return 32 * 1020; // must be a multiple of 20! (8 byte long data, 4 byte file name hash, 8 byte offset)
+    }
+
+    @Override
+    protected String getStrategy() {
+        return AbstractHashCode64IndexMapper.HASHCODE64_SNAPPY_V1;
     }
 }

@@ -2,6 +2,9 @@ package org.jumbodb.importer.hadoop.json;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -13,11 +16,15 @@ import org.apache.hadoop.util.ToolRunner;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.JumboJobCreator;
+import org.jumbodb.connector.hadoop.JumboMetaUtil;
 import org.jumbodb.connector.hadoop.configuration.FinishedNotification;
 import org.jumbodb.connector.hadoop.configuration.ImportDefinition;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.index.output.data.SnappyDataV1OutputFormat;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.security.DigestOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +52,8 @@ public class JsonImporterJob extends Configured implements Tool {
         String jsonConfPath = args[0];
 
         ImportDefinition importDefinition = JumboConfigurationUtil.loadJsonConfigurationAndUpdateHadoop(jsonConfPath, conf);
-        List<JumboGenericImportJob> importJobs = JumboConfigurationUtil.convertToGenericImportJobs(conf, importDefinition);
+        String outputWithDate = JumboConfigurationUtil.getOutputPathWithDateStamp(importDefinition);
+        List<JumboGenericImportJob> importJobs = JumboConfigurationUtil.convertToGenericImportJobs(conf, importDefinition, outputWithDate);
 
         JobControl control = new JobControl("JsonImporterJob");
 
@@ -73,11 +81,9 @@ public class JsonImporterJob extends Configured implements Tool {
             }
             control.addJobCollection(jumboIndexAndImportJob);
             System.out.println("Waiting Jobs " + control.getWaitingJobList().size());
-
-            // CARSTEN write delivery meta data
-            // CARSTEN write index meta data
-
         }
+
+        JumboMetaUtil.writeDeliveryMetaData(new Path(outputWithDate), importDefinition.getDescription(), conf);
 
         Thread t = new Thread(control);
         t.start();
@@ -94,4 +100,5 @@ public class JsonImporterJob extends Configured implements Tool {
         JumboJobCreator.sendFinishedNotification(finishedNotifications, control, conf);
         return control.getFailedJobList().size() == 0 ? 0 : 1;
     }
+
 }

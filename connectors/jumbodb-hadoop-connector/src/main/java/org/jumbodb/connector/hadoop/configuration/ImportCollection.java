@@ -13,7 +13,6 @@ import java.util.List;
  */
 public class ImportCollection {
     private String input;
-    private String output;
     private String description;
     private String collectionName;
     private String deliveryChunkKey;
@@ -86,14 +85,6 @@ public class ImportCollection {
         this.input = input;
     }
 
-    public String getOutput() {
-        return output;
-    }
-
-    public void setOutput(String output) {
-        this.output = output;
-    }
-
     public String getCollectionName() {
         return collectionName;
     }
@@ -139,7 +130,6 @@ public class ImportCollection {
     public String toString() {
         return "ImportCollection{" +
                 "input='" + input + '\'' +
-                ", output='" + output + '\'' +
                 ", description='" + description + '\'' +
                 ", collectionName='" + collectionName + '\'' +
                 ", deliveryChunk='" + deliveryChunkKey + '\'' +

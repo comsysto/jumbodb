@@ -20,6 +20,21 @@ import java.util.Properties;
 public class JumboMetaUtil {
     public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
+    public static void writeActiveMetaData(Path rootGenerationFolder, Configuration conf) throws IOException {
+        FileSystem fs = rootGenerationFolder.getFileSystem(conf);
+        String delivery = conf.get(JumboConstants.DELIVERY_CHUNK_KEY);
+        String version = conf.get(JumboConstants.DELIVERY_VERSION);
+        Path suffix = rootGenerationFolder.suffix("/data/" + delivery + "/active.properties");
+        if(!fs.exists(suffix)) {
+            FSDataOutputStream fsDataOutputStream = fs.create(suffix, true);
+            Properties indexInfo = new Properties();
+            indexInfo.setProperty("active", "true");
+            indexInfo.setProperty("version", version);
+            indexInfo.store(fsDataOutputStream, "Active version");
+            IOUtils.closeStream(fsDataOutputStream);
+        }
+    }
+
     public static void writeDeliveryMetaData(Path rootGenerationFolder, String info, Configuration conf) throws IOException {
         FileSystem fs = rootGenerationFolder.getFileSystem(conf);
         String delivery = conf.get(JumboConstants.DELIVERY_CHUNK_KEY);

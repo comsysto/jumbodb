@@ -84,6 +84,7 @@ public class JsonImporterJob extends Configured implements Tool {
         }
 
         JumboMetaUtil.writeDeliveryMetaData(new Path(outputWithDate), importDefinition.getDescription(), conf);
+        JumboMetaUtil.writeActiveMetaData(new Path(outputWithDate), conf);
 
         Thread t = new Thread(control);
         t.start();

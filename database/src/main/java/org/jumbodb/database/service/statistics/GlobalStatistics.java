@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * Date: 3/19/13
  * Time: 2:13 PM
  */
-// CARSTEN make spring bean
 public class GlobalStatistics {
     private static AtomicLong numberOfQueries = new AtomicLong(0l);
     private static AtomicLong numberOfResults = new AtomicLong(0l);

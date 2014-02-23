@@ -1,6 +1,5 @@
 package org.jumbodb.database.service.query.data;
 
-import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.importer.ImportMetaFileInformation;

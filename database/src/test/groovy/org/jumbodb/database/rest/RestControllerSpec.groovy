@@ -2,8 +2,6 @@ package org.jumbodb.database.rest
 
 import org.jumbodb.database.service.exporter.ExportDeliveryService
 import org.jumbodb.database.service.exporter.StartReplication
-import org.jumbodb.database.service.management.status.StatusService
-import org.jumbodb.database.service.management.status.dto.ServerInformation
 import org.jumbodb.database.service.management.storage.StorageManagement
 import org.jumbodb.database.service.management.storage.dto.maintenance.TemporaryFiles
 import org.jumbodb.database.service.queryutil.QueryUtilService
@@ -94,7 +92,7 @@ class RestControllerSpec extends Specification {
         when:
         controller.activateChunkedVersionForAllCollections("chunk_key", "version").type == "activate"
         then:
-        1 * storageManagementMock.activateChunkedVersionForAllCollections("chunk_key", "version")
+        1 * storageManagementMock.activateChunkedVersion("chunk_key", "version")
     }
 
     def "activateChunkedVersionInCollection"() {
@@ -116,7 +114,7 @@ class RestControllerSpec extends Specification {
         when:
         controller.deleteChunkedVersionForAllCollections("chunk_key", "version").type == "delete"
         then:
-        1 * storageManagementMock.deleteChunkedVersionForAllCollections("chunk_key", "version")
+        1 * storageManagementMock.deleteChunkedVersion("chunk_key", "version")
     }
 
     def "deleteChunkedVersionInCollection"() {

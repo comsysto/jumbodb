@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TODO ULF CARSTEN offset sorting?
+ * TODO ULF offset sorting?
  * @author Ulf Gitschthaler
  */
 public class RandomOffsetGenerator extends BaseOffsetGenerator {
@@ -100,7 +100,7 @@ public class RandomOffsetGenerator extends BaseOffsetGenerator {
         return samplesPerFile > 0 ? samplesPerFile + 1 : 0;
     }
 
-    // TODO UlF CARSTEN snappy
+    // TODO UlF snappy
     private long readFileSize(File dataFile){
         return dataFile.length();
     }

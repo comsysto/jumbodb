@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.jumbodb.data.common.meta.ActiveProperties;
-import org.jumbodb.data.common.meta.DeliveryProperties;
+import org.jumbodb.data.common.meta.CollectionProperties;
 import org.jumbodb.data.common.meta.IndexProperties;
 import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.query.JumboSearcher;
@@ -17,9 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Properties;
 
 public class ImportTask implements Runnable {
     private Logger log = LoggerFactory.getLogger(ImportTask.class);
@@ -82,26 +80,27 @@ public class ImportTask implements Runnable {
 
                 @Override
                 public void onCollectionMetaData(ImportMetaData information) {
-                    File temporaryDataPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion());
-                    deleteIfExists(temporaryDataPath);
-                    String deliveryKeyPath = temporaryDataPath + "/" + information.getCollection() + "/";
-                    DeliveryProperties.DeliveryMeta meta = new DeliveryProperties.DeliveryMeta(information.getDeliveryVersion(), information.getInfo(), new Date(), information.getSourcePath(), information.getDataStrategy());
-                    File deliveryVersionFilePath = new File(deliveryKeyPath);
-                    mkdirs(deliveryVersionFilePath);
-                    File deliveryInfoFile = new File(deliveryKeyPath + "/" + DeliveryProperties.DEFAULT_FILENAME);
-                    DeliveryProperties.write(deliveryInfoFile, meta);
-                    // pfad sollte der richtige sein ...
-                    File activeDeliveryFile = getFinalActivationFilePath(information.getCollection(), information.getDeliveryKey());//new File(deliveryKeyPath + "/active.properties");
-                    if(!activeDeliveryFile.exists()) {
-                        onActivateDelivery(information);
-                    }
+                    // CARSTEN fix
+//                    File temporaryDataPath = getTemporaryDataPath(information.getDeliveryKey(), information.getDeliveryVersion());
+//                    deleteIfExists(temporaryDataPath);
+//                    String deliveryKeyPath = temporaryDataPath + "/" + information.getCollection() + "/";
+//                    CollectionProperties.CollectionMeta meta = new CollectionProperties.CollectionMeta(new Date(), information.getSourcePath(), information.getDataStrategy());
+//                    File deliveryVersionFilePath = new File(deliveryKeyPath);
+//                    mkdirs(deliveryVersionFilePath);
+//                    File deliveryInfoFile = new File(deliveryKeyPath + "/" + CollectionProperties.DEFAULT_FILENAME);
+//                    CollectionProperties.write(deliveryInfoFile, meta);
+//                    // pfad sollte der richtige sein ...
+//                    File activeDeliveryFile = getFinalActivationFilePath(information.getCollection(), information.getDeliveryKey());//new File(deliveryKeyPath + "/active.properties");
+//                    if(!activeDeliveryFile.exists()) {
+//                        onActivateDelivery(information);
+//                    }
                 }
 
                 @Override
                 public void onCollectionMetaIndex(ImportMetaIndex information) {
                     String deliveryKeyPath = getTemporaryIndexPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/" + information.getIndexName() + "/";
 //                    Properties deliveryInfo = new Properties();
-                    IndexProperties.IndexMeta meta = new IndexProperties.IndexMeta(information.getDeliveryVersion(), new Date(), information.getIndexName(), information.getStrategy(), information.getIndexSourceFields());
+                    IndexProperties.IndexMeta meta = new IndexProperties.IndexMeta(new Date(), information.getIndexName(), information.getStrategy(), information.getIndexSourceFields());
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
                     mkdirs(deliveryVersionFilePath);
                     File deliveryInfoFile = new File(deliveryKeyPath + "/" + IndexProperties.DEFAULT_FILENAME);

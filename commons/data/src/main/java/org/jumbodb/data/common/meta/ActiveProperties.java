@@ -15,15 +15,20 @@ import java.util.Properties;
 public class ActiveProperties {
     public static final String DEFAULT_FILENAME = "active.properties";
 
+    public static boolean isDeliveryActive(File activePropsFile) {
+        Properties activeProps = PropertiesHelper.loadProperties(activePropsFile);
+        return "true".equals(activeProps.getProperty("active"));
+    }
+
     public static String getActiveDeliveryVersion(File activePropsFile) {
         Properties activeProps = PropertiesHelper.loadProperties(activePropsFile);
-        return activeProps.getProperty("deliveryVersion");
+        return activeProps.getProperty("version");
     }
 
     public static void writeActiveFile(File activeDeliveryFile, String deliveryVersion) {
         Properties active = new Properties();
         active.setProperty("active", "true");
-        active.setProperty("deliveryVersion", deliveryVersion);
+        active.setProperty("version", deliveryVersion);
 
         FileOutputStream activeDeliveryFos = null;
         try {

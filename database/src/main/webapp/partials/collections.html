@@ -34,7 +34,6 @@
                                     <th>Uncompressed</th>
                                     <th>Index</th>
                                     <th>&nbsp;</th>
-                                    <th>&nbsp;</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -49,9 +48,7 @@
                                     <td>{{version.formatedIndexSize}}</td>
                                     <td>
                                         <span class="label label-success" ng-show="version.active">Running</span>
-                                        <button class="btn btn-default" ng-click="activateChunkedVersionInCollection(collection.name, chunk.key, version.version)" ng-hide="version.active" href=""><i class="glyphicon glyphicon-hand-right"></i> Activate</button>
                                     </td>
-                                    <td><button class="btn btn-danger" ng-click="deleteChunkedVersionInCollection(collection.name, chunk.key, version.version)"><i class="glyphicon glyphicon-trash"></i></button></td>
 
                                 </tr>
                                 <tr>
@@ -61,11 +58,9 @@
                                     <td><strong>{{chunk.formatedUncompressedSize}}</strong></td>
                                     <td><strong>{{chunk.formatedIndexSize}}</strong></td>
                                     <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
                                 </tr>
                                 </tbody>
                             </table>
-                            <button class="btn btn-danger" ng-click="deleteCompleteCollection(collection.name)"><i class="icon-trash icon-white"></i> Delete collection <strong>{{collection.name}}</strong></button>
                             <hr/>
                         </div>
                     </div>

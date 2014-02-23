@@ -9,10 +9,10 @@ class DeliveryPropertiesSpec extends Specification {
     def "test write and load configuration"() {
         setup:
         def file = File.createTempFile("test", "file")
-        def metaToWrite = new DeliveryProperties.DeliveryMeta("my_version", "some infos", new Date(480000l), "source path", "my_test_strategy")
+        def metaToWrite = new CollectionProperties.CollectionMeta("my_version", "some infos", new Date(480000l), "source path", "my_test_strategy")
         when:
-        DeliveryProperties.write(file, metaToWrite)
-        def meta = DeliveryProperties.getDeliveryMeta(file)
+        CollectionProperties.write(file, metaToWrite)
+        def meta = CollectionProperties.getDeliveryMeta(file)
         then:
         meta.getDate() == new Date(480000l)
         meta.getDeliveryVersion()  == "my_version"
@@ -26,10 +26,10 @@ class DeliveryPropertiesSpec extends Specification {
     def "test getDate"() {
         setup:
         def file = File.createTempFile("test", "file")
-        def metaToWrite = new DeliveryProperties.DeliveryMeta("my_version", "some infos", new Date(480000l), "source path", "my_test_strategy")
+        def metaToWrite = new CollectionProperties.CollectionMeta("my_version", "some infos", new Date(480000l), "source path", "my_test_strategy")
         when:
-        DeliveryProperties.write(file, metaToWrite)
-        def date = DeliveryProperties.getDate(file)
+        CollectionProperties.write(file, metaToWrite)
+        def date = CollectionProperties.getDate(file)
         then:
         date == new Date(480000l)
         cleanup:
@@ -39,10 +39,10 @@ class DeliveryPropertiesSpec extends Specification {
     def "test getStrategy"() {
         setup:
         def file = File.createTempFile("test", "file")
-        def metaToWrite = new DeliveryProperties.DeliveryMeta("my_version", "some infos", new Date(480000l), "source path", "my_test_strategy")
+        def metaToWrite = new CollectionProperties.CollectionMeta("my_version", "some infos", new Date(480000l), "source path", "my_test_strategy")
         when:
-        DeliveryProperties.write(file, metaToWrite)
-        def strategy = DeliveryProperties.getStrategy(file)
+        CollectionProperties.write(file, metaToWrite)
+        def strategy = CollectionProperties.getStrategy(file)
         then:
         strategy == "my_test_strategy"
         cleanup:

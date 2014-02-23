@@ -14,88 +14,78 @@ import java.util.Properties;
 /**
  * @author Carsten Hufe
  */
+// CARSTEN unit test
 public class DeliveryProperties {
+    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String DEFAULT_FILENAME = "delivery.properties";
-    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm";
-
-    public static String getStrategy(File deliveryPropsFile) {
-        return getDeliveryMeta(deliveryPropsFile).getStrategy();
-    }
-
-    public static Date getDate(File file) {
-        return getDeliveryMeta(file).getDate();
-    }
 
     public static DeliveryMeta getDeliveryMeta(File file) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties properties = PropertiesHelper.loadProperties(file);
-        String deliveryVersion = properties.getProperty("deliveryVersion"); // CARSTEN remove
-        String info = properties.getProperty("info"); // CARSTEN remove
         String date = properties.getProperty("date");
-        String sourcePath = properties.getProperty("sourcePath");
-        String strategy = properties.getProperty("strategy");
-        try {
-            return  new DeliveryMeta(deliveryVersion, info, sdf.parse(date), sourcePath, strategy);
-        } catch (ParseException e) {
-            throw new UnhandledException(e);
-        }
-
+        String info = properties.getProperty("info");
+        String delivery = properties.getProperty("delivery");
+        String version = properties.getProperty("version");
+        return  new DeliveryMeta(date, info, delivery, version);
     }
 
-    // CARSTEN remove
-    public static void write(File deliveryInfoFile, DeliveryMeta deliveryMeta) {
+    public static void writeDeliveryFile(File deliveryFile, String deliveryKey, String deliveryVersion, String info) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
-        Properties deliveryInfo = new Properties();
-        deliveryInfo.setProperty("deliveryVersion", deliveryMeta.getDeliveryVersion());
-        deliveryInfo.setProperty("sourcePath", deliveryMeta.getSourcePath());
-        deliveryInfo.setProperty("date", sdf.format(deliveryMeta.getDate()));
-        deliveryInfo.setProperty("info", deliveryMeta.getInfo());
-        deliveryInfo.setProperty("strategy", deliveryMeta.getStrategy());
 
-        FileOutputStream deliveryInfoFos = null;
+        Properties active = new Properties();
+        active.setProperty("version", deliveryVersion);
+        active.setProperty("date", sdf.format(new Date()));
+        active.setProperty("info", info);
+        active.setProperty("delivery", deliveryKey);
+
+        FileOutputStream activeDeliveryFos = null;
         try {
-            deliveryInfoFos = new FileOutputStream(deliveryInfoFile);
-            deliveryInfo.store(deliveryInfoFos, "Delivery Information");
+            activeDeliveryFos = new FileOutputStream(deliveryFile);
+            active.store(activeDeliveryFos, "Delivery information");
         } catch(IOException e) {
             throw new RuntimeException(e);
         } finally {
-            IOUtils.closeQuietly(deliveryInfoFos);
+            IOUtils.closeQuietly(activeDeliveryFos);
         }
     }
 
     public static class DeliveryMeta {
-        private String deliveryVersion;
+        private String date;
         private String info;
-        private Date date;
-        private String sourcePath;
-        private String strategy;
+        private String delivery;
+        private String version;
 
-        public DeliveryMeta(String deliveryVersion, String info, Date date, String sourcePath, String strategy) {
-            this.deliveryVersion = deliveryVersion;
-            this.info = info;
+        public DeliveryMeta(String date, String info, String delivery, String version) {
             this.date = date;
-            this.sourcePath = sourcePath;
-            this.strategy = strategy;
+            this.info = info;
+            this.delivery = delivery;
+            this.version = version;
+        }
+
+        public String getDate() {
+            return date;
         }
 
         public String getInfo() {
             return info;
         }
 
-        public Date getDate() {
-            return date;
+        public String getDelivery() {
+            return delivery;
         }
 
-        public String getSourcePath() {
-            return sourcePath;
+        public String getVersion() {
+            return version;
         }
 
-        public String getStrategy() {
-            return strategy;
-        }
-
-        public String getDeliveryVersion() {
-            return deliveryVersion;
+        @Override
+        public String toString() {
+            return "DeliveryMeta{" +
+                    "date=" + date +
+                    ", info='" + info + '\'' +
+                    ", delivery='" + delivery + '\'' +
+                    ", version='" + version + '\'' +
+                    '}';
         }
     }
 }

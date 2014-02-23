@@ -20,8 +20,8 @@ public class TwitterQuery {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
 //        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
         JumboQuery query = new JumboQuery();
-//        query.setLimit(10);
-        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
+        query.setLimit(10);
+//        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
 //        query.addJsonQuery("user.screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
 
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

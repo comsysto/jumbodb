@@ -36,7 +36,7 @@ public class SnappyDataV1InputFormat extends FileInputFormat<LongWritable, Text>
 
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
-        return false; // CARSTEN implement
+        return false;
     }
 
     @Override

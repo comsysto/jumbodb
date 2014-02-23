@@ -20,14 +20,25 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
     private long compressedSize = -1;
     private long uncompressedSize = -1;
     private long indexSize = -1;
+    private boolean versionActive = false;
+    private boolean chunkActive = false;
 
-    public ChunkedDeliveryVersion(String collapseId, String chunkKey, String version, String info, String date, List<VersionedJumboCollection> collections) {
+    public ChunkedDeliveryVersion(String collapseId, String chunkKey, String version, String info, String date, boolean versionActive, boolean chunkActive, List<VersionedJumboCollection> collections) {
         this.collapseId = collapseId;
         this.chunkKey = chunkKey;
         this.version = version;
         this.info = info;
         this.date = date;
         this.collections = collections;
+        this.chunkActive = chunkActive;
+    }
+
+    public boolean isVersionActive() {
+        return versionActive;
+    }
+
+    public boolean isChunkActive() {
+        return chunkActive;
     }
 
     public String getCollapseId() {
@@ -109,28 +120,6 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
 
     public String getFormatedIndexSize() {
         return FileUtils.byteCountToDisplaySize(getIndexSize());
-    }
-
-    public boolean isAllRunning() {
-        for (VersionedJumboCollection collection : collections) {
-            if(!collection.isActive()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean isNoneRunning() {
-        for (VersionedJumboCollection collection : collections) {
-            if(collection.isActive()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean isSomeRunning() {
-        return !isNoneRunning() && !isAllRunning();
     }
 
     @Override

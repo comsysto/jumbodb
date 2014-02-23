@@ -15,9 +15,11 @@ public class DeliveryChunk implements Comparable<DeliveryChunk> {
     private long compressedSize = -1;
     private long uncompressedSize = -1;
     private long indexSize = -1;
+    private boolean active = false;
 
-    public DeliveryChunk(String key, List<DeliveryVersion> versions) {
+    public DeliveryChunk(String key, boolean active, List<DeliveryVersion> versions) {
         this.key = key;
+        this.active = active;
         this.versions = versions;
     }
 
@@ -27,6 +29,10 @@ public class DeliveryChunk implements Comparable<DeliveryChunk> {
 
     public List<DeliveryVersion> getVersions() {
         return versions;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public long getCompressedSize() {

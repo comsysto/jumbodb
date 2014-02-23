@@ -4,12 +4,9 @@ import com.google.common.io.Files
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.RandomStringUtils
-import org.apache.commons.lang.StringUtils
-import org.apache.commons.lang.math.RandomUtils
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.connector.importer.IndexInfo
 import org.jumbodb.data.common.meta.ActiveProperties
-import org.jumbodb.data.common.meta.DeliveryProperties
+import org.jumbodb.data.common.meta.CollectionProperties
 import org.jumbodb.data.common.meta.IndexProperties
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.configuration.JumboConfiguration
@@ -425,11 +422,11 @@ class StorageManagementSpec extends Specification {
         createDefaultFileStructure(dataDir, indexDir)
         def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
-        storageManagement.activateChunkedVersionForAllCollections("test_delivery1", "version1")
+        storageManagement.activateChunkedVersion("test_delivery1", "version1")
         then:
         storageManagement.getActiveDeliveryVersion("test_collection1", "test_delivery1") == "version1"
         when:
-        storageManagement.activateChunkedVersionForAllCollections("test_delivery1", "version2")
+        storageManagement.activateChunkedVersion("test_delivery1", "version2")
         then:
         storageManagement.getActiveDeliveryVersion("test_collection1", "test_delivery1") == "version2"
         cleanup:
@@ -517,7 +514,7 @@ class StorageManagementSpec extends Specification {
         createDefaultFileStructure(dataDir, indexDir)
         def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         when:
-        storageManagement.deleteChunkedVersionForAllCollections("test_delivery1", "version1")
+        storageManagement.deleteChunkedVersion("test_delivery1", "version1")
         def collections = storageManagement.getJumboCollections()
         then: "deletes collection2 fully, version1 of collection1"
         collections.size() == 2
@@ -597,10 +594,10 @@ class StorageManagementSpec extends Specification {
         def bytes = "The real data".getBytes("UTF-8")
         SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), new File(path + "part0001"), bytes.length, 32768)
         SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), new File(path + "part0002"), bytes.length, 32768)
-        def propsFile = new File(path + DeliveryProperties.DEFAULT_FILENAME)
+        def propsFile = new File(path + CollectionProperties.DEFAULT_FILENAME)
         Files.createParentDirs(propsFile)
-        def meta = new DeliveryProperties.DeliveryMeta(version, "some info", sdf.parse(date), "source path", "test_data_strategy")
-        DeliveryProperties.write(propsFile, meta)
+        def meta = new CollectionProperties.CollectionMeta(version, "some info", sdf.parse(date), "source path", "test_data_strategy")
+        CollectionProperties.write(propsFile, meta)
     }
 
     def makeIndex(indexDir, collection, deliveryKey, version, indexName) {

@@ -1,5 +1,9 @@
 package org.jumbodb.database.service.query;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.lang.UnhandledException;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.IndexQuery;
@@ -17,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.cache.CacheManager;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -138,6 +143,67 @@ public class JumboSearcher {
             DataStrategy strategy = dataStrategyManager.getStrategy(deliveryChunk.getCollection(), deliveryChunk.getChunkKey());
             return strategy.findDataSetsByFileOffsets(deliveryChunk, fileOffsets, resultCallback, searchQuery);
         }
+    }
+
+//    private long getIndexSize(String collectionName, String chunkKey, String version) {
+//        File indexVersionFolder = new File(getIndexPath().getAbsolutePath() + "/" + collectionName + "/" + chunkKey + "/" + version);
+//        if (indexVersionFolder.exists()) {
+//            return calculateCompressedSize(indexVersionFolder);
+//        }
+//        return 0l;
+//    }
+//    private long getUncompressedSize(File deliveryVersionFolder) {
+//        long uncompressedSize = 0l;
+//        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".chunks.snappy"));
+//        File[] snappyChunks = deliveryVersionFolder.listFiles(metaFiler);
+//        for (File snappyChunk : snappyChunks) {
+//            uncompressedSize += getSizeFromSnappyChunk(snappyChunk);
+//        }
+//        return uncompressedSize;
+//    }
+//
+//    private long getSizeFromSnappyChunk(File snappyChunk) {
+//        FileInputStream fis = null;
+//        DataInputStream dis = null;
+//        try {
+//            fis = new FileInputStream(snappyChunk);
+//            dis = new DataInputStream(fis);
+//            return dis.readLong();
+//        } catch (FileNotFoundException e) {
+//            throw new UnhandledException(e);
+//        } catch (IOException e) {
+//            throw new UnhandledException(e);
+//        } finally {
+//            IOUtils.closeQuietly(dis);
+//            IOUtils.closeQuietly(fis);
+//        }
+//    }
+//private long calculateCompressedSize(File versionFolder) {
+//    return FileUtils.sizeOfDirectory(versionFolder);
+//}
+
+    public long getDataCompressedSize(String collection, String chunkKey, String version) {
+        // CARSTEN implement
+        // CARSTEN unit test
+        return 0l;
+    }
+
+    public long getDataUncompressedSize(String collection, String chunkKey, String version) {
+        // CARSTEN implement
+        // CARSTEN unit test
+        return 0l;
+    }
+
+    public long getIndexSize(String collection, String chunkKey, String version, String indexName) {
+        // CARSTEN implement
+        // CARSTEN unit test
+        return 0l;
+    }
+
+    public long getIndexSize(String collection, String chunkKey, String version) {
+        // CARSTEN implement
+        // CARSTEN unit test
+        return 0l;
     }
 
     public IndexStrategy getIndexStrategy(String collection, String chunkKey, String indexName) {

@@ -155,6 +155,7 @@ public class JumboImportConnection implements Closeable {
         }
     }
 
+    // CARSTEN remove
     public void sendMetaIndex(MetaIndex metaIndex) {
         try {
             dos.writeUTF(":cmd:import:collection:meta:index");
@@ -178,6 +179,7 @@ public class JumboImportConnection implements Closeable {
         }
     }
 
+    // CARSTEN remove
     public void sendMetaData(MetaData metaData) {
         try {
             dos.writeUTF(":cmd:import:collection:meta:data");

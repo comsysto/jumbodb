@@ -38,6 +38,8 @@ public class RestController {
         return statusService.getStatus();
     }
 
+// CARSTEN method to active and disable chunk!
+// CARSTEN separate labels for disabled chunks
 
     @RequestMapping(value = "/collections", method = RequestMethod.GET)
     @ResponseBody
@@ -68,71 +70,19 @@ public class RestController {
     public QueryResult queryWithDefault(@PathVariable String collection, @RequestBody String query) {
         return queryUtilService.findDocumentsByQuery(collection, query, 20);
     }
-//
-//    @RequestMapping(value = "/query/{collection}/stream", method = RequestMethod.POST)
-//    public void queryStream(@PathVariable String collection, @RequestBody String query, final HttpServletResponse response) throws IOException {
-//        // TOD extract and clean up
-//        final AtomicInteger counter = new AtomicInteger(0);
-//        queryUtilService.findDocumentsByQuery(collection, query, new ResultCallback() {
-//             @Override
-//             public void writeResult(byte[] result) throws IOException {
-//                synchronized (response) {
-//                    String s = new String(result, "UTF-8").trim();
-//                    response.getWriter().println(s);
-//                    response.getWriter().flush();
-//                    counter.incrementAndGet();
-//                }
-//             }
-//
-//            @Override
-//            public void collect(CancelableTask cancelableTask) {
-//                // TOD implement timeout handling
-//            }
-//
-//            @Override
-//             public boolean needsMore(JumboQuery jumboQuery) throws IOException {
-//                 return counter.get() < jumboQuery.getLimit();
-//             }
-//         });
-//        response.getWriter().println(":EOF");
-//    }
 
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}", method = RequestMethod.PUT)
     @ResponseBody
-    public Message activateChunkedVersionForAllCollections(@PathVariable String chunkDeliveryKey, @PathVariable String version) {
-        storageManagement.activateChunkedVersionForAllCollections(chunkDeliveryKey, version);
-        return new Message("activate", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' on all collections has been activated.");
-    }
-
-    // CARSTEN remove
-    @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}/{collection}", method = RequestMethod.PUT)
-    @ResponseBody
-    public Message activateChunkedVersionInCollection(@PathVariable String chunkDeliveryKey, @PathVariable String version, @PathVariable String collection) {
-        storageManagement.activateChunkedVersionInCollection(chunkDeliveryKey, version, collection);
-        return new Message("activate", "Version '" + version + "' for '" + collection + "' has been activated.");
+    public Message activateChunkedVersion(@PathVariable String chunkDeliveryKey, @PathVariable String version) {
+        storageManagement.activateChunkedVersion(chunkDeliveryKey, version);
+        return new Message("activate", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' has been activated.");
     }
 
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}", method = RequestMethod.DELETE)
     @ResponseBody
-    public Message deleteChunkedVersionForAllCollections(@PathVariable String chunkDeliveryKey, @PathVariable String version) {
-        storageManagement.deleteChunkedVersionForAllCollections(chunkDeliveryKey, version);
-        return new Message("delete", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' (incl. all collections) has been deleted.");
-    }
-
-    // CARSTEN remove
-    @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}/{collection}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public Message deleteChunkedVersionInCollection(@PathVariable String chunkDeliveryKey, @PathVariable String version, @PathVariable String collection) {
-        storageManagement.deleteChunkedVersionInCollection(chunkDeliveryKey, version, collection);
-        return new Message("delete", "Version '" + version + "' for '" + collection + "' has been deleted.");
-    }
-
-    // CARSTEN remove
-    @RequestMapping(value = "/collection/{collection}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public Message deleteCompleteCollection(@PathVariable String collection) {
-        storageManagement.deleteCompleteCollection(collection);
-        return new Message("delete", "Complete collection '" + collection + "' has been deleted.");
+    public Message deleteChunkedVersion(@PathVariable String chunkDeliveryKey, @PathVariable String version) {
+        storageManagement.deleteChunkedVersion(chunkDeliveryKey, version);
+        return new Message("delete", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' has been deleted.");
     }
 
     @RequestMapping(value = "/replication", method = RequestMethod.POST)

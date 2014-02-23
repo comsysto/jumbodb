@@ -1,10 +1,8 @@
 package org.jumbodb.database.service.query.definition
 
 import org.jumbodb.data.common.meta.ActiveProperties
-import org.jumbodb.data.common.meta.DeliveryProperties
+import org.jumbodb.data.common.meta.CollectionProperties
 import org.jumbodb.data.common.meta.IndexProperties
-import org.jumbodb.database.service.importer.ImportMetaData
-import org.jumbodb.database.service.importer.ImportMetaIndex
 import spock.lang.Specification
 
 import java.text.SimpleDateFormat
@@ -12,6 +10,7 @@ import java.text.SimpleDateFormat
 /**
  * @author Carsten Hufe
  */
+// CARSTEN fix tests
 class CollectionDefinitionLoaderSpec extends Specification {
     def rootPath = File.createTempFile("test", "file").getParentFile()
     def dataPath = new File(rootPath.absolutePath + "/data/")
@@ -29,8 +28,8 @@ class CollectionDefinitionLoaderSpec extends Specification {
         new File(versionPath + "part0002.sha1").createNewFile()
         new File(versionPath + "part0002.md5").createNewFile()
         new File(versionPath + "part0002.chunks.snappy").createNewFile()
-        def metaData = new DeliveryProperties.DeliveryMeta(version, "Some info", sdf.parse(date), "Data imported from", "TEST_STRATEGY")
-        DeliveryProperties.write(new File(versionPath + "/delivery.properties"), metaData)
+        def metaData = new CollectionProperties.CollectionMeta(version, "Some info", sdf.parse(date), "Data imported from", "TEST_STRATEGY")
+        CollectionProperties.write(new File(versionPath + "/delivery.properties"), metaData)
     }
 
     def writeActiveProperties(collection, chunkKey, version) {

@@ -11,24 +11,20 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     private String collectionName;
     private String version;
     private String chunkKey;
-    private String info;
     private String date;
     private String sourcePath;
     private String strategy;
-    private boolean active;
     private long compressedSize;
     private long uncompressedSize;
     private long indexSize;
 
-    public VersionedJumboCollection(String collectionName, String version, String chunkKey, String info, String date, String sourcePath, String strategy, boolean active, long compressedSize, long uncompressedSize, long indexSize) {
+    public VersionedJumboCollection(String collectionName, String version, String chunkKey, String date, String sourcePath, String strategy, long compressedSize, long uncompressedSize, long indexSize) {
         this.collectionName = collectionName;
         this.version = version;
         this.chunkKey = chunkKey;
-        this.info = info;
         this.date = date;
         this.sourcePath = sourcePath;
         this.strategy = strategy;
-        this.active = active;
         this.compressedSize = compressedSize;
         this.uncompressedSize = uncompressedSize;
         this.indexSize = indexSize;
@@ -54,16 +50,8 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
         return chunkKey;
     }
 
-    public String getInfo() {
-        return info;
-    }
-
     public String getDate() {
         return date;
-    }
-
-    public boolean isActive() {
-        return active;
     }
 
     public long getCompressedSize() {
@@ -118,9 +106,7 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
                 "collectionName='" + collectionName + '\'' +
                 ", version='" + version + '\'' +
                 ", chunkKey='" + chunkKey + '\'' +
-                ", info='" + info + '\'' +
                 ", date='" + date + '\'' +
-                ", active=" + active +
                 ", compressedSize=" + compressedSize +
                 ", uncompressedSize=" + uncompressedSize +
                 ", indexSize=" + indexSize +

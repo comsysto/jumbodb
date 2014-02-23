@@ -1,12 +1,10 @@
 package org.jumbodb.database.service.query.definition;
 
-import org.apache.commons.io.filefilter.AndFileFilter;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.NotFileFilter;
-import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.io.filefilter.*;
 import org.jumbodb.data.common.meta.ActiveProperties;
-import org.jumbodb.data.common.meta.DeliveryProperties;
+import org.jumbodb.data.common.meta.CollectionProperties;
 import org.jumbodb.data.common.meta.IndexProperties;
+import org.springframework.util.LinkedMultiValueMap;
 
 import java.io.*;
 import java.util.*;
@@ -18,38 +16,47 @@ import java.util.*;
  */
 public class CollectionDefinitionLoader {
     public static final FileFilter FOLDER_INSTANCE = (FileFilter) DirectoryFileFilter.INSTANCE;
+    public static final AndFileFilter FILE_FILTER = new AndFileFilter();
+
+    static {
+        FILE_FILTER.addFileFilter(new NotFileFilter(new PrefixFileFilter("_")));
+        FILE_FILTER.addFileFilter(new NotFileFilter(new PrefixFileFilter(".")));
+        FILE_FILTER.addFileFilter(new NotFileFilter(new SuffixFileFilter(".properties")));
+        FILE_FILTER.addFileFilter(new NotFileFilter(new SuffixFileFilter(".chunks")));
+        FILE_FILTER.addFileFilter(new NotFileFilter(new SuffixFileFilter(".sha1")));
+        FILE_FILTER.addFileFilter(new NotFileFilter(new SuffixFileFilter(".md5")));
+    }
 
     public static CollectionDefinition loadCollectionDefinition(File dataPath, File indexPath) {
-        // CARSTEN change implementation for new format
-        Map<String, Collection<DeliveryChunkDefinition>> result = new HashMap<String, Collection<DeliveryChunkDefinition>>();
-        File[] dataCollectionDirectories = dataPath.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
-        if(dataCollectionDirectories == null) {
-            return new CollectionDefinition(result);
+        File[] deliveryKeyFolders = dataPath.listFiles((FileFilter) DirectoryFileFilter.INSTANCE);
+        if(deliveryKeyFolders == null) {
+            return new CollectionDefinition(new HashMap<String, List<DeliveryChunkDefinition>>());
         }
-        for (File dataCollectionFolder  : dataCollectionDirectories) {
-            if(!dataCollectionFolder.getName().startsWith(".")) {
-                String collectionName = dataCollectionFolder.getName();
-                Collection<DeliveryChunkDefinition> deliveryChunkDefinitions = new LinkedList<DeliveryChunkDefinition>();
-                File[] chunkFolders = dataCollectionFolder.listFiles(FOLDER_INSTANCE);
-                for (File chunkFolder : chunkFolders) {
-                    DeliveryChunkDefinition deliveryChunkDefinition = getDataDataDeliveryChunk(indexPath, dataCollectionFolder, collectionName, chunkFolder.getName());
-                    deliveryChunkDefinitions.add(deliveryChunkDefinition);
+        LinkedMultiValueMap<String, DeliveryChunkDefinition> deliveryChunkDefinitions = new LinkedMultiValueMap<String, DeliveryChunkDefinition>();
+        for (File deliveryKeyFolder : deliveryKeyFolders) {
+            if(!deliveryKeyFolder.getName().startsWith(".")) {
+                String deliveryKey = deliveryKeyFolder.getName();
+                File activeProperties = new File(deliveryKeyFolder.getAbsolutePath() + "/" + ActiveProperties.DEFAULT_FILENAME);
+                if(ActiveProperties.isDeliveryActive(activeProperties)) {
+                    String activeVersion = ActiveProperties.getActiveDeliveryVersion(activeProperties);
+                    File activeVersionFolder = new File(deliveryKeyFolder.getAbsolutePath() + "/" + activeVersion + "/");
+                    if(activeVersionFolder.exists()) {
+                        File[] collectionFolders = activeVersionFolder.listFiles(FOLDER_INSTANCE);
+                        for (File collectionFolder : collectionFolders) {
+                            String collectionName = collectionFolder.getName();
+                            File indexDeliveryVersionFolder = new File(indexPath.getAbsolutePath() + "/" + deliveryKey + "/" + activeVersion + "/" + collectionName + "/");
+                            DeliveryChunkDefinition dataDataDeliveryChunk = createDeliveryChunk(collectionName, deliveryKey, indexDeliveryVersionFolder, collectionFolder);
+                            deliveryChunkDefinitions.add(collectionName, dataDataDeliveryChunk);
+                        }
+                    }
+                    else {
+                        throw new IllegalStateException("Active version '" + activeVersionFolder + "' does not exist for delivery '" + deliveryKey + "'.");
+                    }
                 }
-                result.put(collectionName, deliveryChunkDefinitions);
             }
         }
-        return new CollectionDefinition(result);
+        return new CollectionDefinition(deliveryChunkDefinitions);
     }
-
-    private static DeliveryChunkDefinition getDataDataDeliveryChunk(File indexPath, File dataCollectionFolder, String collectionName, String chunkKey) {
-        String dataDeliveryKeyFolder = dataCollectionFolder.getAbsolutePath() + "/" + chunkKey + "/";
-        String deliveryVersion = ActiveProperties.getActiveDeliveryVersion(new File(dataDeliveryKeyFolder + ActiveProperties.DEFAULT_FILENAME));
-
-        String dataDeliveryVersionFolder = dataDeliveryKeyFolder + deliveryVersion + "/";
-        String indexDeliveryVersionFolder = indexPath.getAbsolutePath() + "/" + collectionName + "/" + chunkKey + "/" + deliveryVersion + "/";
-        return createDeliveryChunk(collectionName, chunkKey, new File(indexDeliveryVersionFolder), new File(dataDeliveryVersionFolder));
-    }
-
 
     private static DeliveryChunkDefinition createDeliveryChunk(String collectionName, String chunkKey, File collectionIndexFolder, File collectionDataFolder) {
         File[] indexFolders = collectionIndexFolder.listFiles(FOLDER_INSTANCE);
@@ -61,12 +68,7 @@ public class CollectionDefinitionLoader {
                 resIndexFiles.add(new IndexDefinition(indexFolder.getName(), indexFolder, strategy));
             }
         }
-        AndFileFilter ands = new AndFileFilter();
-        ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".properties")));
-        ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".chunks")));
-        ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".sha1")));
-        ands.addFileFilter(new NotFileFilter(new SuffixFileFilter(".md5")));
-        File[] dataFiles = collectionDataFolder.listFiles((FilenameFilter) ands);
+        File[] dataFiles = collectionDataFolder.listFiles((FilenameFilter) FILE_FILTER);
         for (File dataFile : dataFiles) {
             resDataFiles.put(dataFile.getName().hashCode(), dataFile);
         }
@@ -79,6 +81,6 @@ public class CollectionDefinitionLoader {
     }
 
     private static String getDataStrategy(File dataFolder) {
-        return DeliveryProperties.getStrategy(new File(dataFolder.getAbsolutePath() + "/" + DeliveryProperties.DEFAULT_FILENAME));
+        return CollectionProperties.getStrategy(new File(dataFolder.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME));
     }
 }

@@ -77,7 +77,7 @@ define(['angular' ], function (angular) {
 				});
 			}
 
-			$scope.activateChunkedVersionForAllCollections = function(chunkDeliveryKey, version) {
+			$scope.activateChunkedVersion = function(chunkDeliveryKey, version) {
 				if(confirm('Are you sure?')) {
 					$http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
 						fetchData();
@@ -86,16 +86,8 @@ define(['angular' ], function (angular) {
 				}
 			}
 
-			$scope.activateChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
-				if(confirm('Are you sure?')) {
-					$http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
-						fetchData();
-						buildMessage(data)
-					});
-				}
-			}
 
-			$scope.deleteChunkedVersionForAllCollections = function(chunkDeliveryKey, version) {
+			$scope.deleteChunkedVersion = function(chunkDeliveryKey, version) {
 				if(confirm('Are you sure?')) {
 					$http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
 						fetchData();
@@ -104,14 +96,6 @@ define(['angular' ], function (angular) {
 				}
 			}
 
-			$scope.deleteChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
-				if(confirm('Are you sure?')) {
-					$http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
-						fetchData();
-						buildMessage(data);
-					});
-				}
-			}
 
 			function buildMessage(data) {
 				var msg = {};

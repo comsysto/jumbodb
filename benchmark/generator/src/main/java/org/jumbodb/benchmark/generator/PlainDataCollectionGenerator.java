@@ -4,7 +4,7 @@ package org.jumbodb.benchmark.generator;
 import org.apache.commons.io.FilenameUtils;
 import org.jumbodb.benchmark.generator.runner.DataFileGenerationRunner;
 import org.jumbodb.benchmark.generator.runner.PlainDataFileGenerationRunner;
-import org.jumbodb.data.common.meta.DeliveryProperties;
+import org.jumbodb.data.common.meta.CollectionProperties;
 
 import java.io.File;
 import java.util.Date;
@@ -26,10 +26,10 @@ public class PlainDataCollectionGenerator extends DataCollectionGenerator {
 
     @Override
     public void createDeliveryProperties(String dataFolder, String deliveryVersion, String description){
-        DeliveryProperties.DeliveryMeta deliveryMeta = new DeliveryProperties.DeliveryMeta(deliveryVersion, description, new Date(),
+        CollectionProperties.CollectionMeta collectionMeta = new CollectionProperties.CollectionMeta("date",
                 DELIVERY_PATH, DELIVERY_STRATEGY);
 
-        String deliveryPropertiesPath = FilenameUtils.concat(dataFolder, DeliveryProperties.DEFAULT_FILENAME);
-        DeliveryProperties.write(new File(deliveryPropertiesPath), deliveryMeta);
+        String deliveryPropertiesPath = FilenameUtils.concat(dataFolder, CollectionProperties.DEFAULT_FILENAME);
+        CollectionProperties.write(new File(deliveryPropertiesPath), collectionMeta);
     }
 }

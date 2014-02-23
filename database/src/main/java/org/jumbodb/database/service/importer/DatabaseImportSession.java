@@ -72,7 +72,6 @@ public class DatabaseImportSession implements Closeable {
             dataOutputStream.writeUTF(md5Hash);
             dataOutputStream.flush();
         } else if(":cmd:import:collection:index".equals(cmd)) {
-            // CARSTEN is meta still required?
             ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.INDEX;
             String collection = dataInputStream.readUTF();
             String indexName = dataInputStream.readUTF();
@@ -105,6 +104,7 @@ public class DatabaseImportSession implements Closeable {
             dataOutputStream.writeUTF(":ok");
             dataOutputStream.flush();
         } else if(":cmd:import:collection:meta:index".equals(cmd)) {
+            // CARSTEN is meta still required?
             String collection = dataInputStream.readUTF();
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();
@@ -124,6 +124,7 @@ public class DatabaseImportSession implements Closeable {
             dataOutputStream.flush();
         } else if(":cmd:import:finished".equals(cmd)) {
             log.info(":cmd:import:finished");
+            // CARSTEN activation must be executed here!
             importHandler.onFinished(dataInputStream.readUTF(), dataInputStream.readUTF());
             dataOutputStream.writeUTF(":ok");
             dataOutputStream.flush();

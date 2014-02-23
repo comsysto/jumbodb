@@ -124,10 +124,27 @@ public class StorageManagement {
         log.info("deleteChunkedVersion (" + chunkedDeliveryKey + ", " + version + ")");
         // activate other collections if active
         // CARSTEN implement correctly
+        // CARSTEN active other version
+        // CARSTEN delete chunk folder if last one...
 //        List<String> collectionsWithChunkAndVersion = findCollectionsWithChunkAndVersion(chunkedDeliveryKey, version);
 //        for (String collection : collectionsWithChunkAndVersion) {
 //            deleteChunkedVersionInCollectionWithoutRestart(collection, chunkedDeliveryKey, version);
 //        }
+        onDataChanged();
+    }
+
+    public void activateChunk(String chunkedDeliveryKey) {
+        log.info("activateChunked (" + chunkedDeliveryKey + ")");
+        // CARSTEN implement correctly
+        // CARSTEN unit test
+        onDataChanged();
+    }
+
+
+    public void inactivateChunk(String chunkedDeliveryKey) {
+        log.info("inactivateChunk (" + chunkedDeliveryKey + ")");
+        // CARSTEN implement correctly
+        // CARSTEN unit test
         onDataChanged();
     }
 
@@ -141,36 +158,30 @@ public class StorageManagement {
         onDataChanged();
     }
 
-    private List<String> findCollectionsWithChunkAndVersion(String chunkedDeliveryKey, String version) {
-        List<File> collectionDirectories = findCollectionDataDirectories();
-        List<String> result = new LinkedList<String>();
-        for (File collectionDirectory : collectionDirectories) {
-            String path = collectionDirectory.getAbsolutePath() + "/" + chunkedDeliveryKey + "/" + version;
-            File pathFile = new File(path);
-            if (pathFile.exists()) {
-                result.add(collectionDirectory.getName());
-            }
-        }
+//    private List<String> findCollectionsWithChunkAndVersion(String chunkedDeliveryKey, String version) {
+//        List<File> collectionDirectories = findCollectionDataDirectories();
+//        List<String> result = new LinkedList<String>();
+//        for (File collectionDirectory : collectionDirectories) {
+//            String path = collectionDirectory.getAbsolutePath() + "/" + chunkedDeliveryKey + "/" + version;
+//            File pathFile = new File(path);
+//            if (pathFile.exists()) {
+//                result.add(collectionDirectory.getName());
+//            }
+//        }
+//
+//        return result;
+//    }
 
-        return result;
-    }
-
-    private List<File> findCollectionDataDirectories() {
-        List<File> collectionDirectories = new LinkedList<File>();
-        File[] files = getDataPath().listFiles();
-        for (File file : files) {
-            if (!file.getName().startsWith(".") && file.isDirectory()) {
-                collectionDirectories.add(file);
-            }
-        }
-        return collectionDirectories;
-    }
-
-    private void activateChunkedVersionInCollectionWithoutRestart(String collection, String chunkDeliveryKey, String version) {
-        File activeDeliveryFile = getActiveDeliveryFile(collection, chunkDeliveryKey);
-        activateDeliveryVersion(version, activeDeliveryFile);
-    }
-
+//    private List<File> findCollectionDataDirectories() {
+//        List<File> collectionDirectories = new LinkedList<File>();
+//        File[] files = getDataPath().listFiles();
+//        for (File file : files) {
+//            if (!file.getName().startsWith(".") && file.isDirectory()) {
+//                collectionDirectories.add(file);
+//            }
+//        }
+//        return collectionDirectories;
+//    }
 
     public String getActiveDeliveryVersion(String collection, String chunkDeliveryKey) {
         return ActiveProperties.getActiveDeliveryVersion(getActiveDeliveryFile(collection, chunkDeliveryKey));
@@ -180,11 +191,10 @@ public class StorageManagement {
         return new File(getDataPath().getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/" + ActiveProperties.DEFAULT_FILENAME);
     }
 
-    private void activateDeliveryVersion(String version, File activeDeliveryFile) {
-        // CARSTEN implement correctly
-        log.info("Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
-        ActiveProperties.writeActiveFile(activeDeliveryFile, version);
-    }
+//    private void activateDeliveryVersion(String version, File activeDeliveryFile) {
+//        log.info("Activate " + activeDeliveryFile.getAbsolutePath() + " => " + version);
+//        ActiveProperties.writeActiveFile(activeDeliveryFile, version);
+//    }
 
     public File getIndexPath() {
         return config.getIndexPath();
@@ -244,9 +254,9 @@ public class StorageManagement {
         return result;
     }
 
-    private File getDeliveryPropertiesFile(File deliveryVersionFolder) {
-        return new File(deliveryVersionFolder.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME);
-    }
+//    private File getDeliveryPropertiesFile(File deliveryVersionFolder) {
+//        return new File(deliveryVersionFolder.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME);
+//    }
 
     public List<ChunkedDeliveryVersion> getChunkedDeliveryVersions() {
         return getChunkedDeliveryVersions(true);
@@ -285,7 +295,7 @@ public class StorageManagement {
         return result;
     }
 
-    private List<VersionedJumboCollection> getAllVersionedJumboCollections() {
+//    private List<VersionedJumboCollection> getAllVersionedJumboCollections() {
 //        List<VersionedJumboCollection> versionedJumboCollections = new LinkedList<VersionedJumboCollection>();
 //        File[] collectionFolders = getDataPath().listFiles(FOLDER_FILTER);
 //        for (File collectionFolder : collectionFolders) {
@@ -309,8 +319,8 @@ public class StorageManagement {
 //
 //        }
 //        return versionedJumboCollections;
-        return null;
-    }
+//        return null;
+//    }
 
 //    public List<MetaData> getMetaDataForDelivery(String deliveryChunkKey, String version, boolean activate) {
 //        List<VersionedJumboCollection> allVersionedJumboCollections = getAllVersionedJumboCollections();
@@ -355,14 +365,14 @@ public class StorageManagement {
     private File findCollectionChunkedVersionIndexFolder(String collectionName, String deliveryChunkKey, String version) {
         return new File(getIndexPath().getAbsolutePath() + "/" + deliveryChunkKey + "/" + version + "/" + collectionName + "/");
     }
-
-    private File findCollectionChunkedVersionIndexFolder(String collectionName, String deliveryChunkKey, String version, String indexName) {
-        return new File(getIndexPath().getAbsolutePath() + "/" + collectionName + "/" + deliveryChunkKey + "/" + version + "/" + indexName + "/");
-    }
-
-    private File findCollectionChunkedVersionDataFolder(String collectionName, String deliveryChunkKey, String version) {
-        return new File(getDataPath().getAbsolutePath() + "/" + collectionName + "/" + deliveryChunkKey + "/" + version + "/");
-    }
+//
+//    private File findCollectionChunkedVersionIndexFolder(String collectionName, String deliveryChunkKey, String version, String indexName) {
+//        return new File(getIndexPath().getAbsolutePath() + "/" + collectionName + "/" + deliveryChunkKey + "/" + version + "/" + indexName + "/");
+//    }
+//
+//    private File findCollectionChunkedVersionDataFolder(String collectionName, String deliveryChunkKey, String version) {
+//        return new File(getDataPath().getAbsolutePath() + "/" + collectionName + "/" + deliveryChunkKey + "/" + version + "/");
+//    }
 
 //    public List<IndexInfo> getIndexInfoForDelivery(List<MetaIndex> metaIndex) {
 //        List<IndexInfo> result = new LinkedList<IndexInfo>();
@@ -412,34 +422,34 @@ public class StorageManagement {
 //        File dataFile = new File(dataFolder.getAbsolutePath() + "/" + data.getFilename());
 //        return new SnappyInputStream(new BufferedInputStream(new FileInputStream(dataFile)));
 //    }
-
-    private static class ChunkKeyVersion {
-        final String chunkKey;
-        final String version;
-
-        private ChunkKeyVersion(String chunkKey, String version) {
-            this.chunkKey = chunkKey;
-            this.version = version;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            ChunkKeyVersion that = (ChunkKeyVersion) o;
-
-            if (!chunkKey.equals(that.chunkKey)) return false;
-            if (!version.equals(that.version)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = chunkKey.hashCode();
-            result = 31 * result + version.hashCode();
-            return result;
-        }
-    }
+//
+//    private static class ChunkKeyVersion {
+//        final String chunkKey;
+//        final String version;
+//
+//        private ChunkKeyVersion(String chunkKey, String version) {
+//            this.chunkKey = chunkKey;
+//            this.version = version;
+//        }
+//
+//        @Override
+//        public boolean equals(Object o) {
+//            if (this == o) return true;
+//            if (o == null || getClass() != o.getClass()) return false;
+//
+//            ChunkKeyVersion that = (ChunkKeyVersion) o;
+//
+//            if (!chunkKey.equals(that.chunkKey)) return false;
+//            if (!version.equals(that.version)) return false;
+//
+//            return true;
+//        }
+//
+//        @Override
+//        public int hashCode() {
+//            int result = chunkKey.hashCode();
+//            result = 31 * result + version.hashCode();
+//            return result;
+//        }
+//    }
 }

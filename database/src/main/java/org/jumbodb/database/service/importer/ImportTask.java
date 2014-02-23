@@ -63,10 +63,12 @@ public class ImportTask implements Runnable {
                     try {
                         File absoluteImportPath = new File(getTemporaryImportAbsolutePathByType(information));
                         if(information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
+                            // CARSTEN kein delegate zur strategy
                             DataStrategy strategy = dataStrategyManager.getStrategy(information.getStrategy());
                             return strategy.onImport(information, dataInputStream, absoluteImportPath);
                         }
                         else if(information.getFileType() == ImportMetaFileInformation.FileType.INDEX) {
+                            // CARSTEN kein delegate zur strategy
                             IndexStrategy strategy = indexStrategyManager.getStrategy(information.getStrategy());
                             return strategy.onImport(information, dataInputStream, absoluteImportPath);
                         }
@@ -118,6 +120,7 @@ public class ImportTask implements Runnable {
 
                 @Override
                 public void onFinished(String deliveryKey, String deliveryVersion) {
+                    // CARSTEN activate delivery here
                     log.info("Moving temporary data to final path");
                     moveDataFiles(deliveryKey, deliveryVersion);
                     log.info("Temporary data to final path moved");

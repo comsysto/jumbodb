@@ -347,14 +347,9 @@ public class StorageManagement {
         List<CollectionIndex> result = new LinkedList<CollectionIndex>();
         for (File indexFolder : indexFolders) {
             IndexProperties.IndexMeta props = IndexProperties.getIndexMeta(new File(indexFolder.getAbsolutePath() + "/" + IndexProperties.DEFAULT_FILENAME));
-            result.add(new CollectionIndex(indexFolder.getName(), dateToString(props.getDate()), props.getIndexSourceFields(), props.getStrategy()));
+            result.add(new CollectionIndex(indexFolder.getName(), props.getDate(), props.getIndexSourceFields(), props.getStrategy()));
         }
         return result;
-    }
-
-    private String dateToString(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat(CollectionProperties.DATE_PATTERN);
-        return sdf.format(date);
     }
 
     private File findCollectionChunkedVersionIndexFolder(String collectionName, String deliveryChunkKey, String version) {

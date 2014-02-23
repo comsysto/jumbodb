@@ -9,13 +9,12 @@ class IndexPropertiesSpec extends Specification {
     def "test write and load configuration"() {
         setup:
         def file = File.createTempFile("test", "file")
-        def metaToWrite = new IndexProperties.IndexMeta("my_version", new Date(480000l), "my_index_name", "my_test_strategy", "source fields")
+        def metaToWrite = new IndexProperties.IndexMeta("my_date", "my_index_name", "my_test_strategy", "source fields")
         when:
         IndexProperties.write(file, metaToWrite)
         def meta = IndexProperties.getIndexMeta(file)
         then:
-        meta.getDate() == new Date(480000l)
-        meta.getDeliveryVersion()  == "my_version"
+        meta.getDate() == "my_date"
         meta.getIndexName()  == "my_index_name"
         meta.getIndexSourceFields()  == "source fields"
         meta.getStrategy()  == "my_test_strategy"
@@ -26,7 +25,7 @@ class IndexPropertiesSpec extends Specification {
     def "test getStrategy"() {
         setup:
         def file = File.createTempFile("test", "file")
-        def metaToWrite = new IndexProperties.IndexMeta("my_version", new Date(480000l), "my_index_name", "my_test_strategy", "source fields")
+        def metaToWrite = new IndexProperties.IndexMeta("my_date", "my_index_name", "my_test_strategy", "source fields")
         when:
         IndexProperties.write(file, metaToWrite)
         def strategy = IndexProperties.getStrategy(file)

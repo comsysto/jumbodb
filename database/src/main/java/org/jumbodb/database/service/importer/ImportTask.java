@@ -100,7 +100,7 @@ public class ImportTask implements Runnable {
                 public void onCollectionMetaIndex(ImportMetaIndex information) {
                     String deliveryKeyPath = getTemporaryIndexPath(information.getDeliveryKey(), information.getDeliveryVersion())+ "/" + information.getCollection() + "/" + information.getIndexName() + "/";
 //                    Properties deliveryInfo = new Properties();
-                    IndexProperties.IndexMeta meta = new IndexProperties.IndexMeta(new Date(), information.getIndexName(), information.getStrategy(), information.getIndexSourceFields());
+                    IndexProperties.IndexMeta meta = new IndexProperties.IndexMeta("date ...", information.getIndexName(), information.getStrategy(), information.getIndexSourceFields());
                     File deliveryVersionFilePath = new File(deliveryKeyPath);
                     mkdirs(deliveryVersionFilePath);
                     File deliveryInfoFile = new File(deliveryKeyPath + "/" + IndexProperties.DEFAULT_FILENAME);

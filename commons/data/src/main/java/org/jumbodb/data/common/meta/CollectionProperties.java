@@ -16,7 +16,6 @@ import java.util.Properties;
  */
 public class CollectionProperties {
     public static final String DEFAULT_FILENAME = "collection.properties";
-    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     public static String getStrategy(File deliveryPropsFile) {
         return getDeliveryMeta(deliveryPropsFile).getStrategy();
@@ -36,10 +35,9 @@ public class CollectionProperties {
     }
 
     public static void write(File deliveryInfoFile, CollectionMeta collectionMeta) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties deliveryInfo = new Properties();
         deliveryInfo.setProperty("sourcePath", collectionMeta.getSourcePath());
-        deliveryInfo.setProperty("date", sdf.format(collectionMeta.getDate()));
+        deliveryInfo.setProperty("date", collectionMeta.getDate());
         deliveryInfo.setProperty("strategy", collectionMeta.getStrategy());
 
         FileOutputStream deliveryInfoFos = null;

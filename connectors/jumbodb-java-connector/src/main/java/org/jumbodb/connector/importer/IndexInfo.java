@@ -14,6 +14,7 @@ public class IndexInfo implements Comparable<IndexInfo> {
     private String deliveryVersion;
     private String indexStrategy;
 
+    // CARSTEN reorder
     public IndexInfo(String collection, String indexName, String filename, long fileLength, String deliveryKey, String deliveryVersion, String indexStrategy) {
         this.collection = collection;
         this.indexName = indexName;

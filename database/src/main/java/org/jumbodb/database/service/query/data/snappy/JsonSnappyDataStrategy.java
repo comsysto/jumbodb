@@ -1,6 +1,9 @@
 package org.jumbodb.database.service.query.data.snappy;
 
 import com.google.common.collect.HashMultimap;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryClause;
@@ -49,13 +52,6 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         operations.put(QueryOperation.GEO_BOUNDARY_BOX, new GeoBoundaryBoxJsonOperationSearch());
         operations.put(QueryOperation.GEO_WITHIN_RANGE_METER, new GeoWithinRangeInMeterJsonOperationSearch());
         return operations;
-    }
-
-
-    @Override
-    public String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
-        String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/" + information.getFileName();
-        return SnappyChunksUtil.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), SNAPPY_DATA_CHUNK_SIZE);
     }
 
     @Override
@@ -132,6 +128,51 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
     }
 
     @Override
+    public boolean matches(QueryClause queryClause, Object value) {
+        JsonOperationSearch jsonOperationSearch = getOperations().get(queryClause.getQueryOperation());
+        if(jsonOperationSearch == null) {
+            throw new UnsupportedOperationException("OperationSearch is not supported: " + queryClause.getQueryOperation());
+        }
+        return jsonOperationSearch.matches(queryClause, value);
+    }
+
+    @Override
+    public long getCompressedSize(File dataFolder) {
+        // CARSTEN unit test
+        return FileUtils.sizeOfDirectory(dataFolder);
+    }
+
+    @Override
+    public long getUncompressedSize(File dataFolder) {
+        // CARSTEN unit test
+        long uncompressedSize = 0l;
+        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".snappy.chunks"));
+        File[] snappyChunks = dataFolder.listFiles(metaFiler);
+        for (File snappyChunk : snappyChunks) {
+            uncompressedSize += getSizeFromSnappyChunk(snappyChunk);
+        }
+        return uncompressedSize;
+    }
+
+    private long getSizeFromSnappyChunk(File snappyChunk) {
+        FileInputStream fis = null;
+        DataInputStream dis = null;
+        try {
+            fis = new FileInputStream(snappyChunk);
+            dis = new DataInputStream(fis);
+            return dis.readLong();
+        } catch (FileNotFoundException e) {
+            throw new UnhandledException(e);
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+        finally {
+            IOUtils.closeQuietly(dis);
+            IOUtils.closeQuietly(fis);
+        }
+    }
+
+    @Override
     public List<QueryOperation> getSupportedOperations() {
         return new ArrayList<QueryOperation>(getOperations().keySet());
     }
@@ -161,12 +202,5 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         this.datasetsByOffsetsCache = datasetsByOffsetsCache;
     }
 
-    @Override
-    public boolean matches(QueryClause queryClause, Object value) {
-        JsonOperationSearch jsonOperationSearch = getOperations().get(queryClause.getQueryOperation());
-        if(jsonOperationSearch == null) {
-            throw new UnsupportedOperationException("OperationSearch is not supported: " + queryClause.getQueryOperation());
-        }
-        return jsonOperationSearch.matches(queryClause, value);
-    }
+
 }

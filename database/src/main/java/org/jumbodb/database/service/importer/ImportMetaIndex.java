@@ -5,6 +5,7 @@ package org.jumbodb.database.service.importer;
  * Date: 2/8/13
  * Time: 10:00 AM
  */
+// CARSTEN remove
 public class ImportMetaIndex {
     private String collection;
     private String deliveryKey;

@@ -1,14 +1,10 @@
 package org.jumbodb.data.common.meta;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.UnhandledException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -18,14 +14,14 @@ public class CollectionProperties {
     public static final String DEFAULT_FILENAME = "collection.properties";
 
     public static String getStrategy(File deliveryPropsFile) {
-        return getDeliveryMeta(deliveryPropsFile).getStrategy();
+        return getCollectionMeta(deliveryPropsFile).getStrategy();
     }
 
-//    public static Date getDate(File file) {
-//        return getDeliveryMeta(file).getDate();
-//    }
+    public static String getStrategyName(File file) {
+        return getCollectionMeta(file).getStrategy();
+    }
 
-    public static CollectionMeta getDeliveryMeta(File file) {
+    public static CollectionMeta getCollectionMeta(File file) {
         Properties properties = PropertiesHelper.loadProperties(file);
         String date = properties.getProperty("date");
         String sourcePath = properties.getProperty("sourcePath");

@@ -1,14 +1,11 @@
 package org.jumbodb.data.common.meta;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.UnhandledException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -20,21 +17,18 @@ public class DeliveryProperties {
     public static final String DEFAULT_FILENAME = "delivery.properties";
 
     public static DeliveryMeta getDeliveryMeta(File file) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties properties = PropertiesHelper.loadProperties(file);
         String date = properties.getProperty("date");
         String info = properties.getProperty("info");
         String delivery = properties.getProperty("delivery");
         String version = properties.getProperty("version");
-        return  new DeliveryMeta(date, info, delivery, version);
+        return new DeliveryMeta(date, info, delivery, version);
     }
 
-    public static void writeDeliveryFile(File deliveryFile, String deliveryKey, String deliveryVersion, String info) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
-
+    public static void writeDeliveryFile(File deliveryFile, String deliveryKey, String deliveryVersion, String date, String info) {
         Properties active = new Properties();
         active.setProperty("version", deliveryVersion);
-        active.setProperty("date", sdf.format(new Date()));
+        active.setProperty("date", date);
         active.setProperty("info", info);
         active.setProperty("delivery", deliveryKey);
 
@@ -42,7 +36,7 @@ public class DeliveryProperties {
         try {
             activeDeliveryFos = new FileOutputStream(deliveryFile);
             active.store(activeDeliveryFos, "Delivery information");
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(activeDeliveryFos);
@@ -81,11 +75,11 @@ public class DeliveryProperties {
         @Override
         public String toString() {
             return "DeliveryMeta{" +
-                    "date=" + date +
-                    ", info='" + info + '\'' +
-                    ", delivery='" + delivery + '\'' +
-                    ", version='" + version + '\'' +
-                    '}';
+              "date=" + date +
+              ", info='" + info + '\'' +
+              ", delivery='" + delivery + '\'' +
+              ", version='" + version + '\'' +
+              '}';
         }
     }
 }

@@ -2,10 +2,9 @@ package org.jumbodb.database.service.importer;
 
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.connector.JumboConstants;
+import org.jumbodb.data.common.meta.ChecksumType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xerial.snappy.SnappyInputStream;
-import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
@@ -21,11 +20,9 @@ public class DatabaseImportSession implements Closeable {
     private Socket clientSocket;
     private int clientID;
     private InputStream inputStream;
-//    private BufferedInputStream bufferedInputStream;
-    private SnappyInputStream snappyInputStream;
+    private BufferedInputStream bufferedInputStream;
     private DataInputStream dataInputStream;
     private OutputStream outputStream;
-    private SnappyOutputStream snappyOutputStream;
     private DataOutputStream dataOutputStream;
 
 
@@ -36,15 +33,10 @@ public class DatabaseImportSession implements Closeable {
 
     public void runImport(ImportHandler importHandler) throws IOException {
         outputStream = clientSocket.getOutputStream();
-        // CARSTEN disable compressed stream
-        snappyOutputStream = new SnappyOutputStream(outputStream);
-        dataOutputStream = new DataOutputStream(snappyOutputStream);
+        dataOutputStream = new DataOutputStream(outputStream);
         inputStream = clientSocket.getInputStream();
-        // CARSTEN enable buffer stream
-//        bufferedInputStream = new BufferedInputStream(inputStream);
-        // CARSTEN disable compressed stream
-        snappyInputStream = new SnappyInputStream(inputStream);
-        dataInputStream = new DataInputStream(snappyInputStream);
+        bufferedInputStream = new BufferedInputStream(inputStream);
+        dataInputStream = new DataInputStream(bufferedInputStream);
 
         int protocolVersion = dataInputStream.readInt();
         if(protocolVersion != JumboConstants.IMPORT_PROTOCOL_VERSION) {
@@ -56,67 +48,63 @@ public class DatabaseImportSession implements Closeable {
 
         String cmd = dataInputStream.readUTF();
         log.info("ClientID " + clientID + " with command " + cmd);
-        if(":cmd:import:collection:data".equals(cmd)) {
+        if(":cmd:import:init".equals(cmd)) {
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
+            String date = dataInputStream.readUTF();
+            String info = dataInputStream.readUTF();
+            try {
+                importHandler.onInit(deliveryKey, deliveryVersion, date, info);
+                dataOutputStream.writeUTF(":success");
+            } catch (DeliveryVersionExistsException e) {
+                log.error("Existing delivery", e);
+                dataOutputStream.writeUTF(":failed");
+                dataOutputStream.writeUTF(e.getMessage());
+            }
+            dataOutputStream.flush();
+        }
+        else if(":cmd:import:collection:data".equals(cmd)) {
             ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.DATA;
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
             String collection = dataInputStream.readUTF();
             String filename = dataInputStream.readUTF();
             long fileLength = dataInputStream.readLong();
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String dataStrategy = dataInputStream.readUTF();
-            dataOutputStream.writeUTF(":copy");
-            dataOutputStream.flush();
-            ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, null, fileLength, deliveryKey, deliveryVersion, dataStrategy);
-            String md5Hash = importHandler.onImport(meta, dataInputStream);
-            dataOutputStream.writeUTF(":verify:md5");
-            dataOutputStream.writeUTF(md5Hash);
+            ChecksumType checksumType = ChecksumType.valueOf(dataInputStream.readUTF());
+            String checksum = checksumType != ChecksumType.NONE ? dataInputStream.readUTF() : null;
+            ImportMetaFileInformation meta = new ImportMetaFileInformation(deliveryKey, deliveryVersion, collection,
+                null, type, filename, fileLength, checksumType, checksum);
+            try {
+                importHandler.onImport(meta, dataInputStream);
+                dataOutputStream.writeUTF(":success");
+            } catch (FileChecksumException e) {
+                log.error("Checksum exception", e);
+                dataOutputStream.writeUTF(":failed");
+                dataOutputStream.writeUTF(e.getMessage());
+            }
             dataOutputStream.flush();
         } else if(":cmd:import:collection:index".equals(cmd)) {
             ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.INDEX;
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
             String collection = dataInputStream.readUTF();
             String indexName = dataInputStream.readUTF();
             String filename = dataInputStream.readUTF();
             long fileLength = dataInputStream.readLong();
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String indexStrategy = dataInputStream.readUTF();
-            dataOutputStream.writeUTF(":copy");
-            dataOutputStream.flush();
-            ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, indexName, fileLength, deliveryKey, deliveryVersion, indexStrategy);
-            String md5Hash = importHandler.onImport(meta, dataInputStream);
-            dataOutputStream.writeUTF(":verify:md5");
-            dataOutputStream.writeUTF(md5Hash);
-            dataOutputStream.flush();
-        } else if(":cmd:import:collection:meta:data".equals(cmd)) {
-            // CARSTEN is meta still required?
-            String collection = dataInputStream.readUTF();
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String dataStrategy = dataInputStream.readUTF();
-            String sourcePath = dataInputStream.readUTF();
-            boolean activate = dataInputStream.readBoolean();
-            String info = dataInputStream.readUTF();
-            ImportMetaData meta = new ImportMetaData(collection, deliveryKey, deliveryVersion, dataStrategy, sourcePath, info);
-            importHandler.onCollectionMetaData(meta);
-            if(activate) {
-                importHandler.onActivateDelivery(meta);
+            ChecksumType checksumType = ChecksumType.valueOf(dataInputStream.readUTF());
+            String checksum = checksumType != ChecksumType.NONE ? dataInputStream.readUTF() : null;
+            ImportMetaFileInformation meta = new ImportMetaFileInformation(deliveryKey, deliveryVersion, collection,
+                    indexName, type, filename, fileLength, checksumType, checksum);
+            try {
+                importHandler.onImport(meta, dataInputStream);
+                dataOutputStream.writeUTF(":success");
+            } catch (FileChecksumException e) {
+                log.error("Checksum exception", e);
+                dataOutputStream.writeUTF(":failed");
+                dataOutputStream.writeUTF(e.getMessage());
             }
-            dataOutputStream.writeUTF(":ok");
-            dataOutputStream.flush();
-        } else if(":cmd:import:collection:meta:index".equals(cmd)) {
-            // CARSTEN is meta still required?
-            String collection = dataInputStream.readUTF();
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String indexName = dataInputStream.readUTF();
-            String strategy = dataInputStream.readUTF();
-            String indexSourceFields = dataInputStream.readUTF();
-            ImportMetaIndex meta = new ImportMetaIndex(collection, deliveryKey, deliveryVersion, indexName, strategy, indexSourceFields);
-            importHandler.onCollectionMetaIndex(meta);
-            dataOutputStream.writeUTF(":ok");
             dataOutputStream.flush();
         } else if(":cmd:import:delivery:version:exists".equals(cmd)) {
-//            String collection = dataInputStream.readUTF();
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();
             boolean b = importHandler.existsDeliveryVersion(deliveryKey, deliveryVersion);
@@ -124,9 +112,10 @@ public class DatabaseImportSession implements Closeable {
             dataOutputStream.flush();
         } else if(":cmd:import:finished".equals(cmd)) {
             log.info(":cmd:import:finished");
-            // CARSTEN activation must be executed here!
-            importHandler.onFinished(dataInputStream.readUTF(), dataInputStream.readUTF());
-            dataOutputStream.writeUTF(":ok");
+            boolean activateChunk = dataInputStream.readBoolean();
+            boolean activateVersion = dataInputStream.readBoolean();
+            importHandler.onFinished(dataInputStream.readUTF(), dataInputStream.readUTF(), activateChunk, activateVersion);
+            dataOutputStream.writeUTF(":success");
             dataOutputStream.flush();
         } else {
             throw new UnsupportedOperationException("Unsupported command: " + cmd);
@@ -136,11 +125,9 @@ public class DatabaseImportSession implements Closeable {
     @Override
     public void close() throws IOException {
         IOUtils.closeQuietly(dataInputStream);
-        IOUtils.closeQuietly(snappyInputStream);
-//        IOUtils.closeQuietly(bufferedInputStream);
+        IOUtils.closeQuietly(bufferedInputStream);
         IOUtils.closeQuietly(inputStream);
         IOUtils.closeQuietly(dataOutputStream);
-        IOUtils.closeQuietly(snappyOutputStream);
         IOUtils.closeQuietly(outputStream);
         IOUtils.closeQuietly(clientSocket);
     }

@@ -13,6 +13,7 @@ public class DataInfo {
     private String deliveryVersion;
     private String dataStrategy;
 
+    // CARSTEN reorder
     public DataInfo(String collection, String filename, long fileLength, String deliveryKey, String deliveryVersion, String dataStrategy) {
         this.collection = collection;
         this.filename = filename;

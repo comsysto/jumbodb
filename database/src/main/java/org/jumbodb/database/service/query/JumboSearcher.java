@@ -1,14 +1,13 @@
 package org.jumbodb.database.service.query;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.lang.UnhandledException;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.data.common.meta.CollectionProperties;
+import org.jumbodb.data.common.meta.IndexProperties;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
+import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.DataStrategyManager;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
@@ -21,9 +20,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.cache.CacheManager;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * User: carsten
@@ -51,7 +58,8 @@ public class JumboSearcher {
     }
 
     protected CollectionDefinition getCollectionDefinition() {
-        return CollectionDefinitionLoader.loadCollectionDefinition(jumboConfiguration.getDataPath(), jumboConfiguration.getIndexPath());
+        return CollectionDefinitionLoader
+          .loadCollectionDefinition(jumboConfiguration.getDataPath(), jumboConfiguration.getIndexPath());
     }
 
     public void onDataChanged() {
@@ -64,18 +72,19 @@ public class JumboSearcher {
         }
     }
 
-    public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery, ResultCallback resultCallback) {
+    public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery,
+      ResultCallback resultCallback) {
         Collection<DeliveryChunkDefinition> deliveryChunks = collectionDefinition.getChunks(collectionName);
-        if(deliveryChunks != null && deliveryChunks.size() > 0) {
+        if (deliveryChunks != null && deliveryChunks.size() > 0) {
             List<Future<Integer>> futures = new LinkedList<Future<Integer>>();
             for (DeliveryChunkDefinition deliveryChunk : deliveryChunks) {
-                Future<Integer> future = chunkExecutor.submit(new SearchDeliveryChunkTask(deliveryChunk, searchQuery, resultCallback));
+                Future<Integer> future = chunkExecutor
+                  .submit(new SearchDeliveryChunkTask(deliveryChunk, searchQuery, resultCallback));
                 futures.add(future);
                 resultCallback.collect(new FutureCancelableTask(future));
             }
             return getNumberOfResultsFromFuturesAndHandleTimeOut(futures);
-        }
-        else {
+        } else {
             throw new JumboCollectionMissingException("Collection '" + collectionName + "' does not exist!");
         }
     }
@@ -90,18 +99,21 @@ public class JumboSearcher {
             throw new RuntimeException(e);
 
         } catch (ExecutionException e) {
-            throw (RuntimeException)e.getCause();
+            throw (RuntimeException) e.getCause();
         }
         return results;
     }
 
-    private Collection<FileOffset> findFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition, JumboQuery searchQuery, ResultCallback resultCallback) {
-        if(searchQuery.getIndexQuery().size() == 0) {
+    private Collection<FileOffset> findFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition,
+      JumboQuery searchQuery, ResultCallback resultCallback) {
+        if (searchQuery.getIndexQuery().size() == 0) {
             return Collections.emptyList();
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
         for (IndexQuery indexQuery : searchQuery.getIndexQuery()) {
-            Future<Set<FileOffset>> future = indexExecutor.submit(new SearchIndexTask(deliveryChunkDefinition, indexQuery, indexStrategyManager, searchQuery.getLimit(), searchQuery.isResultCacheEnabled()));
+            Future<Set<FileOffset>> future = indexExecutor.submit(
+              new SearchIndexTask(deliveryChunkDefinition, indexQuery, indexStrategyManager, searchQuery.getLimit(),
+                searchQuery.isResultCacheEnabled()));
             tasks.add(future);
             resultCallback.collect(new FutureCancelableTask(future));
         }
@@ -111,10 +123,9 @@ public class JumboSearcher {
             for (Future<Set<FileOffset>> task : tasks) {
                 // .get is blocking, so we dont have to wait explicitly
                 Set<FileOffset> fileOffsets = task.get();
-                if(result == null) {
+                if (result == null) {
                     result = new HashSet<FileOffset>(fileOffsets);
-                }
-                else {
+                } else {
                     result.retainAll(fileOffsets);
                 }
             }
@@ -122,7 +133,7 @@ public class JumboSearcher {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
-            throw (RuntimeException)e.getCause();
+            throw (RuntimeException) e.getCause();
         }
     }
 
@@ -131,7 +142,8 @@ public class JumboSearcher {
         private JumboQuery searchQuery;
         private ResultCallback resultCallback;
 
-        private SearchDeliveryChunkTask(DeliveryChunkDefinition deliveryChunk, JumboQuery searchQuery, ResultCallback resultCallback) {
+        private SearchDeliveryChunkTask(DeliveryChunkDefinition deliveryChunk, JumboQuery searchQuery,
+          ResultCallback resultCallback) {
             this.deliveryChunk = deliveryChunk;
             this.searchQuery = searchQuery;
             this.resultCallback = resultCallback;
@@ -140,70 +152,66 @@ public class JumboSearcher {
         @Override
         public Integer call() throws Exception {
             Collection<FileOffset> fileOffsets = findFileOffsets(deliveryChunk, searchQuery, resultCallback);
-            DataStrategy strategy = dataStrategyManager.getStrategy(deliveryChunk.getCollection(), deliveryChunk.getChunkKey());
+            DataStrategy strategy = dataStrategyManager
+              .getStrategy(deliveryChunk.getCollection(), deliveryChunk.getChunkKey());
             return strategy.findDataSetsByFileOffsets(deliveryChunk, fileOffsets, resultCallback, searchQuery);
         }
     }
 
-//    private long getIndexSize(String collectionName, String chunkKey, String version) {
-//        File indexVersionFolder = new File(getIndexPath().getAbsolutePath() + "/" + collectionName + "/" + chunkKey + "/" + version);
-//        if (indexVersionFolder.exists()) {
-//            return calculateCompressedSize(indexVersionFolder);
-//        }
-//        return 0l;
-//    }
-//    private long getUncompressedSize(File deliveryVersionFolder) {
-//        long uncompressedSize = 0l;
-//        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".chunks.snappy"));
-//        File[] snappyChunks = deliveryVersionFolder.listFiles(metaFiler);
-//        for (File snappyChunk : snappyChunks) {
-//            uncompressedSize += getSizeFromSnappyChunk(snappyChunk);
-//        }
-//        return uncompressedSize;
-//    }
-//
-//    private long getSizeFromSnappyChunk(File snappyChunk) {
-//        FileInputStream fis = null;
-//        DataInputStream dis = null;
-//        try {
-//            fis = new FileInputStream(snappyChunk);
-//            dis = new DataInputStream(fis);
-//            return dis.readLong();
-//        } catch (FileNotFoundException e) {
-//            throw new UnhandledException(e);
-//        } catch (IOException e) {
-//            throw new UnhandledException(e);
-//        } finally {
-//            IOUtils.closeQuietly(dis);
-//            IOUtils.closeQuietly(fis);
-//        }
-//    }
-//private long calculateCompressedSize(File versionFolder) {
-//    return FileUtils.sizeOfDirectory(versionFolder);
-//}
-
     public long getDataCompressedSize(String collection, String chunkKey, String version) {
-        // CARSTEN implement
         // CARSTEN unit test
-        return 0l;
+        File file = buildPathToData(collection, chunkKey, version);
+        String strategyName = getDataStrategyName(file);
+        DataStrategy dataStrategy = getDataStrategy(strategyName);
+        return dataStrategy.getCompressedSize(file);
     }
 
     public long getDataUncompressedSize(String collection, String chunkKey, String version) {
-        // CARSTEN implement
         // CARSTEN unit test
-        return 0l;
-    }
-
-    public long getIndexSize(String collection, String chunkKey, String version, String indexName) {
-        // CARSTEN implement
-        // CARSTEN unit test
-        return 0l;
+        File file = buildPathToData(collection, chunkKey, version);
+        String strategyName = getDataStrategyName(file);
+        DataStrategy dataStrategy = getDataStrategy(strategyName);
+        return dataStrategy.getUncompressedSize(file);
     }
 
     public long getIndexSize(String collection, String chunkKey, String version) {
-        // CARSTEN implement
         // CARSTEN unit test
-        return 0l;
+        long result = 0l;
+        File indexRoot = buildPathToIndexRoot(collection, chunkKey, version);
+        File[] indexFolders = indexRoot.listFiles(StorageManagement.FOLDER_FILTER);
+        for (File indexFolder : indexFolders) {
+            result += getIndexSize(indexFolder);
+        }
+        return result;
+    }
+
+    private long getIndexSize(File indexFolder) {
+        String indexStrategyName = getIndexStrategyName(indexFolder);
+        IndexStrategy indexStrategy = getIndexStrategy(indexStrategyName);
+        return indexStrategy.getSize(indexFolder);
+    }
+
+    private String getIndexStrategyName(File indexPath) {
+        File indexProps = new File(indexPath.getAbsolutePath() + "/" + IndexProperties.DEFAULT_FILENAME);
+        return IndexProperties.getStrategy(indexProps);
+    }
+
+    private String getDataStrategyName(File indexPath) {
+        File indexProps = new File(indexPath.getAbsolutePath() + CollectionProperties.DEFAULT_FILENAME);
+        return CollectionProperties.getStrategy(indexProps);
+    }
+
+    private File buildPathToData(String collection, String chunkKey, String version) {
+        return new File(
+          jumboConfiguration.getDataPath().getAbsolutePath() + "/" + chunkKey + "/" + version + "/" + collection + "/");
+    }
+
+    private File buildPathToIndexRoot(String collection, String chunkKey, String version) {
+        return new File(jumboConfiguration.getIndexPath().getAbsolutePath() + "/" + chunkKey + "/" + version + "/" + collection + "/");
+    }
+
+    private File buildPathToIndex(String collection, String chunkKey, String version, String indexName) {
+        return new File(buildPathToIndexRoot(collection, chunkKey, version).getAbsolutePath() + indexName + "/");
     }
 
     public IndexStrategy getIndexStrategy(String collection, String chunkKey, String indexName) {
@@ -212,6 +220,10 @@ public class JumboSearcher {
 
     public IndexStrategy getIndexStrategy(String key) {
         return indexStrategyManager.getStrategy(key);
+    }
+
+    public DataStrategy getDataStrategy(String key) {
+        return dataStrategyManager.getStrategy(key);
     }
 
     public DataStrategy getDataStrategy(String collection, String chunkKey) {

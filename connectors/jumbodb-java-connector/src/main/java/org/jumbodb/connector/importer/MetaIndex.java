@@ -5,6 +5,7 @@ package org.jumbodb.connector.importer;
  * Date: 2/28/13
  * Time: 1:32 PM
  */
+// CARSTEN remove
 public class MetaIndex implements Comparable<MetaIndex> {
     private String collection;
     private String deliveryKey;

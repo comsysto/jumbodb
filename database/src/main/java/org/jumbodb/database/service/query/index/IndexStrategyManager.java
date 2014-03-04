@@ -12,16 +12,19 @@ import java.util.Map;
 /**
  * @author Carsten Hufe
  */
+// CARSTEN change all signatures to chunk key, version, collection name
 public class IndexStrategyManager {
 
     private Map<IndexKey, IndexStrategy> indexLocationsAndStrategies;
     private List<IndexStrategy> strategies;
+    private Map<String, IndexStrategy> strategiesByName;
 
 
     public void onInitialize(CollectionDefinition collectionDefinition) {
         for (IndexStrategy strategy : strategies) {
             strategy.onInitialize(collectionDefinition);
         }
+        strategiesByName = buildStrategiesByName(strategies);
         indexLocationsAndStrategies = buildIndexStrategies(collectionDefinition);
     }
 
@@ -35,7 +38,7 @@ public class IndexStrategyManager {
     }
 
     public IndexStrategy getStrategy(String strategyKey) {
-        return buildStrategiesByName(strategies).get(strategyKey);
+        return strategiesByName.get(strategyKey);
     }
 
     public void onDataChanged(CollectionDefinition collectionDefinition) {

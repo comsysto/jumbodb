@@ -75,6 +75,8 @@ public class JumboImportConnection implements Closeable {
         }
     }
 
+    // CARSTEN add init
+
     public void importIndex(IndexInfo indexInfo, OnCopyCallback callback) throws InvalidFileHashException {
         try {
             dos.writeUTF(":cmd:import:collection:index");

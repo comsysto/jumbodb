@@ -12,7 +12,7 @@ class DeliveryPropertiesSpec extends Specification {
         def metaToWrite = new CollectionProperties.CollectionMeta("my_version", "some infos", new Date(480000l), "source path", "my_test_strategy")
         when:
         CollectionProperties.write(file, metaToWrite)
-        def meta = CollectionProperties.getDeliveryMeta(file)
+        def meta = CollectionProperties.getCollectionMeta(file)
         then:
         meta.getDate() == new Date(480000l)
         meta.getDeliveryVersion()  == "my_version"

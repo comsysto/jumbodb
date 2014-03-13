@@ -1,4 +1,4 @@
-package org.jumbodb.data.common.meta;
+package org.jumbodb.common.query;
 
 /**
  * Supported checksums

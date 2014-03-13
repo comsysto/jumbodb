@@ -5,7 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.data.common.meta.ActiveProperties;
-import org.jumbodb.data.common.meta.ChecksumType;
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.data.common.meta.DeliveryProperties;
 import org.jumbodb.database.service.management.storage.StorageManagement;
 import org.jumbodb.database.service.query.JumboSearcher;
@@ -120,7 +120,7 @@ public class ImportTask implements Runnable {
                 }
 
                 @Override
-                public void onFinished(String deliveryKey, String deliveryVersion, boolean activateChunk,
+                public void onCommit(String deliveryKey, String deliveryVersion, boolean activateChunk,
                   boolean activeVersion) {
                     log.info("Moving temporary data to final path");
                     moveDataFiles(deliveryKey, deliveryVersion);

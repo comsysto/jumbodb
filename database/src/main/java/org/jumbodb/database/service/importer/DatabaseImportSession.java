@@ -2,7 +2,7 @@ package org.jumbodb.database.service.importer;
 
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.connector.JumboConstants;
-import org.jumbodb.data.common.meta.ChecksumType;
+import org.jumbodb.common.query.ChecksumType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public class DatabaseImportSession implements Closeable {
                 dataOutputStream.writeUTF(":success");
             } catch (FileChecksumException e) {
                 log.error("Checksum exception", e);
-                dataOutputStream.writeUTF(":failed");
+                dataOutputStream.writeUTF(":error:checksum");
                 dataOutputStream.writeUTF(e.getMessage());
             }
             dataOutputStream.flush();
@@ -100,7 +100,7 @@ public class DatabaseImportSession implements Closeable {
                 dataOutputStream.writeUTF(":success");
             } catch (FileChecksumException e) {
                 log.error("Checksum exception", e);
-                dataOutputStream.writeUTF(":failed");
+                dataOutputStream.writeUTF(":error:checksum");
                 dataOutputStream.writeUTF(e.getMessage());
             }
             dataOutputStream.flush();
@@ -110,11 +110,11 @@ public class DatabaseImportSession implements Closeable {
             boolean b = importHandler.existsDeliveryVersion(deliveryKey, deliveryVersion);
             dataOutputStream.writeBoolean(b);
             dataOutputStream.flush();
-        } else if(":cmd:import:finished".equals(cmd)) {
-            log.info(":cmd:import:finished");
+        } else if(":cmd:import:commit".equals(cmd)) {
+            log.info(cmd);
             boolean activateChunk = dataInputStream.readBoolean();
             boolean activateVersion = dataInputStream.readBoolean();
-            importHandler.onFinished(dataInputStream.readUTF(), dataInputStream.readUTF(), activateChunk, activateVersion);
+            importHandler.onCommit(dataInputStream.readUTF(), dataInputStream.readUTF(), activateChunk, activateVersion);
             dataOutputStream.writeUTF(":success");
             dataOutputStream.flush();
         } else {

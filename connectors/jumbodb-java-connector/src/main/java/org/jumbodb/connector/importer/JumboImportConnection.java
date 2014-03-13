@@ -2,11 +2,12 @@ package org.jumbodb.connector.importer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.UnhandledException;
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.JumboConstants;
 import org.jumbodb.connector.exception.JumboCommonException;
+import org.jumbodb.connector.exception.JumboFileChecksumException;
 import org.jumbodb.connector.exception.JumboWrongVersionException;
 import org.xerial.snappy.SnappyInputStream;
-import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
@@ -20,26 +21,25 @@ public class JumboImportConnection implements Closeable {
     private Socket socket;
     private OutputStream os;
     private MonitorCountingOutputStream mcos;
-//    private BufferedOutputStream bos;
-    private SnappyOutputStream sos;
+    private BufferedOutputStream bos;
     private DataOutputStream dos;
     private InputStream is;
     private SnappyInputStream sis;
     private DataInputStream dis;
+
 
     public JumboImportConnection(String host, int port) {
         try {
             socket = new Socket(host, port);
             os = socket.getOutputStream();
             mcos = createMonitorCountingOutputStream(os);
-//            bos = new BufferedOutputStream(mcos, JumboConstants.BUFFER_SIZE);
-            sos = new SnappyOutputStream(mcos);
-            dos = new DataOutputStream(sos);
+            bos = new BufferedOutputStream(mcos);
+            dos = new DataOutputStream(bos);
             is = socket.getInputStream();
             sis = new SnappyInputStream(is);
             dis = new DataInputStream(sis);
             dos.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION);
-//            dos.flush();
+            dos.flush();
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -75,33 +75,40 @@ public class JumboImportConnection implements Closeable {
         }
     }
 
-    // CARSTEN add init
+    // CARSTEN unit test
+    // CARSTEN call hadoop job
+    public void initImport(ImportInfo importInfo) {
+        try {
+            dos.writeUTF(":cmd:import:init");
+            dos.writeUTF(importInfo.getDeliveryKey());
+            dos.writeUTF(importInfo.getDeliveryVersion());
+            dos.writeUTF(importInfo.getDate());
+            dos.writeUTF(importInfo.getInfo());
+            dos.flush();
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+    }
 
-    public void importIndex(IndexInfo indexInfo, OnCopyCallback callback) throws InvalidFileHashException {
+    public void importIndexFile(IndexInfo indexInfo, OnCopyCallback callback) {
         try {
             dos.writeUTF(":cmd:import:collection:index");
-            dos.writeUTF(indexInfo.getCollection());
-            dos.writeUTF(indexInfo.getIndexName());
-            dos.writeUTF(indexInfo.getFilename());
-            dos.writeLong(indexInfo.getFileLength());
             dos.writeUTF(indexInfo.getDeliveryKey());
             dos.writeUTF(indexInfo.getDeliveryVersion());
-            dos.writeUTF(indexInfo.getIndexStrategy());
+            dos.writeUTF(indexInfo.getCollection());
+            dos.writeUTF(indexInfo.getIndexName());
+            dos.writeUTF(indexInfo.getFileName());
+            dos.writeLong(indexInfo.getFileLength());
+            dos.writeUTF(indexInfo.getChecksumType().name());
+            if(indexInfo.getChecksumType() != ChecksumType.NONE) {
+                dos.writeUTF(indexInfo.getChecksum());
+            }
+
             dos.flush();
+            callback.onCopy(dos);
+
             String command = dis.readUTF();
-            if(":copy".equals(command)) {
-                String md5Hash = callback.onCopy(dos);
-                String afterCopyCommand = dis.readUTF();
-                if(":verify:md5".equals(afterCopyCommand)) {
-                    String md5HashRemote = dis.readUTF();
-                    if(!md5Hash.equals(md5HashRemote)) {
-                        throw new InvalidFileHashException("MD5 hash for index-file " + indexInfo.getCollection() + "/" + indexInfo.getIndexName() + "/" + indexInfo.getFilename() + " is invalid (local: " + md5Hash + " / remote: " + md5HashRemote + ")");
-                    }
-                }
-                else {
-                    handleErrors(afterCopyCommand);
-                }
-            } else {
+            if(":error".equals(command)) {
                 handleErrors(command);
             }
         } catch (IOException e) {
@@ -122,32 +129,29 @@ public class JumboImportConnection implements Closeable {
         if(":error:wrongversion".equals(command)) {
             throw new JumboWrongVersionException(message);
         }
+        else if(":error:checksum".equals(command)) {
+            throw new JumboFileChecksumException(message);
+        }
         throw new JumboCommonException("Error on import [" + command + "]: " + message);
     }
 
-    public void importData(DataInfo dataInfo, OnCopyCallback callback) throws InvalidFileHashException {
+    public void importDataFile(DataInfo dataInfo, OnCopyCallback callback) {
         try {
             dos.writeUTF(":cmd:import:collection:data");
-            dos.writeUTF(dataInfo.getCollection());
-            dos.writeUTF(dataInfo.getFilename());
-            dos.writeLong(dataInfo.getFileLength());
             dos.writeUTF(dataInfo.getDeliveryKey());
             dos.writeUTF(dataInfo.getDeliveryVersion());
-            dos.writeUTF(dataInfo.getDataStrategy());
+            dos.writeUTF(dataInfo.getCollection());
+            dos.writeUTF(dataInfo.getFileName());
+            dos.writeLong(dataInfo.getFileLength());
+            dos.writeUTF(dataInfo.getChecksumType().name());
+            if(dataInfo.getChecksumType() != ChecksumType.NONE) {
+                dos.writeUTF(dataInfo.getChecksum());
+            }
             dos.flush();
+            callback.onCopy(dos);
             String command = dis.readUTF();
-            if(":copy".equals(command)) {
-                String md5Hash = callback.onCopy(dos);
-                String afterCopyCommand = dis.readUTF();
-                if(":verify:md5".equals(afterCopyCommand)) {
-                    String md5HashRemote = dis.readUTF();
-                    if(!md5Hash.equals(md5HashRemote)) {
-                        throw new InvalidFileHashException("MD5 hash for data-file " + dataInfo.getCollection() + "/" + dataInfo.getFilename() + " is invalid (local: " + md5Hash + " / remote: " + md5HashRemote + ")");
-                    }
-                }
-                else {
-                    handleErrors(afterCopyCommand);
-                }
+            if(":error".equals(command)) {
+                handleErrors(command);
             }
             else {
                 handleErrors(command);
@@ -157,59 +161,18 @@ public class JumboImportConnection implements Closeable {
         }
     }
 
-    // CARSTEN remove
-    public void sendMetaIndex(MetaIndex metaIndex) {
-        try {
-            dos.writeUTF(":cmd:import:collection:meta:index");
-            dos.writeUTF(metaIndex.getCollection());
-            dos.writeUTF(metaIndex.getDeliveryKey());
-            dos.writeUTF(metaIndex.getDeliveryVersion());
-            dos.writeUTF(metaIndex.getIndexName());
-            dos.writeUTF(metaIndex.getIndexStrategy());
-            dos.writeUTF(metaIndex.getIndexSourceFields());
-            dos.flush();
-            handleOkCommand();
-        } catch (IOException e) {
-            throw new UnhandledException(e);
-        }
-    }
-
-    private void handleOkCommand() throws IOException {
-        String command = dis.readUTF();
-        if(!":ok".equals(command)) {
-            handleErrors(command);
-        }
-    }
-
-    // CARSTEN remove
-    public void sendMetaData(MetaData metaData) {
-        try {
-            dos.writeUTF(":cmd:import:collection:meta:data");
-            dos.writeUTF(metaData.getCollection());
-            dos.writeUTF(metaData.getDeliveryKey());
-            dos.writeUTF(metaData.getDeliveryVersion());
-            dos.writeUTF(metaData.getDataStrategy());
-            dos.writeUTF(metaData.getPath());
-            dos.writeBoolean(metaData.isActivate());
-            dos.writeUTF(metaData.getInfo());
-            dos.flush();
-            handleOkCommand();
-        } catch (IOException e) {
-            throw new UnhandledException(e);
-        }
-    }
-
     public long getByteCount() {
         return mcos.getByteCount();
     }
 
-    public void sendFinishedNotification(String deliveryKey, String deliveryVersion) {
+    public void commitImport(String deliveryKey, String deliveryVersion, boolean activateChunk, boolean activateVersion) {
         try {
-            dos.writeUTF(":cmd:import:finished");
+            dos.writeUTF(":cmd:import:commit");
             dos.writeUTF(deliveryKey);
             dos.writeUTF(deliveryVersion);
+            dos.writeBoolean(activateChunk);
+            dos.writeBoolean(activateVersion);
             dos.flush();
-            handleOkCommand();
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -218,8 +181,7 @@ public class JumboImportConnection implements Closeable {
     @Override
     public void close() throws IOException {
         IOUtils.closeQuietly(dos);
-        IOUtils.closeQuietly(sos);
-//        IOUtils.closeQuietly(bos);
+        IOUtils.closeQuietly(bos);
         IOUtils.closeQuietly(mcos);
         IOUtils.closeQuietly(os);
         IOUtils.closeQuietly(dis);

@@ -2,8 +2,6 @@ package org.jumbodb.importer.hadoop.json;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -14,17 +12,13 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
-import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.JumboJobCreator;
 import org.jumbodb.connector.hadoop.JumboMetaUtil;
-import org.jumbodb.connector.hadoop.configuration.FinishedNotification;
+import org.jumbodb.connector.hadoop.configuration.CommitNotification;
 import org.jumbodb.connector.hadoop.configuration.ImportDefinition;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.index.output.data.SnappyDataV1OutputFormat;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.security.DigestOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -97,8 +91,8 @@ public class JsonImporterJob extends Configured implements Tool {
                 System.err.println(e);
             }
         }
-        Set<FinishedNotification> finishedNotifications = JumboConfigurationUtil.convertToFinishedNotifications(importDefinition);
-        JumboJobCreator.sendFinishedNotification(finishedNotifications, control, conf);
+        Set<CommitNotification> commitNotifications = JumboConfigurationUtil.convertToFinishedNotifications(importDefinition);
+        JumboJobCreator.sendFinishedNotification(commitNotifications, control, conf);
         return control.getFailedJobList().size() == 0 ? 0 : 1;
     }
 

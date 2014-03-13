@@ -4,6 +4,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.connector.importer.DataInfo;
+import org.jumbodb.connector.importer.IndexInfo;
 import org.jumbodb.data.common.meta.ActiveProperties;
 import org.jumbodb.data.common.meta.CollectionProperties;
 import org.jumbodb.data.common.meta.DeliveryProperties;
@@ -25,10 +27,14 @@ import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.LinkedMultiValueMap;
+import org.xerial.snappy.SnappyInputStream;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -156,6 +162,10 @@ public class StorageManagement {
 
     private File getDataChunkedVersionFolder(String chunkedDeliveryKey, String version) {
         return new File(getDataChunkFolder(chunkedDeliveryKey).getAbsolutePath() + version + "/");
+    }
+
+    private File getDataChunkedVersionCollectionFolder(String chunkedDeliveryKey, String version, String collection) {
+        return new File(getDataChunkedVersionFolder(chunkedDeliveryKey, version).getAbsolutePath() + collection + "/");
     }
 
     private void activateChunkedLatestVersion(String chunkedDeliveryKey) {
@@ -351,7 +361,8 @@ public class StorageManagement {
 //    }
 
     private List<CollectionIndex> getCollectionIndexes(String collectionName, String deliveryChunkKey, String version) {
-        File collectionVersionIndexPath = findCollectionChunkedVersionIndexFolder(collectionName, deliveryChunkKey, version);
+        File collectionVersionIndexPath = getIndexChunkedVersionCollectionFolder(collectionName, deliveryChunkKey,
+          version);
         File[] indexFolders = collectionVersionIndexPath.listFiles(FOLDER_FILTER);
         if (indexFolders == null) {
             return Collections.emptyList();
@@ -364,7 +375,7 @@ public class StorageManagement {
         return result;
     }
 
-    private File findCollectionChunkedVersionIndexFolder(String collectionName, String deliveryChunkKey, String version) {
+    private File getIndexChunkedVersionCollectionFolder(String collectionName, String deliveryChunkKey, String version) {
         return new File(getIndexPath().getAbsolutePath() + "/" + deliveryChunkKey + "/" + version + "/" + collectionName + "/");
     }
 
@@ -402,17 +413,19 @@ public class StorageManagement {
 //        }
 //        return result;
 //    }
-//
-//    public InputStream getInputStream(IndexInfo index) throws IOException {
-//        File indexFolder = findCollectionChunkedVersionIndexFolder(index.getCollection(), index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexName());
-//        File indexFile = new File(indexFolder.getAbsolutePath() + "/" + index.getFilename());
-//        return new SnappyInputStream(new BufferedInputStream(new FileInputStream(indexFile)));
-//    }
-//
-//    public InputStream getInputStream(DataInfo data) throws IOException {
-//        File dataFolder = findCollectionChunkedVersionDataFolder(data.getCollection(), data.getDeliveryKey(), data.getDeliveryVersion());
-//        File dataFile = new File(dataFolder.getAbsolutePath() + "/" + data.getFilename());
-//        return new SnappyInputStream(new BufferedInputStream(new FileInputStream(dataFile)));
-//    }
-//
+
+    public InputStream getInputStream(IndexInfo index) throws IOException {
+        File indexFolder = getIndexChunkedVersionCollectionFolder(index.getCollection(), index.getDeliveryKey(),
+          index.getDeliveryVersion());
+        File indexFile = new File(indexFolder.getAbsolutePath() + "/" + index.getIndexName() + "/" + index.getFileName());
+        return new BufferedInputStream(new FileInputStream(indexFile));
+    }
+
+    public InputStream getInputStream(DataInfo data) throws IOException {
+        File dataFolder = getDataChunkedVersionCollectionFolder(data.getCollection(), data.getDeliveryKey(),
+          data.getDeliveryVersion());
+        File dataFile = new File(dataFolder.getAbsolutePath() + "/" + data.getFileName());
+        return new BufferedInputStream(new FileInputStream(dataFile));
+    }
+
 }

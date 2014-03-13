@@ -27,7 +27,7 @@ class ExportDeliveryServiceSpec extends Specification {
         def repl = service.getReplications()
         then:
         repl.size() == 1
-        repl.get(0).getCopyRateInBytesCompressed() == 0
+        repl.get(0).getCopyRateInBytes() == 0
         repl.get(0).getCopyRateInBytesUncompressed() == 0
         repl.get(0).getCurrentBytes() == 0
         repl.get(0).getDeliveryChunkKey() == "chunk_key"

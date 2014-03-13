@@ -2,6 +2,7 @@ package org.jumbodb.connector.hadoop.importer.map;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.UnhandledException;
+import org.jumbodb.connector.exception.JumboFileChecksumException;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.apache.hadoop.conf.Configuration;
@@ -62,15 +63,17 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             long fileLength = fs.getFileStatus(path).getLen();
             if(JumboConstants.DATA_TYPE_INDEX.equals(type)) {
                 String fileName = path.getName();
-                IndexInfo indexInfo = new IndexInfo(collection, indexName, fileName, fileLength, deliveryKey, deliveryVersion, indexStrategy);
+                IndexInfo indexInfo = new IndexInfo(deliveryKey, deliveryVersion, collection, indexName, fileName, fileLength,
+                  indexStrategy);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
-                jumboImportConnection.importIndex(indexInfo, copyDataCallback);
+                jumboImportConnection.importIndexFile(indexInfo, copyDataCallback);
             }
             else if(JumboConstants.DATA_TYPE_DATA.equals(type)) {
                 String fileName = path.getName();
-                DataInfo dataInfo = new DataInfo(collection, fileName, fileLength, deliveryKey, deliveryVersion, dataStrategy);
+                DataInfo dataInfo = new DataInfo(deliveryKey, deliveryVersion, collection, fileName, fileLength,
+                  dataStrategy);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
-                jumboImportConnection.importData(dataInfo, copyDataCallback);
+                jumboImportConnection.importDataFile(dataInfo, copyDataCallback);
             } else {
                 throw new RuntimeException("Unsupported type " + type);
             }
@@ -78,9 +81,9 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         } catch (URISyntaxException e) {
             context.setStatus("ABORTED " + e.toString());
             throw new RuntimeException(e);
-        } catch (InvalidFileHashException e) {
+        } catch (JumboFileChecksumException e) {
             context.setStatus("FAILED Invalid file hash");
-            throw new RuntimeException(e);
+            throw e;
         } finally {
             IOUtils.closeStream(fis);
             IOUtils.closeStream(jumboImportConnection);

@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.importer;
 
-import org.jumbodb.data.common.meta.ChecksumType;
+import org.jumbodb.common.query.ChecksumType;
 
 public class ImportMetaFileInformation {
     public enum FileType {INDEX, DATA}

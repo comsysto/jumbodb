@@ -1,6 +1,5 @@
 package org.jumbodb.connector.hadoop;
 
-import org.apache.commons.lang.StringUtils;
 import org.jumbodb.connector.hadoop.importer.ImportJobCreator;
 import org.jumbodb.connector.hadoop.index.IndexJobCreator;
 import org.jumbodb.connector.hadoop.configuration.*;
@@ -78,81 +77,38 @@ public class JumboJobCreator {
         return controlledJobs;
     }
 
-    // CARSTEN remove
-    public static void sendMetaIndex(BaseJumboImportJob genericImportJob, IndexField indexField, Configuration conf) {
-
-        String type = conf.get(JumboConstants.DATA_TYPE);
-        if (!JumboConstants.DATA_TYPE_INDEX.equals(type)) {
-            return;
-        }
-        for (ImportHost importHost : genericImportJob.getHosts()) {
-            JumboImportConnection jumbo = null;
-            try {
-                jumbo = new JumboImportConnection(importHost.getHost(), importHost.getPort());
-                String collection = genericImportJob.getCollectionName();
-                MetaIndex metaData = new MetaIndex(collection, genericImportJob.getDeliveryChunkKey(), conf.get(JumboConstants.DELIVERY_VERSION), indexField.getIndexName(), indexField.getIndexStrategy(), StringUtils.join(indexField.getFields(), ";"));
-                jumbo.sendMetaIndex(metaData);
-            } finally {
-                IOUtils.closeStream(jumbo);
-            }
-        }
-
-    }
-
-
-    // CARSTEN remove
-    public static void sendMetaData(BaseJumboImportJob genericImportJob, Configuration conf) {
-        String type = conf.get(JumboConstants.DATA_TYPE);
-        if (!JumboConstants.DATA_TYPE_DATA.equals(type)) {
-            return;
-        }
-        for (ImportHost importHost : genericImportJob.getHosts()) {
-            JumboImportConnection jumbo = null;
-            try {
-                jumbo = new JumboImportConnection(importHost.getHost(), importHost.getPort());
-                String collection = genericImportJob.getCollectionName();
-                boolean activate = genericImportJob.isActivateDelivery();
-                MetaData metaData = new MetaData(collection, genericImportJob.getDeliveryChunkKey(), conf.get(JumboConstants.DELIVERY_VERSION), genericImportJob.getDataStrategy(), genericImportJob.getInputPath().toString(), activate, genericImportJob.getDescription());
-                jumbo.sendMetaData(metaData);
-            } finally {
-                IOUtils.closeStream(jumbo);
-            }
-        }
-
-    }
-
-    public static void sendFinishedNotification(Set<FinishedNotification> finishedNotifications, JobControl jobControl, Configuration conf) {
-        for (FinishedNotification finishedNotification : finishedNotifications) {
-            sendFinishedNotification(finishedNotification, jobControl, conf);
+    public static void sendFinishedNotification(Set<CommitNotification> commitNotifications, JobControl jobControl, Configuration conf) {
+        for (CommitNotification commitNotification : commitNotifications) {
+            sendFinishedNotification(commitNotification, jobControl, conf);
         }
     }
 
 
-    public static void sendFinishedNotification(Set<FinishedNotification> finishedNotifications, Configuration conf) {
-        for (FinishedNotification finishedNotification : finishedNotifications) {
-            sendFinishedNotification(finishedNotification, conf);
+    public static void sendFinishedNotification(Set<CommitNotification> commitNotifications, Configuration conf) {
+        for (CommitNotification commitNotification : commitNotifications) {
+            commitImport(commitNotification, conf);
         }
     }
 
-    public static void sendFinishedNotification(FinishedNotification finishedNotification, JobControl jobControl, Configuration conf) {
+    public static void sendFinishedNotification(CommitNotification commitNotification, JobControl jobControl, Configuration conf) {
         if (!conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
             return;
         }
         if (jobControl.getFailedJobList().size() == 0
                 && jobControl.allFinished()) {
-            sendFinishedNotification(finishedNotification, conf);
+            commitImport(commitNotification, conf);
         }
 
     }
 
 
-    public static void sendFinishedNotification(FinishedNotification finishedNotification, Configuration conf) {
+    public static void commitImport(CommitNotification commitNotification, Configuration conf) {
         String deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
         JumboImportConnection jumbo = null;
         try {
-            ImportHost host = finishedNotification.getHost();
+            ImportHost host = commitNotification.getHost();
             jumbo = new JumboImportConnection(host.getHost(), host.getPort());
-            jumbo.sendFinishedNotification(finishedNotification.getDeliveryChunkKey(), deliveryVersion);
+            jumbo.commitImport(commitNotification.getDeliveryChunkKey(), deliveryVersion);
         } finally {
             IOUtils.closeStream(jumbo);
         }

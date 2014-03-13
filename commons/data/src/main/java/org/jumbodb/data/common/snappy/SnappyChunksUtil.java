@@ -32,7 +32,7 @@ public class SnappyChunksUtil {
      * @param chunkSize
      * @return hash over uncompressed data
      */
-    // CARSTEN delete
+    // CARSTEN move, required for unit tests
     public static String copy(InputStream dataInputStream, File absoluteImportFile, long fileLength, int chunkSize) {
         OutputStream sos = null;
         DataOutputStream dos = null;

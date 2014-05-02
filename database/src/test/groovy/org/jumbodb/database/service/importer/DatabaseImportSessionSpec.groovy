@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.importer
 
 import org.jumbodb.connector.JumboConstants
-import org.jumbodb.database.service.query.DatabaseQuerySession
 import org.xerial.snappy.SnappyInputStream
 import org.xerial.snappy.SnappyOutputStream
 import spock.lang.Specification
@@ -272,7 +271,7 @@ class DatabaseImportSessionSpec extends Specification {
         session.runImport(importHandlerMock)
         def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
         then:
-        1 * importHandlerMock.onFinished("test_delivery_key", "test_delivery_version")
+        1 * importHandlerMock.onCommit("test_delivery_key", "test_delivery_version")
         dataInputStream.readUTF() == ":ok"
         cleanup:
         dataInputStream.close()

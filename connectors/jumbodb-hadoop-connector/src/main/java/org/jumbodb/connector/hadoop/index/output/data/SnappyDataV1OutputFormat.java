@@ -48,7 +48,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
         private final List<Integer> chunkSizes = new LinkedList<Integer>();
         private final Path file;
         private final FileSystem fs;
-        private long length = 0L;
+        private long length = 0l;
 
         public SnappyDataV1Writer(TaskAttemptContext context)
                 throws IOException {
@@ -68,6 +68,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             dataOutputStream = new DataOutputStream(snappyOutputStream);
         }
 
+        // CARSTEN make configurable
         private MessageDigest getMessageDigest() {
             try {
                 return MessageDigest.getInstance("MD5");
@@ -76,10 +77,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             }
         }
 
-        private void writeMd5Digest() throws IOException {
-            writeMd5Digest(file, digestOutputStream);
-        }
-
+        // CARSTEN make configurable
         private void writeMd5Digest(Path file, DigestOutputStream stream) throws IOException {
             String digestRawHex = Hex.encodeHexString(stream.getMessageDigest().digest());
             Path path = file.suffix(".md5");
@@ -108,6 +106,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             JumboMetaUtil.writeCollectionMetaData(file.getParent(), STRATEGY_KEY, context);
         }
 
+        // CARSTEN not used?
         private String getSourcePaths(TaskAttemptContext context) {
             Path[] inputPaths = FileInputFormat.getInputPaths(context);
             StringBuilder buf = new StringBuilder();

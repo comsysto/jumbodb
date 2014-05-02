@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.index.basic.numeric;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.jumbodb.common.query.IndexQuery;
@@ -157,6 +158,12 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         }
     }
 
+    @Override
+    public long getSize(File indexFolder) {
+        // CARSTEN unit test
+        return FileUtils.sizeOfDirectory(indexFolder);
+    }
+
     public MultiValueMap<File, QueryClause> groupByIndexFile(String collection, String chunkKey, IndexQuery query) {
         List<IF> indexFiles = getIndexFiles(collection, chunkKey, query);
         MultiValueMap<File, QueryClause> groupByIndexFile = new LinkedMultiValueMap<File, QueryClause>();
@@ -308,12 +315,6 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     @Override
     public void onInitialize(CollectionDefinition collectionDefinition) {
         onDataChanged(collectionDefinition);
-    }
-
-    @Override
-    public String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
-        String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/" + information.getFileName();
-        return SnappyChunksUtil.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), getSnappyChunkSize());
     }
 
     public abstract Map<QueryOperation, OperationSearch<T, IFV, IF>> getQueryOperationsStrategies();

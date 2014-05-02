@@ -8,5 +8,5 @@ import java.io.OutputStream;
  * Time: 4:50 PM
  */
 public interface OnCopyCallback {
-    String onCopy(OutputStream outputStream);
+    void onCopy(OutputStream outputStream);
 }

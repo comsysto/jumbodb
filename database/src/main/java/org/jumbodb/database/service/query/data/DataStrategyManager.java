@@ -14,16 +14,19 @@ import java.util.Map;
 /**
  * @author Carsten Hufe
  */
+// CARSTEN change all signatures to chunk key, version, collection name
 public class DataStrategyManager {
 
     private Map<DataKey, DataStrategy> dataLocationsAndStrategies;
     private List<DataStrategy> strategies;
+    private Map<String,DataStrategy> strategiesByName;
 
 
     public void onInitialize(CollectionDefinition collectionDefinition) {
         for (DataStrategy strategy : strategies) {
             strategy.onInitialize(collectionDefinition);
         }
+        strategiesByName = buildStrategiesByName(strategies);
         dataLocationsAndStrategies = buildDataStrategies(collectionDefinition);
     }
 
@@ -37,7 +40,7 @@ public class DataStrategyManager {
     }
 
     public DataStrategy getStrategy(String strategyKey) {
-        return buildStrategiesByName(strategies).get(strategyKey);
+        return strategiesByName.get(strategyKey);
     }
 
     public void onDataChanged(CollectionDefinition collectionDefinition) {

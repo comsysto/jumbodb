@@ -11,7 +11,7 @@ import java.io.IOException;
 public class JumboOutputFormat extends TextOutputFormat<Text, NullWritable> {
     @Override
     public void checkOutputSpecs(JobContext job) throws IOException {
-        // CARSTEN implement all spec checks odb.
+        // CARSTEN implement all spec checks jumbodb.
         super.checkOutputSpecs(job);
     }
 

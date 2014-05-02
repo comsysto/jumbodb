@@ -1,15 +1,13 @@
 package org.jumbodb.connector.hadoop.configuration;
 
-import java.util.List;
-
 /**
  * @author Carsten Hufe
  */
-public class FinishedNotification {
+public class CommitNotification {
     private String deliveryChunkKey;
     private ImportHost host;
 
-    public FinishedNotification(String deliveryChunkKey, ImportHost host) {
+    public CommitNotification(String deliveryChunkKey, ImportHost host) {
         this.deliveryChunkKey = deliveryChunkKey;
         this.host = host;
     }
@@ -35,7 +33,7 @@ public class FinishedNotification {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        FinishedNotification that = (FinishedNotification) o;
+        CommitNotification that = (CommitNotification) o;
 
         if (deliveryChunkKey != null ? !deliveryChunkKey.equals(that.deliveryChunkKey) : that.deliveryChunkKey != null)
             return false;
@@ -53,7 +51,7 @@ public class FinishedNotification {
 
     @Override
     public String toString() {
-        return "FinishedNotification{" +
+        return "CommitNotification{" +
                 "deliveryChunkKey='" + deliveryChunkKey + '\'' +
                 ", host=" + host +
                 '}';

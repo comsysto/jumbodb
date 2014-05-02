@@ -276,7 +276,7 @@ class StorageManagementSpec extends Specification {
         indexInfos[0].getDeliveryVersion() == "version4"
         indexInfos[0].getIndexName() == "test_index1"
         indexInfos[0].getFileLength() == 11l
-        indexInfos[0].getFilename() == "part0001.odx"
+        indexInfos[0].getFileName() == "part0001.odx"
         indexInfos[0].getIndexStrategy() == "test_index_strategy"
         then:
         indexInfos[1].getCollection() == "test_collection3"
@@ -284,7 +284,7 @@ class StorageManagementSpec extends Specification {
         indexInfos[1].getDeliveryVersion() == "version4"
         indexInfos[1].getIndexName() == "test_index1"
         indexInfos[1].getFileLength() == 11l
-        indexInfos[1].getFilename() == "part0002.odx"
+        indexInfos[1].getFileName() == "part0002.odx"
         indexInfos[1].getIndexStrategy() == "test_index_strategy"
         then:
         indexInfos[2].getCollection() == "test_collection3"
@@ -292,7 +292,7 @@ class StorageManagementSpec extends Specification {
         indexInfos[2].getDeliveryVersion() == "version4"
         indexInfos[2].getIndexName() == "test_index2"
         indexInfos[2].getFileLength() == 11l
-        indexInfos[2].getFilename() == "part0001.odx"
+        indexInfos[2].getFileName() == "part0001.odx"
         indexInfos[2].getIndexStrategy() == "test_index_strategy"
         then:
         indexInfos[3].getCollection() == "test_collection3"
@@ -300,7 +300,7 @@ class StorageManagementSpec extends Specification {
         indexInfos[3].getDeliveryVersion() == "version4"
         indexInfos[3].getIndexName() == "test_index2"
         indexInfos[3].getFileLength() == 11l
-        indexInfos[3].getFilename() == "part0002.odx"
+        indexInfos[3].getFileName() == "part0002.odx"
         indexInfos[3].getIndexStrategy() == "test_index_strategy"
         cleanup:
         dataDir.delete()
@@ -337,7 +337,7 @@ class StorageManagementSpec extends Specification {
         dataInfos[0].getFileLength() == 13l
         dataInfos[0].getDataStrategy() == "test_data_strategy"
         when:
-        def fileNames = (dataInfos.collect{ it.getFilename() } as Set)
+        def fileNames = (dataInfos.collect{ it.getFileName() } as Set)
         then:
         fileNames == ["part0001", "part0002"] as Set
         cleanup:

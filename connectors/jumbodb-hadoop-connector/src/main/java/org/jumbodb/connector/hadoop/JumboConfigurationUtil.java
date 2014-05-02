@@ -190,14 +190,14 @@ public class JumboConfigurationUtil {
         return output + "/" + dateStamp;
     }
 
-    public static Set<FinishedNotification> convertToFinishedNotifications(ImportDefinition importDefinition) {
-        Set<FinishedNotification> result = new HashSet<FinishedNotification>();
+    public static Set<CommitNotification> convertToFinishedNotifications(ImportDefinition importDefinition) {
+        Set<CommitNotification> result = new HashSet<CommitNotification>();
         for (ImportCollection importCollection : importDefinition.getImportCollection()) {
             String deliveryChunkKey = importCollection.getDeliveryChunkKey() != null ? importCollection.getDeliveryChunkKey() : importDefinition.getDeliveryChunkKey();
             List<ImportHost> importHosts = importCollection.getHosts() != null && importCollection.getHosts().size() > 0 ? importCollection.getHosts() : importDefinition.getHosts();
             for (ImportHost importHost : importHosts) {
-                FinishedNotification finishedNotification = new FinishedNotification(deliveryChunkKey, importHost);
-                result.add(finishedNotification);
+                CommitNotification commitNotification = new CommitNotification(deliveryChunkKey, importHost);
+                result.add(commitNotification);
             }
         }
         return result;

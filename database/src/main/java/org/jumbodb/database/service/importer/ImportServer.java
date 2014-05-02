@@ -27,16 +27,12 @@ public class ImportServer {
     private ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newCachedThreadPool();
     private JumboConfiguration config;
     private JumboSearcher jumboSearcher;
-    private DataStrategyManager dataStrategyManager;
-    private IndexStrategyManager indexStrategyManager;
     private ServerSocket serverSocket;
 
 
-    public ImportServer(JumboConfiguration config, JumboSearcher jumboSearcher, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager) {
+    public ImportServer(JumboConfiguration config, JumboSearcher jumboSearcher) {
         this.config = config;
         this.jumboSearcher = jumboSearcher;
-        this.dataStrategyManager = dataStrategyManager;
-        this.indexStrategyManager = indexStrategyManager;
     }
 
     public void start() throws Exception {
@@ -50,7 +46,7 @@ public class ImportServer {
                     log.info("ImportServer started");
                     while (isServerActive()) {
                         Socket clientSocket = serverSocket.accept();
-                        executorService.submit(new ImportTask(clientSocket, id++, config.getDataPath(), config.getIndexPath(), jumboSearcher, dataStrategyManager, indexStrategyManager));
+                        executorService.submit(new ImportTask(clientSocket, id++, config.getDataPath(), config.getIndexPath(), jumboSearcher));
                     }
                     log.info("ImportServer stopped");
                 } catch (Exception e) {

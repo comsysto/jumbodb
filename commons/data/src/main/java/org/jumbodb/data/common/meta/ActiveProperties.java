@@ -20,20 +20,25 @@ public class ActiveProperties {
         return "true".equals(activeProps.getProperty("active"));
     }
 
+    public static boolean isChunkActive(File activePropsFile) {
+        Properties activeProps = PropertiesHelper.loadProperties(activePropsFile);
+        return Boolean.parseBoolean(activeProps.getProperty("active"));
+    }
+
     public static String getActiveDeliveryVersion(File activePropsFile) {
         Properties activeProps = PropertiesHelper.loadProperties(activePropsFile);
         return activeProps.getProperty("version");
     }
 
-    public static void writeActiveFile(File activeDeliveryFile, String deliveryVersion) {
-        Properties active = new Properties();
-        active.setProperty("active", "true");
-        active.setProperty("version", deliveryVersion);
+    public static void writeActiveFile(File activeDeliveryFile, String deliveryVersion, boolean active) {
+        Properties activeProp = new Properties();
+        activeProp.setProperty("active", Boolean.toString(active));
+        activeProp.setProperty("version", deliveryVersion);
 
         FileOutputStream activeDeliveryFos = null;
         try {
             activeDeliveryFos = new FileOutputStream(activeDeliveryFile);
-            active.store(activeDeliveryFos, "Active Delivery");
+            activeProp.store(activeDeliveryFos, "Active Delivery");
         } catch(IOException e) {
             throw new RuntimeException(e);
         } finally {

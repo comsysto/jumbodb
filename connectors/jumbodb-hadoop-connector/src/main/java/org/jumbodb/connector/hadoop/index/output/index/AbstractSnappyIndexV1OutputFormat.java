@@ -90,6 +90,7 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
 
         }
 
+        // CARSTEN make configurable
         private void writeMd5Digest() throws IOException {
             writeMd5Digest(file, digestStream);
         }

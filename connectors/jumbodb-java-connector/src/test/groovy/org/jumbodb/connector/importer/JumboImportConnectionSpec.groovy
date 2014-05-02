@@ -62,7 +62,7 @@ class JumboImportConnectionSpec extends Specification {
         setup:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
-        def indexInfo = new IndexInfo("my_collection", "my_index", "part0005", dataToSend.length, "my_delivery", "my_version", "INDEX_STRATEGY")
+        def indexInfo = new IndexInfo("my_delivery", "my_version", "my_collection", "my_index", "part0005", dataToSend.length, "INDEX_STRATEGY")
         def copyCallBackMock = new OnCopyCallback() {
             @Override
             String onCopy(OutputStream outputStream) {
@@ -90,14 +90,14 @@ class JumboImportConnectionSpec extends Specification {
             dos.writeUTF("this_is_the_expected_hash")
             dos.flush()
         }
-        jis.importIndex(indexInfo, copyCallBackMock)
+        jis.importIndexFile(indexInfo, copyCallBackMock)
     }
 
     def "import index with invalid MD5 hash"() {
         when:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
-        def indexInfo = new IndexInfo("my_collection", "my_index", "part0005", dataToSend.length, "my_delivery", "my_version", "INDEX_STRATEGY")
+        def indexInfo = new IndexInfo("my_delivery", "my_version", "my_collection", "my_index", "part0005", dataToSend.length, "INDEX_STRATEGY")
         def copyCallBackMock = new OnCopyCallback() {
             @Override
             String onCopy(OutputStream outputStream) {
@@ -124,7 +124,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.writeUTF("this_is_an_invalid_hash")
             dos.flush()
         }
-        jis.importIndex(indexInfo, copyCallBackMock)
+        jis.importIndexFile(indexInfo, copyCallBackMock)
         then:
         thrown InvalidFileHashException
     }
@@ -133,7 +133,7 @@ class JumboImportConnectionSpec extends Specification {
         setup:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
-        def dataInfo = new DataInfo("my_collection", "part0005", dataToSend.length, "my_delivery", "my_version", "DATA_STRATEGY")
+        def dataInfo = new DataInfo("my_delivery", "my_version", "my_collection", "part0005", dataToSend.length, "DATA_STRATEGY")
         def copyCallBackMock = new OnCopyCallback() {
             @Override
             String onCopy(OutputStream outputStream) {
@@ -160,7 +160,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.writeUTF("this_is_the_expected_hash")
             dos.flush()
         }
-        jis.importData(dataInfo, copyCallBackMock)
+        jis.importDataFile(dataInfo, copyCallBackMock)
         jis.getByteCount() == 206 // data length + meta data
     }
 
@@ -168,7 +168,7 @@ class JumboImportConnectionSpec extends Specification {
         when:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
-        def dataInfo = new DataInfo("my_collection", "part0005", dataToSend.length, "my_delivery", "my_version", "DATA_STRATEGY")
+        def dataInfo = new DataInfo("my_delivery", "my_version", "my_collection", "part0005", dataToSend.length, "DATA_STRATEGY")
         def copyCallBackMock = new OnCopyCallback() {
             @Override
             String onCopy(OutputStream outputStream) {
@@ -194,7 +194,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.writeUTF("this_is_an_invalid_hash")
             dos.flush()
         }
-        jis.importData(dataInfo, copyCallBackMock)
+        jis.importDataFile(dataInfo, copyCallBackMock)
         then:
         thrown InvalidFileHashException
     }
@@ -248,7 +248,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.writeUTF(":ok")
             dos.flush()
         }
-        jis.sendFinishedNotification("my_delivery", "my_version")
+        jis.commitImport("my_delivery", "my_version")
     }
 
     def "handle wrong version"() {
@@ -259,7 +259,7 @@ class JumboImportConnectionSpec extends Specification {
             dos.writeUTF("my message")
             dos.flush()
         }
-        jis.sendFinishedNotification("my_delivery", "my_version")
+        jis.commitImport("my_delivery", "my_version")
         then:
         def ex = thrown JumboWrongVersionException
         ex.getMessage() == "my message"

@@ -26,7 +26,8 @@ public class CollectionProperties {
         String date = properties.getProperty("date");
         String sourcePath = properties.getProperty("sourcePath");
         String strategy = properties.getProperty("strategy");
-        return new CollectionMeta(date, sourcePath, strategy);
+        String info = properties.getProperty("info");
+        return new CollectionMeta(date, sourcePath, strategy, info);
 
     }
 
@@ -35,6 +36,7 @@ public class CollectionProperties {
         deliveryInfo.setProperty("sourcePath", collectionMeta.getSourcePath());
         deliveryInfo.setProperty("date", collectionMeta.getDate());
         deliveryInfo.setProperty("strategy", collectionMeta.getStrategy());
+        deliveryInfo.setProperty("info", collectionMeta.getInfo());
 
         FileOutputStream deliveryInfoFos = null;
         try {
@@ -51,11 +53,13 @@ public class CollectionProperties {
         private String date;
         private String sourcePath;
         private String strategy;
+        private String info;
 
-        public CollectionMeta(String date, String sourcePath, String strategy) {
+        public CollectionMeta(String date, String sourcePath, String strategy, String info) {
             this.date = date;
             this.sourcePath = sourcePath;
             this.strategy = strategy;
+            this.info = info;
         }
 
 
@@ -71,5 +75,8 @@ public class CollectionProperties {
             return strategy;
         }
 
+        public String getInfo() {
+            return info;
+        }
     }
 }

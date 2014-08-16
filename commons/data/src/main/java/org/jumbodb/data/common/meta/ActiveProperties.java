@@ -20,11 +20,6 @@ public class ActiveProperties {
         return "true".equals(activeProps.getProperty("active"));
     }
 
-    public static boolean isChunkActive(File activePropsFile) {
-        Properties activeProps = PropertiesHelper.loadProperties(activePropsFile);
-        return Boolean.parseBoolean(activeProps.getProperty("active"));
-    }
-
     public static String getActiveDeliveryVersion(File activePropsFile) {
         Properties activeProps = PropertiesHelper.loadProperties(activePropsFile);
         return activeProps.getProperty("version");

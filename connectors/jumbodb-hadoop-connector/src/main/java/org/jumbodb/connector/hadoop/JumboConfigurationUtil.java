@@ -111,6 +111,10 @@ public class JumboConfigurationUtil {
         conf.getConfiguration().set(JumboConstants.JUMBO_SORT_CONFIG, mapper.writeValueAsString(sort));
     }
 
+    public static void setCollectionInfo(Job conf, String collectionInfo) throws IOException {
+        conf.getConfiguration().set(JumboConstants.JUMBO_COLLECTION_INFO, collectionInfo);
+    }
+
     public static void setSortDatePatternConfig(Job conf, String sort) throws IOException {
         conf.getConfiguration().set(JumboConstants.JUMBO_SORT_DATEPATTERN_CONFIG, sort);
     }

@@ -53,6 +53,7 @@ public class JsonImporterJob extends Configured implements Tool {
             Job sortJob = Job.getInstance(conf, "Sort Job " + importJob.getCollectionName());
             JumboConfigurationUtil.setSortConfig(sortJob, importJob.getSort());
             JumboConfigurationUtil.setSortDatePatternConfig(sortJob, importJob.getSortDatePattern());
+            JumboConfigurationUtil.setCollectionInfo(sortJob, importJob.getDescription());
             FileInputFormat.addInputPath(sortJob, importJob.getInputPath());
             FileOutputFormat.setOutputPath(sortJob, importJob.getSortedOutputPath());
             sortJob.setJarByClass(JsonImporterJob.class);

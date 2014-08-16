@@ -36,15 +36,13 @@ class NotFoundIndexStrategySpec extends Specification {
         thrown IllegalStateException
     }
 
-    def "onImport should throw an exception"() {
-        when:
-        strategy.onImport(Mock(ImportMetaFileInformation), Mock(InputStream), Mock(File))
-        then:
-        thrown UnsupportedOperationException
-    }
-
     def "strategy has no supported operations"() {
         expect:
         strategy.getSupportedOperations().size() == 0
+    }
+
+    def "strategy has not data, so size is zero"() {
+        expect:
+        strategy.getSize(null) == 0
     }
 }

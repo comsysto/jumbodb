@@ -7,6 +7,6 @@ import spock.lang.Specification
  */
 class ExportDeliveryTaskSpec extends Specification {
     def "how to test, class must be refactored"() {
-        // CARSTEN
+        // CARSTEN implement test
     }
 }

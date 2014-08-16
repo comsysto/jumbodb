@@ -60,7 +60,7 @@ public class ImportTask implements Runnable {
                     deleteFolderIfExists(tmpDataImportPath);
                     File deliveryFile = new File(
                       tmpDataImportPath.getAbsolutePath() + "/" + DeliveryProperties.DEFAULT_FILENAME);
-                    DeliveryProperties.writeDeliveryFile(deliveryFile, deliveryKey, deliveryVersion, date, info);
+                    DeliveryProperties.write(deliveryFile, new DeliveryProperties.DeliveryMeta(deliveryKey, deliveryVersion, date, info));
                 }
 
                 @Override

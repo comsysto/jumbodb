@@ -49,13 +49,11 @@ public class NotFoundDataStrategy implements DataStrategy {
 
     @Override
     public long getCompressedSize(File dataFolder) {
-        // CARSTEN unit test
         return 0l;
     }
 
     @Override
     public long getUncompressedSize(File dataFolder) {
-        // CARSTEN unit test
         return 0l;
     }
 }

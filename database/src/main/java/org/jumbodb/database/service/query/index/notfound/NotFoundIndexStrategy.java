@@ -46,7 +46,6 @@ public class NotFoundIndexStrategy implements IndexStrategy {
 
     @Override
     public long getSize(File indexFolder) {
-        // CARSTEN unit test
         return 0l;
     }
 }

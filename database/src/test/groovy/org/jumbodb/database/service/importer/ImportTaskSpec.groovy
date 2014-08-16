@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.importer
 
 import com.google.common.io.Files
+import org.jumbodb.common.query.ChecksumType
 import org.jumbodb.database.service.query.JumboSearcher
 import org.jumbodb.database.service.query.data.DataStrategy
 import org.jumbodb.database.service.query.data.DataStrategyManager
@@ -26,7 +27,7 @@ class ImportTaskSpec extends Specification {
         def indexDir = Files.createTempDir()
         def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
         def dataStrategyMock = Mock(DataStrategy)
-        def metaInfo = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.DATA, "testFileName", "test_collection", null, 1234567l, "test_delivery_key", "test_version", "test_strategy")
+        def metaInfo = new ImportMetaFileInformation("test_delivery_key", "test_version", "test_collection", null, ImportMetaFileInformation.FileType.DATA, "testFileName", 1234567l, ChecksumType.NONE, null)
 
         def inputStreamMock = Mock(InputStream)
         when:

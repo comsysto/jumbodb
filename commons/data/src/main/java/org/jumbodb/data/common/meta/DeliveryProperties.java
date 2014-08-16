@@ -5,13 +5,11 @@ import org.apache.commons.io.IOUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Properties;
 
 /**
  * @author Carsten Hufe
  */
-// CARSTEN unit test
 public class DeliveryProperties {
     public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String DEFAULT_FILENAME = "delivery.properties";
@@ -22,15 +20,15 @@ public class DeliveryProperties {
         String info = properties.getProperty("info");
         String delivery = properties.getProperty("delivery");
         String version = properties.getProperty("version");
-        return new DeliveryMeta(date, info, delivery, version);
+        return new DeliveryMeta(delivery, version, date, info);
     }
 
-    public static void writeDeliveryFile(File deliveryFile, String deliveryKey, String deliveryVersion, String date, String info) {
+    public static void write(File deliveryFile, DeliveryMeta deliveryMeta) {
         Properties active = new Properties();
-        active.setProperty("version", deliveryVersion);
-        active.setProperty("date", date);
-        active.setProperty("info", info);
-        active.setProperty("delivery", deliveryKey);
+        active.setProperty("delivery", deliveryMeta.getDelivery());
+        active.setProperty("version", deliveryMeta.getVersion());
+        active.setProperty("date", deliveryMeta.getDate());
+        active.setProperty("info", deliveryMeta.getInfo());
 
         FileOutputStream activeDeliveryFos = null;
         try {
@@ -49,7 +47,7 @@ public class DeliveryProperties {
         private String delivery;
         private String version;
 
-        public DeliveryMeta(String date, String info, String delivery, String version) {
+        public DeliveryMeta(String delivery, String version, String date, String info) {
             this.date = date;
             this.info = info;
             this.delivery = delivery;

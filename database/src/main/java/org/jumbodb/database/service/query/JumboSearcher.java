@@ -46,12 +46,9 @@ public class JumboSearcher {
     private CollectionDefinition collectionDefinition;
     private ExecutorService indexExecutor;
     private ExecutorService chunkExecutor;
-    private ObjectMapper jsonMapper;
     private CacheManager cacheManager;
 
     public void onInitialize() {
-        this.jsonMapper = new ObjectMapper();
-        this.jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         this.collectionDefinition = getCollectionDefinition();
         this.indexStrategyManager.onInitialize(collectionDefinition);
         this.dataStrategyManager.onInitialize(collectionDefinition);

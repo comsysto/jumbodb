@@ -27,7 +27,7 @@ public class PlainDataCollectionGenerator extends DataCollectionGenerator {
     @Override
     public void createDeliveryProperties(String dataFolder, String deliveryVersion, String description){
         CollectionProperties.CollectionMeta collectionMeta = new CollectionProperties.CollectionMeta("date",
-                DELIVERY_PATH, DELIVERY_STRATEGY);
+                DELIVERY_PATH, DELIVERY_STRATEGY, "info");
 
         String deliveryPropertiesPath = FilenameUtils.concat(dataFolder, CollectionProperties.DEFAULT_FILENAME);
         CollectionProperties.write(new File(deliveryPropertiesPath), collectionMeta);

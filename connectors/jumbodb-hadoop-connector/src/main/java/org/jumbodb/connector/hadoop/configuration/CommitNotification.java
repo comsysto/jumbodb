@@ -5,11 +5,15 @@ package org.jumbodb.connector.hadoop.configuration;
  */
 public class CommitNotification {
     private String deliveryChunkKey;
+    private boolean activateChunk;
+    private boolean activateVersion;
     private ImportHost host;
 
-    public CommitNotification(String deliveryChunkKey, ImportHost host) {
+    public CommitNotification(String deliveryChunkKey, ImportHost host, boolean activateChunk, boolean activateVersion) {
         this.deliveryChunkKey = deliveryChunkKey;
         this.host = host;
+        this.activateChunk = activateChunk;
+        this.activateVersion = activateVersion;
     }
 
     public String getDeliveryChunkKey() {
@@ -26,6 +30,14 @@ public class CommitNotification {
 
     public void setHost(ImportHost host) {
         this.host = host;
+    }
+
+    public boolean isActivateChunk() {
+        return activateChunk;
+    }
+
+    public boolean isActivateVersion() {
+        return activateVersion;
     }
 
     @Override

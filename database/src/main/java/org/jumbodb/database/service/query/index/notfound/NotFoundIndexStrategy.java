@@ -2,15 +2,12 @@ package org.jumbodb.database.service.query.index.notfound;
 
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryOperation;
-import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -18,7 +15,7 @@ import java.util.Set;
  */
 public class NotFoundIndexStrategy implements IndexStrategy {
     @Override
-    public boolean isResponsibleFor(String collection, String chunkKey, String indexName) {
+    public boolean isResponsibleFor(String chunkKey, String collection, String indexName) {
         return true;
     }
 

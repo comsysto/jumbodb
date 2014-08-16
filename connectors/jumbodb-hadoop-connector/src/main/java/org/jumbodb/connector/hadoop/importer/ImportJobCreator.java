@@ -36,8 +36,6 @@ public class ImportJobCreator {
         JumboInputFormat.setImportPath(job, importPath);
         JumboInputFormat.setIndexName(job, indexField != null ? indexField.getIndexName() : "not_set");
         JumboInputFormat.setCollectionName(job, genericImportJob.getCollectionName());
-        JumboInputFormat.setDataStrategy(job, genericImportJob.getDataStrategy());
-        JumboInputFormat.setIndexStrategy(job, indexField);
         JumboInputFormat.setDeliveryChunkKey(job, genericImportJob.getDeliveryChunkKey());
         FileOutputFormat.setOutputPath(job, reportOutputPath);
         FileInputFormat.addInputPath(job, importPath);
@@ -56,8 +54,6 @@ public class ImportJobCreator {
         Configuration jobConf = job.getConfiguration();
         jobConf.set(JumboConstants.HOST, importHost.getHost());
         jobConf.setInt(JumboConstants.PORT, importHost.getPort());
-        JumboJobCreator.sendMetaData(genericImportJob, job.getConfiguration());
-        JumboJobCreator.sendMetaIndex(genericImportJob, indexField, job.getConfiguration());
         return new ControlledJob(job, new ArrayList<ControlledJob>());
     }
 

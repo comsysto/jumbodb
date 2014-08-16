@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.connector.importer.*;
 import org.jumbodb.database.service.management.storage.StorageManagement;
+import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDeliveryVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,15 +29,14 @@ public class ExportDeliveryTask implements Runnable {
 
     @Override
     public void run() {
-        if(exportDelivery.getState() != ExportDelivery.State.WAITING) {
+        if (exportDelivery.getState() != ExportDelivery.State.WAITING) {
             return;
         }
         try {
             exportDelivery.setState(ExportDelivery.State.RUNNING);
             exportDelivery.setStatus("Sending meta data");
-        // CARSTEN implement
-            List<DataInfo> dataInfoForDelivery = storageManagement.getDataInfoForDelivery(metaDatas);
-            List<IndexInfo> indexInfoForDelivery = storageManagement.getIndexInfoForDelivery(metaIndexes);
+            List<DataInfo> dataInfoForDelivery = storageManagement.getDataInfoForDelivery(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion());
+            List<IndexInfo> indexInfoForDelivery = storageManagement.getIndexInfoForDelivery(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion());
             long indexSize = getIndexSize(indexInfoForDelivery);
             long dataSize = getDataSize(dataInfoForDelivery);
             exportDelivery.setTotalBytes(indexSize + dataSize);
@@ -64,7 +64,7 @@ public class ExportDeliveryTask implements Runnable {
             exportDelivery.setCurrentBytes(exportDelivery.getTotalBytes());
             exportDelivery.setState(ExportDelivery.State.FINISHED);
             exportDelivery.setStatus("Finished");
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             exportDelivery.setState(ExportDelivery.State.FAILED);
             exportDelivery.setStatus("Error: " + ex.getMessage());
             log.error("An error occured: ", ex);
@@ -77,7 +77,7 @@ public class ExportDeliveryTask implements Runnable {
             imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort()) {
                 @Override
                 protected void onCopyRateUpdate(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
-                    if(exportDelivery.getState() != ExportDelivery.State.RUNNING) {
+                    if (exportDelivery.getState() != ExportDelivery.State.RUNNING) {
                         throw new IllegalStateException("State is not RUNNING -> aborted");
                     }
                     exportDelivery.setCopyRateInBytes(rateInBytesPerSecond);
@@ -102,11 +102,10 @@ public class ExportDeliveryTask implements Runnable {
                 }
             });
             long timeDiff = System.currentTimeMillis() - start;
-            if(timeDiff > 0) {
+            if (timeDiff > 0) {
                 exportDelivery.setCopyRateInBytes((imp.getByteCount() * 1000) / timeDiff);
             }
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(imp);
         }
     }
@@ -117,7 +116,7 @@ public class ExportDeliveryTask implements Runnable {
             imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort()) {
                 @Override
                 protected void onCopyRateUpdate(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
-                    if(exportDelivery.getState() != ExportDelivery.State.RUNNING) {
+                    if (exportDelivery.getState() != ExportDelivery.State.RUNNING) {
                         throw new IllegalStateException("State is not RUNNING -> aborted");
                     }
                     exportDelivery.setCopyRateInBytes(rateInBytesPerSecond);
@@ -129,7 +128,7 @@ public class ExportDeliveryTask implements Runnable {
                 public void onCopy(OutputStream outputStream) {
                     InputStream is = null;
                     ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream,
-                      exportDelivery);
+                            exportDelivery);
                     try {
                         is = storageManagement.getInputStream(dataInfo);
                         IOUtils.copyLarge(is, cos, 0l, dataInfo.getFileLength());
@@ -143,7 +142,7 @@ public class ExportDeliveryTask implements Runnable {
                 }
             });
             long timeDiff = System.currentTimeMillis() - start;
-            if(timeDiff > 0) {
+            if (timeDiff > 0) {
                 exportDelivery.setCopyRateInBytes((imp.getByteCount() * 1000) / timeDiff);
             }
         } finally {
@@ -155,7 +154,7 @@ public class ExportDeliveryTask implements Runnable {
         JumboImportConnection imp = null;
         try {
             imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
-            if(imp.existsDeliveryVersion(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion())) {
+            if (imp.existsDeliveryVersion(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion())) {
                 exportDelivery.setState(ExportDelivery.State.FAILED);
                 exportDelivery.setStatus("Delivery version already exists on host, please delete it, before replicating.");
                 return true;
@@ -167,11 +166,12 @@ public class ExportDeliveryTask implements Runnable {
     }
 
     private void initImport() {
+        ChunkedDeliveryVersion chunkedDeliveryVersion = storageManagement.getChunkedDeliveryVersion(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion());
         JumboImportConnection imp = null;
         try {
             imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
-            String info = "set info"; // CARSTEN set value
-            String date = "set date"; // CARSTEN set value
+            String info = chunkedDeliveryVersion.getInfo();
+            String date = chunkedDeliveryVersion.getDate();
             imp.initImport(new ImportInfo(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion(), date, info));
         } finally {
             IOUtils.closeQuietly(imp);
@@ -183,7 +183,7 @@ public class ExportDeliveryTask implements Runnable {
         try {
             imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
             imp.commitImport(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion(),
-              exportDelivery.isActivateChunk(), exportDelivery.isActivateVersion());
+                    exportDelivery.isActivateChunk(), exportDelivery.isActivateVersion());
         } finally {
             IOUtils.closeQuietly(imp);
         }

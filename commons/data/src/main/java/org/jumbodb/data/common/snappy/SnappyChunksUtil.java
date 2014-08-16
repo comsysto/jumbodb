@@ -61,7 +61,7 @@ public class SnappyChunksUtil {
             }
             log.info("ImportServer - " + absoluteImportFile);
 
-            String filePlaceChunksPath = absoluteImportFile.getAbsolutePath() + ".chunks.snappy";
+            String filePlaceChunksPath = absoluteImportFile.getAbsolutePath() + ".snappy.chunks";
             File filePlaceChunksFile = new File(filePlaceChunksPath);
             if (filePlaceChunksFile.exists()) {
                 filePlaceChunksFile.delete();
@@ -117,7 +117,7 @@ public class SnappyChunksUtil {
     }
 
     public static SnappyChunks getSnappyChunksByFile(File compressedFile) {
-        String chunkFileName = compressedFile.getAbsolutePath() + ".chunks.snappy";
+        String chunkFileName = compressedFile.getAbsolutePath() + ".snappy.chunks";
         File chunkFile = new File(chunkFileName);
         FileInputStream chunksFis = null;
         DataInputStream chunksDis = null;

@@ -3,6 +3,7 @@ package org.jumbodb.database.service.management.storage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.UnhandledException;
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.connector.importer.DataInfo;
 import org.jumbodb.connector.importer.IndexInfo;
@@ -27,14 +28,8 @@ import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.LinkedMultiValueMap;
-import org.xerial.snappy.SnappyInputStream;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -45,7 +40,6 @@ import java.util.*;
  * Time: 2:12 PM
  */
 // CARSTEN fix unit tests
-// CARSTEN change all signatures to chunk key, version, collection name
 public class StorageManagement {
     public static final FileFilter FOLDER_FILTER = FileFilterUtils.makeDirectoryOnly(FileFilterUtils.notFileFilter(FileFilterUtils.prefixFileFilter(".")));
 
@@ -111,7 +105,7 @@ public class StorageManagement {
             Set<QueryUtilIndex> resultIndexes = new HashSet<QueryUtilIndex>();
             for (DeliveryChunk deliveryChunk : collection.getChunks()) {
                 for (DeliveryVersion deliveryVersion : deliveryChunk.getVersions()) {
-                    List<CollectionIndex> collectionIndexes = getCollectionIndexes(collection.getName(), deliveryChunk.getKey(), deliveryVersion.getVersion());
+                    List<CollectionIndex> collectionIndexes = getCollectionIndexes(deliveryChunk.getKey(), deliveryVersion.getVersion(), collection.getName());
                     for (CollectionIndex collectionIndex : collectionIndexes) {
                         IndexStrategy indexStrategy = jumboSearcher.getIndexStrategy(collectionIndex.getStrategy());
                         resultIndexes.add(new QueryUtilIndex(collectionIndex.getIndexName(), collectionIndex.getStrategy(), new ArrayList<QueryOperation>(indexStrategy.getSupportedOperations())));
@@ -239,7 +233,7 @@ public class StorageManagement {
         onDataChanged();
     }
 
-    public String getActiveDeliveryVersion(String collection, String chunkDeliveryKey) {
+    public String getActiveDeliveryVersion(String chunkDeliveryKey, String collection) {
         return ActiveProperties.getActiveDeliveryVersion(getActiveDeliveryFile(collection, chunkDeliveryKey));
     }
 
@@ -334,35 +328,9 @@ public class StorageManagement {
         return result;
     }
 
-//    public List<MetaData> getMetaDataForDelivery(String deliveryChunkKey, String version, boolean activate) {
-//        List<VersionedJumboCollection> allVersionedJumboCollections = getAllVersionedJumboCollections();
-//        List<MetaData> result = new LinkedList<MetaData>();
-//        for (VersionedJumboCollection collection : allVersionedJumboCollections) {
-//            if (deliveryChunkKey.equals(collection.getChunkKey()) && version.equals(collection.getVersion())) {
-//                result.add(new MetaData(collection.getCollectionName(), deliveryChunkKey, version, collection.getStrategy(), collection.getSourcePath(), activate, collection.getInfo()));
-//            }
-//        }
-//        return result;
-//    }
-//
-//    public List<MetaIndex> getMetaIndexForDelivery(String deliveryChunkKey, String version) {
-//        List<VersionedJumboCollection> allVersionedJumboCollections = getAllVersionedJumboCollections();
-//        List<MetaIndex> result = new LinkedList<MetaIndex>();
-//        for (VersionedJumboCollection collection : allVersionedJumboCollections) {
-//            if (deliveryChunkKey.equals(collection.getChunkKey()) && version.equals(collection.getVersion())) {
-//                List<CollectionIndex> collectionIndexes = getCollectionIndexes(collection.getCollectionName(), deliveryChunkKey, version);
-//                for (CollectionIndex collectionIndex : collectionIndexes) {
-//                    result.add(new MetaIndex(collection.getCollectionName(), deliveryChunkKey, version, collectionIndex.getIndexName(), collectionIndex.getStrategy(), collectionIndex.getIndexSourceFields()));
-//                }
-//            }
-//        }
-//        Collections.sort(result);
-//        return result;
-//    }
-
-    private List<CollectionIndex> getCollectionIndexes(String collectionName, String deliveryChunkKey, String version) {
-        File collectionVersionIndexPath = getIndexChunkedVersionCollectionFolder(collectionName, deliveryChunkKey,
-          version);
+    private List<CollectionIndex> getCollectionIndexes(String deliveryChunkKey, String version, String collectionName) {
+        File collectionVersionIndexPath = getIndexChunkedVersionCollectionFolder(deliveryChunkKey, version, collectionName
+        );
         File[] indexFolders = collectionVersionIndexPath.listFiles(FOLDER_FILTER);
         if (indexFolders == null) {
             return Collections.emptyList();
@@ -375,48 +343,97 @@ public class StorageManagement {
         return result;
     }
 
-    private File getIndexChunkedVersionCollectionFolder(String collectionName, String deliveryChunkKey, String version) {
+
+    private File getIndexChunkedVersionCollectionIndexFolder(String deliveryChunkKey, String version, String collectionName, String index) {
+        return new File(getIndexPath().getAbsolutePath() + "/" + deliveryChunkKey + "/" + version + "/" + collectionName + "/" + index + "/");
+    }
+
+    private File getIndexChunkedVersionCollectionFolder(String deliveryChunkKey, String version, String collectionName) {
         return new File(getIndexPath().getAbsolutePath() + "/" + deliveryChunkKey + "/" + version + "/" + collectionName + "/");
     }
 
-//    public List<IndexInfo> getIndexInfoForDelivery(List<MetaIndex> metaIndex) {
-//        List<IndexInfo> result = new LinkedList<IndexInfo>();
-//        for (MetaIndex index : metaIndex) {
-//            File indexFolder = findCollectionChunkedVersionIndexFolder(index.getCollection(), index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexName());
-//            FilenameFilter ioFileFilter = FileFilterUtils.suffixFileFilter(".idx");
-//            File[] files = indexFolder.listFiles(ioFileFilter);
-//            for (File indexFile : files) {
-//                long fileLength = getSizeFromSnappyChunk(new File(indexFile.getAbsolutePath() + ".chunks"));
-//                result.add(new IndexInfo(index.getCollection(), index.getIndexName(), indexFile.getName(), fileLength, index.getDeliveryKey(), index.getDeliveryVersion(), index.getIndexStrategy()));
-//            }
-//        }
-//        Collections.sort(result);
-//        return result;
-//    }
+    public List<IndexInfo> getIndexInfoForDelivery(String deliveryChunkKey, String deliveryVersion) {
+        ChunkedDeliveryVersion chunkedDeliveryVersion = getChunkedDeliveryVersion(deliveryChunkKey, deliveryVersion);
+        List<IndexInfo> result = new LinkedList<IndexInfo>();
+        for (VersionedJumboCollection versionedJumboCollection : chunkedDeliveryVersion.getCollections()) {
+            String collectionName = versionedJumboCollection.getCollectionName();
+            List<CollectionIndex> collectionIndexes = getCollectionIndexes(deliveryChunkKey, deliveryVersion, collectionName);
+            for (CollectionIndex collectionIndex : collectionIndexes) {
+                String indexName = collectionIndex.getIndexName();
+                File indexFolder = getIndexChunkedVersionCollectionIndexFolder(deliveryChunkKey, deliveryVersion, collectionName, indexName);
+                File[] files = indexFolder.listFiles();
+                if(files == null) {
+                    throw new IllegalStateException("Index folder does not exist for export: " + indexFolder.getAbsolutePath());
+                }
+                for (File indexFile : files) {
+                    long fileLength = indexFile.length();
+                    ChecksumType checksumType = resolveChecksumType(indexFile);
+                    String checksum = resolveChecksum(checksumType, indexFile);
+                    result.add(new IndexInfo(deliveryChunkKey, deliveryVersion, collectionName, indexName, indexFile.getName(), fileLength, checksumType, checksum));
+                }
+            }
+        }
+        Collections.sort(result);
+        return result;
+    }
 
-//    public List<DataInfo> getDataInfoForDelivery(List<MetaData> metaDatas) {
-//        List<DataInfo> result = new LinkedList<DataInfo>();
-//        IOFileFilter notPointPrefix = FileFilterUtils.notFileFilter(FileFilterUtils.prefixFileFilter("."));
-//        IOFileFilter notUnderScore = FileFilterUtils.notFileFilter(FileFilterUtils.prefixFileFilter("_"));
-//        IOFileFilter notChunksSnappy = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".chunks"));
-//        IOFileFilter notProperties = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".properties"));
-//        IOFileFilter notSha1 = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".sha1"));
-//        IOFileFilter notMd5 = FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".md5"));
-//        FilenameFilter ioFileFilter = FileFilterUtils.and(notChunksSnappy, notProperties, notSha1, notMd5, notPointPrefix, notUnderScore);
-//        for (MetaData data : metaDatas) {
-//            File dataFolder = findCollectionChunkedVersionDataFolder(data.getCollection(), data.getDeliveryKey(), data.getDeliveryVersion());
-//            File[] files = dataFolder.listFiles(ioFileFilter);
-//            for (File dataFile : files) {
-//                long fileLength = getSizeFromSnappyChunk(new File(dataFile.getAbsolutePath() + ".chunks"));
-//                result.add(new DataInfo(data.getCollection(), dataFile.getName(), fileLength, data.getDeliveryKey(), data.getDeliveryVersion(), data.getDataStrategy()));
-//            }
-//        }
-//        return result;
-//    }
+    private String resolveChecksum(ChecksumType checksumType, File indexFile) {
+        File checksumFile = new File(indexFile.getAbsolutePath() + checksumType.getFileSuffix());
+        try {
+            return FileUtils.readFileToString(checksumFile);
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
+    private ChecksumType resolveChecksumType(File file) {
+        if(file.getName().startsWith(".") || file.getName().startsWith("_")) {
+            return ChecksumType.NONE;
+        }
+        ChecksumType[] values = ChecksumType.values();
+        for (ChecksumType checksum : values) {
+            File checksumFile = new File(file.getAbsolutePath() + checksum.getFileSuffix());
+            if(checksumFile.exists()) {
+                return checksum;
+            }
+        }
+        return ChecksumType.NONE;
+    }
+
+    public ChunkedDeliveryVersion getChunkedDeliveryVersion(String deliveryChunkKey, String deliveryVersion) {
+        // could be more efficient, dont build full tree just the element itself
+        List<ChunkedDeliveryVersion> chunkedDeliveryVersions = getChunkedDeliveryVersions(false);
+        for (ChunkedDeliveryVersion chunkedDeliveryVersion : chunkedDeliveryVersions) {
+            if(chunkedDeliveryVersion.getChunkKey().equals(deliveryChunkKey) && chunkedDeliveryVersion.getVersion().equals(deliveryVersion)) {
+                return chunkedDeliveryVersion;
+            }
+        }
+        return null;
+    }
+
+    public List<DataInfo> getDataInfoForDelivery(String deliveryChunkKey, String deliveryVersion) {
+        List<DataInfo> result = new LinkedList<DataInfo>();
+        ChunkedDeliveryVersion chunkedDeliveryVersion = getChunkedDeliveryVersion(deliveryChunkKey, deliveryVersion);
+        for (VersionedJumboCollection versionedJumboCollection : chunkedDeliveryVersion.getCollections()) {
+            String collectionName = versionedJumboCollection.getCollectionName();
+            File dataFolder = getDataChunkedVersionCollectionFolder(deliveryChunkKey, deliveryVersion, collectionName);
+            File[] files = dataFolder.listFiles();
+            if(files == null) {
+                throw new IllegalStateException("Data folder does not exist for export: " + dataFolder.getAbsolutePath());
+            }
+            for (File dataFile : files) {
+                long fileLength = dataFile.length();
+                ChecksumType checksumType = resolveChecksumType(dataFile);
+                String checksum = resolveChecksum(checksumType, dataFile);
+                result.add(new DataInfo(deliveryChunkKey, deliveryVersion, collectionName, dataFile.getName(), fileLength, checksumType, checksum));
+            }
+        }
+        return result;
+    }
 
     public InputStream getInputStream(IndexInfo index) throws IOException {
-        File indexFolder = getIndexChunkedVersionCollectionFolder(index.getCollection(), index.getDeliveryKey(),
-          index.getDeliveryVersion());
+        File indexFolder = getIndexChunkedVersionCollectionFolder(index.getDeliveryKey(), index.getDeliveryVersion(), index.getCollection()
+        );
         File indexFile = new File(indexFolder.getAbsolutePath() + "/" + index.getIndexName() + "/" + index.getFileName());
         return new BufferedInputStream(new FileInputStream(indexFile));
     }

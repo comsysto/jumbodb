@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.strategy.hashcode32.snappy;
+package org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy;
 
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.apache.hadoop.io.IntWritable;

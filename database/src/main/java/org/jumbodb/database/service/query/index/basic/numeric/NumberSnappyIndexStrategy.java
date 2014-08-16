@@ -8,7 +8,6 @@ import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
-import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
@@ -83,7 +82,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
     @Override
-    public boolean isResponsibleFor(String collection, String chunkKey, String indexName) {
+    public boolean isResponsibleFor(String chunkKey, String collection, String indexName) {
         IndexDefinition chunkIndex = collectionDefinition.getChunkIndex(collection, chunkKey, indexName);
         if(chunkIndex != null) {
             return getStrategyName().equals(chunkIndex.getStrategy());
@@ -97,7 +96,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
             for (DeliveryChunkDefinition deliveryChunkDefinition : collectionDefinition.getChunks(collection)) {
                 for (IndexDefinition indexDefinition : deliveryChunkDefinition.getIndexes()) {
                     if(getStrategyName().equals(indexDefinition.getStrategy())) {
-                        IndexKey indexKey = new IndexKey(collection, deliveryChunkDefinition.getChunkKey(), indexDefinition.getName());
+                        IndexKey indexKey = new IndexKey(deliveryChunkDefinition.getChunkKey(), collection, indexDefinition.getName());
                         result.put(indexKey, buildIndexRange(indexDefinition.getPath()));
                     }
                 }
@@ -178,7 +177,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
     protected List<IF> getIndexFiles(String collection, String chunkKey, IndexQuery query) {
-        return indexFiles.get(new IndexKey(collection, chunkKey, query.getName()));
+        return indexFiles.get(new IndexKey(chunkKey, collection, query.getName()));
     }
 
 

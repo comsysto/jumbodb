@@ -157,12 +157,10 @@ public class JumboConfigurationUtil {
             JumboGenericImportJob job = new JumboGenericImportJob();
             job.setIndexes(importCollection.getIndexes());
             job.setSort(importCollection.getSort());
-            job.setActivateDelivery(importCollection.getActivateDelivery() != null ? importCollection.getActivateDelivery() : importDefinition.getActivateDelivery());
             job.setCollectionName(importCollection.getCollectionName());
-            job.setDataStrategy(importCollection.getDataStrategy());
-            job.setDeliveryChunkKey(importCollection.getDeliveryChunkKey() != null ? importCollection.getDeliveryChunkKey() : importDefinition.getDeliveryChunkKey());
-            job.setDescription(importCollection.getDescription() != null ? importCollection.getDescription() : importDefinition.getDescription());
-            job.setHosts(importCollection.getHosts() != null && importCollection.getHosts().size() > 0 ? importCollection.getHosts() : importDefinition.getHosts());
+            job.setDeliveryChunkKey(importDefinition.getDeliveryChunkKey());
+            job.setDescription(importCollection.getDescription());
+            job.setHosts(importDefinition.getHosts());
             for (IndexField indexField : job.getIndexes()) {
                 if(indexField.getDatePattern() == null) {
                     indexField.setDatePattern(importDefinition.getDatePattern());
@@ -192,13 +190,11 @@ public class JumboConfigurationUtil {
 
     public static Set<CommitNotification> convertToFinishedNotifications(ImportDefinition importDefinition) {
         Set<CommitNotification> result = new HashSet<CommitNotification>();
-        for (ImportCollection importCollection : importDefinition.getImportCollection()) {
-            String deliveryChunkKey = importCollection.getDeliveryChunkKey() != null ? importCollection.getDeliveryChunkKey() : importDefinition.getDeliveryChunkKey();
-            List<ImportHost> importHosts = importCollection.getHosts() != null && importCollection.getHosts().size() > 0 ? importCollection.getHosts() : importDefinition.getHosts();
-            for (ImportHost importHost : importHosts) {
-                CommitNotification commitNotification = new CommitNotification(deliveryChunkKey, importHost);
-                result.add(commitNotification);
-            }
+        String deliveryChunkKey = importDefinition.getDeliveryChunkKey();
+        List<ImportHost> importHosts = importDefinition.getHosts();
+        for (ImportHost importHost : importHosts) {
+            CommitNotification commitNotification = new CommitNotification(deliveryChunkKey, importHost, importDefinition.getActivateChunk(), importDefinition.getActivateVersion());
+            result.add(commitNotification);
         }
         return result;
     }

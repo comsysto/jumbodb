@@ -8,12 +8,12 @@ import org.jumbodb.common.query.ChecksumType;
  * Time: 4:48 PM
  */
 public class IndexInfo implements Comparable<IndexInfo> {
+    private String deliveryKey;
+    private String deliveryVersion;
     private String collection;
     private String indexName;
     private String fileName;
     private long fileLength;
-    private String deliveryKey;
-    private String deliveryVersion;
     private final ChecksumType checksumType;
     private final String checksum;
 
@@ -24,12 +24,12 @@ public class IndexInfo implements Comparable<IndexInfo> {
 
     public IndexInfo(String deliveryKey, String deliveryVersion, String collection, String indexName, String fileName,
       long fileLength, ChecksumType checksumType, String checksum) {
+        this.deliveryKey = deliveryKey;
+        this.deliveryVersion = deliveryVersion;
         this.collection = collection;
         this.indexName = indexName;
         this.fileName = fileName;
         this.fileLength = fileLength;
-        this.deliveryKey = deliveryKey;
-        this.deliveryVersion = deliveryVersion;
         this.checksumType = checksumType;
         this.checksum = checksum;
     }

@@ -48,6 +48,7 @@ dependencies {
     bundle project(':connectors:jumbodb-java-connector')
     bundle project(':commons:query')
     bundle project(':commons:geo')
+    bundle project(':commons:data')
     bundle "org.xerial.snappy:snappy-java:$snappyVersion"
     bundle 'commons-io:commons-io:2.3'
     testCompile "org.codehaus.groovy:groovy-all:1.8.6"

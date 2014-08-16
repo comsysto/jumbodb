@@ -129,7 +129,7 @@ class StorageManagementSpec extends Specification {
         createDefaultFileStructure(dataDir, indexDir)
         def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, dataDir, indexDir), jumboSearcherMock, importServerMock)
         expect:
-        storageManagement.getActiveDeliveryVersion(collection, delivery) == expectedVersion
+        storageManagement.getActiveDeliveryVersion(delivery, collection) == expectedVersion
         cleanup:
         dataDir.delete()
         indexDir.delete()
@@ -424,11 +424,11 @@ class StorageManagementSpec extends Specification {
         when:
         storageManagement.activateChunkedVersion("test_delivery1", "version1")
         then:
-        storageManagement.getActiveDeliveryVersion("test_collection1", "test_delivery1") == "version1"
+        storageManagement.getActiveDeliveryVersion("test_delivery1", "test_collection1") == "version1"
         when:
         storageManagement.activateChunkedVersion("test_delivery1", "version2")
         then:
-        storageManagement.getActiveDeliveryVersion("test_collection1", "test_delivery1") == "version2"
+        storageManagement.getActiveDeliveryVersion("test_delivery1", "test_collection1") == "version2"
         cleanup:
         dataDir.delete()
         indexDir.delete()
@@ -455,11 +455,11 @@ class StorageManagementSpec extends Specification {
         when:
         storageManagement.activateChunkedVersionInCollection("test_collection1", "test_delivery1", "version1")
         then:
-        storageManagement.getActiveDeliveryVersion("test_collection1", "test_delivery1") == "version1"
+        storageManagement.getActiveDeliveryVersion("test_delivery1", "test_collection1") == "version1"
         when:
         storageManagement.activateChunkedVersionInCollection("test_collection1", "test_delivery1", "version2")
         then:
-        storageManagement.getActiveDeliveryVersion("test_collection1", "test_delivery1") == "version2"
+        storageManagement.getActiveDeliveryVersion("test_delivery1", "test_collection1") == "version2"
         cleanup:
         dataDir.delete()
         indexDir.delete()

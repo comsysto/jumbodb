@@ -8,15 +8,13 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.importer.ImportInfo;
 import org.jumbodb.connector.importer.JumboImportConnection;
-import org.jumbodb.connector.importer.MetaData;
-import org.jumbodb.connector.importer.MetaIndex;
+import org.jumbodb.data.common.meta.DeliveryProperties;
 
 import java.io.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * User: carsten
@@ -47,6 +45,20 @@ public class JumboJobCreator {
             }
         }
         return controlledJobs;
+    }
+
+    public static void initImport(List<ImportHost> importHosts, String chunkKey, String deliveryDescription, Configuration conf) {
+        String deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
+        for (ImportHost host : importHosts) {
+            JumboImportConnection jumbo = null;
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(DeliveryProperties.DATE_PATTERN);
+                jumbo = new JumboImportConnection(host.getHost(), host.getPort());
+                jumbo.initImport(new ImportInfo(chunkKey, deliveryVersion, sdf.format(new Date()), deliveryDescription));
+            } finally {
+                IOUtils.closeStream(jumbo);
+            }
+        }
     }
 
     public static List<ControlledJob> createIndexAndImportJob(Configuration conf, JumboCustomImportJob jumboCustomImportJob) throws IOException {
@@ -108,7 +120,7 @@ public class JumboJobCreator {
         try {
             ImportHost host = commitNotification.getHost();
             jumbo = new JumboImportConnection(host.getHost(), host.getPort());
-            jumbo.commitImport(commitNotification.getDeliveryChunkKey(), deliveryVersion);
+            jumbo.commitImport(commitNotification.getDeliveryChunkKey(), deliveryVersion, commitNotification.isActivateChunk(), commitNotification.isActivateVersion());
         } finally {
             IOUtils.closeStream(jumbo);
         }

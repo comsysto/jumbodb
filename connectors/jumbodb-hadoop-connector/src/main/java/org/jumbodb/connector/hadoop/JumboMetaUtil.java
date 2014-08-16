@@ -8,6 +8,8 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
+import org.jumbodb.data.common.meta.DeliveryProperties;
+import org.jumbodb.data.common.meta.IndexProperties;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -17,8 +19,8 @@ import java.util.Properties;
 /**
  * @author Carsten Hufe
  */
+// CARSTEN reuse from common classes like DeliveryProperties
 public class JumboMetaUtil {
-    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     public static void writeActiveMetaData(Path rootGenerationFolder, Configuration conf) throws IOException {
         FileSystem fs = rootGenerationFolder.getFileSystem(conf);
@@ -41,7 +43,7 @@ public class JumboMetaUtil {
         String version = conf.get(JumboConstants.DELIVERY_VERSION);
         Path suffix = rootGenerationFolder.suffix("/data/" + delivery + "/" + version + "/delivery.properties");
         if(!fs.exists(suffix)) {
-            SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
+            SimpleDateFormat sdf = new SimpleDateFormat(DeliveryProperties.DATE_PATTERN);
             FSDataOutputStream fsDataOutputStream = fs.create(suffix, true);
             Properties indexInfo = new Properties();
             indexInfo.setProperty("date", sdf.format(new Date()));
@@ -58,7 +60,7 @@ public class JumboMetaUtil {
         Path suffix = indexFolder.suffix("/index.properties");
         IndexField indexField = JumboConfigurationUtil.loadIndexJson(jobContext.getConfiguration());
         if(!fs.exists(suffix)) {
-            SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
+            SimpleDateFormat sdf = new SimpleDateFormat(DeliveryProperties.DATE_PATTERN);
             FSDataOutputStream fsDataOutputStream = fs.create(suffix, true);
             Properties indexInfo = new Properties();
             indexInfo.setProperty("date", sdf.format(new Date()));
@@ -74,7 +76,7 @@ public class JumboMetaUtil {
         FileSystem fs = collectionFolder.getFileSystem(jobContext.getConfiguration());
         Path suffix = collectionFolder.suffix("/collection.properties");
         if(!fs.exists(suffix)) {
-            SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
+            SimpleDateFormat sdf = new SimpleDateFormat(DeliveryProperties.DATE_PATTERN);
             FSDataOutputStream fsDataOutputStream = fs.create(suffix, true);
             Properties deliveryInfo = new Properties();
             deliveryInfo.setProperty("sourcePath", getSourcePaths(jobContext));

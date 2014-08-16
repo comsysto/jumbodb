@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public interface IndexStrategy {
     long getSize(File indexFolder);
-    boolean isResponsibleFor(String collection, String chunkKey, String indexName);
+    boolean isResponsibleFor(String chunkKey, String collection, String indexName);
     String getStrategyName();
     Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit, boolean resultCacheEnabled);
     Set<QueryOperation> getSupportedOperations();

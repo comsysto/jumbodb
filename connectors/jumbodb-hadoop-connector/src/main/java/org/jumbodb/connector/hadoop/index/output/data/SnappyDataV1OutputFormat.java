@@ -106,16 +106,6 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             JumboMetaUtil.writeCollectionMetaData(file.getParent(), STRATEGY_KEY, context);
         }
 
-        // CARSTEN not used?
-        private String getSourcePaths(TaskAttemptContext context) {
-            Path[] inputPaths = FileInputFormat.getInputPaths(context);
-            StringBuilder buf = new StringBuilder();
-            for (Path inputPath : inputPaths) {
-                buf.append(inputPath.toString()).append(';');
-            }
-            return buf.toString();
-        }
-
         private void writeSnappyChunks() throws IOException {
             Path path = file.suffix(".chunks");
             FSDataOutputStream fsDataOutputStream = fs.create(path, false);

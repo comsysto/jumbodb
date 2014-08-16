@@ -8,11 +8,11 @@ import org.jumbodb.common.query.ChecksumType;
  * Time: 4:48 PM
  */
 public class DataInfo {
+    private String deliveryKey;
+    private String deliveryVersion;
     private String collection;
     private String fileName;
     private long fileLength;
-    private String deliveryKey;
-    private String deliveryVersion;
     private ChecksumType checksumType;
     private String checksum;
 
@@ -22,11 +22,11 @@ public class DataInfo {
 
     public DataInfo(String deliveryKey, String deliveryVersion, String collection, String fileName, long fileLength,
       ChecksumType checksumType, String checksum) {
+        this.deliveryKey = deliveryKey;
+        this.deliveryVersion = deliveryVersion;
         this.collection = collection;
         this.fileName = fileName;
         this.fileLength = fileLength;
-        this.deliveryKey = deliveryKey;
-        this.deliveryVersion = deliveryVersion;
         this.checksumType = checksumType;
         this.checksum = checksum;
     }

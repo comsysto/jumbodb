@@ -76,7 +76,6 @@ public class JumboImportConnection implements Closeable {
     }
 
     // CARSTEN unit test
-    // CARSTEN call hadoop job
     public void initImport(ImportInfo importInfo) {
         try {
             dos.writeUTF(":cmd:import:init");

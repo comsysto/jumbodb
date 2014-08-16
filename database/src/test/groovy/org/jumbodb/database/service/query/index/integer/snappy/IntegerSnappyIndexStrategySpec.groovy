@@ -225,11 +225,11 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         strategy.onInitialize(cd)
         when:
-        def responsible = strategy.isResponsibleFor("testCollection", "testChunkKey", "testIndex")
+        def responsible = strategy.isResponsibleFor("testChunkKey", "testCollection", "testIndex")
         then:
         responsible
         when:
-        def notResponsible = !strategy.isResponsibleFor("testCollection", "testChunkKey", "notIn")
+        def notResponsible = !strategy.isResponsibleFor("testChunkKey", "testCollection", "notIn")
         then:
         notResponsible
         cleanup:
@@ -247,7 +247,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         when:
         strategy.onInitialize(cd)
         def ranges = strategy.buildIndexRanges()
-        def testIndexFiles = ranges.get(new IndexKey("testCollection", "testChunkKey", "testIndex"))
+        def testIndexFiles = ranges.get(new IndexKey("testChunkKey", "testCollection", "testIndex"))
         then:
         ranges.size() == 1
         testIndexFiles.size() == 1

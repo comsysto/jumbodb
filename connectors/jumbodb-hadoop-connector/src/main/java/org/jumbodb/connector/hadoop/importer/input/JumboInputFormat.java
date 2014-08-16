@@ -42,16 +42,6 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
         context.getConfiguration().set(JumboConstants.INDEX_NAME, indexName);
     }
 
-    public static void setDataStrategy(JobContext context, String dataStrategy) {
-        context.getConfiguration().set(JumboConstants.JUMBO_DATA_STRATEGY, dataStrategy);
-    }
-
-    public static void setIndexStrategy(JobContext context, IndexField indexStrategy) {
-        if(indexStrategy != null) {
-            context.getConfiguration().set(JumboConstants.JUMBO_INDEX_STRATEGY, indexStrategy.getIndexStrategy());
-        }
-    }
-
     public static void setDeliveryChunkKey(JobContext context, String key) {
         context.getConfiguration().set(JumboConstants.DELIVERY_CHUNK_KEY, key);
     }
@@ -102,10 +92,10 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
 
     @Override
     public RecordReader<FileStatus, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-        return new OdbRecordReader();
+        return new JumboRecordReader();
     }
 
-    public static class OdbRecordReader extends RecordReader<FileStatus, NullWritable> {
+    public static class JumboRecordReader extends RecordReader<FileStatus, NullWritable> {
         private JumboInputSplit inputSplit;
         private int currentIndex = 0;
 

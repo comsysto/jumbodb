@@ -12,7 +12,8 @@ public class ImportDefinition {
     private String deliveryChunkKey;
     private List<ImportHost> hosts;
     private String description = "No description";
-    private Boolean activateDelivery = JumboConstants.DELIVERY_ACTIVATE_DEFAULT;
+    private Boolean activateChunk = JumboConstants.DELIVERY_ACTIVATE_CHUNK;
+    private Boolean activateVersion = JumboConstants.DELIVERY_ACTIVATE_VERSION;
     private List<ImportCollection> importCollection;
     private List<HadoopConfig> hadoop = new LinkedList<HadoopConfig>();
     private String output;
@@ -67,12 +68,20 @@ public class ImportDefinition {
         this.description = description;
     }
 
-    public Boolean getActivateDelivery() {
-        return activateDelivery;
+    public Boolean getActivateChunk() {
+        return activateChunk;
     }
 
-    public void setActivateDelivery(Boolean activateDelivery) {
-        this.activateDelivery = activateDelivery;
+    public void setActivateChunk(Boolean activateChunk) {
+        this.activateChunk = activateChunk;
+    }
+
+    public Boolean getActivateVersion() {
+        return activateVersion;
+    }
+
+    public void setActivateVersion(Boolean activateVersion) {
+        this.activateVersion = activateVersion;
     }
 
     public List<ImportCollection> getImportCollection() {

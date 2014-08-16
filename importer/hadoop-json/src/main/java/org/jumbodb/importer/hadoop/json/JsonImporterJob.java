@@ -48,9 +48,7 @@ public class JsonImporterJob extends Configured implements Tool {
         ImportDefinition importDefinition = JumboConfigurationUtil.loadJsonConfigurationAndUpdateHadoop(jsonConfPath, conf);
         String outputWithDate = JumboConfigurationUtil.getOutputPathWithDateStamp(importDefinition);
         List<JumboGenericImportJob> importJobs = JumboConfigurationUtil.convertToGenericImportJobs(conf, importDefinition, outputWithDate);
-
         JobControl control = new JobControl("JsonImporterJob");
-
         for (JumboGenericImportJob importJob : importJobs) {
             Job sortJob = Job.getInstance(conf, "Sort Job " + importJob.getCollectionName());
             JumboConfigurationUtil.setSortConfig(sortJob, importJob.getSort());
@@ -68,7 +66,7 @@ public class JsonImporterJob extends Configured implements Tool {
             ControlledJob controlledSortJob = new ControlledJob(sortJob, Collections.<ControlledJob>emptyList());
             control.addJob(controlledSortJob);
 
-            List<ControlledJob> jumboIndexAndImportJob = JumboJobCreator.createIndexAndImportJob(conf,  importJob);
+            List<ControlledJob> jumboIndexAndImportJob = JumboJobCreator.createIndexAndImportJob(conf, importJob);
             System.out.println("Number of Jumbo Index and Import Jobs " + jumboIndexAndImportJob.size());
             for (ControlledJob current : jumboIndexAndImportJob) {
                 current.addDependingJob(controlledSortJob);
@@ -76,7 +74,7 @@ public class JsonImporterJob extends Configured implements Tool {
             control.addJobCollection(jumboIndexAndImportJob);
             System.out.println("Waiting Jobs " + control.getWaitingJobList().size());
         }
-
+        JumboJobCreator.initImport(importDefinition.getHosts(), importDefinition.getDeliveryChunkKey(), importDefinition.getDescription(), conf);
         JumboMetaUtil.writeDeliveryMetaData(new Path(outputWithDate), importDefinition.getDescription(), conf);
         JumboMetaUtil.writeActiveMetaData(new Path(outputWithDate), conf);
 
@@ -86,8 +84,7 @@ public class JsonImporterJob extends Configured implements Tool {
         while (!control.allFinished()) {
             try {
                 Thread.sleep(1000);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 System.err.println(e);
             }
         }

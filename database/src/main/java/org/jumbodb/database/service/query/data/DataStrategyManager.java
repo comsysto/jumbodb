@@ -3,9 +3,6 @@ package org.jumbodb.database.service.query.data;
 import com.google.common.collect.Maps;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
-import org.jumbodb.database.service.query.definition.IndexDefinition;
-import org.jumbodb.database.service.query.index.IndexKey;
-import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.List;
@@ -14,7 +11,6 @@ import java.util.Map;
 /**
  * @author Carsten Hufe
  */
-// CARSTEN change all signatures to chunk key, version, collection name
 public class DataStrategyManager {
 
     private Map<DataKey, DataStrategy> dataLocationsAndStrategies;
@@ -32,11 +28,11 @@ public class DataStrategyManager {
 
 
     public String getStrategyKey(String collection, String chunkKey) {
-        return dataLocationsAndStrategies.get(new DataKey(collection, chunkKey)).getStrategyName();
+        return dataLocationsAndStrategies.get(new DataKey(chunkKey, collection)).getStrategyName();
     }
 
     public DataStrategy getStrategy(String collection, String chunkKey) {
-        return dataLocationsAndStrategies.get(new DataKey(collection, chunkKey));
+        return dataLocationsAndStrategies.get(new DataKey(chunkKey, collection));
     }
 
     public DataStrategy getStrategy(String strategyKey) {
@@ -60,7 +56,7 @@ public class DataStrategyManager {
         Map<DataKey, DataStrategy> result = Maps.newHashMap();
         for (String collectionName : collectionDefinition.getCollections()) {
             for (DeliveryChunkDefinition deliveryChunkDef : collectionDefinition.getChunks(collectionName)) {
-                DataKey dataKey = new DataKey(collectionName, deliveryChunkDef.getChunkKey());
+                DataKey dataKey = new DataKey(deliveryChunkDef.getChunkKey(), collectionName);
                 result.put(dataKey, getResponsibleStrategy(dataKey));
             }
         }

@@ -1,7 +1,9 @@
 package org.jumbodb.connector.hadoop.importer.map;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.UnhandledException;
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.exception.JumboFileChecksumException;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
@@ -32,8 +34,6 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
     private String deliveryVersion;
     private String collection;
     private String indexName;
-    private String dataStrategy;
-    private String indexStrategy;
     private long bytesReadAll = 0l;
 
     @Override
@@ -46,8 +46,6 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         this.deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
         this.collection = conf.get(JumboConstants.COLLECTION_NAME);
         this.indexName = conf.get(JumboConstants.INDEX_NAME);
-        this.dataStrategy = conf.get(JumboConstants.JUMBO_DATA_STRATEGY);
-        this.indexStrategy = conf.get(JumboConstants.JUMBO_INDEX_STRATEGY);
         this.bytesReadAll = 0l;
         super.setup(context);
     }
@@ -63,15 +61,19 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             long fileLength = fs.getFileStatus(path).getLen();
             if(JumboConstants.DATA_TYPE_INDEX.equals(type)) {
                 String fileName = path.getName();
+                ChecksumType checksumType = resolveChecksumType(fs, path);
+                String checksum = resolveChecksum(fs, checksumType, path);
                 IndexInfo indexInfo = new IndexInfo(deliveryKey, deliveryVersion, collection, indexName, fileName, fileLength,
-                  indexStrategy);
+                  checksumType, checksum);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
                 jumboImportConnection.importIndexFile(indexInfo, copyDataCallback);
             }
             else if(JumboConstants.DATA_TYPE_DATA.equals(type)) {
                 String fileName = path.getName();
+                ChecksumType checksumType = resolveChecksumType(fs, path);
+                String checksum = resolveChecksum(fs, checksumType, path);
                 DataInfo dataInfo = new DataInfo(deliveryKey, deliveryVersion, collection, fileName, fileLength,
-                  dataStrategy);
+                  checksumType, checksum);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
                 jumboImportConnection.importDataFile(dataInfo, copyDataCallback);
             } else {
@@ -90,7 +92,32 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         }
     }
 
+    private String resolveChecksum(FileSystem fs, ChecksumType checksumType, Path indexFile) throws IOException {
+        Path checksumFile = indexFile.suffix(checksumType.getFileSuffix());
+        FSDataInputStream is = null;
+        try {
+            is = fs.open(checksumFile);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            IOUtils.copyBytes(is, bos, 2048, true);
+            return new String(bos.toByteArray(), "UTF-8");
+        } finally {
+            IOUtils.closeStream(is);
+        }
+    }
 
+    private ChecksumType resolveChecksumType(FileSystem fs, Path file) throws IOException {
+        if(file.getName().startsWith(".") || file.getName().startsWith("_")) {
+            return ChecksumType.NONE;
+        }
+        ChecksumType[] values = ChecksumType.values();
+        for (ChecksumType checksum : values) {
+            Path checksumFile = file.suffix(checksum.getFileSuffix());
+            if(fs.exists(checksumFile)) {
+                return checksum;
+            }
+        }
+        return ChecksumType.NONE;
+    }
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
@@ -115,18 +142,18 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         }
 
         @Override
-        public String onCopy(OutputStream outputStream) {
+        public void onCopy(OutputStream outputStream) {
             try {
-                return copyBytes(inputStream, outputStream, fileLength, context, filename, collection);
+                copyBytes(inputStream, outputStream, fileLength, context, filename, collection);
             } catch (IOException e) {
                 throw new UnhandledException(e);
             }
         }
 
-        public String copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, long fileSize, Context context, String filename, String collection)
+        public void copyBytes(InputStream in, OutputStream out, int buffSize, boolean close, long fileSize, Context context, String filename, String collection)
                 throws IOException {
             try {
-                return copyBytes(in, out, buffSize, fileSize, context, filename, collection);
+                copyBytes(in, out, buffSize, fileSize, context, filename, collection);
             } finally {
                 out.flush();
                 if (close) {
@@ -136,15 +163,13 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             }
         }
 
-        public String copyBytes(InputStream in, OutputStream out, int buffSize, long fileSize, Context context, String filename, String collection)  throws IOException {
+        public void copyBytes(InputStream in, OutputStream out, int buffSize, long fileSize, Context context, String filename, String collection)  throws IOException {
             PrintStream ps = (out instanceof PrintStream) ? (PrintStream)out : null;
             byte[] buf = new byte[buffSize];
             int bytesRead = in.read(buf);
             long currentFileBytes = 0;
-            MessageDigest messageDigest = getMd5MessageDigest();
             while (bytesRead >= 0) {
                 out.write(buf, 0, bytesRead);
-                messageDigest.update(buf, 0, bytesRead);
                 if ((ps != null) && (ps.checkError())) {
                     throw new IOException("Unable to write to output stream.");
                 }
@@ -165,20 +190,11 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
                 inputSplit.setCurrentlyCopied(bytesReadAll);
                 bytesRead = in.read(buf);
             }
-            return Hex.encodeHexString(messageDigest.digest());
         }
 
-        private MessageDigest getMd5MessageDigest() {
-            try {
-                return MessageDigest.getInstance("MD5");
-            } catch (NoSuchAlgorithmException e) {
-                throw new UnhandledException(e);
-            }
-        }
-
-        public String copyBytes(InputStream in, OutputStream out, long fileSize, Context context, String filename, String collection)
+        public void copyBytes(InputStream in, OutputStream out, long fileSize, Context context, String filename, String collection)
                 throws IOException  {
-            return copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), false, fileSize, context, filename, collection);
+            copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), false, fileSize, context, filename, collection);
         }
     }
 }

@@ -5,13 +5,13 @@ import org.jumbodb.common.query.ChecksumType;
 public class ImportMetaFileInformation {
     public enum FileType {INDEX, DATA}
 
-    private FileType fileType;
-    private String fileName;
-    private String collection;
-    private String indexName;
-    private long fileLength;
     private String deliveryKey;
     private String deliveryVersion;
+    private String collection;
+    private String indexName;
+    private FileType fileType;
+    private String fileName;
+    private long fileLength;
     private ChecksumType checksumType;
     private String checksum;
 

@@ -26,13 +26,13 @@ class CollectionDefinitionLoaderSpec extends Specification {
         new File(versionPath + "part0002.sha1").createNewFile()
         new File(versionPath + "part0002.md5").createNewFile()
         new File(versionPath + "part0002.snappy.chunks").createNewFile()
-        def metaData = new CollectionProperties.CollectionMeta(date, "Data imported from", "TEST_STRATEGY")
+        def metaData = new CollectionProperties.CollectionMeta(date, "Data imported from", "TEST_STRATEGY", "info")
         CollectionProperties.write(new File(versionPath + "/" + CollectionProperties.DEFAULT_FILENAME), metaData)
     }
 
     def writeActiveProperties(chunkKey, version) {
         def chunkKeyPath = dataPath.absolutePath + "/" + chunkKey + "/"
-        ActiveProperties.writeActiveFile(new File(chunkKeyPath + "/" + ActiveProperties.DEFAULT_FILENAME), version);
+        ActiveProperties.writeActiveFile(new File(chunkKeyPath + "/" + ActiveProperties.DEFAULT_FILENAME), version, true);
     }
 
     def createIndexCollectionVersion(collection, chunkKey, version) {
@@ -59,8 +59,8 @@ class CollectionDefinitionLoaderSpec extends Specification {
 
     def "verify loaded data structure"() {
         setup:
-        createDataCollectionVersion("testCollection1", "firstChunk", "version1", "2012-01-01")
-        createDataCollectionVersion("testCollection1", "firstChunk", "version2", "2012-01-02")
+        createDataCollectionVersion("testCollection1", "firstChunk", "version1", "2012-01-01 12:12:12")
+        createDataCollectionVersion("testCollection1", "firstChunk", "version2", "2012-01-02 12:12:12")
         createIndexCollectionVersion("testCollection1", "firstChunk", "version1")
         createIndexCollectionVersion("testCollection1", "firstChunk", "version2")
         writeActiveProperties("firstChunk", "version2")

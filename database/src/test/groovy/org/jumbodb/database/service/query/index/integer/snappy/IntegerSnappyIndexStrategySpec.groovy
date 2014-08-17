@@ -251,7 +251,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         then:
         ranges.size() == 1
         testIndexFiles.size() == 1
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         testIndexFiles[0].getFrom() == -2048
         testIndexFiles[0].getTo() == 20479
         cleanup:
@@ -279,28 +279,11 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         def indexRange = strategy.buildIndexRange(indexFolder)
         then:
         indexRange.size() == 1
-        indexRange[0].getIndexFile().getName() == "part00001.odx"
+        indexRange[0].getIndexFile().getName() == "part00001.idx"
         indexRange[0].getFrom() == -2048
         indexRange[0].getTo() == 20479
         cleanup:
         indexFolder.delete()
-    }
-
-    def "onImport"() {
-        setup:
-        def indexFileContent = IntegerDataGeneration.createIndexContent()
-        def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
-        def meta = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.INDEX, "part00001.odx", "collection", "testindex", indexFileContent.length, "deliveryKey", "deliveryVersion", "STRATEGY")
-        when:
-        def md5hash = strategy.onImport(meta, new ByteArrayInputStream(indexFileContent), indexFolder)
-        then:
-        new File(indexFolder.getAbsolutePath() + "/part00001.odx").exists()
-        new File(indexFolder.getAbsolutePath() + "/part00001.odx.chunks.snappy").exists()
-        SnappyChunksUtil.getSnappyChunksByFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx")).getLength() == indexFileContent.length
-        md5hash == "e9fc3b4a86e729ff2987bb8ded8479cf"
-        cleanup:
-        indexFolder.delete()
-
     }
 
     def "onInitialize"() {
@@ -316,7 +299,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         testIndexFiles[0].getFrom() == -2048
         testIndexFiles[0].getTo() == 20479
         cleanup:
@@ -337,7 +320,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         testIndexFiles[0].getFrom() == -2048
         testIndexFiles[0].getTo() == 20479
         cleanup:
@@ -347,7 +330,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        IntegerDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx"))
+        IntegerDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

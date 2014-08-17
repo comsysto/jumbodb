@@ -31,7 +31,6 @@ import java.util.concurrent.Future;
  * @author Carsten Hufe
  */
 public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch {
-    public static final int SNAPPY_DATA_CHUNK_SIZE = 32 * 1024;
     public static final String JSON_SNAPPY_V1 = "JSON_SNAPPY_V1";
     private Logger log = LoggerFactory.getLogger(JsonSnappyDataStrategy.class);
 

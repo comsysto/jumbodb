@@ -251,7 +251,7 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
         then:
         ranges.size() == 1
         testIndexFiles.size() == 1
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         testIndexFiles[0].getFrom() == -1600l
         testIndexFiles[0].getTo() == 15999l
         cleanup:
@@ -279,28 +279,11 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
         def indexRange = strategy.buildIndexRange(indexFolder)
         then:
         indexRange.size() == 1
-        indexRange[0].getIndexFile().getName() == "part00001.odx"
+        indexRange[0].getIndexFile().getName() == "part00001.idx"
         indexRange[0].getFrom() == -1600l
         indexRange[0].getTo() == 15999l
         cleanup:
         indexFolder.delete()
-    }
-
-    def "onImport"() {
-        setup:
-        def indexFileContent = HashCode64DataGeneration.createIndexContent()
-        def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
-        def meta = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.INDEX, "part00001.odx", "collection", "testindex", indexFileContent.length, "deliveryKey", "deliveryVersion", "STRATEGY")
-        when:
-        def md5hash = strategy.onImport(meta, new ByteArrayInputStream(indexFileContent), indexFolder)
-        then:
-        new File(indexFolder.getAbsolutePath() + "/part00001.odx").exists()
-        new File(indexFolder.getAbsolutePath() + "/part00001.odx.chunks.snappy").exists()
-        SnappyChunksUtil.getSnappyChunksByFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx")).getLength() == indexFileContent.length
-        md5hash == "8e30fdf7186b5d460a0ffe26b0d78cc7"
-        cleanup:
-        indexFolder.delete()
-
     }
 
     def "onInitialize"() {
@@ -316,7 +299,7 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         testIndexFiles[0].getFrom() == -1600l
         testIndexFiles[0].getTo() == 15999l
         cleanup:
@@ -337,7 +320,7 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         testIndexFiles[0].getFrom() == -1600l
         testIndexFiles[0].getTo() == 15999l
         cleanup:
@@ -347,7 +330,7 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        HashCode64DataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx"))
+        HashCode64DataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

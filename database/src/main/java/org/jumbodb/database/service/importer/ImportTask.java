@@ -22,7 +22,6 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-// CARSTEN fix unit tests
 public class ImportTask implements Runnable {
     private Logger log = LoggerFactory.getLogger(ImportTask.class);
 
@@ -58,6 +57,8 @@ public class ImportTask implements Runnable {
                     deleteFolderIfExists(tmpIndexImportPath);
                     File tmpDataImportPath = getTmpDataDeliveryPath(deliveryKey, deliveryVersion);
                     deleteFolderIfExists(tmpDataImportPath);
+                    tmpIndexImportPath.mkdirs();
+                    tmpDataImportPath.mkdirs();
                     File deliveryFile = new File(
                       tmpDataImportPath.getAbsolutePath() + "/" + DeliveryProperties.DEFAULT_FILENAME);
                     DeliveryProperties.write(deliveryFile, new DeliveryProperties.DeliveryMeta(deliveryKey, deliveryVersion, date, info));
@@ -70,8 +71,7 @@ public class ImportTask implements Runnable {
                 }
 
                 @Override
-                public void onImport(ImportMetaFileInformation information,
-                  InputStream dataInputStream) throws FileChecksumException {
+                public void onImport(ImportMetaFileInformation information, InputStream dataInputStream) throws FileChecksumException {
                     MessageDigest messageDigest = createMessageDigest(information);
                     InputStream dis = createDigestInputStream(dataInputStream, messageDigest);
                     FileOutputStream fos = null;
@@ -162,13 +162,13 @@ public class ImportTask implements Runnable {
     }
 
     private void activateDelivery(String deliveryKey, String deliveryVersion, boolean activateChunk,
-            boolean activeVersion) {
+            boolean activateVersion) {
         File activeFile = new File(dataPath.getAbsolutePath() + "/" + deliveryKey + "/" + ActiveProperties.DEFAULT_FILENAME);
-        String currentDeliveryVersion = ActiveProperties.getActiveDeliveryVersion(activeFile);
-        if(activeVersion) {
+        if(activateVersion || !activeFile.exists()) {
             ActiveProperties.writeActiveFile(activeFile, deliveryVersion, activateChunk);
         }
         else {
+            String currentDeliveryVersion = ActiveProperties.getActiveDeliveryVersion(activeFile);
             ActiveProperties.writeActiveFile(activeFile, currentDeliveryVersion, activateChunk);
         }
     }
@@ -216,7 +216,7 @@ public class ImportTask implements Runnable {
         return new File(path.getAbsolutePath() + "/.tmp/");
     }
 
-    private File getTmpImportPathByType(ImportMetaFileInformation information) throws IOException {
+    protected File getTmpImportPathByType(ImportMetaFileInformation information) throws IOException {
         if (information.getFileType() == ImportMetaFileInformation.FileType.DATA) {
             File tmpDataDeliveryPath = getTmpDataDeliveryPath(information.getDeliveryKey(),
               information.getDeliveryVersion());
@@ -254,6 +254,9 @@ public class ImportTask implements Runnable {
     }
 
     private void moveFolder(File src, File dest) {
+        if(!dest.getParentFile().exists()) {
+            dest.getParentFile().mkdirs();
+        }
         if (!src.renameTo(dest)) {
             log.warn("Cannot rename file: " + src.getAbsolutePath() + " to " + dest.getAbsolutePath());
         }

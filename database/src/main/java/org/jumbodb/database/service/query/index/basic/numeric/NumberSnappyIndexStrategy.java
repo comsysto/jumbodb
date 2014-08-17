@@ -107,7 +107,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
 
     protected List<IF> buildIndexRange(File indexFolder) {
         List<IF> result = new LinkedList<IF>();
-        File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".odx"));
+        File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".idx"));
         for (File indexFile : indexFiles) {
             SnappyChunks snappyChunks = getSnappyChunksByFile(indexFile);
             if(snappyChunks.getNumberOfChunks() > 0) {

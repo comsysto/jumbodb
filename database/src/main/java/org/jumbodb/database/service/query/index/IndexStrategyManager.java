@@ -44,6 +44,7 @@ public class IndexStrategyManager {
         for (IndexStrategy strategy : strategies) {
             strategy.onDataChanged(collectionDefinition);
         }
+        strategiesByName = buildStrategiesByName(strategies);
         indexLocationsAndStrategies = buildIndexStrategies(collectionDefinition);
     }
 

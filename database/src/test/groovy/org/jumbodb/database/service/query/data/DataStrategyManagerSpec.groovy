@@ -15,6 +15,7 @@ class DataStrategyManagerSpec extends Specification {
         def strategyMock = Mock(DataStrategy)
         strategyMock.getStrategyName() >> "testStrategy"
         dataStrategyManager.setStrategies([strategyMock])
+        dataStrategyManager.onInitialize(new CollectionDefinition(new HashMap<String, List<DeliveryChunkDefinition>>()))
         when:
         def strategy = dataStrategyManager.getStrategy("testStrategy")
         then:

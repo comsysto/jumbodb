@@ -63,27 +63,6 @@ class JsonSnappyDataStrategySpec extends Specification {
         strategy.getStrategyName() == "JSON_SNAPPY_V1"
     }
 
-    def "onImport stream should be snappy compressed saved"() {
-        setup:
-        def strToCompare = "Some content for the file"
-        def strToWrite = strToCompare + "\n"
-        def byteArrayInputStream = new ByteArrayInputStream("Some content for the file".getBytes())
-        def tmpTargetFile = File.createTempFile("outputFile", "snappy")
-        def tmpTargetPath = tmpTargetFile.getParentFile()
-        def information = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.DATA, tmpTargetFile.getName(), "collection", "index name", strToWrite.size(), "deliverykey", "version", JsonSnappyDataStrategy.JSON_SNAPPY_V1)
-        when:
-        def md5Hash = strategy.onImport(information, byteArrayInputStream, tmpTargetPath)
-        def is = new SnappyInputStream(new FileInputStream(tmpTargetFile))
-        def reader = new BufferedReader(new InputStreamReader(is))
-        then:
-        reader.readLine() == strToCompare
-        md5Hash == "d6abbaae7c2c3b32eaa5767455113437"
-        cleanup:
-        is.close()
-        reader.close()
-        tmpTargetFile.delete()
-    }
-
     def "matches should delegate to the appropriate operation"() {
         setup:
         def eqOperation = Mock(JsonOperationSearch)

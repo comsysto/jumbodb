@@ -16,6 +16,7 @@ class IndexStrategyManagerSpec extends Specification {
         def strategyMock = Mock(IndexStrategy)
         strategyMock.getStrategyName() >> "testStrategy"
         indexStrategyManager.setStrategies([strategyMock])
+        indexStrategyManager.onInitialize(new CollectionDefinition(new HashMap<String, List<DeliveryChunkDefinition>>()))
         when:
         def strategy = indexStrategyManager.getStrategy("testStrategy")
         then:

@@ -319,10 +319,10 @@ class StorageManagementSpec extends Specification {
         collections[0].getChunks()[0].getKey() == "test_delivery1"
         collections[0].getChunks()[0].getUncompressedSize() == 0l
         collections[0].getChunks()[0].getVersions().size() == 2
-        collections[0].getChunks()[0].getVersions()[0].getVersion() == "version1"
-        collections[0].getChunks()[0].getVersions()[0].getInfo() == "some info"
-        collections[0].getChunks()[0].getVersions()[1].getVersion() == "version2"
+        collections[0].getChunks()[0].getVersions()[1].getVersion() == "version1"
         collections[0].getChunks()[0].getVersions()[1].getInfo() == "some info"
+        collections[0].getChunks()[0].getVersions()[0].getVersion() == "version2"
+        collections[0].getChunks()[0].getVersions()[0].getInfo() == "some info"
         collections[0].getChunks()[1].getKey() == "test_delivery2"
         collections[0].getChunks()[1].getVersions().size() == 1
         collections[0].getChunks()[1].getVersions()[0].getVersion() == "version3"

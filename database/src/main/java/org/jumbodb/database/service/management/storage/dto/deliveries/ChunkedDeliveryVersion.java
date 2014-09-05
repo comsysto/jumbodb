@@ -29,6 +29,7 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
         this.version = version;
         this.info = info;
         this.date = date;
+        this.versionActive = versionActive;
         this.collections = collections;
         this.chunkActive = chunkActive;
     }

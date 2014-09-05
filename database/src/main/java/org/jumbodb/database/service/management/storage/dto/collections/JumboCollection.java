@@ -92,6 +92,19 @@ public class JumboCollection implements Comparable<JumboCollection> {
         return FileUtils.byteCountToDisplaySize(getIndexSize());
     }
 
+    public boolean hasAtLeastOneActiveChunk() {
+        for (DeliveryChunk chunk : chunks) {
+            if(chunk.isActive()) {
+                for (DeliveryVersion version : chunk.getVersions()) {
+                    if(version.isActive()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public int compareTo(JumboCollection jumboCollection) {
         return name.compareTo(jumboCollection.name);

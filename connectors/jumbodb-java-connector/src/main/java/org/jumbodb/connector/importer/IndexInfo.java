@@ -78,12 +78,12 @@ public class IndexInfo implements Comparable<IndexInfo> {
     @Override
     public String toString() {
         return "IndexInfo{" +
-          "collection='" + collection + '\'' +
+          "deliveryKey='" + deliveryKey + '\'' +
+          ", deliveryVersion='" + deliveryVersion + '\'' +
+          ", collection='" + collection + '\'' +
           ", indexName='" + indexName + '\'' +
           ", fileName='" + fileName + '\'' +
           ", fileLength=" + fileLength +
-          ", deliveryKey='" + deliveryKey + '\'' +
-          ", deliveryVersion='" + deliveryVersion + '\'' +
           ", checksumType=" + checksumType +
           ", checksum='" + checksum + '\'' +
           '}';

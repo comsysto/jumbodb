@@ -81,9 +81,9 @@ public class SnappyChunksUtil {
                     super.write(bytes, i, i2);
                 }
             };
-            sos = new SnappyOutputStream(bos, chunkSize);
-            md5DosRaw = new DigestOutputStream(sos, md5DigestRaw);
-            IOUtils.copyLarge(dataInputStream, md5DosRaw, 0l, fileLength);
+            md5DosRaw = new DigestOutputStream(bos, md5DigestRaw);
+            sos = new SnappyOutputStream(md5DosRaw, chunkSize);
+            IOUtils.copyLarge(dataInputStream, sos, 0l, fileLength);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
@@ -107,7 +107,7 @@ public class SnappyChunksUtil {
             }  */
             if(md5DigestRaw != null) {
                 String md5DigestRawHex = Hex.encodeHexString(md5DigestRaw.digest());
-                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".raw.md5"), md5DigestRawHex);
+                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".md5"), md5DigestRawHex);
                 return md5DigestRawHex;
             }
         } catch(IOException e) {

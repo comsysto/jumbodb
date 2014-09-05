@@ -39,7 +39,6 @@ import java.util.*;
  * Date: 3/22/13
  * Time: 2:12 PM
  */
-// CARSTEN fix unit tests
 public class StorageManagement {
     public static final FileFilter FOLDER_FILTER = FileFilterUtils.makeDirectoryOnly(FileFilterUtils.notFileFilter(FileFilterUtils.prefixFileFilter(".")));
 
@@ -102,28 +101,31 @@ public class StorageManagement {
         String dataStrategyName = "none";
         Set<QueryOperation> supportedOperations = new HashSet<QueryOperation>();
         for (JumboCollection collection : jumboCollections) {
-            Set<QueryUtilIndex> resultIndexes = new HashSet<QueryUtilIndex>();
-            for (DeliveryChunk deliveryChunk : collection.getChunks()) {
-                for (DeliveryVersion deliveryVersion : deliveryChunk.getVersions()) {
-                    List<CollectionIndex> collectionIndexes = getCollectionIndexes(deliveryChunk.getKey(), deliveryVersion.getVersion(), collection.getName());
-                    for (CollectionIndex collectionIndex : collectionIndexes) {
-                        IndexStrategy indexStrategy = jumboSearcher.getIndexStrategy(collectionIndex.getStrategy());
-                        resultIndexes.add(new QueryUtilIndex(collectionIndex.getIndexName(), collectionIndex.getStrategy(), new ArrayList<QueryOperation>(indexStrategy.getSupportedOperations())));
+            if(collection.hasAtLeastOneActiveChunk()) {
+                Set<QueryUtilIndex> resultIndexes = new HashSet<QueryUtilIndex>();
+                for (DeliveryChunk deliveryChunk : collection.getChunks()) {
+                    for (DeliveryVersion deliveryVersion : deliveryChunk.getVersions()) {
+                        if(deliveryVersion.isActive() && deliveryChunk.isActive()) {
+                            List<CollectionIndex> collectionIndexes = getCollectionIndexes(deliveryChunk.getKey(), deliveryVersion.getVersion(), collection.getName());
+                            for (CollectionIndex collectionIndex : collectionIndexes) {
+                                IndexStrategy indexStrategy = jumboSearcher.getIndexStrategy(collectionIndex.getStrategy());
+                                resultIndexes.add(new QueryUtilIndex(collectionIndex.getIndexName(), collectionIndex.getStrategy(), new ArrayList<QueryOperation>(indexStrategy.getSupportedOperations())));
+                            }
+                            DataStrategy dataStrategy = jumboSearcher.getDataStrategy(collection.getName(), deliveryChunk.getKey());
+                            dataStrategyName = dataStrategy.getStrategyName();
+                            supportedOperations.addAll(dataStrategy.getSupportedOperations());
+                        }
                     }
-                    DataStrategy dataStrategy = jumboSearcher.getDataStrategy(collection.getName(), deliveryChunk.getKey());
-                    dataStrategyName = dataStrategy.getStrategyName();
-                    supportedOperations.addAll(dataStrategy.getSupportedOperations());
                 }
+                List<QueryUtilIndex> indexes = new ArrayList<QueryUtilIndex>(resultIndexes);
+                Collections.sort(indexes);
+                result.add(new QueryUtilCollection(collection.getName(), indexes, dataStrategyName, new ArrayList<QueryOperation>(supportedOperations)));
             }
-            List<QueryUtilIndex> indexes = new ArrayList<QueryUtilIndex>(resultIndexes);
-            Collections.sort(indexes);
-            result.add(new QueryUtilCollection(collection.getName(), indexes, dataStrategyName, new ArrayList<QueryOperation>(supportedOperations)));
         }
         return result;
     }
 
     public void deleteChunkedVersion(String chunkedDeliveryKey, String version) {
-        // CARSTEN unit test
         log.info("deleteChunkedVersion (" + chunkedDeliveryKey + ", " + version + ")");
         try {
             File[] versionFolders = getDataChunkFolder(chunkedDeliveryKey).listFiles(FOLDER_FILTER);
@@ -147,7 +149,7 @@ public class StorageManagement {
     }
 
     private File getIndexChunkedVersionFolder(String chunkedDeliveryKey, String version) {
-        return new File(getIndexChunkFolder(chunkedDeliveryKey).getAbsolutePath() + version + "/");
+        return new File(getIndexChunkFolder(chunkedDeliveryKey).getAbsolutePath() + "/" + version + "/");
     }
 
     private File getDataChunkFolder(String chunkedDeliveryKey) {
@@ -155,11 +157,11 @@ public class StorageManagement {
     }
 
     private File getDataChunkedVersionFolder(String chunkedDeliveryKey, String version) {
-        return new File(getDataChunkFolder(chunkedDeliveryKey).getAbsolutePath() + version + "/");
+        return new File(getDataChunkFolder(chunkedDeliveryKey).getAbsolutePath() + "/" + version + "/");
     }
 
     private File getDataChunkedVersionCollectionFolder(String chunkedDeliveryKey, String version, String collection) {
-        return new File(getDataChunkedVersionFolder(chunkedDeliveryKey, version).getAbsolutePath() + collection + "/");
+        return new File(getDataChunkedVersionFolder(chunkedDeliveryKey, version).getAbsolutePath() + "/" + collection + "/");
     }
 
     private void activateChunkedLatestVersion(String chunkedDeliveryKey) {
@@ -167,7 +169,7 @@ public class StorageManagement {
         activateChunkedVersion(chunkedDeliveryKey, latestVersion);
     }
 
-    private String getLatestVersionInChunk(String chunkedDeliveryKey) {
+    protected String getLatestVersionInChunk(String chunkedDeliveryKey) {
         File[] versionFolders = getDataChunkFolder(chunkedDeliveryKey).listFiles(FOLDER_FILTER);
         if(versionFolders == null || versionFolders.length == 0l) {
             throw new IllegalStateException("No available version in chunk folder! Chunk folder " + chunkedDeliveryKey + " must be deleted!");
@@ -202,7 +204,6 @@ public class StorageManagement {
     }
 
     public void activateChunk(String chunkedDeliveryKey) {
-        // CARSTEN unit test
         log.info("activateChunk(" + chunkedDeliveryKey + ")");
         changeChunkActiveState(chunkedDeliveryKey, true);
         onDataChanged();
@@ -217,28 +218,26 @@ public class StorageManagement {
 
 
     public void inactivateChunk(String chunkedDeliveryKey) {
-        // CARSTEN unit test
         log.info("inactivateChunk(" + chunkedDeliveryKey + ")");
         changeChunkActiveState(chunkedDeliveryKey, false);
         onDataChanged();
     }
 
     public void activateChunkedVersion(String chunkedDeliveryKey, String version) {
-        // CARSTEN unit test
         log.info("activateChunkedVersion(" + chunkedDeliveryKey + ", " + version + ")");
         File dataChunkFolder = getDataChunkFolder(chunkedDeliveryKey);
         File activeFile = getActiveFile(dataChunkFolder);
         boolean chunkActive = ActiveProperties.isDeliveryActive(activeFile);
-        ActiveProperties.writeActiveFile(activeFile, chunkedDeliveryKey, chunkActive);
+        ActiveProperties.writeActiveFile(activeFile, version, chunkActive);
         onDataChanged();
     }
 
-    public String getActiveDeliveryVersion(String chunkDeliveryKey, String collection) {
-        return ActiveProperties.getActiveDeliveryVersion(getActiveDeliveryFile(collection, chunkDeliveryKey));
+    public String getActiveDeliveryVersion(String chunkDeliveryKey) {
+        return ActiveProperties.getActiveDeliveryVersion(getActiveDeliveryFile(chunkDeliveryKey));
     }
 
-    private File getActiveDeliveryFile(String collection, String chunkDeliveryKey) {
-        return new File(getDataPath().getAbsolutePath() + "/" + collection + "/" + chunkDeliveryKey + "/" + ActiveProperties.DEFAULT_FILENAME);
+    private File getActiveDeliveryFile(String chunkDeliveryKey) {
+        return new File(getDataPath().getAbsolutePath() + "/" + chunkDeliveryKey + "/" + ActiveProperties.DEFAULT_FILENAME);
     }
 
     public File getIndexPath() {
@@ -313,7 +312,7 @@ public class StorageManagement {
                     long compressedSize = loadSizes ? jumboSearcher.getDataCompressedSize(collection, deliveryKey, version) : 0l;
                     long uncompressedSize = loadSizes ? jumboSearcher.getDataUncompressedSize(collection, deliveryKey, version) : 0l;
                     long indexSize = loadSizes ? jumboSearcher.getIndexSize(collection, deliveryKey, version) : 0l;
-                    collections.add(new VersionedJumboCollection(collection, version, deliveryKey, deliveryMeta.getDate(),
+                    collections.add(new VersionedJumboCollection(deliveryKey, version, collection, deliveryMeta.getDate(),
                             deliveryMeta.getSourcePath(), deliveryMeta.getStrategy(), compressedSize, uncompressedSize, indexSize));
 
                 }
@@ -378,6 +377,9 @@ public class StorageManagement {
     }
 
     private String resolveChecksum(ChecksumType checksumType, File indexFile) {
+        if(checksumType == ChecksumType.NONE) {
+            return null;
+        }
         File checksumFile = new File(indexFile.getAbsolutePath() + checksumType.getFileSuffix());
         try {
             return FileUtils.readFileToString(checksumFile);
@@ -439,8 +441,8 @@ public class StorageManagement {
     }
 
     public InputStream getInputStream(DataInfo data) throws IOException {
-        File dataFolder = getDataChunkedVersionCollectionFolder(data.getCollection(), data.getDeliveryKey(),
-          data.getDeliveryVersion());
+        File dataFolder = getDataChunkedVersionCollectionFolder(data.getDeliveryKey(),
+          data.getDeliveryVersion(), data.getCollection());
         File dataFile = new File(dataFolder.getAbsolutePath() + "/" + data.getFileName());
         return new BufferedInputStream(new FileInputStream(dataFile));
     }

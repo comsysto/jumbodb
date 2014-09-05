@@ -8,9 +8,9 @@ import org.apache.commons.io.FileUtils;
  * Time: 8:14 PM
  */
 public class VersionedJumboCollection implements Comparable<VersionedJumboCollection> {
-    private String collectionName;
-    private String version;
     private String chunkKey;
+    private String version;
+    private String collectionName;
     private String date;
     private String sourcePath;
     private String strategy;
@@ -18,7 +18,8 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     private long uncompressedSize;
     private long indexSize;
 
-    public VersionedJumboCollection(String collectionName, String version, String chunkKey, String date, String sourcePath, String strategy, long compressedSize, long uncompressedSize, long indexSize) {
+    public VersionedJumboCollection(String chunkKey, String version, String collectionName,
+      String date, String sourcePath, String strategy, long compressedSize, long uncompressedSize, long indexSize) {
         this.collectionName = collectionName;
         this.version = version;
         this.chunkKey = chunkKey;

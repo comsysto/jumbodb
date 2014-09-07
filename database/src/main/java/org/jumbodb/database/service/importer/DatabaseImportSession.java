@@ -112,9 +112,11 @@ public class DatabaseImportSession implements Closeable {
             dataOutputStream.flush();
         } else if(":cmd:import:commit".equals(cmd)) {
             log.info(cmd);
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
             boolean activateChunk = dataInputStream.readBoolean();
             boolean activateVersion = dataInputStream.readBoolean();
-            importHandler.onCommit(dataInputStream.readUTF(), dataInputStream.readUTF(), activateChunk, activateVersion);
+            importHandler.onCommit(deliveryKey, deliveryVersion, activateChunk, activateVersion);
             dataOutputStream.writeUTF(":success");
             dataOutputStream.flush();
         } else {

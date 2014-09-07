@@ -1,8 +1,7 @@
 package org.jumbodb.database.service.importer
 
+import org.jumbodb.common.query.ChecksumType
 import org.jumbodb.connector.JumboConstants
-import org.xerial.snappy.SnappyInputStream
-import org.xerial.snappy.SnappyOutputStream
 import spock.lang.Specification
 
 /**
@@ -12,17 +11,16 @@ class DatabaseImportSessionSpec extends Specification {
     def "import collection data"() {
         setup:
         def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
+        def cmds = new DataOutputStream(cmdStream)
         def sendBytes = "Hello World".getBytes("UTF-8")
         cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:import:collection:data") // send command
-        cmds.writeUTF("test_collection") // send collection
-        cmds.writeUTF("file_name_part001") // send collection
-        cmds.writeLong(sendBytes.length) // send file length
         cmds.writeUTF("test_delivery_key")
         cmds.writeUTF("test_delivery_version")
-        cmds.writeUTF("TEST_STRATEGY")
+        cmds.writeUTF("test_collection")
+        cmds.writeUTF("file_name_part001")
+        cmds.writeLong(sendBytes.length)
+        cmds.writeUTF(ChecksumType.NONE.toString())
         cmds.write(sendBytes)
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
@@ -34,7 +32,7 @@ class DatabaseImportSessionSpec extends Specification {
         def session = new DatabaseImportSession(socketMock, 1)
         when:
         session.runImport(importHandlerMock)
-        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
+        def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
         1 * importHandlerMock.onImport(_, _) >> { info, importInputStream ->
             assert importInputStream != null
@@ -47,13 +45,9 @@ class DatabaseImportSessionSpec extends Specification {
             assert info.getFileLength() == 11l
             assert info.getDeliveryVersion() == "test_delivery_version"
             assert info.getDeliveryKey() == "test_delivery_key"
-            assert info.getStrategy() == "TEST_STRATEGY"
             assert info.getFileName() == "file_name_part001"
-            return "md5testhash"
         }
-        dataInputStream.readUTF() == ":copy"
-        dataInputStream.readUTF() == ":verify:md5"
-        dataInputStream.readUTF() == "md5testhash"
+        dataInputStream.readUTF() == ":success"
         cleanup:
         dataInputStream.close()
         cmds.close()
@@ -65,18 +59,17 @@ class DatabaseImportSessionSpec extends Specification {
     def "import collection index"() {
         setup:
         def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
+        def cmds = new DataOutputStream(cmdStream)
         def sendBytes = "Hello World".getBytes("UTF-8")
         cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:import:collection:index") // send command
+        cmds.writeUTF("test_delivery_key")
+        cmds.writeUTF("test_delivery_version")
         cmds.writeUTF("test_collection") // send collection
         cmds.writeUTF("test_index") // send index name
         cmds.writeUTF("file_name_part001") // send file
         cmds.writeLong(sendBytes.length) // send file length
-        cmds.writeUTF("test_delivery_key")
-        cmds.writeUTF("test_delivery_version")
-        cmds.writeUTF("TEST_STRATEGY")
+        cmds.writeUTF(ChecksumType.NONE.toString())
         cmds.write(sendBytes)
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
@@ -88,7 +81,7 @@ class DatabaseImportSessionSpec extends Specification {
         def session = new DatabaseImportSession(socketMock, 1)
         when:
         session.runImport(importHandlerMock)
-        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
+        def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
         1 * importHandlerMock.onImport(_, _) >> { info, importInputStream ->
             assert importInputStream != null
@@ -101,13 +94,9 @@ class DatabaseImportSessionSpec extends Specification {
             assert info.getFileLength() == 11l
             assert info.getDeliveryVersion() == "test_delivery_version"
             assert info.getDeliveryKey() == "test_delivery_key"
-            assert info.getStrategy() == "TEST_STRATEGY"
             assert info.getFileName() == "file_name_part001"
-            return "md5testhash"
         }
-        dataInputStream.readUTF() == ":copy"
-        dataInputStream.readUTF() == ":verify:md5"
-        dataInputStream.readUTF() == "md5testhash"
+        dataInputStream.readUTF() == ":success"
         cleanup:
         dataInputStream.close()
         cmds.close()
@@ -116,19 +105,15 @@ class DatabaseImportSessionSpec extends Specification {
         session.close()
     }
 
-    def "collection meta data without activation"() {
+    def "import initialization"() {
         setup:
         def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
+        def cmds = new DataOutputStream(cmdStream)
         cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
-        cmds.writeUTF(":cmd:import:collection:meta:data") // send command
-        cmds.writeUTF("test_collection") // send collection
+        cmds.writeUTF(":cmd:import:init") // send command
         cmds.writeUTF("test_delivery_key")
         cmds.writeUTF("test_delivery_version")
-        cmds.writeUTF("TEST_STRATEGY")
-        cmds.writeUTF("source path")
-        cmds.writeBoolean(false)
+        cmds.writeUTF("2012-12-12 12:12:12") // send collection
         cmds.writeUTF("some info")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
@@ -140,19 +125,10 @@ class DatabaseImportSessionSpec extends Specification {
         def session = new DatabaseImportSession(socketMock, 1)
         when:
         session.runImport(importHandlerMock)
-        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
+        def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        1 * importHandlerMock.onCollectionMetaData(_) >> { metaDatas ->
-            def metaData = metaDatas[0]
-            assert metaData.getCollection() == "test_collection"
-            assert metaData.getDeliveryVersion() == "test_delivery_version"
-            assert metaData.getDeliveryKey() == "test_delivery_key"
-            assert metaData.getDataStrategy() == "TEST_STRATEGY"
-            assert metaData.getSourcePath() == "source path"
-            assert metaData.getInfo() == "some info"
-        }
-        0 * importHandlerMock.onActivateDelivery(_)
-        dataInputStream.readUTF() == ":ok"
+        1 * importHandlerMock.onInit("test_delivery_key", "test_delivery_version", "2012-12-12 12:12:12", "some info")
+        dataInputStream.readUTF() == ":success"
         cleanup:
         dataInputStream.close()
         cmds.close()
@@ -161,20 +137,51 @@ class DatabaseImportSessionSpec extends Specification {
         session.close()
     }
 
-    def "collection meta data with activation"() {
+    def "import initialization with existing delivery version should fail"() {
         setup:
         def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
+        def cmds = new DataOutputStream(cmdStream)
         cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
-        cmds.writeUTF(":cmd:import:collection:meta:data") // send command
-        cmds.writeUTF("test_collection") // send collection
+        cmds.writeUTF(":cmd:import:init") // send command
         cmds.writeUTF("test_delivery_key")
         cmds.writeUTF("test_delivery_version")
-        cmds.writeUTF("TEST_STRATEGY")
-        cmds.writeUTF("source path")
+        cmds.writeUTF("2012-12-12 12:12:12") // send collection
+        cmds.writeUTF("some info")
+        cmds.flush()
+        def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
+        def outputStream = new ByteArrayOutputStream()
+        def socketMock = Mock(Socket)
+        socketMock.getInputStream() >> inputStream
+        socketMock.getOutputStream() >> outputStream
+        def importHandlerMock = Mock(ImportHandler)
+        def session = new DatabaseImportSession(socketMock, 1)
+        when:
+        session.runImport(importHandlerMock)
+        def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
+        then:
+        1 * importHandlerMock.onInit("test_delivery_key", "test_delivery_version", "2012-12-12 12:12:12", "some info") >> {
+            throw new DeliveryVersionExistsException("my error")
+        }
+        dataInputStream.readUTF() == ":failed"
+        dataInputStream.readUTF() == "my error"
+        cleanup:
+        dataInputStream.close()
+        cmds.close()
+        inputStream.close()
+        outputStream.close()
+        session.close()
+    }
+
+    def "import commit with activation"() {
+        setup:
+        def cmdStream = new ByteArrayOutputStream()
+        def cmds = new DataOutputStream(cmdStream)
+        cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
+        cmds.writeUTF(":cmd:import:commit") // send command
+        cmds.writeUTF("test_delivery_key")
+        cmds.writeUTF("test_delivery_version")
         cmds.writeBoolean(true)
-        cmds.writeUTF("some info")
+        cmds.writeBoolean(true)
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -185,19 +192,10 @@ class DatabaseImportSessionSpec extends Specification {
         def session = new DatabaseImportSession(socketMock, 1)
         when:
         session.runImport(importHandlerMock)
-        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
+        def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        1 * importHandlerMock.onCollectionMetaData(_)
-        1 * importHandlerMock.onActivateDelivery(_) >> { metaDatas ->
-            def metaData = metaDatas[0]
-            assert metaData.getCollection() == "test_collection"
-            assert metaData.getDeliveryVersion() == "test_delivery_version"
-            assert metaData.getDeliveryKey() == "test_delivery_key"
-            assert metaData.getDataStrategy() == "TEST_STRATEGY"
-            assert metaData.getSourcePath() == "source path"
-            assert metaData.getInfo() == "some info"
-        }
-        dataInputStream.readUTF() == ":ok"
+        1 * importHandlerMock.onCommit("test_delivery_key", "test_delivery_version", true, true)
+        dataInputStream.readUTF() == ":success"
         cleanup:
         dataInputStream.close()
         cmds.close()
@@ -206,19 +204,17 @@ class DatabaseImportSessionSpec extends Specification {
         session.close()
     }
 
-    def "collection meta index"() {
+
+    def "import commit without activation"() {
         setup:
         def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
+        def cmds = new DataOutputStream(cmdStream)
         cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
-        cmds.writeUTF(":cmd:import:collection:meta:index") // send command
-        cmds.writeUTF("test_collection") // send collection
+        cmds.writeUTF(":cmd:import:commit") // send command
         cmds.writeUTF("test_delivery_key")
         cmds.writeUTF("test_delivery_version")
-        cmds.writeUTF("test_index_name")
-        cmds.writeUTF("TEST_STRATEGY")
-        cmds.writeUTF("index source fields")
+        cmds.writeBoolean(false)
+        cmds.writeBoolean(false)
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -229,19 +225,10 @@ class DatabaseImportSessionSpec extends Specification {
         def session = new DatabaseImportSession(socketMock, 1)
         when:
         session.runImport(importHandlerMock)
-        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
+        def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
-        1 * importHandlerMock.onCollectionMetaIndex(_) >> { metaIndexes ->
-            def metaIndex = metaIndexes[0]
-            assert metaIndex.getCollection() == "test_collection"
-            assert metaIndex.getDeliveryVersion() == "test_delivery_version"
-            assert metaIndex.getDeliveryKey() == "test_delivery_key"
-            assert metaIndex.getStrategy() == "TEST_STRATEGY"
-            assert metaIndex.getIndexName() == "test_index_name"
-            assert metaIndex.getIndexSourceFields() == "index source fields"
-        }
-        0 * importHandlerMock.onActivateDelivery(_)
-        dataInputStream.readUTF() == ":ok"
+        1 * importHandlerMock.onCommit("test_delivery_key", "test_delivery_version", false, false)
+        dataInputStream.readUTF() == ":success"
         cleanup:
         dataInputStream.close()
         cmds.close()
@@ -249,44 +236,11 @@ class DatabaseImportSessionSpec extends Specification {
         outputStream.close()
         session.close()
     }
-
-    def "import finished"() {
-        setup:
-        def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
-        cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
-        cmds.writeUTF(":cmd:import:finished") // send command
-        cmds.writeUTF("test_delivery_key")
-        cmds.writeUTF("test_delivery_version")
-        cmds.flush()
-        def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
-        def outputStream = new ByteArrayOutputStream()
-        def socketMock = Mock(Socket)
-        socketMock.getInputStream() >> inputStream
-        socketMock.getOutputStream() >> outputStream
-        def importHandlerMock = Mock(ImportHandler)
-        def session = new DatabaseImportSession(socketMock, 1)
-        when:
-        session.runImport(importHandlerMock)
-        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
-        then:
-        1 * importHandlerMock.onCommit("test_delivery_key", "test_delivery_version")
-        dataInputStream.readUTF() == ":ok"
-        cleanup:
-        dataInputStream.close()
-        cmds.close()
-        inputStream.close()
-        outputStream.close()
-        session.close()
-    }
-
 
     def "existsDeliveryVersion should be true"() {
         setup:
         def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
+        def cmds = new DataOutputStream(cmdStream)
         cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:import:delivery:version:exists") // send command
         cmds.writeUTF("test_delivery_key")
@@ -301,7 +255,7 @@ class DatabaseImportSessionSpec extends Specification {
         def session = new DatabaseImportSession(socketMock, 1)
         when:
         session.runImport(importHandlerMock)
-        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
+        def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
         dataInputStream.readBoolean() == true
         1 * importHandlerMock.existsDeliveryVersion("test_delivery_key", "test_delivery_version") >> true
@@ -316,8 +270,7 @@ class DatabaseImportSessionSpec extends Specification {
     def "existsDeliveryVersion should be false"() {
         setup:
         def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
+        def cmds = new DataOutputStream(cmdStream)
         cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:import:delivery:version:exists") // send command
         cmds.writeUTF("test_delivery_key")
@@ -332,7 +285,7 @@ class DatabaseImportSessionSpec extends Specification {
         def session = new DatabaseImportSession(socketMock, 1)
         when:
         session.runImport(importHandlerMock)
-        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
+        def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
         dataInputStream.readBoolean() == false
         1 * importHandlerMock.existsDeliveryVersion("test_delivery_key", "test_delivery_version") >> false
@@ -347,8 +300,7 @@ class DatabaseImportSessionSpec extends Specification {
     def "unsupported operation"() {
         setup:
         def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
+        def cmds = new DataOutputStream(cmdStream)
         cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:is:not:supported") // send command
         cmds.flush()
@@ -373,8 +325,7 @@ class DatabaseImportSessionSpec extends Specification {
     def "wrong protocol version"() {
         setup:
         def cmdStream = new ByteArrayOutputStream()
-        def sos = new SnappyOutputStream(cmdStream)
-        def cmds = new DataOutputStream(sos)
+        def cmds = new DataOutputStream(cmdStream)
         cmds.writeInt(Integer.MAX_VALUE) // send wrong version
         cmds.writeUTF(":cmd:is:not:supported") // send command
         cmds.flush()
@@ -387,7 +338,7 @@ class DatabaseImportSessionSpec extends Specification {
         def session = new DatabaseImportSession(socketMock, 1)
         when:
         session.runImport(importHandlerMock)
-        def dataInputStream = new DataInputStream(new SnappyInputStream(new ByteArrayInputStream(outputStream.toByteArray())))
+        def dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()))
         then:
         dataInputStream.readUTF() == ":error:wrongversion"
         dataInputStream.readUTF().startsWith("Wrong protocol version - Got 2147483647, but expected ")

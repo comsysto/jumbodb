@@ -21,27 +21,13 @@ subprojects {
     group = 'org.jumbodb'
     version = '0.1.0-SNAPSHOT'
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
     repositories {
         mavenCentral()
     }
 }
-
-//def findbugsProjects() {
-//    subprojects.findAll{ project ->
-//        !['test', 'evaluation', 'integration', 'testdata'].contains(project.name)
-//    }
-//}
-//
-//configure(findbugsProjects()){
-//    apply plugin: 'findbugs'
-//
-//    findbugs {
-//        ignoreFailures = true
-//    }
-//}
 
 
 idea {
@@ -53,5 +39,5 @@ idea {
 // generate gradle bootstrapping
 // run gradle createWrapper
 task createWrapper(type: Wrapper) {
-  gradleVersion = '1.8'
+  gradleVersion = '2.0'
 }

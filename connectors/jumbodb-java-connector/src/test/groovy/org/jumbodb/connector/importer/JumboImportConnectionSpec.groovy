@@ -10,7 +10,6 @@ import spock.lang.Specification
 /**
  * @author Carsten Hufe
  */
-// CARSTEN fix tests
 class JumboImportConnectionSpec extends Specification {
     JumboImportConnection jis
     ServerSocket serverSocket

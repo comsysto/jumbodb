@@ -5,18 +5,16 @@ import org.jumbodb.data.common.meta.CollectionProperties
 import org.jumbodb.data.common.meta.IndexProperties
 import spock.lang.Specification
 
-import java.text.SimpleDateFormat
-
 /**
  * @author Carsten Hufe
  */
 class CollectionDefinitionLoaderSpec extends Specification {
     def rootPath = File.createTempFile("test", "file").getParentFile()
-    def dataPath = new File(rootPath.absolutePath + "/data/")
-    def indexPath = new File(rootPath.absolutePath + "/index/")
+    def dataPath = new File(rootPath.getAbsolutePath() + "/data/")
+    def indexPath = new File(rootPath.getAbsolutePath() + "/index/")
 
-    def createDataCollectionVersion(collection, chunkKey, version, date) {
-        def versionPath = dataPath.absolutePath + "/" + chunkKey + "/" + version + "/" + collection + "/"
+    def createDataCollectionVersion(chunkKey, version, collection, date) {
+        def versionPath = dataPath.getAbsolutePath() + "/" + chunkKey + "/" + version + "/" + collection + "/"
         new File(versionPath).mkdirs()
         new File(versionPath + "part0001.snappy").createNewFile()
         new File(versionPath + "part0001.sha1").createNewFile()
@@ -31,13 +29,13 @@ class CollectionDefinitionLoaderSpec extends Specification {
     }
 
     def writeActiveProperties(chunkKey, version) {
-        def chunkKeyPath = dataPath.absolutePath + "/" + chunkKey + "/"
+        def chunkKeyPath = dataPath.getAbsolutePath() + "/" + chunkKey + "/"
         ActiveProperties.writeActiveFile(new File(chunkKeyPath + "/" + ActiveProperties.DEFAULT_FILENAME), version, true);
     }
 
-    def createIndexCollectionVersion(collection, chunkKey, version) {
-        def index1Path = indexPath.absolutePath + "/" + chunkKey + "/" + version + "/"  + collection + "/index1/"
-        def index2Path = indexPath.absolutePath + "/" + chunkKey + "/" + version + "/"  + collection + "/index2/"
+    def createIndexCollectionVersion(chunkKey, version, collection) {
+        def index1Path = indexPath.getAbsolutePath() + "/" + chunkKey + "/" + version + "/"  + collection + "/index1/"
+        def index2Path = indexPath.getAbsolutePath() + "/" + chunkKey + "/" + version + "/"  + collection + "/index2/"
         new File(index1Path).mkdirs()
         new File(index2Path).mkdirs()
 
@@ -59,10 +57,10 @@ class CollectionDefinitionLoaderSpec extends Specification {
 
     def "verify loaded data structure"() {
         setup:
-        createDataCollectionVersion("testCollection1", "firstChunk", "version1", "2012-01-01 12:12:12")
-        createDataCollectionVersion("testCollection1", "firstChunk", "version2", "2012-01-02 12:12:12")
-        createIndexCollectionVersion("testCollection1", "firstChunk", "version1")
-        createIndexCollectionVersion("testCollection1", "firstChunk", "version2")
+        createDataCollectionVersion("firstChunk", "version1", "testCollection1", "2012-01-01 12:12:12")
+        createDataCollectionVersion("firstChunk", "version2", "testCollection1", "2012-01-02 12:12:12")
+        createIndexCollectionVersion("firstChunk", "version1", "testCollection1")
+        createIndexCollectionVersion("firstChunk", "version2", "testCollection1")
         writeActiveProperties("firstChunk", "version2")
         when:
         def cd = CollectionDefinitionLoader.loadCollectionDefinition(dataPath, indexPath)
@@ -91,8 +89,8 @@ class CollectionDefinitionLoaderSpec extends Specification {
         def dataFiles = chunks[0].dataFiles
         then:
         dataFiles.size() == 2
-        dataFiles.get("part0001.snappy".hashCode()) == new File(dataPath.absolutePath + "/firstChunk/version2/testCollection1/part0001.snappy")
-        dataFiles.get("part0002.snappy".hashCode()) == new File(dataPath.absolutePath + "/firstChunk/version2/testCollection1/part0002.snappy")
+        dataFiles.get("part0001.snappy".hashCode()) == new File(dataPath.getAbsolutePath() + "/firstChunk/version2/testCollection1/part0001.snappy")
+        dataFiles.get("part0002.snappy".hashCode()) == new File(dataPath.getAbsolutePath() + "/firstChunk/version2/testCollection1/part0002.snappy")
         cleanup:
         rootPath.delete()
     }

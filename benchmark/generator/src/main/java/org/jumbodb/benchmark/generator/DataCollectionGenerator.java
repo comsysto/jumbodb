@@ -111,7 +111,7 @@ public abstract class DataCollectionGenerator {
     }
 
     private void createActiveProperties(String chunkKeyDir, String deliveryVersion) {
-        File activePropertiesFile = DirectoryUtil.concatenatePaths(chunkKeyDir, ACTIVE_PROPERTIES_FILE_NAME);
-        ActiveProperties.writeActiveFile(activePropertiesFile, deliveryVersion);
+//        File activePropertiesFile = DirectoryUtil.concatenatePaths(chunkKeyDir, ACTIVE_PROPERTIES_FILE_NAME);
+//        ActiveProperties.writeActiveFile(activePropertiesFile, deliveryVersion);
     }
 }

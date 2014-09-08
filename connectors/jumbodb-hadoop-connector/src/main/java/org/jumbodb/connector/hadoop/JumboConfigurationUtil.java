@@ -112,6 +112,9 @@ public class JumboConfigurationUtil {
     }
 
     public static void setCollectionInfo(Job conf, String collectionInfo) throws IOException {
+        if(collectionInfo == null) {
+            return;
+        }
         conf.getConfiguration().set(JumboConstants.JUMBO_COLLECTION_INFO, collectionInfo);
     }
 

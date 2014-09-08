@@ -2,6 +2,7 @@ package org.jumbodb.benchmark.generator;
 
 
 import org.apache.commons.io.FilenameUtils;
+import org.jumbodb.benchmark.generator.config.GenerationContext;
 import org.jumbodb.benchmark.generator.runner.DataFileGenerationRunner;
 import org.jumbodb.benchmark.generator.runner.PlainDataFileGenerationRunner;
 import org.jumbodb.data.common.meta.CollectionProperties;
@@ -14,14 +15,16 @@ public class PlainDataCollectionGenerator extends DataCollectionGenerator {
     private static final String DELIVERY_PATH = "created_by_generator";
     private static final String DELIVERY_STRATEGY = "JSON_PLAIN_V1";
 
-    public PlainDataCollectionGenerator(String outputFolder, int numberOfFiles, int dataSetsPerFile,
-            int dataSetSizeInChars, String collectionName, int parallelThreads) {
-        super(outputFolder, numberOfFiles, dataSetsPerFile, dataSetSizeInChars, collectionName, parallelThreads);
+    private final GenerationContext context;
+
+    public PlainDataCollectionGenerator(GenerationContext context) {
+        super(context);
+        this.context = context;
     }
 
     @Override
-    public DataFileGenerationRunner createDataGenerationRunner(String fileName, int dataSetsPerFile, byte[][] randomizedJSONDocs) {
-        return new PlainDataFileGenerationRunner(fileName, dataSetsPerFile, randomizedJSONDocs);
+    public DataFileGenerationRunner createDataGenerationRunner(String fileName, GenerationContext dataSetsPerFile, byte[][] randomizedJSONDocs) {
+        return new PlainDataFileGenerationRunner(fileName, context, randomizedJSONDocs);
     }
 
     @Override

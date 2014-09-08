@@ -1,11 +1,12 @@
 package org.jumbodb.benchmark.generator.runner;
 
 import org.apache.commons.io.IOUtils;
+import org.jumbodb.benchmark.generator.config.GenerationContext;
 import org.xerial.snappy.SnappyOutputStream;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author Ulf Gitschthaler
@@ -14,8 +15,9 @@ public class SnappyV1DataFileGenerationRunner extends PlainDataFileGenerationRun
 
     private SnappyOutputStream sos;
 
-    public SnappyV1DataFileGenerationRunner(String outputFilePath, int dataSetsPerFile, byte[][] randomizedJSONDocs) {
-        super(outputFilePath, dataSetsPerFile, randomizedJSONDocs);
+    public SnappyV1DataFileGenerationRunner(String outputFilePath, GenerationContext context, byte[][] randomizedJSONDocs) {
+
+        super(outputFilePath, context, randomizedJSONDocs);
     }
 
     @Override

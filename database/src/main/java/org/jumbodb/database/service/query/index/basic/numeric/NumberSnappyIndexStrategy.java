@@ -159,7 +159,6 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
 
     @Override
     public long getSize(File indexFolder) {
-        // CARSTEN unit test
         return FileUtils.sizeOfDirectory(indexFolder);
     }
 

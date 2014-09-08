@@ -1,7 +1,11 @@
 package org.jumbodb.connector.importer
 
 import org.apache.commons.io.IOUtils
+import org.jumbodb.common.query.ChecksumType
 import org.jumbodb.connector.JumboConstants
+import org.jumbodb.connector.exception.JumboCommonException
+import org.jumbodb.connector.exception.JumboDeliveryVersionExistsException
+import org.jumbodb.connector.exception.JumboFileChecksumException
 import org.jumbodb.connector.exception.JumboWrongVersionException
 import org.xerial.snappy.SnappyInputStream
 import org.xerial.snappy.SnappyOutputStream
@@ -15,26 +19,23 @@ class JumboImportConnectionSpec extends Specification {
     ServerSocket serverSocket
     Socket clientSocket
     InputStream is
-    SnappyInputStream sis
     DataInputStream dis
     OutputStream os
-    SnappyOutputStream sos
     DataOutputStream dos
 
 
     def setup() {
         serverSocket = new ServerSocket(12001);
         Thread.start {
+            serverSocket.setSoTimeout(1000)
             clientSocket = serverSocket.accept();
             os = clientSocket.getOutputStream()
-            sos = new SnappyOutputStream(os)
-            dos = new DataOutputStream(sos)
-            dos.flush()
+            dos = new DataOutputStream(os)
             is = clientSocket.getInputStream()
-            sis = new SnappyInputStream(is)
-            dis = new DataInputStream(sis)
+            dis = new DataInputStream(is)
         }
         jis = new JumboImportConnection("localhost", 12001)
+        Thread.sleep(500)
     }
 
     def cleanup() {
@@ -44,6 +45,7 @@ class JumboImportConnectionSpec extends Specification {
     }
 
     def "exists delivery version #deliveryExists"() {
+        setup:
         expect:
         Thread.start {
             assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
@@ -62,7 +64,7 @@ class JumboImportConnectionSpec extends Specification {
         setup:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
-        def indexInfo = new IndexInfo("my_delivery", "my_version", "my_collection", "my_index", "part0005", dataToSend.length, "INDEX_STRATEGY")
+        def indexInfo = new IndexInfo("my_delivery", "my_version", "my_collection", "my_index", "part0005", dataToSend.length, ChecksumType.MD5, "checksum-md5")
         def copyCallBackMock = new OnCopyCallback() {
             @Override
             void onCopy(OutputStream outputStream) {
@@ -74,20 +76,18 @@ class JumboImportConnectionSpec extends Specification {
         Thread.start {
             assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:index"
+            assert dis.readUTF() == "my_delivery"
+            assert dis.readUTF() == "my_version"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "my_index"
             assert dis.readUTF() == "part0005"
             assert dis.readLong() == dataToSend.length
-            assert dis.readUTF() == "my_delivery"
-            assert dis.readUTF() == "my_version"
-            assert dis.readUTF() == "INDEX_STRATEGY"
-            dos.writeUTF(":copy");
-            dos.flush()
+            assert dis.readUTF() == "MD5"
+            assert dis.readUTF() == "checksum-md5"
             def data = IOUtils.toByteArray(dis, dataToSend.length)
-            assert IOUtils.toString(data, "UTF-8") == dataToSendStr
-            dos.writeUTF(":verify:md5")
-            dos.writeUTF("this_is_the_expected_hash")
+            dos.writeUTF(":success")
             dos.flush()
+            assert IOUtils.toString(data, "UTF-8") == dataToSendStr
         }
         jis.importIndexFile(indexInfo, copyCallBackMock)
     }
@@ -96,7 +96,7 @@ class JumboImportConnectionSpec extends Specification {
         when:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
-        def indexInfo = new IndexInfo("my_delivery", "my_version", "my_collection", "my_index", "part0005", dataToSend.length, "INDEX_STRATEGY")
+        def indexInfo = new IndexInfo("my_delivery", "my_version", "my_collection", "my_index", "part0005", dataToSend.length, ChecksumType.MD5, "md5hash")
         def copyCallBackMock = new OnCopyCallback() {
             @Override
             void onCopy(OutputStream outputStream) {
@@ -107,31 +107,31 @@ class JumboImportConnectionSpec extends Specification {
         Thread.start {
             assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:index"
+            assert dis.readUTF() == "my_delivery"
+            assert dis.readUTF() == "my_version"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "my_index"
             assert dis.readUTF() == "part0005"
             assert dis.readLong() == dataToSend.length
-            assert dis.readUTF() == "my_delivery"
-            assert dis.readUTF() == "my_version"
-            assert dis.readUTF() == "INDEX_STRATEGY"
-            dos.writeUTF(":copy");
-            dos.flush()
+            assert dis.readUTF() == "MD5"
+            assert dis.readUTF() == "md5hash"
             def data = IOUtils.toByteArray(dis, dataToSend.length)
+            dos.writeUTF(":error:checksum");
+            dos.writeUTF("Wrong checksum");
+            dos.flush()
             assert IOUtils.toString(data, "UTF-8") == dataToSendStr
-            dos.writeUTF(":verify:md5")
-            dos.writeUTF("this_is_an_invalid_hash")
             dos.flush()
         }
         jis.importIndexFile(indexInfo, copyCallBackMock)
         then:
-        thrown InvalidFileHashException
+        thrown JumboFileChecksumException
     }
 
     def "import data with valid MD5 hash"() {
         setup:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
-        def dataInfo = new DataInfo("my_delivery", "my_version", "my_collection", "part0005", dataToSend.length, "DATA_STRATEGY")
+        def dataInfo = new DataInfo("my_delivery", "my_version", "my_collection", "part0005", dataToSend.length, ChecksumType.MD5, "md5checksum")
         def copyCallBackMock = new OnCopyCallback() {
             @Override
             void onCopy(OutputStream outputStream) {
@@ -143,29 +143,27 @@ class JumboImportConnectionSpec extends Specification {
         Thread.start {
             assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:data"
+            assert dis.readUTF() == "my_delivery"
+            assert dis.readUTF() == "my_version"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "part0005"
             assert dis.readLong() == dataToSend.length
-            assert dis.readUTF() == "my_delivery"
-            assert dis.readUTF() == "my_version"
-            assert dis.readUTF() == "DATA_STRATEGY"
-            dos.writeUTF(":copy");
-            dos.flush()
+            assert dis.readUTF() == "MD5"
+            assert dis.readUTF() == "md5checksum"
             def data = IOUtils.toByteArray(dis, dataToSend.length)
-            assert IOUtils.toString(data, "UTF-8") == dataToSendStr
-            dos.writeUTF(":verify:md5")
-            dos.writeUTF("this_is_the_expected_hash")
+            dos.writeUTF(":success");
             dos.flush()
+            assert IOUtils.toString(data, "UTF-8") == dataToSendStr
         }
         jis.importDataFile(dataInfo, copyCallBackMock)
-        jis.getByteCount() == 206 // data length + meta data
+        jis.getByteCount() == 195 // data length + meta data
     }
 
     def "import data with invalid MD5 hash"() {
         when:
         def dataToSendStr = "This is the binary test data! Usally it's binary and not readable, but for testing ok."
         def dataToSend = dataToSendStr.getBytes("UTF-8")
-        def dataInfo = new DataInfo("my_delivery", "my_version", "my_collection", "part0005", dataToSend.length, "DATA_STRATEGY")
+        def dataInfo = new DataInfo("my_delivery", "my_version", "my_collection", "part0005", dataToSend.length, ChecksumType.MD5, "md5checksum")
         def copyCallBackMock = new OnCopyCallback() {
             @Override
             void onCopy(OutputStream outputStream) {
@@ -176,86 +174,86 @@ class JumboImportConnectionSpec extends Specification {
         Thread.start {
             assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:import:collection:data"
+            assert dis.readUTF() == "my_delivery"
+            assert dis.readUTF() == "my_version"
             assert dis.readUTF() == "my_collection"
             assert dis.readUTF() == "part0005"
             assert dis.readLong() == dataToSend.length
-            assert dis.readUTF() == "my_delivery"
-            assert dis.readUTF() == "my_version"
-            assert dis.readUTF() == "DATA_STRATEGY"
-            dos.writeUTF(":copy");
-            dos.flush()
+            assert dis.readUTF() == "MD5"
+            assert dis.readUTF() == "md5checksum"
             def data = IOUtils.toByteArray(dis, dataToSend.length)
-            assert IOUtils.toString(data, "UTF-8") == dataToSendStr
-            dos.writeUTF(":verify:md5")
-            dos.writeUTF("this_is_an_invalid_hash")
+            dos.writeUTF(":error:checksum");
+            dos.writeUTF("error message");
             dos.flush()
+            assert IOUtils.toString(data, "UTF-8") == dataToSendStr
         }
         jis.importDataFile(dataInfo, copyCallBackMock)
         then:
-        thrown InvalidFileHashException
+        thrown JumboFileChecksumException
     }
-//
-//    def "send meta info index"() {
-//        setup:
-//        def metaInfo = new MetaIndex("my_collection", "my_delivery", "my_version", "my_index", "MY_INDEX_STRATEGY", "the defined source fields")
-//        expect:
-//        Thread.start {
-//            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
-//            assert dis.readUTF() == ":cmd:import:collection:meta:index"
-//            assert dis.readUTF() == "my_collection"
-//            assert dis.readUTF() == "my_delivery"
-//            assert dis.readUTF() == "my_version"
-//            assert dis.readUTF() == "my_index"
-//            assert dis.readUTF() == "MY_INDEX_STRATEGY"
-//            assert dis.readUTF() == "the defined source fields"
-//            dos.writeUTF(":ok")
-//            dos.flush()
-//        }
-//        jis.sendMetaIndex(metaInfo)
-//    }
-//
-//    def "send meta info data "() {
-//        setup:
-//        def metaInfo = new MetaData("my_collection", "my_delivery", "my_version", "MY_DATA_STRATEGY", "A path", true, "some additional info")
-//        expect:
-//        Thread.start {
-//            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
-//            assert dis.readUTF() == ":cmd:import:collection:meta:data"
-//            assert dis.readUTF() == "my_collection"
-//            assert dis.readUTF() == "my_delivery"
-//            assert dis.readUTF() == "my_version"
-//            assert dis.readUTF() == "MY_DATA_STRATEGY"
-//            assert dis.readUTF() == "A path"
-//            assert dis.readBoolean()
-//            assert dis.readUTF() == "some additional info"
-//            dos.writeUTF(":ok")
-//            dos.flush()
-//        }
-//        jis.sendMetaData(metaInfo)
-//    }
 
-    def "sendFinishedNotification"() {
+    def "initImport should be successful"() {
         expect:
         Thread.start {
             assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
-            assert dis.readUTF() == ":cmd:import:finished"
-            assert dis.readUTF() == "my_delivery"
-            assert dis.readUTF() == "my_version"
-            dos.writeUTF(":ok")
+            assert dis.readUTF() == ":cmd:import:init"
+            assert dis.readUTF() == "delivery_key"
+            assert dis.readUTF() == "version2"
+            assert dis.readUTF() == "2012-12-12 12:12"
+            assert dis.readUTF() == "some info"
+            dos.writeUTF(":success")
             dos.flush()
         }
-        jis.commitImport("my_delivery", "my_version")
+        jis.initImport(new ImportInfo("delivery_key", "version2", "2012-12-12 12:12", "some info"))
+    }
+
+    def "initImport should fail because version exists"() {
+        when:
+        Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
+            assert dis.readUTF() == ":cmd:import:init"
+            assert dis.readUTF() == "delivery_key"
+            assert dis.readUTF() == "version2"
+            assert dis.readUTF() == "2012-12-12 12:12"
+            assert dis.readUTF() == "some info"
+            dos.writeUTF(":error:deliveryversionexists")
+            dos.writeUTF("my message")
+            dos.flush()
+        }
+        jis.initImport(new ImportInfo("delivery_key", "version2", "2012-12-12 12:12", "some info"))
+        then:
+        thrown JumboDeliveryVersionExistsException
+    }
+
+    def "commitImport"() {
+        expect:
+        Thread.start {
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
+            assert dis.readUTF() == ":cmd:import:commit"
+            assert dis.readUTF() == "my_delivery"
+            assert dis.readUTF() == "my_version"
+            assert dis.readBoolean()
+            assert !dis.readBoolean()
+            dos.writeUTF(":success")
+            dos.flush()
+        }
+        jis.commitImport("my_delivery", "my_version", true, false)
     }
 
     def "handle wrong version"() {
         when:
         Thread.start {
-            dis.readInt()
+            assert dis.readInt() == JumboConstants.IMPORT_PROTOCOL_VERSION
+            assert dis.readUTF() == ":cmd:import:commit"
+            assert dis.readUTF() == "my_delivery"
+            assert dis.readUTF() == "my_version"
+            assert dis.readBoolean()
+            assert !dis.readBoolean()
             dos.writeUTF(":error:wrongversion")
             dos.writeUTF("my message")
             dos.flush()
         }
-        jis.commitImport("my_delivery", "my_version")
+        jis.commitImport("my_delivery", "my_version", true, false)
         then:
         def ex = thrown JumboWrongVersionException
         ex.getMessage() == "my message"

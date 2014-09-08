@@ -1,7 +1,5 @@
 package org.jumbodb.database.service.query;
 
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.data.common.meta.CollectionProperties;
@@ -155,26 +153,23 @@ public class JumboSearcher {
         }
     }
 
-    public long getDataCompressedSize(String collection, String chunkKey, String version) {
-        // CARSTEN unit test
-        File file = buildPathToData(collection, chunkKey, version);
+    public long getDataCompressedSize(String chunkKey, String version, String collection) {
+        File file = buildPathToData(chunkKey, version, collection);
         String strategyName = getDataStrategyName(file);
         DataStrategy dataStrategy = getDataStrategy(strategyName);
         return dataStrategy.getCompressedSize(file);
     }
 
-    public long getDataUncompressedSize(String collection, String chunkKey, String version) {
-        // CARSTEN unit test
-        File file = buildPathToData(collection, chunkKey, version);
+    public long getDataUncompressedSize(String chunkKey, String version, String collection) {
+        File file = buildPathToData(chunkKey, version, collection);
         String strategyName = getDataStrategyName(file);
         DataStrategy dataStrategy = getDataStrategy(strategyName);
         return dataStrategy.getUncompressedSize(file);
     }
 
-    public long getIndexSize(String collection, String chunkKey, String version) {
-        // CARSTEN unit test
+    public long getIndexSize(String chunkKey, String version, String collection) {
         long result = 0l;
-        File indexRoot = buildPathToIndexRoot(collection, chunkKey, version);
+        File indexRoot = buildPathToIndexRoot(chunkKey, version, collection);
         File[] indexFolders = indexRoot.listFiles(StorageManagement.FOLDER_FILTER);
         for (File indexFolder : indexFolders) {
             result += getIndexSize(indexFolder);
@@ -193,25 +188,21 @@ public class JumboSearcher {
         return IndexProperties.getStrategy(indexProps);
     }
 
-    private String getDataStrategyName(File indexPath) {
-        File indexProps = new File(indexPath.getAbsolutePath() + CollectionProperties.DEFAULT_FILENAME);
-        return CollectionProperties.getStrategy(indexProps);
+    private String getDataStrategyName(File dataPath) {
+        File collectionProps = new File(dataPath.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME);
+        return CollectionProperties.getStrategy(collectionProps);
     }
 
-    private File buildPathToData(String collection, String chunkKey, String version) {
+    private File buildPathToData(String chunkKey, String version, String collection) {
         return new File(
           jumboConfiguration.getDataPath().getAbsolutePath() + "/" + chunkKey + "/" + version + "/" + collection + "/");
     }
 
-    private File buildPathToIndexRoot(String collection, String chunkKey, String version) {
+    private File buildPathToIndexRoot(String chunkKey, String version, String collection) {
         return new File(jumboConfiguration.getIndexPath().getAbsolutePath() + "/" + chunkKey + "/" + version + "/" + collection + "/");
     }
 
-    private File buildPathToIndex(String collection, String chunkKey, String version, String indexName) {
-        return new File(buildPathToIndexRoot(collection, chunkKey, version).getAbsolutePath() + indexName + "/");
-    }
-
-    public IndexStrategy getIndexStrategy(String collection, String chunkKey, String indexName) {
+    public IndexStrategy getIndexStrategy(String chunkKey, String collection, String indexName) {
         return indexStrategyManager.getStrategy(collection, chunkKey, indexName);
     }
 
@@ -223,7 +214,7 @@ public class JumboSearcher {
         return dataStrategyManager.getStrategy(key);
     }
 
-    public DataStrategy getDataStrategy(String collection, String chunkKey) {
+    public DataStrategy getDataStrategy(String chunkKey, String collection) {
         return dataStrategyManager.getStrategy(collection, chunkKey);
     }
 

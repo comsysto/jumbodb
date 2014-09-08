@@ -11,7 +11,7 @@ import org.jumbodb.database.service.query.index.basic.numeric.FileDataRetriever
  */
 class DoubleDataGeneration {
     def static createFile() {
-        File.createTempFile("randomindex", "odx")
+        File.createTempFile("randomindex", "idx")
     }
 
     def static createIndexContent() {

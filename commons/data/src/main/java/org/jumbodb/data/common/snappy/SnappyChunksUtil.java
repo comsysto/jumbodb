@@ -30,23 +30,15 @@ public class SnappyChunksUtil {
      * @param absoluteImportFile
      * @param fileLength
      * @param chunkSize
-     * @return hash over uncompressed data
      */
-    // CARSTEN move, required for unit tests
-    public static String copy(InputStream dataInputStream, File absoluteImportFile, long fileLength, int chunkSize) {
+    public static void copy(InputStream dataInputStream, File absoluteImportFile, long fileLength, int chunkSize) {
         OutputStream sos = null;
         DataOutputStream dos = null;
         FileOutputStream fos = null;
         BufferedOutputStream bos = null;
         FileOutputStream snappyChunksFos = null;
         DataOutputStream snappyChunksDos = null;
-        DigestOutputStream md5DosRaw = null;
-     //   DigestOutputStream sha1DosCompressed = null;
-        MessageDigest md5DigestRaw = null;
-     //   MessageDigest sha1DigestCompressed = null;
         try {
-            md5DigestRaw = MessageDigest.getInstance("MD5");
-     //       sha1DigestCompressed = MessageDigest.getInstance("SHA1");
             String absoluteImportPath = absoluteImportFile.getAbsolutePath() + "/";
             File storageFolderFile = new File(absoluteImportPath);
             if (!storageFolderFile.getParentFile().exists()) {
@@ -59,9 +51,8 @@ public class SnappyChunksUtil {
                     log.warn("Cannot delete file: " + absoluteImportFile.getAbsolutePath());
                 }
             }
-            log.info("ImportServer - " + absoluteImportFile);
 
-            String filePlaceChunksPath = absoluteImportFile.getAbsolutePath() + ".snappy.chunks";
+            String filePlaceChunksPath = absoluteImportFile.getAbsolutePath() + ".chunks";
             File filePlaceChunksFile = new File(filePlaceChunksPath);
             if (filePlaceChunksFile.exists()) {
                 filePlaceChunksFile.delete();
@@ -73,7 +64,6 @@ public class SnappyChunksUtil {
             snappyChunksDos.writeLong(fileLength);
             snappyChunksDos.writeInt(chunkSize);
             fos = new FileOutputStream(absoluteImportFile);
-         //   sha1DosCompressed = new DigestOutputStream(fos, sha1DigestCompressed);
             bos = new BufferedOutputStream(fos) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
@@ -81,43 +71,22 @@ public class SnappyChunksUtil {
                     super.write(bytes, i, i2);
                 }
             };
-            md5DosRaw = new DigestOutputStream(bos, md5DigestRaw);
-            sos = new SnappyOutputStream(md5DosRaw, chunkSize);
+            sos = new SnappyOutputStream(bos, chunkSize);
             IOUtils.copyLarge(dataInputStream, sos, 0l, fileLength);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new UnhandledException(e);
         } finally {
-            IOUtils.closeQuietly(md5DosRaw);
             IOUtils.closeQuietly(sos);
             IOUtils.closeQuietly(dos);
             IOUtils.closeQuietly(bos);
-         //   IOUtils.closeQuietly(sha1DosCompressed);
             IOUtils.closeQuietly(fos);
             IOUtils.closeQuietly(snappyChunksDos);
             IOUtils.closeQuietly(snappyChunksFos);
         }
-
-        // streams should be closed or flushed to get valid hashes!
-        try {
-/*            if(md5DigestRaw != null) {
-                String sha1CompressHex = Hex.encodeHexString(sha1DigestCompressed.digest());
-                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".sha1"), sha1CompressHex);
-            }  */
-            if(md5DigestRaw != null) {
-                String md5DigestRawHex = Hex.encodeHexString(md5DigestRaw.digest());
-                FileUtils.write(new File(absoluteImportFile.getAbsolutePath() + ".md5"), md5DigestRawHex);
-                return md5DigestRawHex;
-            }
-        } catch(IOException e) {
-            throw new UnhandledException(e);
-        }
-        return "invalid_hash";
     }
 
     public static SnappyChunks getSnappyChunksByFile(File compressedFile) {
-        String chunkFileName = compressedFile.getAbsolutePath() + ".snappy.chunks";
+        String chunkFileName = compressedFile.getAbsolutePath() + ".chunks";
         File chunkFile = new File(chunkFileName);
         FileInputStream chunksFis = null;
         DataInputStream chunksDis = null;

@@ -78,11 +78,11 @@ public abstract class DataCollectionGenerator {
     }
 
     private String getChunkKeyDir(String outputFolder, String collectionName) {
-        return DirectoryUtil.concatenatePaths(outputFolder, collectionName, DEFAULT_CHUNK_NAME).getAbsolutePath();
+        return DirectoryUtil.concatenatePaths(outputFolder, DEFAULT_CHUNK_NAME, collectionName).getAbsolutePath();
     }
 
     private String getDataDir(String outputFolder, String collectionName) {
-        return DirectoryUtil.concatenatePaths(outputFolder, collectionName, DEFAULT_CHUNK_NAME, deliveryVersion)
+        return DirectoryUtil.concatenatePaths(outputFolder, DEFAULT_CHUNK_NAME, deliveryVersion, collectionName)
                 .getAbsolutePath();
     }
 

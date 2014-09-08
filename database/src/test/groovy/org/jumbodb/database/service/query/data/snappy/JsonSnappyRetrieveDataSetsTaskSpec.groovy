@@ -32,7 +32,7 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
     }
 
     def cleanupTestFiles(file) {
-        new File(file.getAbsolutePath() + ".chunks.snappy").delete()
+        new File(file.getAbsolutePath() + ".snappy.chunks").delete()
         file.delete()
     }
 

@@ -58,7 +58,7 @@ public class DatabaseImportSession implements Closeable {
                 dataOutputStream.writeUTF(":success");
             } catch (DeliveryVersionExistsException e) {
                 log.error("Existing delivery", e);
-                dataOutputStream.writeUTF(":failed");
+                dataOutputStream.writeUTF(":error:deliveryversionexists");
                 dataOutputStream.writeUTF(e.getMessage());
             }
             dataOutputStream.flush();

@@ -5,6 +5,7 @@ import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.JumboConstants;
 import org.jumbodb.connector.exception.JumboCommonException;
+import org.jumbodb.connector.exception.JumboDeliveryVersionExistsException;
 import org.jumbodb.connector.exception.JumboFileChecksumException;
 import org.jumbodb.connector.exception.JumboWrongVersionException;
 import org.xerial.snappy.SnappyInputStream;
@@ -24,7 +25,6 @@ public class JumboImportConnection implements Closeable {
     private BufferedOutputStream bos;
     private DataOutputStream dos;
     private InputStream is;
-    private SnappyInputStream sis;
     private DataInputStream dis;
 
 
@@ -36,8 +36,7 @@ public class JumboImportConnection implements Closeable {
             bos = new BufferedOutputStream(mcos);
             dos = new DataOutputStream(bos);
             is = socket.getInputStream();
-            sis = new SnappyInputStream(is);
-            dis = new DataInputStream(sis);
+            dis = new DataInputStream(is);
             dos.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION);
             dos.flush();
         } catch (IOException e) {
@@ -83,6 +82,8 @@ public class JumboImportConnection implements Closeable {
             dos.writeUTF(importInfo.getDate());
             dos.writeUTF(importInfo.getInfo());
             dos.flush();
+            String command = dis.readUTF();
+            handleErrors(command);
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -106,15 +107,16 @@ public class JumboImportConnection implements Closeable {
             callback.onCopy(dos);
 
             String command = dis.readUTF();
-            if(":error".equals(command)) {
-                handleErrors(command);
-            }
+            handleErrors(command);
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
     }
 
     private void handleErrors(String command) throws IOException {
+        if(":success".equals(command)) {
+            return;
+        }
         if(command.startsWith(":error")) {
             handleError(command, dis.readUTF());
         }
@@ -129,6 +131,9 @@ public class JumboImportConnection implements Closeable {
         }
         else if(":error:checksum".equals(command)) {
             throw new JumboFileChecksumException(message);
+        }
+        else if(":error:deliveryversionexists".equals(command)) {
+            throw new JumboDeliveryVersionExistsException(message);
         }
         throw new JumboCommonException("Error on import [" + command + "]: " + message);
     }
@@ -148,12 +153,7 @@ public class JumboImportConnection implements Closeable {
             dos.flush();
             callback.onCopy(dos);
             String command = dis.readUTF();
-            if(":error".equals(command)) {
-                handleErrors(command);
-            }
-            else {
-                handleErrors(command);
-            }
+            handleErrors(command);
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -171,6 +171,8 @@ public class JumboImportConnection implements Closeable {
             dos.writeBoolean(activateChunk);
             dos.writeBoolean(activateVersion);
             dos.flush();
+            String command = dis.readUTF();
+            handleErrors(command);
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -183,7 +185,6 @@ public class JumboImportConnection implements Closeable {
         IOUtils.closeQuietly(mcos);
         IOUtils.closeQuietly(os);
         IOUtils.closeQuietly(dis);
-        IOUtils.closeQuietly(sis);
         IOUtils.closeQuietly(is);
         IOUtils.closeQuietly(socket);
     }

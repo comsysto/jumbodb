@@ -72,9 +72,7 @@ public class RestController {
     @RequestMapping(value = "/chunk/{chunkDeliveryKey}/activate", method = RequestMethod.POST)
     @ResponseBody
     public Message activateChunk(@PathVariable String chunkDeliveryKey) {
-        // CARSTEN unit test
         // CARSTEN not wired in frontend
-        // CARSTEN separate labels for disabled chunks
         storageManagement.activateChunk(chunkDeliveryKey);
         return new Message("activate", "Chunk '" + chunkDeliveryKey + "' has been activated.");
     }
@@ -82,7 +80,6 @@ public class RestController {
     @RequestMapping(value = "/chunk/{chunkDeliveryKey}/inactivate", method = RequestMethod.POST)
     @ResponseBody
     public Message inactivateChunk(@PathVariable String chunkDeliveryKey) {
-        // CARSTEN unit test
         // CARSTEN not wired in frontend
         storageManagement.inactivateChunk(chunkDeliveryKey);
         return new Message("inactivate", "Chunk '" + chunkDeliveryKey + "' has been inactivated.");

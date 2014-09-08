@@ -137,15 +137,13 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
 
     @Override
     public long getCompressedSize(File dataFolder) {
-        // CARSTEN unit test
         return FileUtils.sizeOfDirectory(dataFolder);
     }
 
     @Override
     public long getUncompressedSize(File dataFolder) {
-        // CARSTEN unit test
         long uncompressedSize = 0l;
-        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".snappy.chunks"));
+        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".chunks"));
         File[] snappyChunks = dataFolder.listFiles(metaFiler);
         for (File snappyChunk : snappyChunks) {
             uncompressedSize += getSizeFromSnappyChunk(snappyChunk);

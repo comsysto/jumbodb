@@ -162,7 +162,7 @@ class DatabaseImportSessionSpec extends Specification {
         1 * importHandlerMock.onInit("test_delivery_key", "test_delivery_version", "2012-12-12 12:12:12", "some info") >> {
             throw new DeliveryVersionExistsException("my error")
         }
-        dataInputStream.readUTF() == ":failed"
+        dataInputStream.readUTF() == ":error:deliveryversionexists"
         dataInputStream.readUTF() == "my error"
         cleanup:
         dataInputStream.close()

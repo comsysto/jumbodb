@@ -111,7 +111,8 @@ public class StorageManagement {
                                 IndexStrategy indexStrategy = jumboSearcher.getIndexStrategy(collectionIndex.getStrategy());
                                 resultIndexes.add(new QueryUtilIndex(collectionIndex.getIndexName(), collectionIndex.getStrategy(), new ArrayList<QueryOperation>(indexStrategy.getSupportedOperations())));
                             }
-                            DataStrategy dataStrategy = jumboSearcher.getDataStrategy(collection.getName(), deliveryChunk.getKey());
+                            DataStrategy dataStrategy = jumboSearcher.getDataStrategy(deliveryChunk.getKey(),
+                              collection.getName());
                             dataStrategyName = dataStrategy.getStrategyName();
                             supportedOperations.addAll(dataStrategy.getSupportedOperations());
                         }
@@ -309,9 +310,11 @@ public class StorageManagement {
                     String collection = collectionPath.getName();
                     CollectionProperties.CollectionMeta deliveryMeta = CollectionProperties.getCollectionMeta(
                       new File(collectionPath.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME));
-                    long compressedSize = loadSizes ? jumboSearcher.getDataCompressedSize(collection, deliveryKey, version) : 0l;
-                    long uncompressedSize = loadSizes ? jumboSearcher.getDataUncompressedSize(collection, deliveryKey, version) : 0l;
-                    long indexSize = loadSizes ? jumboSearcher.getIndexSize(collection, deliveryKey, version) : 0l;
+                    long compressedSize = loadSizes ? jumboSearcher.getDataCompressedSize(deliveryKey, version,
+                      collection) : 0l;
+                    long uncompressedSize = loadSizes ? jumboSearcher.getDataUncompressedSize(deliveryKey, version,
+                      collection) : 0l;
+                    long indexSize = loadSizes ? jumboSearcher.getIndexSize(deliveryKey, version, collection) : 0l;
                     collections.add(new VersionedJumboCollection(deliveryKey, version, collection, deliveryMeta.getDate(),
                             deliveryMeta.getSourcePath(), deliveryMeta.getStrategy(), compressedSize, uncompressedSize, indexSize));
 

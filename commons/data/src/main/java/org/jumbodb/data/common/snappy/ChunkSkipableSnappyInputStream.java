@@ -37,8 +37,8 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Create a filter for reading compressed data as a uncompressed stream
      *
-     * @param input
-     * @throws java.io.IOException
+     * @param input input stream to compress
+     * @throws java.io.IOException io exception
      */
     public ChunkSkipableSnappyInputStream(InputStream input) throws IOException {
         this.in = input;
@@ -70,9 +70,6 @@ public class ChunkSkipableSnappyInputStream extends InputStream
 
     /**
      * Close the stream
-     */
-    /* (non-Javadoc)
-     * @see java.io.InputStream#close()
      */
     @Override
     public void close() throws IOException {
@@ -142,9 +139,10 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Reads up to len bytes of data from the input stream into an array of
      * bytes.
-     */
-    /* (non-Javadoc)
-     * @see java.io.InputStream#read(byte[], int, int)
+     *
+     * @param b bytes
+     * @param off offset
+     * @param len length
      */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
@@ -154,11 +152,11 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read uncompressed data into the specified array
      *
-     * @param array
-     * @param byteOffset
-     * @param byteLength
+     * @param array array
+     * @param byteOffset byte offset
+     * @param byteLength byte length
      * @return written bytes
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int rawRead(Object array, int byteOffset, int byteLength) throws IOException {
         int writtenBytes = 0;
@@ -182,15 +180,13 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read long array from the stream
      *
-     * @param d
-     *            input
-     * @param off
-     *            offset
-     * @param len
-     *            the number of long elements to read
+     * @param d input
+     * @param off offset
+     * @param len the number of long elements to read
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     *
+     * @throws java.io.IOException exception
      */
     public int read(long[] d, int off, int len) throws IOException {
         return rawRead(d, off * 8, len * 8);
@@ -199,10 +195,10 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read long array from the stream
      *
-     * @param d
+     * @param d read to long array
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int read(long[] d) throws IOException {
         return read(d, 0, d.length);
@@ -211,15 +207,12 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read double array from the stream
      *
-     * @param d
-     *            input
-     * @param off
-     *            offset
-     * @param len
-     *            the number of double elements to read
+     * @param d read to double array
+     * @param off offset
+     * @param len the number of double elements to read
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int read(double[] d, int off, int len) throws IOException {
         return rawRead(d, off * 8, len * 8);
@@ -228,10 +221,10 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read double array from the stream
      *
-     * @param d
+     * @param d input
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int read(double[] d) throws IOException {
         return read(d, 0, d.length);
@@ -240,10 +233,10 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read int array from the stream
      *
-     * @param d
+     * @param d input
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int read(int[] d) throws IOException {
         return read(d, 0, d.length);
@@ -252,15 +245,12 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read int array from the stream
      *
-     * @param d
-     *            input
-     * @param off
-     *            offset
-     * @param len
-     *            the number of int elements to read
+     * @param d input
+     * @param off offset
+     * @param len the number of int elements to read
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int read(int[] d, int off, int len) throws IOException {
         return rawRead(d, off * 4, len * 4);
@@ -269,15 +259,12 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read float array from the stream
      *
-     * @param d
-     *            input
-     * @param off
-     *            offset
-     * @param len
-     *            the number of float elements to read
+     * @param d input
+     * @param off offset
+     * @param len the number of float elements to read
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int read(float[] d, int off, int len) throws IOException {
         return rawRead(d, off * 4, len * 4);
@@ -286,10 +273,10 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read float array from the stream
      *
-     * @param d
+     * @param d input
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int read(float[] d) throws IOException {
         return read(d, 0, d.length);
@@ -298,15 +285,12 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read short array from the stream
      *
-     * @param d
-     *            input
-     * @param off
-     *            offset
-     * @param len
-     *            the number of short elements to read
+     * @param d input
+     * @param off offset
+     * @param len the number of short elements to read
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int read(short[] d, int off, int len) throws IOException {
         return rawRead(d, off * 2, len * 2);
@@ -315,10 +299,10 @@ public class ChunkSkipableSnappyInputStream extends InputStream
     /**
      * Read short array from the stream
      *
-     * @param d
+     * @param d oinput
      * @return the total number of bytes read into the buffer, or -1 if there is
      *         no more data because the end of the stream has been reached.
-     * @throws java.io.IOException
+     * @throws java.io.IOException exception
      */
     public int read(short[] d) throws IOException {
         return read(d, 0, d.length);
@@ -389,9 +373,9 @@ public class ChunkSkipableSnappyInputStream extends InputStream
      * because the end of the stream has been reached, the value -1 is returned.
      * This method blocks until input data is available, the end of the stream
      * is detected, or an exception is thrown.
-     */
-    /* (non-Javadoc)
-     * @see java.io.InputStream#read()
+     *
+     * @return read value
+     * @throws java.io.IOException exception
      */
     @Override
     public int read() throws IOException {

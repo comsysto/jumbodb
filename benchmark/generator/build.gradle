@@ -8,9 +8,6 @@ apply plugin: 'application'
 apply plugin: 'groovy'
 
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 group = 'org.jumbodb.benchmark.generator'
 archivesBaseName = 'jumbodb-benchmark-generator'
 

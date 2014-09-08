@@ -7,10 +7,6 @@ apply plugin: 'eclipse'
 apply plugin: 'eclipse-wtp'
 apply plugin: "groovy"
 
-
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 archivesBaseName = 'jumbodb'
 
 sourceSets {

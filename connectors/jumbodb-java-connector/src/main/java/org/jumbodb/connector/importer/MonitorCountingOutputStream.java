@@ -18,6 +18,7 @@ public class MonitorCountingOutputStream extends CountingOutputStream {
      * Constructs a new CountingOutputStream.
      *
      * @param out the OutputStream to write to
+     * @param intervalMs interval in ms
      */
     public MonitorCountingOutputStream(OutputStream out, long intervalMs) {
         super(out);

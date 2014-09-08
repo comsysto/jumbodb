@@ -7,9 +7,6 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: "groovy"
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 group = 'org.jumbodb.common.data'
 archivesBaseName = 'jumbodb-data'
 

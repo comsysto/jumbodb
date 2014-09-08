@@ -1,17 +1,11 @@
 package org.jumbodb.data.common.snappy;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.UnhandledException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
-import java.security.DigestOutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,12 +20,12 @@ public class SnappyChunksUtil {
     /**
      * Copies stream to file
      *
-     * @param dataInputStream
-     * @param absoluteImportFile
-     * @param fileLength
-     * @param chunkSize
+     * @param inputStream        input stream write to disk
+     * @param absoluteImportFile path where to write
+     * @param fileLength         length of data
+     * @param chunkSize          snappy chunk size
      */
-    public static void copy(InputStream dataInputStream, File absoluteImportFile, long fileLength, int chunkSize) {
+    public static void copy(InputStream inputStream, File absoluteImportFile, long fileLength, int chunkSize) {
         OutputStream sos = null;
         DataOutputStream dos = null;
         FileOutputStream fos = null;
@@ -42,12 +36,12 @@ public class SnappyChunksUtil {
             String absoluteImportPath = absoluteImportFile.getAbsolutePath() + "/";
             File storageFolderFile = new File(absoluteImportPath);
             if (!storageFolderFile.getParentFile().exists()) {
-                if(!storageFolderFile.mkdirs()){
+                if (!storageFolderFile.mkdirs()) {
                     log.warn("Cannot create directory: " + storageFolderFile.getAbsolutePath());
                 }
             }
             if (absoluteImportFile.exists()) {
-                if(!absoluteImportFile.delete()){
+                if (!absoluteImportFile.delete()) {
                     log.warn("Cannot delete file: " + absoluteImportFile.getAbsolutePath());
                 }
             }
@@ -72,7 +66,7 @@ public class SnappyChunksUtil {
                 }
             };
             sos = new SnappyOutputStream(bos, chunkSize);
-            IOUtils.copyLarge(dataInputStream, sos, 0l, fileLength);
+            IOUtils.copyLarge(inputStream, sos, 0l, fileLength);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -95,7 +89,7 @@ public class SnappyChunksUtil {
             chunksDis = new DataInputStream(new BufferedInputStream(chunksFis));
             long length = chunksDis.readLong();
             int snappyChunkSize = chunksDis.readInt();
-            int numberOfChunks = (int)(chunkFile.length() - 8 - 4 - 4) / 4;
+            int numberOfChunks = (int) (chunkFile.length() - 8 - 4 - 4) / 4;
             List<Integer> snappyChunks = buildSnappyChunks(chunksDis, numberOfChunks);
             return new SnappyChunks(length, snappyChunkSize, numberOfChunks, snappyChunks);
 
@@ -110,10 +104,10 @@ public class SnappyChunksUtil {
     }
 
     private static List<Integer> buildSnappyChunks(DataInputStream chunksDis, long numberOfChunks) throws IOException {
-        List<Integer> snappyChunks = new ArrayList<Integer>((int)numberOfChunks);
+        List<Integer> snappyChunks = new ArrayList<Integer>((int) numberOfChunks);
         // - 8 is length value, 4 is the chunksize
         chunksDis.readInt(); // remove version chunk
-        for(int i = 0; i < numberOfChunks; i++) {
+        for (int i = 0; i < numberOfChunks; i++) {
             snappyChunks.add(chunksDis.readInt());
         }
         return snappyChunks;

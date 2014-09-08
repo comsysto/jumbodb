@@ -15,11 +15,6 @@ public class BoundingBoxSampler {
     private int maxSamples;
     private Random rand = new Random();
 
-    /**
-     * @param bbox
-     * @throws IllegalArgumentException if the number of geohashes contained in the bounding box
-     *                                  exceeds Integer.MAX_VALUE
-     */
     public BoundingBoxSampler(TwoGeoHashBoundingBox bbox) {
         this.boundingBox = bbox;
         long maxSamplesLong = GeoHash.stepsBetween(bbox.getBottomLeft(), bbox.getTopRight());

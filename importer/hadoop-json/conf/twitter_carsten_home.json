@@ -10,7 +10,7 @@
     "hadoop": [],
     "importCollection": [
         {
-            "input": "file:///C:/Development/data/twitter/input/",
+            "input": "file:///C:/Develop/data/twitter/input/",
             "description": "Twitter data",
             "collectionName": "carsten.twitter2",
             "sort": ["geo.coordinates"],

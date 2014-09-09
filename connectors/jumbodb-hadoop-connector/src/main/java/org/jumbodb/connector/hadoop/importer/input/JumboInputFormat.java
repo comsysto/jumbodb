@@ -61,7 +61,7 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
             FileSystem fileSystem = FileSystem.get(URI.create(inputPath), configuration);
             FileStatus[] fileStatuses = fileSystem.listStatus(new Path(inputPath));
             for (FileStatus fileStatuse : fileStatuses) {
-                if(!fileStatuse.isDir()) {
+                if(!fileStatuse.isDirectory()) {
                     files.add(fileStatuse);
                 }
             }
@@ -72,7 +72,7 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
                 Path path = indexNameFolder.getPath();
                 FileStatus[] fileStatuses = fileSystem.listStatus(path);
                 for (FileStatus fileStatuse : fileStatuses) {
-                    if(!fileStatuse.isDir()) {
+                    if(!fileStatuse.isDirectory()) {
                         files.add(fileStatuse);
                     }
                 }

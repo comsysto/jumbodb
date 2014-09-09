@@ -15,7 +15,16 @@ public class BaseJumboImportJob {
     private Path sortedOutputPath;
     private Path indexOutputPath;
     private Path logOutputPath;
+    private Integer numberOfOutputFiles;
     private List<ImportHost> hosts;
+
+    public Integer getNumberOfOutputFiles() {
+        return numberOfOutputFiles;
+    }
+
+    public void setNumberOfOutputFiles(final Integer numberOfOutputFiles) {
+        this.numberOfOutputFiles = numberOfOutputFiles;
+    }
 
     public Path getSortedOutputPath() {
         return sortedOutputPath;

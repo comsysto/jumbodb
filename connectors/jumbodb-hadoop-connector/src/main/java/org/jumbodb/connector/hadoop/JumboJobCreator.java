@@ -89,20 +89,21 @@ public class JumboJobCreator {
         return controlledJobs;
     }
 
-    public static void sendFinishedNotification(Set<CommitNotification> commitNotifications, JobControl jobControl, Configuration conf) {
+    public static void commitImport(Set<CommitNotification> commitNotifications, JobControl jobControl,
+      Configuration conf) {
         for (CommitNotification commitNotification : commitNotifications) {
-            sendFinishedNotification(commitNotification, jobControl, conf);
+            commitImport(commitNotification, jobControl, conf);
         }
     }
 
 
-    public static void sendFinishedNotification(Set<CommitNotification> commitNotifications, Configuration conf) {
+    public static void commitImport(Set<CommitNotification> commitNotifications, Configuration conf) {
         for (CommitNotification commitNotification : commitNotifications) {
             commitImport(commitNotification, conf);
         }
     }
 
-    public static void sendFinishedNotification(CommitNotification commitNotification, JobControl jobControl, Configuration conf) {
+    public static void commitImport(CommitNotification commitNotification, JobControl jobControl, Configuration conf) {
         if (!conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
             return;
         }

@@ -45,6 +45,11 @@ body {
     border-left: 1px solid #eee;
 }
 
+
+.space-label {
+    margin-right: 9px;
+}
+
 .topbar .btn {
     border: 0;
 }

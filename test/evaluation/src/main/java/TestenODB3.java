@@ -24,7 +24,7 @@ public class TestenODB3 {
 
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
         JumboQuery query = new JumboQuery();
-        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, -0.027180d)))));
+//        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, -0.027180d)))));
 //        query.addJsonQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, -0.027180d)))));
 //        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, 0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
 //        query.addJsonQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, 0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
@@ -38,8 +38,8 @@ public class TestenODB3 {
 
 
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find("uk.usercentric.cells", Map.class, query);
-        System.out.println(daily.get(0).get("centerLatLon"));
+        List<Map> daily = jumboDriver.find("carsten.twitter", Map.class, query);
+//        System.out.println(daily);
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }
 }

@@ -12,15 +12,23 @@ import java.util.List;
 public class JumboCollection implements Comparable<JumboCollection> {
     private String collapseId;
     private String name;
+    private final List<String> infos;
     private List<DeliveryChunk> chunks;
     private long compressedSize = -1;
     private long uncompressedSize = -1;
     private long indexSize = -1;
+    private Boolean activeChunk;
+    private Boolean activeVersion;
 
-    public JumboCollection(String collapseId, String name, List<DeliveryChunk> chunks) {
+    public JumboCollection(String collapseId, String name, List<String> infos, List<DeliveryChunk> chunks) {
         this.collapseId = collapseId;
         this.name = name;
+        this.infos = infos;
         this.chunks = chunks;
+    }
+
+    public List<String> getInfos() {
+        return infos;
     }
 
     public String getCollapseId() {
@@ -33,6 +41,46 @@ public class JumboCollection implements Comparable<JumboCollection> {
 
     public List<DeliveryChunk> getChunks() {
         return chunks;
+    }
+
+    public Boolean getActive() {
+        return getActiveChunk() && getActiveVersion();
+    }
+
+    public Boolean getActiveChunk() {
+        if(activeChunk == null) {
+            activeChunk = calculateActiveChunk();
+        }
+        return activeChunk;
+    }
+
+    public Boolean getActiveVersion() {
+        if(activeVersion == null) {
+            activeVersion = calculateActiveVersion();
+        }
+        return activeVersion;
+    }
+
+    private Boolean calculateActiveVersion() {
+        for (DeliveryChunk chunk : chunks) {
+            if(chunk.isActive()) {
+                for (DeliveryVersion deliveryVersion : chunk.getVersions()) {
+                    if(deliveryVersion.isActive()) {
+                        return Boolean.TRUE;
+                    }
+                }
+            }
+        }
+        return Boolean.FALSE;
+    }
+
+    private Boolean calculateActiveChunk() {
+        for (DeliveryChunk chunk : chunks) {
+            if(chunk.isActive()) {
+                return Boolean.TRUE;
+            }
+        }
+        return Boolean.FALSE;
     }
 
     public long getCompressedSize() {
@@ -130,12 +178,15 @@ public class JumboCollection implements Comparable<JumboCollection> {
     @Override
     public String toString() {
         return "JumboCollection{" +
-                "collapseId='" + collapseId + '\'' +
-                ", name='" + name + '\'' +
-                ", chunks=" + chunks +
-                ", compressedSize=" + compressedSize +
-                ", uncompressedSize=" + uncompressedSize +
-                ", indexSize=" + indexSize +
-                '}';
+          "collapseId='" + collapseId + '\'' +
+          ", name='" + name + '\'' +
+          ", infos=" + infos +
+          ", chunks=" + chunks +
+          ", compressedSize=" + compressedSize +
+          ", uncompressedSize=" + uncompressedSize +
+          ", indexSize=" + indexSize +
+          ", activeChunk=" + activeChunk +
+          ", activeVersion=" + activeVersion +
+          '}';
     }
 }

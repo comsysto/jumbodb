@@ -2,7 +2,7 @@
     "description": "Carstens Twitter Test Import",
     "deliveryChunkKey": "first_delivery",
     "hosts": [
-
+        {"host": "localhost", "port": 12001}
     ],
     "datePattern": "EEE MMM dd HH:mm:ss Z yyyy",
     "output": "file:///C:/Development/data/twitter/output/",
@@ -11,7 +11,8 @@
     "importCollection": [
         {
             "input": "file:///C:/Development/data/twitter/input/",
-            "collectionName": "carsten.twitter",
+            "description": "Twitter data",
+            "collectionName": "carsten.twitter2",
             "sort": ["geo.coordinates"],
             "sortType": "GEOHASH",
             "dataStrategy": "JSON_SNAPPY_V1",

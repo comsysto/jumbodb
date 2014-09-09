@@ -103,21 +103,22 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             IOUtils.closeStream(digestOutputStream);
             IOUtils.closeStream(fileOut);
             writeSnappyChunks();
+            writeMd5Digest(file, digestOutputStream);
             JumboMetaUtil.writeCollectionMetaData(file.getParent(), STRATEGY_KEY, context);
         }
 
         private void writeSnappyChunks() throws IOException {
             Path path = file.suffix(".chunks");
             FSDataOutputStream fsDataOutputStream = fs.create(path, false);
-            DigestOutputStream digestStream = new DigestOutputStream(fileOut, getMessageDigest());
-            DataOutputStream dos = new DataOutputStream(fsDataOutputStream);
+            DigestOutputStream digestStream = new DigestOutputStream(fsDataOutputStream, getMessageDigest());
+            DataOutputStream dos = new DataOutputStream(digestStream);
             dos.writeLong(length);
             dos.write(SNAPPY_BLOCK_SIZE);
             for (Integer chunkSize : chunkSizes) {
                 dos.writeInt(chunkSize);
             }
-            IOUtils.closeStream(digestStream);
             IOUtils.closeStream(dos);
+            IOUtils.closeStream(digestStream);
             IOUtils.closeStream(fsDataOutputStream);
             writeMd5Digest(path, digestStream);
         }

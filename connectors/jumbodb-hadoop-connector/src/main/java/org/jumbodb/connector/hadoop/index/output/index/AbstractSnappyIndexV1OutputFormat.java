@@ -106,15 +106,15 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
         private void writeSnappyChunks() throws IOException {
             Path path = file.suffix(".chunks");
             FSDataOutputStream fsDataOutputStream = fs.create(path, false);
-            DigestOutputStream digestStream = new DigestOutputStream(fileOut, getMessageDigest());
-            DataOutputStream dos = new DataOutputStream(fsDataOutputStream);
+            DigestOutputStream digestStream = new DigestOutputStream(fsDataOutputStream, getMessageDigest());
+            DataOutputStream dos = new DataOutputStream(digestStream);
             dos.writeLong(countingOutputStream.getByteCount());
             dos.write(getSnappyBlockSize());
             for (Integer chunkSize : chunkSizes) {
                 dos.writeInt(chunkSize);
             }
-            digestStream.close();
             dos.close();
+            digestStream.close();
             fsDataOutputStream.close();
             writeMd5Digest(path, digestStream);
         }

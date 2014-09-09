@@ -280,14 +280,23 @@ public class StorageManagement {
                 for (VersionedJumboCollection version : versions) {
                     ChunkedDeliveryVersion chunkedDeliveryVersion = deliveries.get(version.getChunkKey() + "/" + version.getVersion());
                     chunkVersions.add(new DeliveryVersion(version.getVersion(), chunkedDeliveryVersion.getInfo(), version.getDate(),
-                            version.getCompressedSize(), version.getUncompressedSize(), version.getIndexSize(), chunkedDeliveryVersion.isVersionActive()));
-                    chunkActive = chunkedDeliveryVersion.isChunkActive();
+                            version.getCompressedSize(), version.getUncompressedSize(), version.getIndexSize(), chunkedDeliveryVersion.isActiveVersion()));
+                    chunkActive = chunkedDeliveryVersion.isActiveChunk();
                 }
                 chunks.add(new DeliveryChunk(deliveryKey, chunkActive, chunkVersions));
             }
-            result.add(new JumboCollection("col-" + collection.hashCode(), collection, chunks));
+            result.add(new JumboCollection("col-" + collection.hashCode(), collection, getInfos(
+              versionedJumboCollections), chunks));
         }
         return result;
+    }
+
+    private List<String> getInfos(final List<VersionedJumboCollection> versionedJumboCollections) {
+        Set<String> result = new HashSet<String>();
+        for (VersionedJumboCollection collection : versionedJumboCollections) {
+            result.add(collection.getInfo());
+        }
+        return new ArrayList<String>(result);
     }
 
     public List<ChunkedDeliveryVersion> getChunkedDeliveryVersions() {
@@ -308,15 +317,15 @@ public class StorageManagement {
                 List<VersionedJumboCollection> collections = new ArrayList<VersionedJumboCollection>();
                 for (File collectionPath : versionPath.listFiles(FOLDER_FILTER)) {
                     String collection = collectionPath.getName();
-                    CollectionProperties.CollectionMeta deliveryMeta = CollectionProperties.getCollectionMeta(
+                    CollectionProperties.CollectionMeta collectionMeta = CollectionProperties.getCollectionMeta(
                       new File(collectionPath.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME));
                     long compressedSize = loadSizes ? jumboSearcher.getDataCompressedSize(deliveryKey, version,
                       collection) : 0l;
                     long uncompressedSize = loadSizes ? jumboSearcher.getDataUncompressedSize(deliveryKey, version,
                       collection) : 0l;
                     long indexSize = loadSizes ? jumboSearcher.getIndexSize(deliveryKey, version, collection) : 0l;
-                    collections.add(new VersionedJumboCollection(deliveryKey, version, collection, deliveryMeta.getDate(),
-                            deliveryMeta.getSourcePath(), deliveryMeta.getStrategy(), compressedSize, uncompressedSize, indexSize));
+                    collections.add(new VersionedJumboCollection(deliveryKey, version, collection, collectionMeta.getInfo(), collectionMeta.getDate(),
+                            collectionMeta.getSourcePath(), collectionMeta.getStrategy(), compressedSize, uncompressedSize, indexSize));
 
                 }
                 String collapseId = "col" + (deliveryKey + "-" + version).hashCode();

@@ -15,20 +15,34 @@
             <div class="panel panel-default" ng-repeat="collection in collections">
                 <div class="panel-heading">
                     <div class="accordion-toggle">
-                        <a href="#{{collection.collapseId}}" data-parent="#accordion2" data-toggle="collapse">
-                            <strong>{{collection.name}}</strong>
-                        </a>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <a href="#{{collection.collapseId}}" data-parent="#accordion2" data-toggle="collapse">
+                                <strong>{{collection.name}}</strong>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="label label-success space-label" ng-show="collection.active">Active </span>
+                                <span class="label label-default space-label" ng-show="!collection.activeChunk">Chunk inactive </span>
+                                <span class="label label-default space-label" ng-show="!collection.activeVersion">Version inactive </span>
+                            </div>
+                        </div>
                         <div style="font-size: smaller;">{{collection.formatedCompressedSize}} compressed data - {{collection.formatedUncompressedSize}} uncompressed data - {{collection.formatedIndexSize}} index</div>
                     </div>
                 </div>
                 <div class="panel-collapse" id="{{collection.collapseId}}" style="height: 0px;">
                     <div class="panel-body">
-                        <div ng-repeat="chunk in collection.chunks">
-                            <h4>Delivery Chunk {{chunk.key}}</h4>
-                            <table class="table table-striped">
+                        <p><strong>Collection Information</strong></p>
+                        <ul>
+                            <li ng-repeat="info in collection.infos">{{info}}</li>
+                        </ul>
+                        <!--<div ng-repeat="chunk in collection.chunks">-->
+                            <!--<h4>Delivery Chunk {{chunk.key}}</h4>-->
+                            <table class="table">
                                 <thead>
                                 <tr>
-                                    <th>Version / Info</th>
+                                    <th>Delivery / Version / Info</th>
                                     <th>Date</th>
                                     <th>Compressed</th>
                                     <th>Uncompressed</th>
@@ -36,7 +50,18 @@
                                     <th>&nbsp;</th>
                                 </tr>
                                 </thead>
-                                <tbody>
+                                <tbody ng-repeat="chunk in collection.chunks">
+                                <tr class="active">
+                                    <th><strong><small>{{chunk.key}}</small></strong></th>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                    <th>
+                                        <span class="label label-success" ng-show="chunk.active">Active</span>
+                                        <span class="label label-default" ng-show="!chunk.active">Inactive</span>
+                                    </th>
+                                </tr>
                                 <tr ng-repeat="version in chunk.versions">
                                     <td>
                                         <strong><small>{{version.version}}</small></strong>
@@ -47,7 +72,8 @@
                                     <td>{{version.formatedUncompressedSize}}</td>
                                     <td>{{version.formatedIndexSize}}</td>
                                     <td>
-                                        <span class="label label-success" ng-show="version.active">Running</span>
+                                        <span class="label label-success" ng-show="version.active">Active</span>
+                                        <span class="label label-default" ng-show="!version.active">Inactive</span>
                                     </td>
 
                                 </tr>
@@ -62,7 +88,7 @@
                                 </tbody>
                             </table>
                             <hr/>
-                        </div>
+                        <!--</div>-->
                     </div>
                 </div>
             </div>

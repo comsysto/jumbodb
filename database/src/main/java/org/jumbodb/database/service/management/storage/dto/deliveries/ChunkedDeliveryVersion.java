@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.management.storage.dto.deliveries;
 
 import org.apache.commons.io.FileUtils;
-import org.jumbodb.database.service.management.storage.dto.collections.DeliveryChunk;
 
 import java.util.List;
 
@@ -20,26 +19,30 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
     private long compressedSize = -1;
     private long uncompressedSize = -1;
     private long indexSize = -1;
-    private boolean versionActive = false;
-    private boolean chunkActive = false;
+    private boolean activeVersion = false;
+    private boolean activeChunk = false;
 
-    public ChunkedDeliveryVersion(String collapseId, String chunkKey, String version, String info, String date, boolean versionActive, boolean chunkActive, List<VersionedJumboCollection> collections) {
+    public ChunkedDeliveryVersion(String collapseId, String chunkKey, String version, String info, String date, boolean activeVersion, boolean activeChunk, List<VersionedJumboCollection> collections) {
         this.collapseId = collapseId;
         this.chunkKey = chunkKey;
         this.version = version;
         this.info = info;
         this.date = date;
-        this.versionActive = versionActive;
+        this.activeVersion = activeVersion;
         this.collections = collections;
-        this.chunkActive = chunkActive;
+        this.activeChunk = activeChunk;
     }
 
-    public boolean isVersionActive() {
-        return versionActive;
+    public boolean isActiveVersion() {
+        return activeVersion;
     }
 
-    public boolean isChunkActive() {
-        return chunkActive;
+    public boolean isActiveChunk() {
+        return activeChunk;
+    }
+
+    public boolean isActive() {
+        return isActiveChunk() && isActiveVersion();
     }
 
     public String getCollapseId() {

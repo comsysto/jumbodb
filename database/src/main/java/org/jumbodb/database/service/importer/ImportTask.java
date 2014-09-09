@@ -92,7 +92,7 @@ public class ImportTask implements Runnable {
 
                     if (messageDigest != null) {
                         String digest = Hex.encodeHexString(messageDigest.digest());
-                        if (digest.equals(information.getChecksum())) {
+                        if (!digest.equals(information.getChecksum())) {
                             throw new FileChecksumException(
                               "Wrong checksum for + " + information.toString() + " Calculated checksum: " + digest);
                         }

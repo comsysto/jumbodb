@@ -15,13 +15,17 @@
                 <div class="panel-heading">
                     <div class="accordion-toggle">
                         <div class="row">
-                            <span class="col-md-8">
-                            <a href="#{{delivery.collapseId}}" data-parent="#accordion2" data-toggle="collapse">
-                                <strong>{{delivery.chunkKey}} - {{delivery.version}}</strong>
-                            </a>
-                            </span>
-                            <span class="label label-success offset2" ng-show="delivery.active">Running </span>
-                            <!--<span class="label offset2 label-default" ng-show="!delivery.active">None running </span>-->
+                            <div class="col-md-8">
+                                <a href="#{{delivery.collapseId}}" data-parent="#accordion2" data-toggle="collapse">
+                                    <strong>{{delivery.chunkKey}} - {{delivery.version}}</strong>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="label label-success space-label" ng-show="delivery.active">Active </span>
+                                <span class="label label-default space-label" ng-show="!delivery.activeChunk">Chunk inactive </span>
+                                <span class="label label-default space-label" ng-show="!delivery.activeVersion">Version inactive </span>
+                            </div>
+
                         </div>
                         <div style="font-size: smaller;">{{delivery.info}}</div>
                         <div style="font-size: smaller;">{{delivery.date}} - {{delivery.formatedCompressedSize}} compressed data - {{delivery.formatedUncompressedSize}} uncompressed data - {{delivery.formatedIndexSize}} index</div>
@@ -34,6 +38,7 @@
                                 <thead>
                                 <tr>
                                     <th>Collection</th>
+                                    <th>Info</th>
                                     <th>Compressed</th>
                                     <th>Uncompressed</th>
                                     <th>Index</th>
@@ -42,6 +47,7 @@
                                 <tbody>
                                 <tr ng-repeat="collection in delivery.collections">
                                     <td>{{collection.collectionName}}</td>
+                                    <td><small>{{collection.info}}</small></td>
                                     <td>{{collection.formatedCompressedSize}}</td>
                                     <td>{{collection.formatedUncompressedSize}}</td>
                                     <td>{{collection.formatedIndexSize}}</td>
@@ -49,17 +55,22 @@
                                 </tr>
                                 <tr>
                                     <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
                                     <td><strong>{{delivery.formatedCompressedSize}}</strong></td>
                                     <td><strong>{{delivery.formatedUncompressedSize}}</strong></td>
                                     <td><strong>{{delivery.formatedIndexSize}}</strong></td>
                                 </tr>
                                 </tbody>
                             </table>
-                            <button class="btn btn-default" ng-click="activateChunkedVersion(delivery.chunkKey, delivery.version)"><i class="icon-hand-right icon-white"></i> Activate delivery version</button>
+                            <button class="btn btn-default" ng-disabled="delivery.activeChunk" ng-click="activateChunkedVersion(delivery.chunkKey, delivery.version)"><i class="icon-hand-right icon-white"></i> Activate chunk</button>
+                            &nbsp;&nbsp;
+                            <button class="btn btn-default" ng-disabled="!delivery.activeChunk" ng-click="activateChunkedVersion(delivery.chunkKey, delivery.version)"><i class="icon-hand-right icon-white"></i> Disable chunk</button>
+                            &nbsp;&nbsp;
+                            <button class="btn btn-default" ng-disabled="delivery.activeVersion" ng-click="activateChunkedVersion(delivery.chunkKey, delivery.version)"><i class="icon-hand-right icon-white"></i> Activate version</button>
                             &nbsp;&nbsp;
                             <button class="btn btn-default" ng-click="toggleReplication()"><i class="icon-share icon-white"></i> Replicate</button>
                             &nbsp;&nbsp;
-                            <button class="btn btn-danger" ng-click="deleteChunkedVersion(delivery.chunkKey, delivery.version)"><i class="icon-trash icon-white"></i> Delete delivery version</button>
+                            <button class="btn btn-danger" ng-click="deleteChunkedVersion(delivery.chunkKey, delivery.version)"><i class="icon-trash icon-white"></i> Delete delivery</button>
                             <p/>
                             <div class="alert" ng-show="showReplication">
                                 <h3>Replication</h3>
@@ -67,7 +78,8 @@
                                     <input ng-model="replication.host" type="text" class="input-large" placeholder="Host" required>
                                     <input ng-model="replication.port" type="number" class="input-small" required>
                                     <label class="checkbox">
-                                        <input ng-model="replication.activate" type="checkbox"> Activate
+                                        <input ng-model="replication.activateChunk" type="checkbox"> Activate chunk
+                                        <input ng-model="replication.activateVersion" type="checkbox"> Activate version
                                     </label>
                                     &nbsp;&nbsp;&nbsp;
                                     <button type="submit" ng-click="startReplication(replication, delivery)" ng-disabled="replicationForm.$invalid" class="btn btn-default">Start replication</button>

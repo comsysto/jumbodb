@@ -11,6 +11,7 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     private String chunkKey;
     private String version;
     private String collectionName;
+    private String info;
     private String date;
     private String sourcePath;
     private String strategy;
@@ -18,17 +19,22 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     private long uncompressedSize;
     private long indexSize;
 
-    public VersionedJumboCollection(String chunkKey, String version, String collectionName,
+    public VersionedJumboCollection(String chunkKey, String version, String collectionName, String info,
       String date, String sourcePath, String strategy, long compressedSize, long uncompressedSize, long indexSize) {
         this.collectionName = collectionName;
         this.version = version;
         this.chunkKey = chunkKey;
+        this.info = info;
         this.date = date;
         this.sourcePath = sourcePath;
         this.strategy = strategy;
         this.compressedSize = compressedSize;
         this.uncompressedSize = uncompressedSize;
         this.indexSize = indexSize;
+    }
+
+    public String getInfo() {
+        return info;
     }
 
     public String getSourcePath() {
@@ -85,13 +91,19 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof VersionedJumboCollection)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        VersionedJumboCollection that = (VersionedJumboCollection) o;
+        final VersionedJumboCollection that = (VersionedJumboCollection) o;
 
-        if (!collectionName.equals(that.collectionName)) return false;
+        if (!collectionName.equals(that.collectionName)) {
+            return false;
+        }
 
         return true;
     }
@@ -104,13 +116,16 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     @Override
     public String toString() {
         return "VersionedJumboCollection{" +
-                "collectionName='" + collectionName + '\'' +
-                ", version='" + version + '\'' +
-                ", chunkKey='" + chunkKey + '\'' +
-                ", date='" + date + '\'' +
-                ", compressedSize=" + compressedSize +
-                ", uncompressedSize=" + uncompressedSize +
-                ", indexSize=" + indexSize +
-                '}';
+          "chunkKey='" + chunkKey + '\'' +
+          ", version='" + version + '\'' +
+          ", collectionName='" + collectionName + '\'' +
+          ", info='" + info + '\'' +
+          ", date='" + date + '\'' +
+          ", sourcePath='" + sourcePath + '\'' +
+          ", strategy='" + strategy + '\'' +
+          ", compressedSize=" + compressedSize +
+          ", uncompressedSize=" + uncompressedSize +
+          ", indexSize=" + indexSize +
+          '}';
     }
 }

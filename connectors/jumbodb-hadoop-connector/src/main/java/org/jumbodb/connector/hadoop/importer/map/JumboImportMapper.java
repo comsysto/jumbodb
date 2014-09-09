@@ -93,6 +93,9 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
     }
 
     private String resolveChecksum(FileSystem fs, ChecksumType checksumType, Path indexFile) throws IOException {
+        if(checksumType == ChecksumType.NONE) {
+            return null;
+        }
         Path checksumFile = indexFile.suffix(checksumType.getFileSuffix());
         FSDataInputStream is = null;
         try {

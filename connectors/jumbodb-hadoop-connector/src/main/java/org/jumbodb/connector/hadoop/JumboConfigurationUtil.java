@@ -180,9 +180,11 @@ public class JumboConfigurationUtil {
             job.setSortDatePattern(importCollection.getSortDatePattern() != null ? importCollection.getSortDatePattern() : importDefinition.getDatePattern());
             job.setSortType(importCollection.getSortType());
             job.setInputPath(new Path(importCollection.getInput()));
-            job.setSortedOutputPath(importCollection.getSort() != null && importCollection.getSort().size() > 0 ? new Path(outputData) : null);
+            job.setSortedOutputPath(
+              importCollection.getSort() != null && importCollection.getSort().size() > 0 ? new Path(outputData) : null);
             job.setIndexOutputPath(new Path(outputIndex));
             job.setLogOutputPath(new Path(outputLog));
+            job.setNumberOfOutputFiles(importCollection.getNumberOfOutputFiles() != null ? importCollection.getNumberOfOutputFiles() : importDefinition.getNumberOfOutputFiles());
             result.add(job);
         }
         return result;
@@ -195,7 +197,7 @@ public class JumboConfigurationUtil {
         return output + "/" + dateStamp;
     }
 
-    public static Set<CommitNotification> convertToFinishedNotifications(ImportDefinition importDefinition) {
+    public static Set<CommitNotification> convertToImportCommits(ImportDefinition importDefinition) {
         Set<CommitNotification> result = new HashSet<CommitNotification>();
         String deliveryChunkKey = importDefinition.getDeliveryChunkKey();
         List<ImportHost> importHosts = importDefinition.getHosts();

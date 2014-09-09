@@ -62,7 +62,7 @@ public class JsonImporterJob extends Configured implements Tool {
             sortJob.setMapOutputValueClass(Text.class);
             sortJob.setOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
             sortJob.setOutputValueClass(Text.class);
-            sortJob.setNumReduceTasks(importDefinition.getNumberOfOutputFiles());
+            sortJob.setNumReduceTasks(importJob.getNumberOfOutputFiles());
             sortJob.setOutputFormatClass(SnappyDataV1OutputFormat.class);
             ControlledJob controlledSortJob = new ControlledJob(sortJob, Collections.<ControlledJob>emptyList());
             control.addJob(controlledSortJob);
@@ -75,9 +75,9 @@ public class JsonImporterJob extends Configured implements Tool {
             control.addJobCollection(jumboIndexAndImportJob);
             System.out.println("Waiting Jobs " + control.getWaitingJobList().size());
         }
-        JumboJobCreator.initImport(importDefinition.getHosts(), importDefinition.getDeliveryChunkKey(), importDefinition.getDescription(), conf);
         JumboMetaUtil.writeDeliveryMetaData(new Path(outputWithDate), importDefinition.getDescription(), conf);
         JumboMetaUtil.writeActiveMetaData(new Path(outputWithDate), conf);
+        JumboJobCreator.initImport(importDefinition.getHosts(), importDefinition.getDeliveryChunkKey(), importDefinition.getDescription(), conf);
 
         Thread t = new Thread(control);
         t.start();
@@ -89,8 +89,8 @@ public class JsonImporterJob extends Configured implements Tool {
                 System.err.println(e);
             }
         }
-        Set<CommitNotification> commitNotifications = JumboConfigurationUtil.convertToFinishedNotifications(importDefinition);
-        JumboJobCreator.sendFinishedNotification(commitNotifications, control, conf);
+        Set<CommitNotification> commitNotifications = JumboConfigurationUtil.convertToImportCommits(importDefinition);
+        JumboJobCreator.commitImport(commitNotifications, control, conf);
         return control.getFailedJobList().size() == 0 ? 0 : 1;
     }
 

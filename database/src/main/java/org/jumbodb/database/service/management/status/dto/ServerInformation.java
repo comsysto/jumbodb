@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.management.status.dto;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * User: carsten

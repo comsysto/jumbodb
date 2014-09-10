@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query
 
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.jumbodb.common.query.JumboQuery
 import spock.lang.Specification
 

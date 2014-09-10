@@ -21,7 +21,8 @@ configurations {
 }
 
 dependencies {
-    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+//    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.4.2'
     compile "org.springframework:spring-context:$springVersion"
 //    compile "org.apache.hadoop:hadoop-core:1.0.3"
     compile 'commons-io:commons-io:2.3'

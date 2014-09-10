@@ -26,6 +26,10 @@ sourceSets {
     }
 }
 
+configurations {
+    compile.exclude group: "org.slf4j", module: "log4j-over-slf4j"
+}
+
 dependencies {
     deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
     compile project(':connectors:jumbodb-java-connector')

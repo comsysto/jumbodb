@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * User: carsten
- * Date: 4/17/13
- * Time: 2:32 PM
+ * STarter for the JSON import Job
+ *
+ * @author Carsten Hufe
  */
 public class JsonImporterJob extends Configured implements Tool {
 

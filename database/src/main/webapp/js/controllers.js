@@ -77,9 +77,27 @@ define(['angular' ], function (angular) {
 				});
 			}
 
+            $scope.activateChunk = function(chunkDeliveryKey) {
+                if(confirm('Are you sure?')) {
+                    $http.post('jumbodb/rest/chunk/' + chunkDeliveryKey + '/activate').success(function(data) {
+                        fetchData();
+                        buildMessage(data)
+                    });
+                }
+            }
+
+            $scope.inactivateChunk = function(chunkDeliveryKey) {
+                if(confirm('Are you sure?')) {
+                    $http.post('jumbodb/rest/chunk/' + chunkDeliveryKey + '/inactivate').success(function(data) {
+                        fetchData();
+                        buildMessage(data)
+                    });
+                }
+            }
+
 			$scope.activateChunkedVersion = function(chunkDeliveryKey, version) {
 				if(confirm('Are you sure?')) {
-					$http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
+					$http.post('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/activate').success(function(data) {
 						fetchData();
 						buildMessage(data)
 					});
@@ -88,7 +106,7 @@ define(['angular' ], function (angular) {
 
 
 			$scope.deleteChunkedVersion = function(chunkDeliveryKey, version) {
-				if(confirm('Are you sure?')) {
+				if(confirm('This action is not revertable and will delete all collection within this delivery. Are you sure?')) {
 					$http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
 						fetchData();
 						buildMessage(data);

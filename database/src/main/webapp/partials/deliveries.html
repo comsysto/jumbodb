@@ -62,9 +62,9 @@
                                 </tr>
                                 </tbody>
                             </table>
-                            <button class="btn btn-default" ng-disabled="delivery.activeChunk" ng-click="activateChunkedVersion(delivery.chunkKey, delivery.version)"><i class="icon-hand-right icon-white"></i> Activate chunk</button>
+                            <button class="btn btn-default" ng-disabled="delivery.activeChunk" ng-click="activateChunk(delivery.chunkKey)"><i class="icon-hand-right icon-white"></i> Activate chunk</button>
                             &nbsp;&nbsp;
-                            <button class="btn btn-default" ng-disabled="!delivery.activeChunk" ng-click="activateChunkedVersion(delivery.chunkKey, delivery.version)"><i class="icon-hand-right icon-white"></i> Disable chunk</button>
+                            <button class="btn btn-default" ng-disabled="!delivery.activeChunk" ng-click="inactivateChunk(delivery.chunkKey)"><i class="icon-hand-right icon-white"></i> Disable chunk</button>
                             &nbsp;&nbsp;
                             <button class="btn btn-default" ng-disabled="delivery.activeVersion" ng-click="activateChunkedVersion(delivery.chunkKey, delivery.version)"><i class="icon-hand-right icon-white"></i> Activate version</button>
                             &nbsp;&nbsp;

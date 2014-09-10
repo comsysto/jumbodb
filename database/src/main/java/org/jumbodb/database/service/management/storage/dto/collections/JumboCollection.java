@@ -63,11 +63,9 @@ public class JumboCollection implements Comparable<JumboCollection> {
 
     private Boolean calculateActiveVersion() {
         for (DeliveryChunk chunk : chunks) {
-            if(chunk.isActive()) {
-                for (DeliveryVersion deliveryVersion : chunk.getVersions()) {
-                    if(deliveryVersion.isActive()) {
-                        return Boolean.TRUE;
-                    }
+            for (DeliveryVersion deliveryVersion : chunk.getVersions()) {
+                if(deliveryVersion.isActive()) {
+                    return Boolean.TRUE;
                 }
             }
         }

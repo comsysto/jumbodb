@@ -109,7 +109,7 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
             DigestOutputStream digestStream = new DigestOutputStream(fsDataOutputStream, getMessageDigest());
             DataOutputStream dos = new DataOutputStream(digestStream);
             dos.writeLong(countingOutputStream.getByteCount());
-            dos.write(getSnappyBlockSize());
+            dos.writeInt(getSnappyBlockSize());
             for (Integer chunkSize : chunkSizes) {
                 dos.writeInt(chunkSize);
             }

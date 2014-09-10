@@ -26,16 +26,14 @@ sourceSets {
     }
 }
 
-configurations {
-    compile.exclude group: "org.slf4j", module: "log4j-over-slf4j"
-}
-
 dependencies {
     deployerJars ("org.apache.maven.wagon:wagon-webdav:1.0-beta-2")
     compile project(':connectors:jumbodb-java-connector')
     compile project(':commons:query')
     compile project(':commons:geo')
-    compile project(':commons:data')
+    compile project(':commons:data') {
+
+    }
 
 //    compile ("org.apache.hadoop:hadoop-mapreduce-client-core:$hadoopVersion")
 //    compile ("org.apache.hadoop:hadoop-mapreduce-client-app:$hadoopVersion")

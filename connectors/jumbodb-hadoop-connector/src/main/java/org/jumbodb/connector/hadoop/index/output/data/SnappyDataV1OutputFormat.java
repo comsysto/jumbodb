@@ -113,7 +113,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             DigestOutputStream digestStream = new DigestOutputStream(fsDataOutputStream, getMessageDigest());
             DataOutputStream dos = new DataOutputStream(digestStream);
             dos.writeLong(length);
-            dos.write(SNAPPY_BLOCK_SIZE);
+            dos.writeInt(SNAPPY_BLOCK_SIZE);
             for (Integer chunkSize : chunkSizes) {
                 dos.writeInt(chunkSize);
             }

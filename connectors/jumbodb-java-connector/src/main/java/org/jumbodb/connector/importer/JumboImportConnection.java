@@ -4,10 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.JumboConstants;
-import org.jumbodb.connector.exception.JumboCommonException;
-import org.jumbodb.connector.exception.JumboDeliveryVersionExistsException;
-import org.jumbodb.connector.exception.JumboFileChecksumException;
-import org.jumbodb.connector.exception.JumboWrongVersionException;
+import org.jumbodb.connector.exception.*;
 import org.xerial.snappy.SnappyInputStream;
 
 import java.io.*;
@@ -134,6 +131,9 @@ public class JumboImportConnection implements Closeable {
         }
         else if(":error:deliveryversionexists".equals(command)) {
             throw new JumboDeliveryVersionExistsException(message);
+        }
+        else if(":error:unknown".equals(command)) {
+            throw new JumboUnknownException(message);
         }
         throw new JumboCommonException("Error on import [" + command + "]: " + message);
     }

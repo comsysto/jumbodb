@@ -116,9 +116,16 @@ public class DatabaseImportSession implements Closeable {
             String deliveryVersion = dataInputStream.readUTF();
             boolean activateChunk = dataInputStream.readBoolean();
             boolean activateVersion = dataInputStream.readBoolean();
-            importHandler.onCommit(deliveryKey, deliveryVersion, activateChunk, activateVersion);
-            dataOutputStream.writeUTF(":success");
-            dataOutputStream.flush();
+            try {
+                importHandler.onCommit(deliveryKey, deliveryVersion, activateChunk, activateVersion);
+                dataOutputStream.writeUTF(":success");
+                dataOutputStream.flush();
+            } catch (Throwable ex) {
+                dataOutputStream.writeUTF(":error:unknown");
+                dataOutputStream.writeUTF("Failed to commit: " + ex.getMessage());
+                dataOutputStream.flush();
+            }
+
         } else {
             throw new UnsupportedOperationException("Unsupported command: " + cmd);
         }

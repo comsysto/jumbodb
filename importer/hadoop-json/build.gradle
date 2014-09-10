@@ -37,10 +37,6 @@ sourceSets {
     }
 }
 
-configurations {
-    compile.exclude group: "org.slf4j", module: "log4j-over-slf4j"
-}
-
 dependencies {
     compile project(':connectors:jumbodb-hadoop-connector')
 

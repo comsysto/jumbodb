@@ -37,6 +37,13 @@ sourceSets {
     }
 }
 
+startScripts{
+    doLast{
+        println(windowsScript.text)
+//        windowsScript.text = "testen"
+    }
+}
+
 dependencies {
     compile project(':connectors:jumbodb-hadoop-connector')
 

@@ -63,6 +63,17 @@ class StorageManagementSpec extends Specification {
         2 * importServerMock.isImportRunning() >> false
     }
 
+    def "triggerReloadDatabases should call onDataChanged"() {
+        setup:
+        def jumboSearcherMock = Mock(JumboSearcher)
+        def importServerMock = Mock(ImportServer)
+        def storageManagement = new StorageManagement(new JumboConfiguration(12002, 12001, null, null), jumboSearcherMock, importServerMock)
+        when:
+        storageManagement.triggerReloadDatabases()
+        then:
+        1 * jumboSearcherMock.onDataChanged()
+    }
+
     def "findQueryableCollections should return two queryable collections"() {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)

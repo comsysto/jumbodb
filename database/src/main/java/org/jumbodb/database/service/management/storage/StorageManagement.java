@@ -75,6 +75,10 @@ public class StorageManagement {
         return new TemporaryFiles(sizeFormated, files != null ? files.length : 0, importServer.isImportRunning());
     }
 
+    public void triggerReloadDatabases() {
+        jumboSearcher.onDataChanged();
+    }
+
     public void maintenanceCleanupTemporaryFiles() {
         try {
             if (importServer.isImportRunning()) {

@@ -67,8 +67,8 @@ public class ExportDeliveryTask implements Runnable {
             exportDelivery.setStatus("Finished");
             long endTimeMillis = System.currentTimeMillis();
             long timeDiff = endTimeMillis - exportDelivery.getStartTimeMillis();
-            long speed = (exportDelivery.getCurrentBytes() * 1000) / timeDiff;
-            exportDelivery.setCopyRateInBytes(speed);
+            long finalSpeed = (exportDelivery.getCurrentBytes() * 1000) / timeDiff;
+            exportDelivery.setCopyRateInBytes(finalSpeed);
         } catch (Exception ex) {
             exportDelivery.setState(ExportDelivery.State.FAILED);
             exportDelivery.setStatus("Error: " + ex.getMessage());

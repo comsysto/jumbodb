@@ -9,6 +9,10 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.partition.BinaryPartitioner;
+import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
+import org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedPartitioner;
+import org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
@@ -69,6 +73,7 @@ public class JsonImporterJob extends Configured implements Tool {
             sortJob.setOutputValueClass(dataStrategy.getOutputClass());
             sortJob.setNumReduceTasks(importJob.getNumberOfOutputFiles());
             sortJob.setOutputFormatClass(dataStrategy.getOutputFormat());
+            sortJob.setPartitionerClass(HashPartitioner.class);
             ControlledJob controlledSortJob = new ControlledJob(sortJob, Collections.<ControlledJob>emptyList());
             control.addJob(controlledSortJob);
 

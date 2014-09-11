@@ -36,6 +36,17 @@ class RestControllerSpec extends Specification {
         1 * storageManagementMock.maintenanceCleanupTemporaryFiles()
     }
 
+    def "triggerReloadDatabases"() {
+        setup:
+        def controller = new RestController()
+        def storageManagementMock = Mock(StorageManagement)
+        controller.setStorageManagement(storageManagementMock)
+        when:
+        controller.triggerReloadDatabases()
+        then:
+        1 * storageManagementMock.triggerReloadDatabases()
+    }
+
     def "getJumboCollections"() {
         setup:
         def controller = new RestController()

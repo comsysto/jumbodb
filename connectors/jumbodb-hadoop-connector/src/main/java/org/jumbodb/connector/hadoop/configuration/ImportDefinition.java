@@ -18,7 +18,7 @@ public class ImportDefinition {
     private List<ImportCollection> importCollection;
     private List<HadoopConfig> hadoop = new LinkedList<HadoopConfig>();
     private String output;
-    private Integer numberOfOutputFiles = 50;
+    private Integer numberOfDataFiles = 32;
     private String datePattern = "yyyy-MM-dd HH:mm:ss";
     private ChecksumType checksum;
 
@@ -38,12 +38,12 @@ public class ImportDefinition {
         this.datePattern = datePattern;
     }
 
-    public Integer getNumberOfOutputFiles() {
-        return numberOfOutputFiles;
+    public Integer getNumberOfDataFiles() {
+        return numberOfDataFiles;
     }
 
-    public void setNumberOfOutputFiles(Integer numberOfOutputFiles) {
-        this.numberOfOutputFiles = numberOfOutputFiles;
+    public void setNumberOfDataFiles(Integer numberOfDataFiles) {
+        this.numberOfDataFiles = numberOfDataFiles;
     }
 
     public String getOutput() {

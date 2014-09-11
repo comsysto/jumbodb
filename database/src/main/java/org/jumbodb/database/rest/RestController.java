@@ -153,6 +153,17 @@ public class RestController {
         }
     }
 
+    @RequestMapping(value = "/maintenance/databases/reload", method = RequestMethod.POST)
+    @ResponseBody
+    public Message triggerReloadDatabases() {
+        try {
+            storageManagement.triggerReloadDatabases();
+            return new Message("success", "Databases meta information was reloaded successfully");
+        } catch(Exception e) {
+            return new Message("error", "Exception: " + e.getMessage());
+        }
+    }
+
     private String checkNull(String property) {
         if(property == null) {
             return "unknown";

@@ -12,7 +12,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.hadoop.configuration.*;
 import org.jumbodb.connector.hadoop.index.map.*;
 
@@ -187,7 +186,7 @@ public class JumboConfigurationUtil {
               importCollection.getSort() != null && importCollection.getSort().size() > 0 ? new Path(outputData) : null);
             job.setIndexOutputPath(new Path(outputIndex));
             job.setLogOutputPath(new Path(outputLog));
-            job.setNumberOfOutputFiles(importCollection.getNumberOfOutputFiles() != null ? importCollection.getNumberOfOutputFiles() : importDefinition.getNumberOfOutputFiles());
+            job.setNumberOfOutputFiles(importCollection.getNumberOfOutputFiles() != null ? importCollection.getNumberOfOutputFiles() : importDefinition.getNumberOfDataFiles());
             result.add(job);
         }
         return result;

@@ -141,6 +141,14 @@ define(['angular' ], function (angular) {
                 });
             }
 
+            $scope.triggerReloadDatabases = function() {
+                $http.post('jumbodb/rest/maintenance/databases/reload').success(function(data) {
+                    fetchData();
+                    buildMessage(data);
+                });
+            }
+
+
             function buildMessage(data) {
                 var msg = {};
                 msg.error = (data.type == 'error')

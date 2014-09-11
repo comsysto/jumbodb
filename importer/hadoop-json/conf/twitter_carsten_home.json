@@ -8,11 +8,12 @@
     "output": "file:///C:/Development/data/twitter/output/",
     "numberOfOutputFiles": 5,
     "hadoop": [],
+    "checksum": "SHA1",
     "importCollection": [
         {
             "input": "file:///C:/Development/data/twitter/input/",
             "description": "Twitter data",
-            "collectionName": "carsten.twitter2",
+            "collectionName": "carsten.twitter",
             "sort": ["geo.coordinates"],
             "sortType": "GEOHASH",
             "dataStrategy": "JSON_SNAPPY_V1",

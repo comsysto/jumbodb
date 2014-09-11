@@ -1,6 +1,7 @@
 package org.jumbodb.connector.hadoop.configuration;
 
 import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 
@@ -19,7 +20,7 @@ public class JsonDataStrategy extends DataStrategy {
     }
 
     @Override
-    public Class<?> getSortMapperByType(final String type) {
+    public Class<? extends Mapper> getSortMapperByType(final String type) {
         return JumboConfigurationUtil.getSortMapperByType(type);
     }
 }

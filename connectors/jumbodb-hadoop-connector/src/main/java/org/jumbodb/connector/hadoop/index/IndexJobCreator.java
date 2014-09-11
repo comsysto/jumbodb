@@ -8,6 +8,7 @@ import org.jumbodb.connector.hadoop.configuration.IndexField;
 import org.jumbodb.connector.hadoop.configuration.IndexStrategies;
 import org.jumbodb.connector.hadoop.configuration.JumboCustomImportJob;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
+import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.output.data.SnappyDataV1InputFormat;
 import org.jumbodb.connector.hadoop.index.strategy.datetime.snappy.GenericJsonDateTimeIndexMapper;
@@ -48,7 +49,7 @@ public class IndexJobCreator {
         Class<? extends AbstractIndexMapper> mapper = getIndexStrategy(indexField);
         AbstractIndexMapper abstractIndexMapper = createInstance(mapper);
         job.getConfiguration().set(JumboConfigurationUtil.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
-        JumboConfigurationUtil.setChecksumType(job, genericImportJob.getChecksumType());
+        JumboInputFormat.setChecksumType(job, genericImportJob.getChecksumType());
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
         job.setInputFormatClass(DataStrategies.getDataStrategy(genericImportJob.getDataStrategy()).getInputFormat());
@@ -84,7 +85,7 @@ public class IndexJobCreator {
         job.setOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setPartitionerClass(abstractIndexMapper.getPartitioner());
-        JumboConfigurationUtil.setChecksumType(job, customImportJob.getChecksumType());
+        JumboInputFormat.setChecksumType(job, customImportJob.getChecksumType());
         return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
     }
 

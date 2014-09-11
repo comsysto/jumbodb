@@ -11,12 +11,15 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.hadoop.JumboMetaUtil;
+import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -40,6 +43,7 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
         private final FileSystem fs;
         private final CountingOutputStream countingOutputStream;
         private final DigestOutputStream digestStream;
+        private final MessageDigest fileMessageDigest;
         private List<Integer> chunkSizes = new LinkedList<Integer>();
         private final FSDataOutputStream fileOut;
 
@@ -50,7 +54,8 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
             file = getDefaultWorkFile(context, ".idx");
             fs = file.getFileSystem(conf);
             fileOut = fs.create(file, false);
-            digestStream = new DigestOutputStream(fileOut, getMessageDigest());
+            fileMessageDigest = getMessageDigest(conf);
+            digestStream = new DigestOutputStream(fileOut, fileMessageDigest);
             bufferedOutputStream = new BufferedOutputStream(digestStream) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
@@ -63,13 +68,6 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
             dataOutputStream = new DataOutputStream(countingOutputStream);
         }
 
-        private MessageDigest getMessageDigest() {
-            try {
-                return MessageDigest.getInstance("MD5");
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-        }
 
         @Override
         public synchronized void write(T k, OV v) throws IOException, InterruptedException {
@@ -84,39 +82,59 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
             IOUtils.closeStream(bufferedOutputStream);
             IOUtils.closeStream(digestStream);
             IOUtils.closeStream(fileOut);
-            writeMd5Digest();
-            writeSnappyChunks();
+            Configuration conf = taskAttemptContext.getConfiguration();
+            writeSnappyChunks(conf);
+            writeMd5Digest(file, fileMessageDigest, taskAttemptContext.getConfiguration());
             JumboMetaUtil.writeIndexMetaData(file.getParent(), getStrategy(), taskAttemptContext);
 
         }
 
-        // CARSTEN make configurable
-        private void writeMd5Digest() throws IOException {
-            writeMd5Digest(file, digestStream);
-        }
-
-        private void writeMd5Digest(Path file, DigestOutputStream stream) throws IOException {
-            String digestRawHex = Hex.encodeHexString(stream.getMessageDigest().digest());
-            Path path = file.suffix(".md5");
-            FSDataOutputStream fsDataOutputStream = fs.create(path, false);
-            fsDataOutputStream.write(digestRawHex.getBytes("UTF-8"));
-            fsDataOutputStream.close();
-        }
-
-        private void writeSnappyChunks() throws IOException {
+        private void writeSnappyChunks(Configuration configuration) throws IOException {
             Path path = file.suffix(".chunks");
             FSDataOutputStream fsDataOutputStream = fs.create(path, false);
-            DigestOutputStream digestStream = new DigestOutputStream(fsDataOutputStream, getMessageDigest());
+            MessageDigest messageDigest = getMessageDigest(configuration);
+            OutputStream digestStream = getDigestOutputStream(fsDataOutputStream, messageDigest);
             DataOutputStream dos = new DataOutputStream(digestStream);
             dos.writeLong(countingOutputStream.getByteCount());
             dos.writeInt(getSnappyBlockSize());
             for (Integer chunkSize : chunkSizes) {
                 dos.writeInt(chunkSize);
             }
-            dos.close();
-            digestStream.close();
-            fsDataOutputStream.close();
-            writeMd5Digest(path, digestStream);
+            IOUtils.closeStream(dos);
+            IOUtils.closeStream(digestStream);
+            IOUtils.closeStream(fsDataOutputStream);
+            writeMd5Digest(path, messageDigest, configuration);
+        }
+
+        private OutputStream getDigestOutputStream(FSDataOutputStream fsDataOutputStream, MessageDigest messageDigest) {
+            if(messageDigest == null) {
+                return fsDataOutputStream;
+            }
+            return new DigestOutputStream(fsDataOutputStream, messageDigest);
+        }
+
+        private MessageDigest getMessageDigest(Configuration conf) {
+            ChecksumType checksumType = JumboInputFormat.getChecksumType(conf);
+            if(checksumType == ChecksumType.NONE) {
+                return null;
+            }
+            try {
+                return MessageDigest.getInstance(checksumType.getDigest());
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void writeMd5Digest(Path file, MessageDigest messageDigest, Configuration conf) throws IOException {
+            ChecksumType checksumType = JumboInputFormat.getChecksumType(conf);
+            if(checksumType == ChecksumType.NONE) {
+                return;
+            }
+            String digestRawHex = Hex.encodeHexString(messageDigest.digest());
+            Path path = file.suffix(checksumType.getFileSuffix());
+            FSDataOutputStream fsDataOutputStream = fs.create(path, false);
+            fsDataOutputStream.write(digestRawHex.getBytes("UTF-8"));
+            IOUtils.closeStream(fsDataOutputStream);
         }
     }
 

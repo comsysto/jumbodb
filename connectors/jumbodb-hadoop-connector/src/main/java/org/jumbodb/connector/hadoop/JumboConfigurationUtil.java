@@ -119,13 +119,6 @@ public class JumboConfigurationUtil {
         conf.getConfiguration().set(JumboConstants.JUMBO_COLLECTION_INFO, collectionInfo);
     }
 
-    public static void setChecksumType(Job conf, ChecksumType checksumType) throws IOException {
-        if(checksumType == null) {
-            return;
-        }
-        conf.getConfiguration().set(JumboConstants.JUMBO_CHECKSUM_TYPE, checksumType.toString());
-    }
-
     public static void setSortDatePatternConfig(Job conf, String sort) throws IOException {
         conf.getConfiguration().set(JumboConstants.JUMBO_SORT_DATEPATTERN_CONFIG, sort);
     }

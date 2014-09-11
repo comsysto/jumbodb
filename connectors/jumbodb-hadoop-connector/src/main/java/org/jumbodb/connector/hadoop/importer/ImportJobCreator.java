@@ -38,7 +38,7 @@ public class ImportJobCreator {
         JumboInputFormat.setIndexName(job, indexField != null ? indexField.getIndexName() : "not_set");
         JumboInputFormat.setCollectionName(job, genericImportJob.getCollectionName());
         JumboInputFormat.setDeliveryChunkKey(job, genericImportJob.getDeliveryChunkKey());
-        JumboConfigurationUtil.setChecksumType(job, genericImportJob.getChecksumType());
+        JumboInputFormat.setChecksumType(job, genericImportJob.getChecksumType());
         FileOutputFormat.setOutputPath(job, reportOutputPath);
         FileInputFormat.addInputPath(job, importPath);
         job.setJarByClass(ImportJobCreator.class);

@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop.importer.input;
 
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
@@ -25,6 +26,21 @@ import java.util.List;
  */
 public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
 
+
+    public static void setChecksumType(Job conf, ChecksumType checksumType) throws IOException {
+        if(checksumType == null) {
+            return;
+        }
+        conf.getConfiguration().set(JumboConstants.JUMBO_CHECKSUM_TYPE, checksumType.toString());
+    }
+
+    public static ChecksumType getChecksumType(Configuration conf) {
+        String checksum = conf.get(JumboConstants.JUMBO_CHECKSUM_TYPE);
+        if(checksum == null) {
+            return ChecksumType.NONE;
+        }
+        return ChecksumType.valueOf(checksum);
+    }
 
     public static void setDataType(JobContext context, String dataType) {
         context.getConfiguration().set(JumboConstants.DATA_TYPE, dataType);

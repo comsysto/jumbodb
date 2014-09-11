@@ -8,22 +8,21 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.hadoop.JumboMetaUtil;
+import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
     public static final String STRATEGY_KEY = "JSON_SNAPPY_V1";
@@ -41,13 +40,14 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
         private final byte[] lineBreak = "\n".getBytes("UTF-8");
 
         private final FSDataOutputStream fileOut;
-        private final DigestOutputStream digestOutputStream;
+        private final OutputStream digestOutputStream;
         private final BufferedOutputStream bufferedOutputStream;
         private final SnappyOutputStream snappyOutputStream;
         private final DataOutputStream dataOutputStream;
         private final List<Integer> chunkSizes = new LinkedList<Integer>();
         private final Path file;
         private final FileSystem fs;
+        private final MessageDigest fileMessageDigest;
         private long length = 0l;
 
         public SnappyDataV1Writer(TaskAttemptContext context)
@@ -56,7 +56,8 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             file = getDefaultWorkFile(context, ".snappy");
             fs = file.getFileSystem(conf);
             fileOut = fs.create(file, false);
-            digestOutputStream = new DigestOutputStream(fileOut, getMessageDigest(conf));
+            fileMessageDigest = getMessageDigest(conf);
+            digestOutputStream = getDigestOutputStream(fileOut, fileMessageDigest);
             bufferedOutputStream = new BufferedOutputStream(digestOutputStream) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
@@ -68,19 +69,25 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             dataOutputStream = new DataOutputStream(snappyOutputStream);
         }
 
-        // CARSTEN make configurable
         private MessageDigest getMessageDigest(Configuration conf) {
+            ChecksumType checksumType = JumboInputFormat.getChecksumType(conf);
+            if(checksumType == ChecksumType.NONE) {
+                return null;
+            }
             try {
-                return MessageDigest.getInstance("MD5");
+                return MessageDigest.getInstance(checksumType.getDigest());
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        // CARSTEN make configurable
-        private void writeMd5Digest(Path file, DigestOutputStream stream) throws IOException {
-            String digestRawHex = Hex.encodeHexString(stream.getMessageDigest().digest());
-            Path path = file.suffix(".md5");
+        private void writeMd5Digest(Path file, MessageDigest messageDigest, Configuration conf) throws IOException {
+            ChecksumType checksumType = JumboInputFormat.getChecksumType(conf);
+            if(checksumType == ChecksumType.NONE) {
+                return;
+            }
+            String digestRawHex = Hex.encodeHexString(messageDigest.digest());
+            Path path = file.suffix(checksumType.getFileSuffix());
             FSDataOutputStream fsDataOutputStream = fs.create(path, false);
             fsDataOutputStream.write(digestRawHex.getBytes("UTF-8"));
             IOUtils.closeStream(fsDataOutputStream);
@@ -102,15 +109,16 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             IOUtils.closeStream(bufferedOutputStream);
             IOUtils.closeStream(digestOutputStream);
             IOUtils.closeStream(fileOut);
-            writeSnappyChunks();
-            writeMd5Digest(file, digestOutputStream);
+            writeSnappyChunks(context.getConfiguration());
+            writeMd5Digest(file, fileMessageDigest, context.getConfiguration());
             JumboMetaUtil.writeCollectionMetaData(file.getParent(), STRATEGY_KEY, context);
         }
 
-        private void writeSnappyChunks() throws IOException {
+        private void writeSnappyChunks(Configuration configuration) throws IOException {
             Path path = file.suffix(".chunks");
             FSDataOutputStream fsDataOutputStream = fs.create(path, false);
-            DigestOutputStream digestStream = new DigestOutputStream(fsDataOutputStream, getMessageDigest());
+            MessageDigest messageDigest = getMessageDigest(configuration);
+            OutputStream digestStream = getDigestOutputStream(fsDataOutputStream, messageDigest);
             DataOutputStream dos = new DataOutputStream(digestStream);
             dos.writeLong(length);
             dos.writeInt(SNAPPY_BLOCK_SIZE);
@@ -120,7 +128,14 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             IOUtils.closeStream(dos);
             IOUtils.closeStream(digestStream);
             IOUtils.closeStream(fsDataOutputStream);
-            writeMd5Digest(path, digestStream);
+            writeMd5Digest(path, messageDigest, configuration);
+        }
+
+        private OutputStream getDigestOutputStream(FSDataOutputStream fsDataOutputStream, MessageDigest messageDigest) {
+            if(messageDigest == null) {
+                return fsDataOutputStream;
+            }
+            return new DigestOutputStream(fsDataOutputStream, messageDigest);
         }
     }
 }

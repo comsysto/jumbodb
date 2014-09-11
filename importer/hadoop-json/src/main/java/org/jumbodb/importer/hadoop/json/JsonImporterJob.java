@@ -19,6 +19,7 @@ import org.jumbodb.connector.hadoop.configuration.DataStrategies;
 import org.jumbodb.connector.hadoop.configuration.DataStrategy;
 import org.jumbodb.connector.hadoop.configuration.ImportDefinition;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
+import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.jumbodb.connector.hadoop.index.output.data.SnappyDataV1OutputFormat;
 
 import java.util.Collections;
@@ -56,7 +57,7 @@ public class JsonImporterJob extends Configured implements Tool {
             JumboConfigurationUtil.setSortConfig(sortJob, importJob.getSort());
             JumboConfigurationUtil.setSortDatePatternConfig(sortJob, importJob.getSortDatePattern());
             JumboConfigurationUtil.setCollectionInfo(sortJob, importJob.getDescription());
-            JumboConfigurationUtil.setChecksumType(sortJob, importDefinition.getChecksum());
+            JumboInputFormat.setChecksumType(sortJob, importDefinition.getChecksum());
             FileInputFormat.addInputPath(sortJob, importJob.getInputPath());
             FileOutputFormat.setOutputPath(sortJob, importJob.getSortedOutputPath());
             sortJob.setJarByClass(JsonImporterJob.class);

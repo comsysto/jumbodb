@@ -35,6 +35,7 @@ public class ExportDeliveryTask implements Runnable {
         try {
             exportDelivery.setState(ExportDelivery.State.RUNNING);
             exportDelivery.setStatus("Sending meta data");
+            exportDelivery.setStartTimeMillis(System.currentTimeMillis());
             List<DataInfo> dataInfoForDelivery = storageManagement.getDataInfoForDelivery(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion());
             List<IndexInfo> indexInfoForDelivery = storageManagement.getIndexInfoForDelivery(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion());
             long indexSize = getIndexSize(indexInfoForDelivery);
@@ -64,6 +65,10 @@ public class ExportDeliveryTask implements Runnable {
             exportDelivery.setCurrentBytes(exportDelivery.getTotalBytes());
             exportDelivery.setState(ExportDelivery.State.FINISHED);
             exportDelivery.setStatus("Finished");
+            long endTimeMillis = System.currentTimeMillis();
+            long timeDiff = endTimeMillis - exportDelivery.getStartTimeMillis();
+            long speed = (exportDelivery.getCurrentBytes() * 1000) / timeDiff;
+            exportDelivery.setCopyRateInBytes(speed);
         } catch (Exception ex) {
             exportDelivery.setState(ExportDelivery.State.FAILED);
             exportDelivery.setStatus("Error: " + ex.getMessage());

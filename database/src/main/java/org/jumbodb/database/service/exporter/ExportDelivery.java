@@ -10,6 +10,7 @@ public class ExportDelivery {
     private String id;
     private String host;
     private int port;
+    private long startTimeMillis;
     private boolean activateChunk;
     private boolean activateVersion;
     private String deliveryChunkKey;
@@ -19,6 +20,14 @@ public class ExportDelivery {
     private long currentBytes;
     private long totalBytes;
     private long copyRateInBytes;
+
+    public long getStartTimeMillis() {
+        return startTimeMillis;
+    }
+
+    public void setStartTimeMillis(long startTimeMillis) {
+        this.startTimeMillis = startTimeMillis;
+    }
 
     public void addCurrentBytes(long bytes) {
         currentBytes += bytes;

@@ -40,5 +40,5 @@ idea {
 // generate gradle bootstrapping
 // run gradle createWrapper
 task createWrapper(type: Wrapper) {
-  gradleVersion = '2.0'
+  gradleVersion = '2.1'
 }

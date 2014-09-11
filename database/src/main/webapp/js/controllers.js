@@ -62,7 +62,7 @@ define(['angular' ], function (angular) {
 			$scope.msg = {};
 
 			$scope.showReplication = false;
-			$scope.replication = {"port" :12001, "activate": true};
+			$scope.replication = {"port" :12001, "activateChunk": true, "activateVersion": true};
 
 			$scope.toggleReplication = function() {
 				$scope.showReplication = !$scope.showReplication;

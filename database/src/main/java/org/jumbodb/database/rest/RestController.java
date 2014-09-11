@@ -49,31 +49,6 @@ public class RestController {
         return status;
     }
 
-    private String checkNull(String property) {
-        if(property == null) {
-            return "unknown";
-        }
-        return property;
-    }
-
-
-    private Properties getBuildInfo() {
-        InputStream resourceAsStream = null;
-        Properties props = new Properties();
-        try {
-            resourceAsStream = servletContext.getResourceAsStream("/META-INF/jumbodb.properties");
-            if(resourceAsStream == null) {
-                return props;
-            }
-            props.load(resourceAsStream);
-        } catch (IOException e) {
-            // do nothing
-        } finally {
-            IOUtils.closeQuietly(resourceAsStream);
-        }
-        return props;
-    }
-
     @RequestMapping(value = "/collections", method = RequestMethod.GET)
     @ResponseBody
     public List<JumboCollection> getJumboCollections() {
@@ -178,6 +153,30 @@ public class RestController {
         }
     }
 
+    private String checkNull(String property) {
+        if(property == null) {
+            return "unknown";
+        }
+        return property;
+    }
+
+
+    private Properties getBuildInfo() {
+        InputStream resourceAsStream = null;
+        Properties props = new Properties();
+        try {
+            resourceAsStream = servletContext.getResourceAsStream("/META-INF/jumbodb.properties");
+            if(resourceAsStream == null) {
+                return props;
+            }
+            props.load(resourceAsStream);
+        } catch (IOException e) {
+            // do nothing
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
+        return props;
+    }
 
     @Autowired
     public void setStatusService(StatusService statusService) {

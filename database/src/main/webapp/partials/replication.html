@@ -38,8 +38,7 @@
                            {{replication.status}}
                         </p>
                         <p>{{replication.formattedCurrent}} of {{replication.formattedTotal}} copied</p>
-                        <p>Uncompressed Rate: {{replication.formattedCopyRateUncompressed}}</p>
-                        <p>Compressed Rate: {{replication.formattedCopyRateCompressed}}</p>
+                        <p>Copy Rate: {{replication.formattedCopyRate}}</p>
                     </td>
                     <td>
                         <button class="btn btn-danger" ng-show="replication.state == 'WAITING' || replication.state == 'RUNNING'" ng-click="abortReplication(replication.id)"><i class="icon-remove-sign icon-white"></i> Abort</button>

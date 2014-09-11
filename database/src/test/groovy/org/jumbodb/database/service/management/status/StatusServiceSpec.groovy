@@ -38,7 +38,6 @@ class StatusServiceSpec extends Specification {
         StringUtils.isNotBlank(info.getFreeMemory())
         StringUtils.isNotBlank(info.getAllocatedMemory())
         StringUtils.isNotBlank(info.getStartupTime())
-        StringUtils.isNotBlank(info.getStorageFormatVersion())
         StringUtils.isNotBlank(info.getIndexDiskFreeSpace())
         StringUtils.isNotBlank(info.getIndexDiskTotalSpace())
         StringUtils.isNotBlank(info.getIndexDiskUsedSpace())

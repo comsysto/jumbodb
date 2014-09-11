@@ -8,6 +8,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'project-reports'
     apply plugin: 'eclipse'
+    apply plugin: 'info'
   
     group = 'org.jumbodb'
     version = '0.1.0-SNAPSHOT'
@@ -25,6 +26,10 @@ subprojects {
     }
 }
 
+buildscript {
+    repositories { jcenter() }
+    dependencies { classpath 'com.netflix.nebula:gradle-info-plugin:1.9.+' }
+}
 
 idea {
     module {

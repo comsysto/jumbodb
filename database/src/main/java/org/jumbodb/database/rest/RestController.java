@@ -1,5 +1,6 @@
 package org.jumbodb.database.rest;
 
+import org.apache.commons.io.IOUtils;
 import org.jumbodb.database.rest.dto.Message;
 import org.jumbodb.database.service.exporter.ExportDelivery;
 import org.jumbodb.database.service.exporter.ExportDeliveryService;
@@ -17,7 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletContext;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * User: carsten
@@ -31,11 +36,42 @@ public class RestController {
     private StorageManagement storageManagement;
     private ExportDeliveryService exportDeliveryService;
     private QueryUtilService queryUtilService;
+    private ServletContext servletContext;
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     @ResponseBody
     public ServerInformation getStatus() {
-        return statusService.getStatus();
+        ServerInformation status = statusService.getStatus();
+        Properties buildInfo = getBuildInfo();
+        status.setVersion(checkNull(buildInfo.getProperty("Implementation-Version")));
+        status.setGitRevision(checkNull(buildInfo.getProperty("Change")));
+        status.setBuildDate(checkNull(buildInfo.getProperty("Build-Date")));
+        return status;
+    }
+
+    private String checkNull(String property) {
+        if(property == null) {
+            return "unknown";
+        }
+        return property;
+    }
+
+
+    private Properties getBuildInfo() {
+        InputStream resourceAsStream = null;
+        Properties props = new Properties();
+        try {
+            resourceAsStream = servletContext.getResourceAsStream("/META-INF/jumbodb.properties");
+            if(resourceAsStream == null) {
+                return props;
+            }
+            props.load(resourceAsStream);
+        } catch (IOException e) {
+            // do nothing
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
+        return props;
     }
 
     @RequestMapping(value = "/collections", method = RequestMethod.GET)
@@ -161,5 +197,10 @@ public class RestController {
     @Autowired
     public void setQueryUtilService(QueryUtilService queryUtilService) {
         this.queryUtilService = queryUtilService;
+    }
+
+    @Autowired
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
     }
 }

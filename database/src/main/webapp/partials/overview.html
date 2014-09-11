@@ -62,7 +62,7 @@
         </p>
 
         <p>
-            {{status.startupTime}}
+            Startup time: {{status.startupTime}}
         </p>
         <p>
             <hr/>
@@ -72,6 +72,12 @@
         </p>
         <p>
             Data partition: {{status.dataDiskUsedSpace}} of {{status.dataDiskTotalSpace}} used ({{status.dataDiskUsedSpacePerc}} %)
+        </p>
+        <p>
+        <hr/>
+        </p>
+        <p>
+            Version: {{status.version}} - Build date: {{status.buildDate}} - Git Revision: {{status.gitRevision}}
         </p>
 
     </div>

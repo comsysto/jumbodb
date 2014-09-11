@@ -112,6 +112,10 @@ task copyImporter(dependsOn: ':importer:hadoop-json:distZip') {
         applicationDistribution.from(locateHadoopJarPath()) {
             into 'tools/import-hadoop/'
         }
+
+        applicationDistribution.from('docs/webapps/') {
+            into 'webapps/'
+        }
     }
 }
 jar.dependsOn copyImporter

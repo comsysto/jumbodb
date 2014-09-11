@@ -22,7 +22,7 @@ public class JumboDBStarter {
         String applicationPath = findApplicationPath() + findFileNameFromManifest("warPath") ;
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(9000);
-        tomcat.setBaseDir(findApplicationPath() + "/work/");
+        tomcat.setBaseDir(findApplicationPath());
         tomcat.addWebapp("/",  applicationPath);
         tomcat.start();
         tomcat.getServer().await();

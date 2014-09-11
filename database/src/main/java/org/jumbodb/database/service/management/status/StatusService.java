@@ -1,14 +1,16 @@
 package org.jumbodb.database.service.management.status;
 
+import org.apache.commons.io.IOUtils;
 import org.jumbodb.connector.JumboConstants;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
-import org.jumbodb.database.service.importer.DatabaseImportSession;
 import org.jumbodb.database.service.management.status.dto.ServerInformation;
-import org.jumbodb.database.service.query.DatabaseQuerySession;
 import org.jumbodb.database.service.statistics.GlobalStatistics;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.Properties;
 
 /**
  * User: carsten
@@ -58,7 +60,6 @@ public class StatusService {
         status.setIndexDiskTotalSpace(format.format(indexDiskTotalSpace / divideMB) + " MB");
         status.setIndexDiskUsedSpacePerc((double)(((indexDiskTotalSpace - indexDiskFreeSpace) * 100) / indexDiskTotalSpace));
         status.setIndexDiskUsedSpace(format.format((indexDiskTotalSpace - indexDiskFreeSpace) / divideMB) + " MB");
-        status.setStorageFormatVersion("not yet available");
         return status;
     }
 }

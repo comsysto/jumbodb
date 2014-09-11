@@ -1,6 +1,7 @@
 package org.jumbodb.connector.hadoop.configuration;
 
 import org.apache.hadoop.fs.Path;
+import org.jumbodb.common.query.ChecksumType;
 
 import java.util.List;
 
@@ -16,13 +17,31 @@ public class BaseJumboImportJob {
     private Path indexOutputPath;
     private Path logOutputPath;
     private Integer numberOfOutputFiles;
+    private String dataStrategy;
     private List<ImportHost> hosts;
+    private ChecksumType checksumType;
+
+    public ChecksumType getChecksumType() {
+        return checksumType;
+    }
+
+    public void setChecksumType(ChecksumType checksumType) {
+        this.checksumType = checksumType;
+    }
+
+    public String getDataStrategy() {
+        return dataStrategy;
+    }
+
+    public void setDataStrategy(String dataStrategy) {
+        this.dataStrategy = dataStrategy;
+    }
 
     public Integer getNumberOfOutputFiles() {
         return numberOfOutputFiles;
     }
 
-    public void setNumberOfOutputFiles(final Integer numberOfOutputFiles) {
+    public void setNumberOfOutputFiles(Integer numberOfOutputFiles) {
         this.numberOfOutputFiles = numberOfOutputFiles;
     }
 

@@ -56,7 +56,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             file = getDefaultWorkFile(context, ".snappy");
             fs = file.getFileSystem(conf);
             fileOut = fs.create(file, false);
-            digestOutputStream = new DigestOutputStream(fileOut, getMessageDigest());
+            digestOutputStream = new DigestOutputStream(fileOut, getMessageDigest(conf));
             bufferedOutputStream = new BufferedOutputStream(digestOutputStream) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
@@ -69,7 +69,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
         }
 
         // CARSTEN make configurable
-        private MessageDigest getMessageDigest() {
+        private MessageDigest getMessageDigest(Configuration conf) {
             try {
                 return MessageDigest.getInstance("MD5");
             } catch (NoSuchAlgorithmException e) {

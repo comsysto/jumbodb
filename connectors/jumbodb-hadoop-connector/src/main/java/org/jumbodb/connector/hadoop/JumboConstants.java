@@ -16,6 +16,7 @@ public class JumboConstants {
     public static final String JUMBO_SORT_CONFIG = "jumbo.sort.config";
     public static final String JUMBO_COLLECTION_INFO = "jumbo.collection.info";
     public static final String JUMBO_SORT_DATEPATTERN_CONFIG = "jumbo.sort.datepattern.config";
+    public static final String JUMBO_CHECKSUM_TYPE = "jumbo.checksum.type";
     public static final boolean DELIVERY_ACTIVATE_CHUNK = true;
     public static final boolean DELIVERY_ACTIVATE_VERSION = true;
     public static final String HOST = "jumbo.host";

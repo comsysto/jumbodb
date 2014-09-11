@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop.importer;
 
+import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.JumboJobCreator;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
@@ -37,6 +38,7 @@ public class ImportJobCreator {
         JumboInputFormat.setIndexName(job, indexField != null ? indexField.getIndexName() : "not_set");
         JumboInputFormat.setCollectionName(job, genericImportJob.getCollectionName());
         JumboInputFormat.setDeliveryChunkKey(job, genericImportJob.getDeliveryChunkKey());
+        JumboConfigurationUtil.setChecksumType(job, genericImportJob.getChecksumType());
         FileOutputFormat.setOutputPath(job, reportOutputPath);
         FileInputFormat.addInputPath(job, importPath);
         job.setJarByClass(ImportJobCreator.class);

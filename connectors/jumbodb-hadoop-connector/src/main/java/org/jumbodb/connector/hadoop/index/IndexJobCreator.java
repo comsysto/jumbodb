@@ -2,7 +2,10 @@ package org.jumbodb.connector.hadoop.index;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
+import org.jumbodb.connector.hadoop.configuration.DataStrategies;
+import org.jumbodb.connector.hadoop.configuration.DataStrategy;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
+import org.jumbodb.connector.hadoop.configuration.IndexStrategies;
 import org.jumbodb.connector.hadoop.configuration.JumboCustomImportJob;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
@@ -35,21 +38,6 @@ import java.util.Map;
  */
 public class IndexJobCreator {
 
-    public static final Map<String, Class<? extends AbstractIndexMapper>> INDEX_STRATEGIES = createIndexMapper();
-
-    private static Map<String, Class<? extends AbstractIndexMapper>> createIndexMapper() {
-        Map<String, Class<? extends AbstractIndexMapper>> indexMapper = new HashMap<String, Class<? extends AbstractIndexMapper>>();
-        indexMapper.put(GenericJsonHashCode32IndexMapper.HASHCODE32_SNAPPY_V1, GenericJsonHashCode32IndexMapper.class);
-        indexMapper.put(GenericJsonHashCode64IndexMapper.HASHCODE64_SNAPPY_V1, GenericJsonHashCode64IndexMapper.class);
-        indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V1, GenericJsonIntegerIndexMapper.class);
-        indexMapper.put(GenericJsonLongIndexMapper.LONG_SNAPPY_V1, GenericJsonLongIndexMapper.class);
-        indexMapper.put(GenericJsonFloatIndexMapper.FLOAT_SNAPPY_V_1, GenericJsonFloatIndexMapper.class);
-        indexMapper.put(GenericJsonDoubleIndexMapper.DOUBLE_SNAPPY_V_1, GenericJsonDoubleIndexMapper.class);
-        indexMapper.put(GenericJsonGeohashIndexMapper.GEOHASH_SNAPPY_V1, GenericJsonGeohashIndexMapper.class);
-        indexMapper.put(GenericJsonDateTimeIndexMapper.DATETIME_SNAPPY_V1, GenericJsonDateTimeIndexMapper.class);
-        return Collections.unmodifiableMap(indexMapper);
-    }
-
     public static IndexControlledJob createGenericIndexJob(Configuration conf, JumboGenericImportJob genericImportJob, IndexField indexField) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         Path output = new Path(genericImportJob.getIndexOutputPath().toString() + "/" + indexField.getIndexName());
@@ -60,9 +48,10 @@ public class IndexJobCreator {
         Class<? extends AbstractIndexMapper> mapper = getIndexStrategy(indexField);
         AbstractIndexMapper abstractIndexMapper = createInstance(mapper);
         job.getConfiguration().set(JumboConfigurationUtil.JUMBO_INDEX_JSON_CONF, objectMapper.writeValueAsString(indexField));
+        JumboConfigurationUtil.setChecksumType(job, genericImportJob.getChecksumType());
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
-        job.setInputFormatClass(SnappyDataV1InputFormat.class);  // CARSTEN make configurable
+        job.setInputFormatClass(DataStrategies.getDataStrategy(genericImportJob.getDataStrategy()).getInputFormat());
         job.setNumReduceTasks(indexField.getNumberOfOutputFiles());
         job.setMapOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
@@ -74,11 +63,7 @@ public class IndexJobCreator {
     }
 
     private static Class<? extends AbstractIndexMapper> getIndexStrategy(IndexField indexField) {
-        Class<? extends AbstractIndexMapper> strategy = INDEX_STRATEGIES.get(indexField.getIndexStrategy());
-        if(strategy == null) {
-            throw new IllegalStateException("Index strategy is not available " + indexField.getIndexStrategy());
-        }
-        return strategy;
+        return IndexStrategies.getIndexStrategy(indexField.getIndexStrategy());
     }
 
     public static IndexControlledJob createCustomIndexJob(Configuration conf, JumboCustomImportJob customImportJob, Class<? extends AbstractIndexMapper> mapper) throws IOException {
@@ -91,7 +76,7 @@ public class IndexJobCreator {
         FileOutputFormat.setCompressOutput(job, false);
         job.setJarByClass(IndexJobCreator.class);
         job.setMapperClass(mapper);
-        job.setInputFormatClass(SnappyDataV1InputFormat.class);  // CARSTEN make configurable
+        job.setInputFormatClass(DataStrategies.getDataStrategy(customImportJob.getDataStrategy()).getInputFormat());
         job.setNumReduceTasks(abstractIndexMapper.getNumberOfOutputFiles());
         job.setMapOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setMapOutputValueClass(abstractIndexMapper.getOutputValueClass());
@@ -99,6 +84,7 @@ public class IndexJobCreator {
         job.setOutputKeyClass(abstractIndexMapper.getOutputKeyClass());
         job.setOutputValueClass(abstractIndexMapper.getOutputValueClass());
         job.setPartitionerClass(abstractIndexMapper.getPartitioner());
+        JumboConfigurationUtil.setChecksumType(job, customImportJob.getChecksumType());
         return new IndexControlledJob(new ControlledJob(job, new ArrayList<ControlledJob>()), output);
     }
 

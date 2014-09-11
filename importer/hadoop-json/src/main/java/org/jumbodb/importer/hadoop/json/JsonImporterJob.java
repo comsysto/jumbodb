@@ -15,6 +15,8 @@ import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.JumboJobCreator;
 import org.jumbodb.connector.hadoop.JumboMetaUtil;
 import org.jumbodb.connector.hadoop.configuration.CommitNotification;
+import org.jumbodb.connector.hadoop.configuration.DataStrategies;
+import org.jumbodb.connector.hadoop.configuration.DataStrategy;
 import org.jumbodb.connector.hadoop.configuration.ImportDefinition;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.index.output.data.SnappyDataV1OutputFormat;
@@ -24,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * STarter for the JSON import Job
+ * Starter for the JSON import Job
  *
  * @author Carsten Hufe
  */
@@ -54,16 +56,18 @@ public class JsonImporterJob extends Configured implements Tool {
             JumboConfigurationUtil.setSortConfig(sortJob, importJob.getSort());
             JumboConfigurationUtil.setSortDatePatternConfig(sortJob, importJob.getSortDatePattern());
             JumboConfigurationUtil.setCollectionInfo(sortJob, importJob.getDescription());
+            JumboConfigurationUtil.setChecksumType(sortJob, importDefinition.getChecksum());
             FileInputFormat.addInputPath(sortJob, importJob.getInputPath());
             FileOutputFormat.setOutputPath(sortJob, importJob.getSortedOutputPath());
             sortJob.setJarByClass(JsonImporterJob.class);
-            sortJob.setMapperClass(JumboConfigurationUtil.getSortMapperByType(importJob.getSortType()));
-            sortJob.setMapOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
-            sortJob.setMapOutputValueClass(Text.class);
-            sortJob.setOutputKeyClass(JumboConfigurationUtil.getSortOutputKeyClassByType(importJob.getSortType()));
-            sortJob.setOutputValueClass(Text.class);
+            final DataStrategy dataStrategy = DataStrategies.getDataStrategy(importJob.getDataStrategy());
+            sortJob.setMapperClass(dataStrategy.getSortMapperByType(importJob.getSortType()));
+            sortJob.setMapOutputKeyClass(dataStrategy.getSortOutputKeyClassByType(importJob.getSortType()));
+            sortJob.setMapOutputValueClass(dataStrategy.getOutputClass());
+            sortJob.setOutputKeyClass(dataStrategy.getSortOutputKeyClassByType(importJob.getSortType()));
+            sortJob.setOutputValueClass(dataStrategy.getOutputClass());
             sortJob.setNumReduceTasks(importJob.getNumberOfOutputFiles());
-            sortJob.setOutputFormatClass(SnappyDataV1OutputFormat.class);
+            sortJob.setOutputFormatClass(dataStrategy.getOutputFormat());
             ControlledJob controlledSortJob = new ControlledJob(sortJob, Collections.<ControlledJob>emptyList());
             control.addJob(controlledSortJob);
 

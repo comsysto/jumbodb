@@ -1,5 +1,7 @@
 package org.jumbodb.connector.hadoop;
 
+import org.apache.hadoop.mapred.InputFormat;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.jumbodb.connector.hadoop.importer.ImportJobCreator;
 import org.jumbodb.connector.hadoop.index.IndexJobCreator;
 import org.jumbodb.connector.hadoop.configuration.*;
@@ -8,6 +10,14 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.datetime.snappy.GenericJsonDateTimeIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonDoubleIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.floatval.snappy.GenericJsonFloatIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.geohash.snappy.GenericJsonGeohashIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy.GenericJsonHashCode32IndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.hashcode64.snappy.GenericJsonHashCode64IndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.integer.snappy.GenericJsonIntegerIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.longval.snappy.GenericJsonLongIndexMapper;
 import org.jumbodb.connector.importer.ImportInfo;
 import org.jumbodb.connector.importer.JumboImportConnection;
 import org.jumbodb.data.common.meta.DeliveryProperties;
@@ -22,6 +32,7 @@ import java.util.*;
  * Time: 3:42 PM
  */
 public class JumboJobCreator {
+
     public static List<ControlledJob> createIndexAndImportJob(Configuration conf, JumboGenericImportJob genericImportJob) throws IOException {
         if (conf.get(JumboConstants.DELIVERY_VERSION) == null) {
             conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());

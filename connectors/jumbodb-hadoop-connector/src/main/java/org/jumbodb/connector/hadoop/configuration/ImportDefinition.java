@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop.configuration;
 
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.hadoop.JumboConstants;
 
 import java.util.LinkedList;
@@ -19,6 +20,15 @@ public class ImportDefinition {
     private String output;
     private Integer numberOfOutputFiles = 50;
     private String datePattern = "yyyy-MM-dd HH:mm:ss";
+    private ChecksumType checksum;
+
+    public ChecksumType getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(final ChecksumType checksum) {
+        this.checksum = checksum;
+    }
 
     public String getDatePattern() {
         return datePattern;

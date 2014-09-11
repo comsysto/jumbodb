@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.hadoop.configuration.*;
 import org.jumbodb.connector.hadoop.index.map.*;
 
@@ -118,6 +119,13 @@ public class JumboConfigurationUtil {
         conf.getConfiguration().set(JumboConstants.JUMBO_COLLECTION_INFO, collectionInfo);
     }
 
+    public static void setChecksumType(Job conf, ChecksumType checksumType) throws IOException {
+        if(checksumType == null) {
+            return;
+        }
+        conf.getConfiguration().set(JumboConstants.JUMBO_CHECKSUM_TYPE, checksumType.toString());
+    }
+
     public static void setSortDatePatternConfig(Job conf, String sort) throws IOException {
         conf.getConfiguration().set(JumboConstants.JUMBO_SORT_DATEPATTERN_CONFIG, sort);
     }
@@ -168,6 +176,7 @@ public class JumboConfigurationUtil {
             job.setDeliveryChunkKey(importDefinition.getDeliveryChunkKey());
             job.setDescription(importCollection.getDescription());
             job.setHosts(importDefinition.getHosts());
+            job.setChecksumType(importDefinition.getChecksum());
             for (IndexField indexField : job.getIndexes()) {
                 if(indexField.getDatePattern() == null) {
                     indexField.setDatePattern(importDefinition.getDatePattern());
@@ -177,6 +186,7 @@ public class JumboConfigurationUtil {
             String outputData = outputWithDate + "/data/" + subPath;
             String outputIndex = outputWithDate + "/index/" + subPath;
             String outputLog = outputWithDate + "/log/" + subPath;
+            job.setDataStrategy(importCollection.getDataStrategy());
             job.setSortDatePattern(importCollection.getSortDatePattern() != null ? importCollection.getSortDatePattern() : importDefinition.getDatePattern());
             job.setSortType(importCollection.getSortType());
             job.setInputPath(new Path(importCollection.getInput()));

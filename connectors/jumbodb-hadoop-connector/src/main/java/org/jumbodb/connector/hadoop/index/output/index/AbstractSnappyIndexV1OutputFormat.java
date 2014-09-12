@@ -42,7 +42,7 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
         private final Path file;
         private final FileSystem fs;
         private final CountingOutputStream countingOutputStream;
-        private final DigestOutputStream digestStream;
+        private final OutputStream digestStream;
         private final MessageDigest fileMessageDigest;
         private List<Integer> chunkSizes = new LinkedList<Integer>();
         private final FSDataOutputStream fileOut;
@@ -55,7 +55,7 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
             fs = file.getFileSystem(conf);
             fileOut = fs.create(file, false);
             fileMessageDigest = getMessageDigest(conf);
-            digestStream = new DigestOutputStream(fileOut, fileMessageDigest);
+            digestStream = getDigestOutputStream();
             bufferedOutputStream = new BufferedOutputStream(digestStream) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
@@ -66,6 +66,13 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
             snappyOutputStream = new SnappyOutputStream(bufferedOutputStream, getSnappyBlockSize());
             countingOutputStream = new CountingOutputStream(snappyOutputStream);
             dataOutputStream = new DataOutputStream(countingOutputStream);
+        }
+
+        private OutputStream getDigestOutputStream() {
+            if(fileMessageDigest == null) {
+                return fileOut;
+            }
+            return new DigestOutputStream(fileOut, fileMessageDigest);
         }
 
 

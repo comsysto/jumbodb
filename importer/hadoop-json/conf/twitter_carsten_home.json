@@ -11,7 +11,7 @@
     "checksum": "NONE",
     "importCollection": [
         {
-            "input": "file:///C:/Development/data/twitter/input_big/",
+            "input": "file:///C:/Development/data/twitter/input/",
             "description": "Twitter data",
             "collectionName": "carsten.twitter",
             "sort": ["created_at"],

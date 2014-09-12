@@ -37,10 +37,16 @@ sourceSets {
     }
 }
 
-startScripts{
-    doLast{
-        println(windowsScript.text)
-//        windowsScript.text = "testen"
+applicationDistribution.from(zipTree('lib/hadoop-common-2.2.0-bin-master.zip')) {
+    into "winutils/"
+}
+
+startScripts {
+    doLast {
+        def paths = """\
+set PATH=%PATH%;%~dp0\\..\\winutils\\hadoop-common-2.2.0-bin-master\\bin\r\n
+set HADOOP_HOME=%~dp0\\..\\winutils\\hadoop-common-2.2.0-bin-master\r\n"""
+        windowsScript.text = paths + windowsScript.text
     }
 }
 

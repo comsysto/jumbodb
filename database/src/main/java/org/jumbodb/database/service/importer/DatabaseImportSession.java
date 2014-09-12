@@ -37,7 +37,7 @@ public class DatabaseImportSession implements Closeable {
         inputStream = clientSocket.getInputStream();
         bufferedInputStream = new BufferedInputStream(inputStream);
         dataInputStream = new DataInputStream(bufferedInputStream);
-
+        boolean close = false;
         int protocolVersion = dataInputStream.readInt();
         if(protocolVersion != JumboConstants.IMPORT_PROTOCOL_VERSION) {
             dataOutputStream.writeUTF(":error:wrongversion");
@@ -46,88 +46,92 @@ public class DatabaseImportSession implements Closeable {
             return;
         }
 
-        String cmd = dataInputStream.readUTF();
-        log.info("ClientID " + clientID + " with command " + cmd);
-        if(":cmd:import:init".equals(cmd)) {
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String date = dataInputStream.readUTF();
-            String info = dataInputStream.readUTF();
-            try {
-                importHandler.onInit(deliveryKey, deliveryVersion, date, info);
-                dataOutputStream.writeUTF(":success");
-            } catch (DeliveryVersionExistsException e) {
-                log.error("Existing delivery", e);
-                dataOutputStream.writeUTF(":error:deliveryversionexists");
-                dataOutputStream.writeUTF(e.getMessage());
-            }
-            dataOutputStream.flush();
-        }
-        else if(":cmd:import:collection:data".equals(cmd)) {
-            ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.DATA;
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String collection = dataInputStream.readUTF();
-            String filename = dataInputStream.readUTF();
-            long fileLength = dataInputStream.readLong();
-            ChecksumType checksumType = ChecksumType.valueOf(dataInputStream.readUTF());
-            String checksum = checksumType != ChecksumType.NONE ? dataInputStream.readUTF() : null;
-            ImportMetaFileInformation meta = new ImportMetaFileInformation(deliveryKey, deliveryVersion, collection,
-                null, type, filename, fileLength, checksumType, checksum);
-            try {
-                importHandler.onImport(meta, dataInputStream);
-                dataOutputStream.writeUTF(":success");
-            } catch (FileChecksumException e) {
-                log.error("Checksum exception", e);
-                dataOutputStream.writeUTF(":error:checksum");
-                dataOutputStream.writeUTF(e.getMessage());
-            }
-            dataOutputStream.flush();
-        } else if(":cmd:import:collection:index".equals(cmd)) {
-            ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.INDEX;
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String collection = dataInputStream.readUTF();
-            String indexName = dataInputStream.readUTF();
-            String filename = dataInputStream.readUTF();
-            long fileLength = dataInputStream.readLong();
-            ChecksumType checksumType = ChecksumType.valueOf(dataInputStream.readUTF());
-            String checksum = checksumType != ChecksumType.NONE ? dataInputStream.readUTF() : null;
-            ImportMetaFileInformation meta = new ImportMetaFileInformation(deliveryKey, deliveryVersion, collection,
-                    indexName, type, filename, fileLength, checksumType, checksum);
-            try {
-                importHandler.onImport(meta, dataInputStream);
-                dataOutputStream.writeUTF(":success");
-            } catch (FileChecksumException e) {
-                log.error("Checksum exception", e);
-                dataOutputStream.writeUTF(":error:checksum");
-                dataOutputStream.writeUTF(e.getMessage());
-            }
-            dataOutputStream.flush();
-        } else if(":cmd:import:delivery:version:exists".equals(cmd)) {
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            boolean b = importHandler.existsDeliveryVersion(deliveryKey, deliveryVersion);
-            dataOutputStream.writeBoolean(b);
-            dataOutputStream.flush();
-        } else if(":cmd:import:commit".equals(cmd)) {
-            log.info(cmd);
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            boolean activateChunk = dataInputStream.readBoolean();
-            boolean activateVersion = dataInputStream.readBoolean();
-            try {
-                importHandler.onCommit(deliveryKey, deliveryVersion, activateChunk, activateVersion);
-                dataOutputStream.writeUTF(":success");
+        while(!close) {
+            String cmd = dataInputStream.readUTF();
+            log.info("ClientID " + clientID + " with command " + cmd);
+            if (":cmd:import:init".equals(cmd)) {
+                String deliveryKey = dataInputStream.readUTF();
+                String deliveryVersion = dataInputStream.readUTF();
+                String date = dataInputStream.readUTF();
+                String info = dataInputStream.readUTF();
+                try {
+                    importHandler.onInit(deliveryKey, deliveryVersion, date, info);
+                    dataOutputStream.writeUTF(":success");
+                } catch (DeliveryVersionExistsException e) {
+                    log.error("Existing delivery", e);
+                    dataOutputStream.writeUTF(":error:deliveryversionexists");
+                    dataOutputStream.writeUTF(e.getMessage());
+                }
                 dataOutputStream.flush();
-            } catch (Throwable ex) {
-                dataOutputStream.writeUTF(":error:unknown");
-                dataOutputStream.writeUTF("Failed to commit: " + ex.getMessage());
+            } else if (":cmd:import:collection:data".equals(cmd)) {
+                ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.DATA;
+                String deliveryKey = dataInputStream.readUTF();
+                String deliveryVersion = dataInputStream.readUTF();
+                String collection = dataInputStream.readUTF();
+                String filename = dataInputStream.readUTF();
+                long fileLength = dataInputStream.readLong();
+                ChecksumType checksumType = ChecksumType.valueOf(dataInputStream.readUTF());
+                String checksum = checksumType != ChecksumType.NONE ? dataInputStream.readUTF() : null;
+                ImportMetaFileInformation meta = new ImportMetaFileInformation(deliveryKey, deliveryVersion, collection,
+                        null, type, filename, fileLength, checksumType, checksum);
+                try {
+                    importHandler.onImport(meta, dataInputStream);
+                    dataOutputStream.writeUTF(":success");
+                } catch (FileChecksumException e) {
+                    log.error("Checksum exception", e);
+                    dataOutputStream.writeUTF(":error:checksum");
+                    dataOutputStream.writeUTF(e.getMessage());
+                }
                 dataOutputStream.flush();
-            }
+            } else if (":cmd:import:collection:index".equals(cmd)) {
+                ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.INDEX;
+                String deliveryKey = dataInputStream.readUTF();
+                String deliveryVersion = dataInputStream.readUTF();
+                String collection = dataInputStream.readUTF();
+                String indexName = dataInputStream.readUTF();
+                String filename = dataInputStream.readUTF();
+                long fileLength = dataInputStream.readLong();
+                ChecksumType checksumType = ChecksumType.valueOf(dataInputStream.readUTF());
+                String checksum = checksumType != ChecksumType.NONE ? dataInputStream.readUTF() : null;
+                ImportMetaFileInformation meta = new ImportMetaFileInformation(deliveryKey, deliveryVersion, collection,
+                        indexName, type, filename, fileLength, checksumType, checksum);
+                try {
+                    importHandler.onImport(meta, dataInputStream);
+                    dataOutputStream.writeUTF(":success");
+                } catch (FileChecksumException e) {
+                    log.error("Checksum exception", e);
+                    dataOutputStream.writeUTF(":error:checksum");
+                    dataOutputStream.writeUTF(e.getMessage());
+                }
+                dataOutputStream.flush();
+            } else if (":cmd:import:delivery:version:exists".equals(cmd)) {
+                String deliveryKey = dataInputStream.readUTF();
+                String deliveryVersion = dataInputStream.readUTF();
+                boolean b = importHandler.existsDeliveryVersion(deliveryKey, deliveryVersion);
+                dataOutputStream.writeBoolean(b);
+                dataOutputStream.flush();
+            } else if (":cmd:import:commit".equals(cmd)) {
+                log.info(cmd);
+                String deliveryKey = dataInputStream.readUTF();
+                String deliveryVersion = dataInputStream.readUTF();
+                boolean activateChunk = dataInputStream.readBoolean();
+                boolean activateVersion = dataInputStream.readBoolean();
+                try {
+                    importHandler.onCommit(deliveryKey, deliveryVersion, activateChunk, activateVersion);
+                    dataOutputStream.writeUTF(":success");
+                    dataOutputStream.flush();
+                } catch (Throwable ex) {
+                    dataOutputStream.writeUTF(":error:unknown");
+                    dataOutputStream.writeUTF("Failed to commit: " + ex.getMessage());
+                    dataOutputStream.flush();
+                }
 
-        } else {
-            throw new UnsupportedOperationException("Unsupported command: " + cmd);
+            } else if (":cmd:close".equals(cmd)) {
+                close = true;
+            }
+            else {
+                throw new UnsupportedOperationException("Unsupported command: " + cmd);
+            }
         }
     }
 

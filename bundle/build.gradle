@@ -38,11 +38,11 @@ dependencies {
 }
 
 applicationDistribution.from('../README.md'){
-    into "/"
+    into "."
 }
 
 applicationDistribution.from('../database/LICENSE'){
-    into "/"
+    into "."
 }
 
 def retrieveWarFileName() {

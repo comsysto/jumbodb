@@ -21,6 +21,7 @@ public class ExportDeliveryTask implements Runnable {
 
     private ExportDelivery exportDelivery;
     private StorageManagement storageManagement;
+    private JumboImportConnection imp;
 
     public ExportDeliveryTask(ExportDelivery exportDelivery, StorageManagement storageManagement) {
         this.exportDelivery = exportDelivery;
@@ -33,6 +34,15 @@ public class ExportDeliveryTask implements Runnable {
             return;
         }
         try {
+            imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort()) {
+                @Override
+                protected void onCopyRateUpdate(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
+                    if (exportDelivery.getState() != ExportDelivery.State.RUNNING) {
+                        throw new IllegalStateException("State is not RUNNING -> aborted");
+                    }
+                    exportDelivery.setCopyRateInBytes(rateInBytesPerSecond);
+                }
+            };
             exportDelivery.setState(ExportDelivery.State.RUNNING);
             exportDelivery.setStatus("Sending meta data");
             exportDelivery.setStartTimeMillis(System.currentTimeMillis());
@@ -73,125 +83,84 @@ public class ExportDeliveryTask implements Runnable {
             exportDelivery.setState(ExportDelivery.State.FAILED);
             exportDelivery.setStatus("Error: " + ex.getMessage());
             log.error("An error occured: ", ex);
+        } finally {
+            IOUtils.closeQuietly(imp);
         }
     }
 
     private void importIndexFile(final IndexInfo indexInfo) {
-        JumboImportConnection imp = null;
-        try {
-            imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort()) {
-                @Override
-                protected void onCopyRateUpdate(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
-                    if (exportDelivery.getState() != ExportDelivery.State.RUNNING) {
-                        throw new IllegalStateException("State is not RUNNING -> aborted");
-                    }
-                    exportDelivery.setCopyRateInBytes(rateInBytesPerSecond);
+        long start = System.currentTimeMillis();
+        imp.importIndexFile(indexInfo, new OnCopyCallback() {
+            @Override
+            public void onCopy(OutputStream outputStream) {
+                InputStream is = null;
+                ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream, exportDelivery);
+                try {
+                    is = storageManagement.getInputStream(indexInfo);
+                    IOUtils.copyLarge(is, cos, 0l, indexInfo.getFileLength());
+                    cos.flush();
+                } catch (IOException e) {
+                    throw new UnhandledException(e);
+                } finally {
+                    exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
+                    IOUtils.closeQuietly(is);
                 }
-            };
-            long start = System.currentTimeMillis();
-            imp.importIndexFile(indexInfo, new OnCopyCallback() {
-                @Override
-                public void onCopy(OutputStream outputStream) {
-                    InputStream is = null;
-                    ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream, exportDelivery);
-                    try {
-                        is = storageManagement.getInputStream(indexInfo);
-                        IOUtils.copyLarge(is, cos, 0l, indexInfo.getFileLength());
-                        cos.flush();
-                    } catch (IOException e) {
-                        throw new UnhandledException(e);
-                    } finally {
-                        exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
-                        IOUtils.closeQuietly(is);
-                    }
-                }
-            });
-            long timeDiff = System.currentTimeMillis() - start;
-            if (timeDiff > 0) {
-                exportDelivery.setCopyRateInBytes((imp.getByteCount() * 1000) / timeDiff);
             }
-        } finally {
-            IOUtils.closeQuietly(imp);
-        }
+        });
+//        long timeDiff = System.currentTimeMillis() - start;
+//        if (timeDiff > 0) {
+//            exportDelivery.setCopyRateInBytes((imp.getByteCount() * 1000) / timeDiff);
+//        }
+
     }
 
     private void importDataFile(final DataInfo dataInfo) {
-        JumboImportConnection imp = null;
-        try {
-            imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort()) {
-                @Override
-                protected void onCopyRateUpdate(long rateInBytesPerSecond, long copiedBytesSinceLastCall) {
-                    if (exportDelivery.getState() != ExportDelivery.State.RUNNING) {
-                        throw new IllegalStateException("State is not RUNNING -> aborted");
-                    }
-                    exportDelivery.setCopyRateInBytes(rateInBytesPerSecond);
+
+        long start = System.currentTimeMillis();
+        imp.importDataFile(dataInfo, new OnCopyCallback() {
+            @Override
+            public void onCopy(OutputStream outputStream) {
+                InputStream is = null;
+                ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream,
+                        exportDelivery);
+                try {
+                    is = storageManagement.getInputStream(dataInfo);
+                    IOUtils.copyLarge(is, cos, 0l, dataInfo.getFileLength());
+                    cos.flush();
+                } catch (IOException e) {
+                    throw new UnhandledException(e);
+                } finally {
+                    exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
+                    IOUtils.closeQuietly(is);
                 }
-            };
-            long start = System.currentTimeMillis();
-            imp.importDataFile(dataInfo, new OnCopyCallback() {
-                @Override
-                public void onCopy(OutputStream outputStream) {
-                    InputStream is = null;
-                    ExportDeliveryCountOutputStream cos = new ExportDeliveryCountOutputStream(outputStream,
-                            exportDelivery);
-                    try {
-                        is = storageManagement.getInputStream(dataInfo);
-                        IOUtils.copyLarge(is, cos, 0l, dataInfo.getFileLength());
-                        cos.flush();
-                    } catch (IOException e) {
-                        throw new UnhandledException(e);
-                    } finally {
-                        exportDelivery.addCurrentBytes(cos.getNotMeasuredBytes());
-                        IOUtils.closeQuietly(is);
-                    }
-                }
-            });
-            long timeDiff = System.currentTimeMillis() - start;
-            if (timeDiff > 0) {
-                exportDelivery.setCopyRateInBytes((imp.getByteCount() * 1000) / timeDiff);
             }
-        } finally {
-            IOUtils.closeQuietly(imp);
-        }
+        });
+//        long timeDiff = System.currentTimeMillis() - start;
+//        if (timeDiff > 0) {
+//            exportDelivery.setCopyRateInBytes((imp.getByteCount() * 1000) / timeDiff);
+//        }
     }
 
     private boolean checkExistingVersion() {
-        JumboImportConnection imp = null;
-        try {
-            imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
-            if (imp.existsDeliveryVersion(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion())) {
-                exportDelivery.setState(ExportDelivery.State.FAILED);
-                exportDelivery.setStatus("Delivery version already exists on host, please delete it, before replicating.");
-                return true;
-            }
-        } finally {
-            IOUtils.closeQuietly(imp);
+        if (imp.existsDeliveryVersion(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion())) {
+            exportDelivery.setState(ExportDelivery.State.FAILED);
+            exportDelivery.setStatus("Delivery version already exists on host, please delete it, before replicating.");
+            return true;
         }
         return false;
     }
 
     private void initImport() {
         ChunkedDeliveryVersion chunkedDeliveryVersion = storageManagement.getChunkedDeliveryVersion(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion());
-        JumboImportConnection imp = null;
-        try {
-            imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
-            String info = chunkedDeliveryVersion.getInfo();
-            String date = chunkedDeliveryVersion.getDate();
-            imp.initImport(new ImportInfo(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion(), date, info));
-        } finally {
-            IOUtils.closeQuietly(imp);
-        }
+        String info = chunkedDeliveryVersion.getInfo();
+        String date = chunkedDeliveryVersion.getDate();
+        imp.initImport(new ImportInfo(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion(), date, info));
     }
 
     private void commitImport() {
-        JumboImportConnection imp = null;
-        try {
-            imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
-            imp.commitImport(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion(),
-                    exportDelivery.isActivateChunk(), exportDelivery.isActivateVersion());
-        } finally {
-            IOUtils.closeQuietly(imp);
-        }
+        imp = new JumboImportConnection(exportDelivery.getHost(), exportDelivery.getPort());
+        imp.commitImport(exportDelivery.getDeliveryChunkKey(), exportDelivery.getVersion(),
+                exportDelivery.isActivateChunk(), exportDelivery.isActivateVersion());
     }
 
     private long getDataSize(List<DataInfo> dataInfoForDelivery) {

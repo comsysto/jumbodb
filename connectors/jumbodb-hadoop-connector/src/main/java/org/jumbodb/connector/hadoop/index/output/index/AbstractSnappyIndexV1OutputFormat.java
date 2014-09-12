@@ -55,7 +55,7 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
             fs = file.getFileSystem(conf);
             fileOut = fs.create(file, false);
             fileMessageDigest = getMessageDigest(conf);
-            digestStream = getDigestOutputStream();
+            digestStream = getDigestOutputStream(fileOut, fileMessageDigest);
             bufferedOutputStream = new BufferedOutputStream(digestStream) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
@@ -67,14 +67,6 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
             countingOutputStream = new CountingOutputStream(snappyOutputStream);
             dataOutputStream = new DataOutputStream(countingOutputStream);
         }
-
-        private OutputStream getDigestOutputStream() {
-            if(fileMessageDigest == null) {
-                return fileOut;
-            }
-            return new DigestOutputStream(fileOut, fileMessageDigest);
-        }
-
 
         @Override
         public synchronized void write(T k, OV v) throws IOException, InterruptedException {

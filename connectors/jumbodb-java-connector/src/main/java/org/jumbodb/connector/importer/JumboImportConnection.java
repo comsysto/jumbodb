@@ -180,6 +180,8 @@ public class JumboImportConnection implements Closeable {
 
     @Override
     public void close() throws IOException {
+        dos.writeUTF(":cmd:close");
+        dos.flush();
         IOUtils.closeQuietly(dos);
         IOUtils.closeQuietly(bos);
         IOUtils.closeQuietly(mcos);

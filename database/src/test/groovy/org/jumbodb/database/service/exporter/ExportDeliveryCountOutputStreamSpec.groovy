@@ -13,7 +13,6 @@ class ExportDeliveryCountOutputStreamSpec extends Specification {
         when:
         stream.onInterval(10000l, 50000l)
         then:
-        1 * exportDeliveryMock.setCopyRateInBytes(10000l);
         1 * exportDeliveryMock.addCurrentBytes(50000l);
     }
 }

@@ -20,6 +20,8 @@ public class ExportDelivery {
     private long currentBytes;
     private long totalBytes;
     private long copyRateInBytes;
+    private long lastHitTimeMillis = System.currentTimeMillis();
+    private long bytesSinceLastHit = 0l;
 
     public long getStartTimeMillis() {
         return startTimeMillis;
@@ -31,6 +33,14 @@ public class ExportDelivery {
 
     public void addCurrentBytes(long bytes) {
         currentBytes += bytes;
+        bytesSinceLastHit += bytes;
+        long currentTimeMillis = System.currentTimeMillis();
+        long timeMillisDiff = currentTimeMillis - lastHitTimeMillis;
+        if(timeMillisDiff > 3000) {
+            copyRateInBytes = (bytesSinceLastHit * 1000) / timeMillisDiff;
+            bytesSinceLastHit = 0l;
+            lastHitTimeMillis = currentTimeMillis;
+        }
     }
 
     public String getFormattedCopyRate() {

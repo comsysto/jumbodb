@@ -22,6 +22,7 @@ class DatabaseImportSessionSpec extends Specification {
         cmds.writeLong(sendBytes.length)
         cmds.writeUTF(ChecksumType.NONE.toString())
         cmds.write(sendBytes)
+        cmds.writeUTF(":cmd:close")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -71,6 +72,7 @@ class DatabaseImportSessionSpec extends Specification {
         cmds.writeLong(sendBytes.length) // send file length
         cmds.writeUTF(ChecksumType.NONE.toString())
         cmds.write(sendBytes)
+        cmds.writeUTF(":cmd:close")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -115,6 +117,7 @@ class DatabaseImportSessionSpec extends Specification {
         cmds.writeUTF("test_delivery_version")
         cmds.writeUTF("2012-12-12 12:12:12") // send collection
         cmds.writeUTF("some info")
+        cmds.writeUTF(":cmd:close")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -147,6 +150,7 @@ class DatabaseImportSessionSpec extends Specification {
         cmds.writeUTF("test_delivery_version")
         cmds.writeUTF("2012-12-12 12:12:12") // send collection
         cmds.writeUTF("some info")
+        cmds.writeUTF(":cmd:close")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -182,6 +186,7 @@ class DatabaseImportSessionSpec extends Specification {
         cmds.writeUTF("test_delivery_version")
         cmds.writeBoolean(true)
         cmds.writeBoolean(true)
+        cmds.writeUTF(":cmd:close")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -215,6 +220,7 @@ class DatabaseImportSessionSpec extends Specification {
         cmds.writeUTF("test_delivery_version")
         cmds.writeBoolean(false)
         cmds.writeBoolean(false)
+        cmds.writeUTF(":cmd:close")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -245,6 +251,7 @@ class DatabaseImportSessionSpec extends Specification {
         cmds.writeUTF(":cmd:import:delivery:version:exists") // send command
         cmds.writeUTF("test_delivery_key")
         cmds.writeUTF("test_delivery_version")
+        cmds.writeUTF(":cmd:close")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -275,6 +282,7 @@ class DatabaseImportSessionSpec extends Specification {
         cmds.writeUTF(":cmd:import:delivery:version:exists") // send command
         cmds.writeUTF("test_delivery_key")
         cmds.writeUTF("test_delivery_version")
+        cmds.writeUTF(":cmd:close")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()
@@ -303,6 +311,7 @@ class DatabaseImportSessionSpec extends Specification {
         def cmds = new DataOutputStream(cmdStream)
         cmds.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION)
         cmds.writeUTF(":cmd:is:not:supported") // send command
+        cmds.writeUTF(":cmd:close")
         cmds.flush()
         def inputStream = new ByteArrayInputStream(cmdStream.toByteArray())
         def outputStream = new ByteArrayOutputStream()

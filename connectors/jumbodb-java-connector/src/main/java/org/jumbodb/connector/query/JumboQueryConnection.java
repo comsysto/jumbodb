@@ -1,19 +1,18 @@
 package org.jumbodb.connector.query;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.UnhandledException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.connector.JumboConstants;
-import org.jumbodb.connector.exception.JumboCommonException;
-import org.jumbodb.connector.exception.JumboIndexMissingException;
-import org.jumbodb.connector.exception.JumboTimeoutException;
-import org.jumbodb.connector.exception.JumboUnknownException;
+import org.jumbodb.connector.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyInputStream;
+import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
@@ -41,7 +40,7 @@ public class JumboQueryConnection {
 
     protected ObjectMapper createJacksonObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         return objectMapper;
     }
@@ -133,32 +132,30 @@ public class JumboQueryConnection {
         long start = System.currentTimeMillis();
         Socket sock = null;
         OutputStream os = null;
+        SnappyOutputStream sos = null;
         DataOutputStream dos = null;
         InputStream is = null;
-        BufferedInputStream bufferedInputStream = null;
-        SnappyInputStream snappyInputStream = null;
+        BufferedInputStream bis = null;
+        SnappyInputStream sis = null;
         DataInputStream dis = null;
-//        List<T> result = new LinkedList<T>();
         int results = 0;
         try {
             sock = new Socket(host, port);
 
             os = sock.getOutputStream();
-            dos = new DataOutputStream(os);
+            sos = new SnappyOutputStream(os);
+            dos = new DataOutputStream(sos);
             is = sock.getInputStream();
-            bufferedInputStream = new BufferedInputStream(is);
-            snappyInputStream = new SnappyInputStream(bufferedInputStream);
-            dis = new DataInputStream(snappyInputStream);
-            int protocolVersion = dis.readInt();
-            if(protocolVersion != JumboConstants.QUERY_PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version. Got " + protocolVersion + ", but expected " + JumboConstants.QUERY_PROTOCOL_VERSION);
-            }
+            bis = new BufferedInputStream(is);
+            sis = new SnappyInputStream(bis);
+            dis = new DataInputStream(sis);
+            dos.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION);
             dos.writeUTF(":cmd:query");
             dos.writeUTF(collection);
             byte[] queryBytes = jsonMapper.writeValueAsBytes(searchQuery);
             dos.writeInt(queryBytes.length);
             dos.write(queryBytes);
-
+            dos.flush();
             int byteArrayLength;
             byte[] jsonByteArray = new byte[1024];
             while((byteArrayLength = dis.readInt()) > -1) {
@@ -177,6 +174,11 @@ public class JumboQueryConnection {
                 String message = dis.readUTF();
                 log.error("Unknown error: " + message);
                 throw new JumboUnknownException(message);
+            }
+            else if(cmd.equals(":error:wrongversion")) {
+                String message = dis.readUTF();
+                log.error("Wrong version: " + message);
+                throw new JumboWrongVersionException(message);
             }
             else if(cmd.equals(":error:common")) {
                 String message = dis.readUTF();
@@ -204,10 +206,11 @@ public class JumboQueryConnection {
             throw new UnhandledException(e);
         } finally {
             IOUtils.closeQuietly(dos);
+            IOUtils.closeQuietly(sos);
             IOUtils.closeQuietly(os);
             IOUtils.closeQuietly(dis);
-            IOUtils.closeQuietly(bufferedInputStream);
-            IOUtils.closeQuietly(snappyInputStream);
+            IOUtils.closeQuietly(sis);
+            IOUtils.closeQuietly(bis);
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(sock);
         }

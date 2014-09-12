@@ -3,13 +3,13 @@ package org.jumbodb.database.service.query.data;
 
 public class DataKey {
 
-    private final String collectionName;
     private final String chunkKey;
+    private final String collectionName;
 
 
-    public DataKey(String collectionName, String chunkKey) {
-        this.chunkKey = chunkKey;
+    public DataKey(String chunkKey, String collectionName) {
         this.collectionName = collectionName;
+        this.chunkKey = chunkKey;
     }
 
 

@@ -1,18 +1,22 @@
 package org.jumbodb.database.service.importer;
 
+import org.jumbodb.common.query.ChecksumType;
+
 public class ImportMetaFileInformation {
     public enum FileType {INDEX, DATA}
 
-    private FileType fileType;
-    private String fileName;
-    private String collection;
-    private String indexName;
-    private long fileLength;
     private String deliveryKey;
     private String deliveryVersion;
-    private String strategy;
+    private String collection;
+    private String indexName;
+    private FileType fileType;
+    private String fileName;
+    private long fileLength;
+    private ChecksumType checksumType;
+    private String checksum;
 
-    public ImportMetaFileInformation(FileType fileType, String fileName, String collection, String indexName, long fileLength, String deliveryKey, String deliveryVersion, String strategy) {
+    public ImportMetaFileInformation(String deliveryKey, String deliveryVersion, String collection, String indexName,
+      FileType fileType, String fileName, long fileLength, ChecksumType checksumType, String checksum) {
         this.fileType = fileType;
         this.fileName = fileName;
         this.collection = collection;
@@ -20,7 +24,8 @@ public class ImportMetaFileInformation {
         this.fileLength = fileLength;
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
-        this.strategy = strategy;
+        this.checksumType = checksumType;
+        this.checksum = checksum;
     }
 
     public FileType getFileType() {
@@ -51,22 +56,26 @@ public class ImportMetaFileInformation {
         return deliveryVersion;
     }
 
-    public String getStrategy() {
-        return strategy;
+    public ChecksumType getChecksumType() {
+        return checksumType;
     }
 
+    public String getChecksum() {
+        return checksum;
+    }
 
     @Override
     public String toString() {
         return "ImportMetaFileInformation{" +
-                "fileType=" + fileType +
-                ", fileName='" + fileName + '\'' +
-                ", collection='" + collection + '\'' +
-                ", indexName='" + indexName + '\'' +
-                ", fileLength=" + fileLength +
-                ", deliveryKey='" + deliveryKey + '\'' +
-                ", deliveryVersion='" + deliveryVersion + '\'' +
-                ", strategy='" + strategy + '\'' +
-                '}';
+          "fileType=" + fileType +
+          ", fileName='" + fileName + '\'' +
+          ", collection='" + collection + '\'' +
+          ", indexName='" + indexName + '\'' +
+          ", fileLength=" + fileLength +
+          ", deliveryKey='" + deliveryKey + '\'' +
+          ", deliveryVersion='" + deliveryVersion + '\'' +
+          ", checksumType=" + checksumType +
+          ", checksum='" + checksum + '\'' +
+          '}';
     }
 }

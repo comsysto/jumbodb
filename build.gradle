@@ -16,32 +16,28 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'project-reports'
     apply plugin: 'eclipse'
+    apply plugin: 'info'
   
     group = 'org.jumbodb'
-    version = '0.0.17-SNAPSHOT'
+    version = '0.1.0-SNAPSHOT'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
 
     repositories {
-        mavenCentral()
-        maven{ url "http://repo.spring.io/libs-milestone" }
+        //  mavenCentral()
+        maven{ url "http://repo2.maven.org/maven2/" }
+        maven{ url "http://repository-comsysto.forge.cloudbees.com/release" }
+        maven{ url "http://repository-comsysto.forge.cloudbees.com/snapshot/" }
+        maven{ url "http://maven.springframework.org/release" }
+        maven{ url "http://maven.springframework.org/milestone" }
     }
 }
 
-//def findbugsProjects() {
-//    subprojects.findAll{ project ->
-//        !['test', 'evaluation', 'integration', 'testdata'].contains(project.name)
-//    }
-//}
-//
-//configure(findbugsProjects()){
-//    apply plugin: 'findbugs'
-//
-//    findbugs {
-//        ignoreFailures = true
-//    }
-//}
+buildscript {
+    repositories { jcenter() }
+    dependencies { classpath 'com.netflix.nebula:gradle-info-plugin:1.9.+' }
+}
 
 
 idea {
@@ -53,5 +49,5 @@ idea {
 // generate gradle bootstrapping
 // run gradle createWrapper
 task createWrapper(type: Wrapper) {
-  gradleVersion = '1.8'
+  gradleVersion = '2.1'
 }

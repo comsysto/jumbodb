@@ -15,7 +15,6 @@ import java.util.Properties;
  * @author Carsten Hufe
  */
 public class IndexProperties {
-    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm";
     public static final String DEFAULT_FILENAME = "index.properties";
 
     public static String getStrategy(File indexPropsFile) {
@@ -24,25 +23,17 @@ public class IndexProperties {
     }
 
     public static IndexMeta getIndexMeta(File file) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties properties = PropertiesHelper.loadProperties(file);
-        String deliveryVersion = properties.getProperty("deliveryVersion");
         String date = properties.getProperty("date");
         String indexName = properties.getProperty("indexName");
         String strategy = properties.getProperty("strategy");
         String indexSourceFields = properties.getProperty("indexSourceFields");
-        try {
-            return  new IndexMeta(deliveryVersion, sdf.parse(date), indexName, strategy, indexSourceFields);
-        } catch (ParseException e) {
-            throw new UnhandledException(e);
-        }
+        return  new IndexMeta(date, indexName, strategy, indexSourceFields);
     }
 
     public static void write(File indexFile, IndexMeta indexMeta) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Properties indexInfo = new Properties();
-        indexInfo.setProperty("deliveryVersion", indexMeta.getDeliveryVersion());
-        indexInfo.setProperty("date", sdf.format(indexMeta.getDate()));
+        indexInfo.setProperty("date", indexMeta.getDate());
         indexInfo.setProperty("indexName", indexMeta.getIndexName());
         indexInfo.setProperty("strategy", indexMeta.getStrategy());
         indexInfo.setProperty("indexSourceFields", indexMeta.getIndexSourceFields());
@@ -59,25 +50,19 @@ public class IndexProperties {
     }
 
     public static class IndexMeta {
-        private String deliveryVersion;
-        private Date date;
+        private String date;
         private String indexName;
         private String strategy;
         private String indexSourceFields;
 
-        public IndexMeta(String deliveryVersion, Date date, String indexName, String strategy, String indexSourceFields) {
-            this.deliveryVersion = deliveryVersion;
+        public IndexMeta(String date, String indexName, String strategy, String indexSourceFields) {
             this.date = date;
             this.indexName = indexName;
             this.strategy = strategy;
             this.indexSourceFields = indexSourceFields;
         }
 
-        public String getDeliveryVersion() {
-            return deliveryVersion;
-        }
-
-        public Date getDate() {
+        public String getDate() {
             return date;
         }
 

@@ -10,26 +10,31 @@ public class ExportDelivery {
     private String id;
     private String host;
     private int port;
-    private boolean activate;
+    private long startTimeMillis;
+    private boolean activateChunk;
+    private boolean activateVersion;
     private String deliveryChunkKey;
     private String version;
     private State state;
     private String status;
     private long currentBytes;
     private long totalBytes;
-    private long copyRateInBytesCompressed;
-    private long copyRateInBytesUncompressed;
+    private long copyRateInBytes;
+
+    public long getStartTimeMillis() {
+        return startTimeMillis;
+    }
+
+    public void setStartTimeMillis(long startTimeMillis) {
+        this.startTimeMillis = startTimeMillis;
+    }
 
     public void addCurrentBytes(long bytes) {
         currentBytes += bytes;
     }
 
-    public String getFormattedCopyRateUncompressed() {
-        return FileUtils.byteCountToDisplaySize(copyRateInBytesUncompressed) + " /s";
-    }
-
-    public String getFormattedCopyRateCompressed() {
-        return FileUtils.byteCountToDisplaySize(copyRateInBytesCompressed) + " /s";
+    public String getFormattedCopyRate() {
+        return FileUtils.byteCountToDisplaySize(copyRateInBytes) + " /s";
     }
 
     public String getFormattedCurrent() {
@@ -71,20 +76,12 @@ public class ExportDelivery {
         this.state = state;
     }
 
-    public long getCopyRateInBytesUncompressed() {
-        return copyRateInBytesUncompressed;
+    public long getCopyRateInBytes() {
+        return copyRateInBytes;
     }
 
-    public void setCopyRateInBytesUncompressed(long copyRateInBytesUncompressed) {
-        this.copyRateInBytesUncompressed = copyRateInBytesUncompressed;
-    }
-
-    public long getCopyRateInBytesCompressed() {
-        return copyRateInBytesCompressed;
-    }
-
-    public void setCopyRateInBytesCompressed(long copyRateInBytesCompressed) {
-        this.copyRateInBytesCompressed = copyRateInBytesCompressed;
+    public void setCopyRateInBytes(long copyRateInBytes) {
+        this.copyRateInBytes = copyRateInBytes;
     }
 
     public String getId() {
@@ -111,12 +108,20 @@ public class ExportDelivery {
         this.port = port;
     }
 
-    public boolean isActivate() {
-        return activate;
+    public boolean isActivateChunk() {
+        return activateChunk;
     }
 
-    public void setActivate(boolean activate) {
-        this.activate = activate;
+    public void setActivateChunk(final boolean activateChunk) {
+        this.activateChunk = activateChunk;
+    }
+
+    public boolean isActivateVersion() {
+        return activateVersion;
+    }
+
+    public void setActivateVersion(final boolean activateVersion) {
+        this.activateVersion = activateVersion;
     }
 
     public String getStatus() {

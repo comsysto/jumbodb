@@ -2,8 +2,10 @@ package org.jumbodb.connector.importer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.UnhandledException;
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.JumboConstants;
-import org.xerial.snappy.SnappyOutputStream;
+import org.jumbodb.connector.exception.*;
+import org.xerial.snappy.SnappyInputStream;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,29 +17,25 @@ import java.net.Socket;
  */
 public class JumboImportConnection implements Closeable {
     private Socket socket;
-    private OutputStream outputStream;
-    private BufferedOutputStream bufferedOutputStream;
+    private OutputStream os;
     private MonitorCountingOutputStream mcos;
-    private SnappyOutputStream snappyOutputStream;
+    private BufferedOutputStream bos;
     private DataOutputStream dos;
+    private InputStream is;
     private DataInputStream dis;
+
 
     public JumboImportConnection(String host, int port) {
         try {
             socket = new Socket(host, port);
-            outputStream = socket.getOutputStream();
-            mcos = createMonitorCountingOutputStream(outputStream);
-            dos = new DataOutputStream(mcos);
-            bufferedOutputStream = new BufferedOutputStream(mcos, JumboConstants.BUFFER_SIZE);   // make configurable
-            // THIS is only luck that it works, because snappy writes it header in constructor to stream!
-            // But because it's wrapped in a BufferedStream it works, this one sends the data on next flush
-            // We should fix this
-            snappyOutputStream = new SnappyOutputStream(bufferedOutputStream);
-            dis = new DataInputStream(socket.getInputStream());
-            int protocolVersion = dis.readInt();
-            if(protocolVersion != JumboConstants.IMPORT_PROTOCOL_VERSION) {
-                throw new RuntimeException("Wrong protocol version - Got " + protocolVersion + ", but expected " + JumboConstants.IMPORT_PROTOCOL_VERSION);
-            }
+            os = socket.getOutputStream();
+            mcos = createMonitorCountingOutputStream(os);
+            bos = new BufferedOutputStream(mcos);
+            dos = new DataOutputStream(bos);
+            is = socket.getInputStream();
+            dis = new DataInputStream(is);
+            dos.writeInt(JumboConstants.IMPORT_PROTOCOL_VERSION);
+            dos.flush();
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -73,73 +71,89 @@ public class JumboImportConnection implements Closeable {
         }
     }
 
-    public void importIndex(IndexInfo indexInfo, OnCopyCallback callback) throws InvalidFileHashException {
+    public void initImport(ImportInfo importInfo) {
+        try {
+            dos.writeUTF(":cmd:import:init");
+            dos.writeUTF(importInfo.getDeliveryKey());
+            dos.writeUTF(importInfo.getDeliveryVersion());
+            dos.writeUTF(importInfo.getDate());
+            dos.writeUTF(importInfo.getInfo());
+            dos.flush();
+            String command = dis.readUTF();
+            handleErrors(command);
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
+    public void importIndexFile(IndexInfo indexInfo, OnCopyCallback callback) {
         try {
             dos.writeUTF(":cmd:import:collection:index");
-            dos.writeUTF(indexInfo.getCollection());
-            dos.writeUTF(indexInfo.getIndexName());
-            dos.writeUTF(indexInfo.getFilename());
-            dos.writeLong(indexInfo.getFileLength());
             dos.writeUTF(indexInfo.getDeliveryKey());
             dos.writeUTF(indexInfo.getDeliveryVersion());
-            dos.writeUTF(indexInfo.getIndexStrategy());
-            dos.flush();
-            String sha1Hash = callback.onCopy(snappyOutputStream);
-            String sha1HashRemote = dis.readUTF();
-            if(!sha1Hash.equals(sha1HashRemote)) {
-                throw new InvalidFileHashException("SHA-1 hash for index-file " + indexInfo.getCollection() + "/" + indexInfo.getIndexName() + "/" + indexInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+            dos.writeUTF(indexInfo.getCollection());
+            dos.writeUTF(indexInfo.getIndexName());
+            dos.writeUTF(indexInfo.getFileName());
+            dos.writeLong(indexInfo.getFileLength());
+            dos.writeUTF(indexInfo.getChecksumType().name());
+            if(indexInfo.getChecksumType() != ChecksumType.NONE) {
+                dos.writeUTF(indexInfo.getChecksum());
             }
+
+            dos.flush();
+            callback.onCopy(dos);
+
+            String command = dis.readUTF();
+            handleErrors(command);
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
     }
 
-    public void importData(DataInfo dataInfo, OnCopyCallback callback) throws InvalidFileHashException {
+    private void handleErrors(String command) throws IOException {
+        if(":success".equals(command)) {
+            return;
+        }
+        if(command.startsWith(":error")) {
+            handleError(command, dis.readUTF());
+        }
+        else {
+            throw new IllegalStateException("Unknown command: " + command);
+        }
+    }
+
+    private void handleError(String command, String message) {
+        if(":error:wrongversion".equals(command)) {
+            throw new JumboWrongVersionException(message);
+        }
+        else if(":error:checksum".equals(command)) {
+            throw new JumboFileChecksumException(message);
+        }
+        else if(":error:deliveryversionexists".equals(command)) {
+            throw new JumboDeliveryVersionExistsException(message);
+        }
+        else if(":error:unknown".equals(command)) {
+            throw new JumboUnknownException(message);
+        }
+        throw new JumboCommonException("Error on import [" + command + "]: " + message);
+    }
+
+    public void importDataFile(DataInfo dataInfo, OnCopyCallback callback) {
         try {
             dos.writeUTF(":cmd:import:collection:data");
-            dos.writeUTF(dataInfo.getCollection());
-            dos.writeUTF(dataInfo.getFilename());
-            dos.writeLong(dataInfo.getFileLength());
             dos.writeUTF(dataInfo.getDeliveryKey());
             dos.writeUTF(dataInfo.getDeliveryVersion());
-            dos.writeUTF(dataInfo.getDataStrategy());
-            dos.flush();
-            String sha1Hash = callback.onCopy(snappyOutputStream);
-            String sha1HashRemote = dis.readUTF();
-            if(!sha1Hash.equals(sha1HashRemote)) {
-                throw new InvalidFileHashException("SHA-1 hash for data-file " + dataInfo.getCollection() + "/" + dataInfo.getFilename() + " is invalid (local: " + sha1Hash + " / remote: " + sha1HashRemote + ")");
+            dos.writeUTF(dataInfo.getCollection());
+            dos.writeUTF(dataInfo.getFileName());
+            dos.writeLong(dataInfo.getFileLength());
+            dos.writeUTF(dataInfo.getChecksumType().name());
+            if(dataInfo.getChecksumType() != ChecksumType.NONE) {
+                dos.writeUTF(dataInfo.getChecksum());
             }
-        } catch (IOException e) {
-            throw new UnhandledException(e);
-        }
-    }
-
-    public void sendMetaIndex(MetaIndex metaIndex) {
-        try {
-            dos.writeUTF(":cmd:import:collection:meta:index");
-            dos.writeUTF(metaIndex.getCollection());
-            dos.writeUTF(metaIndex.getDeliveryKey());
-            dos.writeUTF(metaIndex.getDeliveryVersion());
-            dos.writeUTF(metaIndex.getIndexName());
-            dos.writeUTF(metaIndex.getIndexStrategy());
-            dos.writeUTF(metaIndex.getIndexSourceFields());
             dos.flush();
-        } catch (IOException e) {
-            throw new UnhandledException(e);
-        }
-    }
-
-    public void sendMetaData(MetaData metaData) {
-        try {
-            dos.writeUTF(":cmd:import:collection:meta:data");
-            dos.writeUTF(metaData.getCollection());
-            dos.writeUTF(metaData.getDeliveryKey());
-            dos.writeUTF(metaData.getDeliveryVersion());
-            dos.writeUTF(metaData.getDataStrategy());
-            dos.writeUTF(metaData.getPath());
-            dos.writeBoolean(metaData.isActivate());
-            dos.writeUTF(metaData.getInfo());
-            dos.flush();
+            callback.onCopy(dos);
+            String command = dis.readUTF();
+            handleErrors(command);
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -149,12 +163,16 @@ public class JumboImportConnection implements Closeable {
         return mcos.getByteCount();
     }
 
-    public void sendFinishedNotification(String deliveryKey, String deliveryVersion) {
+    public void commitImport(String deliveryKey, String deliveryVersion, boolean activateChunk, boolean activateVersion) {
         try {
-            dos.writeUTF(":cmd:import:finished");
+            dos.writeUTF(":cmd:import:commit");
             dos.writeUTF(deliveryKey);
             dos.writeUTF(deliveryVersion);
+            dos.writeBoolean(activateChunk);
+            dos.writeBoolean(activateVersion);
             dos.flush();
+            String command = dis.readUTF();
+            handleErrors(command);
         } catch (IOException e) {
             throw new UnhandledException(e);
         }
@@ -162,12 +180,12 @@ public class JumboImportConnection implements Closeable {
 
     @Override
     public void close() throws IOException {
-        IOUtils.closeQuietly(bufferedOutputStream);
-        IOUtils.closeQuietly(snappyOutputStream);
-        IOUtils.closeQuietly(mcos);
-        IOUtils.closeQuietly(outputStream);
         IOUtils.closeQuietly(dos);
+        IOUtils.closeQuietly(bos);
+        IOUtils.closeQuietly(mcos);
+        IOUtils.closeQuietly(os);
         IOUtils.closeQuietly(dis);
+        IOUtils.closeQuietly(is);
         IOUtils.closeQuietly(socket);
     }
 }

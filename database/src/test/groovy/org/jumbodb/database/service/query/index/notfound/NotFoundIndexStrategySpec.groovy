@@ -1,12 +1,7 @@
 package org.jumbodb.database.service.query.index.notfound
 
 import org.jumbodb.common.query.IndexQuery
-import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.database.service.importer.ImportMetaFileInformation
-import org.jumbodb.database.service.query.FileOffset
-import org.jumbodb.database.service.query.ResultCallback
-import org.jumbodb.database.service.query.data.notfound.NotFoundDataStrategy
-import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -19,7 +14,7 @@ class NotFoundIndexStrategySpec extends Specification {
     @Unroll
     def "strategy should always be responsible because it's the last strategy #collection"() {
         expect:
-        strategy.isResponsibleFor(collection, chunk, index)
+        strategy.isResponsibleFor(chunk, collection, index)
         where:
         collection      | chunk          | index
         "a_collection"  | "a_chunk_key"  | "index1"
@@ -41,15 +36,13 @@ class NotFoundIndexStrategySpec extends Specification {
         thrown IllegalStateException
     }
 
-    def "onImport should throw an exception"() {
-        when:
-        strategy.onImport(Mock(ImportMetaFileInformation), Mock(InputStream), Mock(File))
-        then:
-        thrown UnsupportedOperationException
-    }
-
     def "strategy has no supported operations"() {
         expect:
         strategy.getSupportedOperations().size() == 0
+    }
+
+    def "strategy has not data, so size is zero"() {
+        expect:
+        strategy.getSize(null) == 0
     }
 }

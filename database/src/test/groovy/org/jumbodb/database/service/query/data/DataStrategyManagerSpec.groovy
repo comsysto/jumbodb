@@ -15,6 +15,7 @@ class DataStrategyManagerSpec extends Specification {
         def strategyMock = Mock(DataStrategy)
         strategyMock.getStrategyName() >> "testStrategy"
         dataStrategyManager.setStrategies([strategyMock])
+        dataStrategyManager.onInitialize(new CollectionDefinition(new HashMap<String, List<DeliveryChunkDefinition>>()))
         when:
         def strategy = dataStrategyManager.getStrategy("testStrategy")
         then:
@@ -63,7 +64,7 @@ class DataStrategyManagerSpec extends Specification {
         when:
         def result = dataStrategyManager.buildDataStrategies(cd)
         then:
-        result.get(new DataKey("testCollection", "testChunkKey")) == strategyMock
+        result.get(new DataKey("testChunkKey", "testCollection")) == strategyMock
         result.size() == 1
     }
 
@@ -73,7 +74,7 @@ class DataStrategyManagerSpec extends Specification {
         def strategyMock = Mock(DataStrategy)
         dataStrategyManager.setStrategies([strategyMock])
         when:
-        def result = dataStrategyManager.getResponsibleStrategy(new DataKey("testCollection", "testChunkKey"))
+        def result = dataStrategyManager.getResponsibleStrategy(new DataKey("testChunkKey", "testCollection"))
         then:
         1 * strategyMock.isResponsibleFor("testCollection", "testChunkKey") >> true
         result == strategyMock

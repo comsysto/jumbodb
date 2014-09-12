@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop.configuration;
 
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.hadoop.JumboConstants;
 
 import java.util.LinkedList;
@@ -12,12 +13,22 @@ public class ImportDefinition {
     private String deliveryChunkKey;
     private List<ImportHost> hosts;
     private String description = "No description";
-    private Boolean activateDelivery = JumboConstants.DELIVERY_ACTIVATE_DEFAULT;
+    private Boolean activateChunk = JumboConstants.DELIVERY_ACTIVATE_CHUNK;
+    private Boolean activateVersion = JumboConstants.DELIVERY_ACTIVATE_VERSION;
     private List<ImportCollection> importCollection;
     private List<HadoopConfig> hadoop = new LinkedList<HadoopConfig>();
     private String output;
-    private Integer numberOfOutputFiles = 50;
+    private Integer numberOfDataFiles = 32;
     private String datePattern = "yyyy-MM-dd HH:mm:ss";
+    private ChecksumType checksum;
+
+    public ChecksumType getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(final ChecksumType checksum) {
+        this.checksum = checksum;
+    }
 
     public String getDatePattern() {
         return datePattern;
@@ -27,12 +38,12 @@ public class ImportDefinition {
         this.datePattern = datePattern;
     }
 
-    public Integer getNumberOfOutputFiles() {
-        return numberOfOutputFiles;
+    public Integer getNumberOfDataFiles() {
+        return numberOfDataFiles;
     }
 
-    public void setNumberOfOutputFiles(Integer numberOfOutputFiles) {
-        this.numberOfOutputFiles = numberOfOutputFiles;
+    public void setNumberOfDataFiles(Integer numberOfDataFiles) {
+        this.numberOfDataFiles = numberOfDataFiles;
     }
 
     public String getOutput() {
@@ -67,12 +78,20 @@ public class ImportDefinition {
         this.description = description;
     }
 
-    public Boolean getActivateDelivery() {
-        return activateDelivery;
+    public Boolean getActivateChunk() {
+        return activateChunk;
     }
 
-    public void setActivateDelivery(Boolean activateDelivery) {
-        this.activateDelivery = activateDelivery;
+    public void setActivateChunk(Boolean activateChunk) {
+        this.activateChunk = activateChunk;
+    }
+
+    public Boolean getActivateVersion() {
+        return activateVersion;
+    }
+
+    public void setActivateVersion(Boolean activateVersion) {
+        this.activateVersion = activateVersion;
     }
 
     public List<ImportCollection> getImportCollection() {

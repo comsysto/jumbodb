@@ -8,7 +8,8 @@ public class StartReplication {
     private String version;
     private String host;
     private int port;
-    private boolean activate;
+    private boolean activateChunk;
+    private boolean activateVersion;
 
     public String getDeliveryChunkKey() {
         return deliveryChunkKey;
@@ -42,12 +43,20 @@ public class StartReplication {
         this.port = port;
     }
 
-    public boolean isActivate() {
-        return activate;
+    public boolean isActivateChunk() {
+        return activateChunk;
     }
 
-    public void setActivate(boolean activate) {
-        this.activate = activate;
+    public void setActivateChunk(boolean activateChunk) {
+        this.activateChunk = activateChunk;
+    }
+
+    public boolean isActivateVersion() {
+        return activateVersion;
+    }
+
+    public void setActivateVersion(boolean activateVersion) {
+        this.activateVersion = activateVersion;
     }
 
     @Override
@@ -57,7 +66,8 @@ public class StartReplication {
                 ", version='" + version + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +
-                ", activate=" + activate +
+                ", activateChunk=" + activateChunk +
+                ", activateVersion=" + activateVersion +
                 '}';
     }
 }

@@ -42,6 +42,11 @@ body {
 
 
 
+
+.space-label {
+    margin-right: 9px;
+}
+
 .topbar .btn {
     border: 0;
 }

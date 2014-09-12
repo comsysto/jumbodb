@@ -1,13 +1,18 @@
 package org.jumbodb.database.service.query
 
+import org.apache.commons.io.FileUtils
 import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.data.common.meta.CollectionProperties
+import org.jumbodb.data.common.meta.IndexProperties
+import org.jumbodb.database.service.configuration.JumboConfiguration
 import org.jumbodb.database.service.query.data.DataStrategy
 import org.jumbodb.database.service.query.data.DataStrategyManager
 import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
+import org.jumbodb.database.service.query.index.IndexStrategy
 import org.jumbodb.database.service.query.index.IndexStrategyManager
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
@@ -131,11 +136,95 @@ class JumboSearcherSpec extends Specification {
         thrown JumboCollectionMissingException
     }
 
+    def "getDataCompressedSize"() {
+        setup:
+        def indexStrategyManagerMock = Mock(IndexStrategyManager)
+        def dataStrategyManagerMock = Mock(DataStrategyManager)
+        def dataStrategyMock = Mock(DataStrategy)
+        def jumboConfigMock = Mock(JumboConfiguration)
+        def folder = FileUtils.getTempDirectoryPath() + "/" + UUID.randomUUID().toString() + "/"
+        def dataPath = new File(folder)
+        def collectionFolder = new File(folder + "testChunkKey/testVersion/testCollection/")
+        FileUtils.forceMkdir(collectionFolder)
+        def meta = new CollectionProperties.CollectionMeta("2012-12-12 12:12:12", "source path", "DATA_STRATEGY", "info")
+        def file = new File(collectionFolder.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME)
+        CollectionProperties.write(file, meta)
+        def js = createJumboSearcher()
+        js.setJumboConfiguration(jumboConfigMock)
+        js.setIndexStrategyManager(indexStrategyManagerMock)
+        js.setDataStrategyManager(dataStrategyManagerMock)
+        when:
+        jumboConfigMock.getDataPath() >> dataPath
+        1 * dataStrategyManagerMock.getStrategy("DATA_STRATEGY") >> dataStrategyMock
+        1 * dataStrategyMock.getCompressedSize(collectionFolder) >> 111l
+        def size = js.getDataCompressedSize("testChunkKey", "testVersion", "testCollection")
+        then:
+        size == 111l
+        cleanup:
+        dataPath.deleteDir()
+    }
+
+    def "getDataUncompressedSize"() {
+        setup:
+        def indexStrategyManagerMock = Mock(IndexStrategyManager)
+        def dataStrategyManagerMock = Mock(DataStrategyManager)
+        def dataStrategyMock = Mock(DataStrategy)
+        def jumboConfigMock = Mock(JumboConfiguration)
+        def folder = FileUtils.getTempDirectoryPath() + "/" + UUID.randomUUID().toString() + "/"
+        def dataPath = new File(folder)
+        def collectionFolder = new File(folder + "testChunkKey/testVersion/testCollection/")
+        FileUtils.forceMkdir(collectionFolder)
+        def meta = new CollectionProperties.CollectionMeta("2012-12-12 12:12:12", "source path", "DATA_STRATEGY", "info")
+        def file = new File(collectionFolder.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME)
+        CollectionProperties.write(file, meta)
+        def js = createJumboSearcher()
+        js.setJumboConfiguration(jumboConfigMock)
+        js.setIndexStrategyManager(indexStrategyManagerMock)
+        js.setDataStrategyManager(dataStrategyManagerMock)
+        when:
+        jumboConfigMock.getDataPath() >> dataPath
+        1 * dataStrategyManagerMock.getStrategy("DATA_STRATEGY") >> dataStrategyMock
+        1 * dataStrategyMock.getUncompressedSize(collectionFolder) >> 111l
+        def size = js.getDataUncompressedSize("testChunkKey", "testVersion", "testCollection")
+        then:
+        size == 111l
+        cleanup:
+        dataPath.deleteDir()
+    }
+
+    def "getIndexSize"() {
+        setup:
+        def indexStrategyManagerMock = Mock(IndexStrategyManager)
+        def dataStrategyManagerMock = Mock(DataStrategyManager)
+        def indexStrategyMock = Mock(IndexStrategy)
+        def jumboConfigMock = Mock(JumboConfiguration)
+        def folder = FileUtils.getTempDirectoryPath() + "/" + UUID.randomUUID().toString() + "/"
+        def indexPath = new File(folder)
+        def indexFolder = new File(folder + "testChunkKey/testVersion/testCollection/indexName/")
+        FileUtils.forceMkdir(indexFolder)
+        def meta = new IndexProperties.IndexMeta("2012-12-12 12:12:12", "indexName", "INDEX_STRATEGY", "source fields")
+        def file = new File(indexFolder.getAbsolutePath() + "/" + IndexProperties.DEFAULT_FILENAME)
+        IndexProperties.write(file, meta)
+        def js = createJumboSearcher()
+        js.setJumboConfiguration(jumboConfigMock)
+        js.setIndexStrategyManager(indexStrategyManagerMock)
+        js.setDataStrategyManager(dataStrategyManagerMock)
+        when:
+        jumboConfigMock.getIndexPath() >> indexPath
+        1 * indexStrategyManagerMock.getStrategy("INDEX_STRATEGY") >> indexStrategyMock
+        1 * indexStrategyMock.getSize(indexFolder) >> 111l
+        def size = js.getIndexSize("testChunkKey", "testVersion", "testCollection")
+        then:
+        size == 111l
+        cleanup:
+        indexPath.deleteDir()
+    }
+
     def createJumboSearcher() {
        new JumboSearcher() {
            @Override
            protected CollectionDefinition getCollectionDefinition() {
-               def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("testIndex", new File("."), "INDEX_STRATEGY")], [:], "testStrategy")]]
+               def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("testIndex", new File("."), "INDEX_STRATEGY")], [:], "DATA_STRATEGY")]]
                return new CollectionDefinition(cdMap)
            }
        }

@@ -8,19 +8,19 @@ import org.apache.commons.io.FileUtils;
  * Time: 8:14 PM
  */
 public class VersionedJumboCollection implements Comparable<VersionedJumboCollection> {
-    private String collectionName;
-    private String version;
     private String chunkKey;
+    private String version;
+    private String collectionName;
     private String info;
     private String date;
     private String sourcePath;
     private String strategy;
-    private boolean active;
     private long compressedSize;
     private long uncompressedSize;
     private long indexSize;
 
-    public VersionedJumboCollection(String collectionName, String version, String chunkKey, String info, String date, String sourcePath, String strategy, boolean active, long compressedSize, long uncompressedSize, long indexSize) {
+    public VersionedJumboCollection(String chunkKey, String version, String collectionName, String info,
+      String date, String sourcePath, String strategy, long compressedSize, long uncompressedSize, long indexSize) {
         this.collectionName = collectionName;
         this.version = version;
         this.chunkKey = chunkKey;
@@ -28,10 +28,13 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
         this.date = date;
         this.sourcePath = sourcePath;
         this.strategy = strategy;
-        this.active = active;
         this.compressedSize = compressedSize;
         this.uncompressedSize = uncompressedSize;
         this.indexSize = indexSize;
+    }
+
+    public String getInfo() {
+        return info;
     }
 
     public String getSourcePath() {
@@ -54,16 +57,8 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
         return chunkKey;
     }
 
-    public String getInfo() {
-        return info;
-    }
-
     public String getDate() {
         return date;
-    }
-
-    public boolean isActive() {
-        return active;
     }
 
     public long getCompressedSize() {
@@ -96,13 +91,19 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof VersionedJumboCollection)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        VersionedJumboCollection that = (VersionedJumboCollection) o;
+        final VersionedJumboCollection that = (VersionedJumboCollection) o;
 
-        if (!collectionName.equals(that.collectionName)) return false;
+        if (!collectionName.equals(that.collectionName)) {
+            return false;
+        }
 
         return true;
     }
@@ -115,15 +116,16 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     @Override
     public String toString() {
         return "VersionedJumboCollection{" +
-                "collectionName='" + collectionName + '\'' +
-                ", version='" + version + '\'' +
-                ", chunkKey='" + chunkKey + '\'' +
-                ", info='" + info + '\'' +
-                ", date='" + date + '\'' +
-                ", active=" + active +
-                ", compressedSize=" + compressedSize +
-                ", uncompressedSize=" + uncompressedSize +
-                ", indexSize=" + indexSize +
-                '}';
+          "chunkKey='" + chunkKey + '\'' +
+          ", version='" + version + '\'' +
+          ", collectionName='" + collectionName + '\'' +
+          ", info='" + info + '\'' +
+          ", date='" + date + '\'' +
+          ", sourcePath='" + sourcePath + '\'' +
+          ", strategy='" + strategy + '\'' +
+          ", compressedSize=" + compressedSize +
+          ", uncompressedSize=" + uncompressedSize +
+          ", indexSize=" + indexSize +
+          '}';
     }
 }

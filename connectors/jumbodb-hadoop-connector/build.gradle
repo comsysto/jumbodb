@@ -31,16 +31,24 @@ dependencies {
     compile project(':connectors:jumbodb-java-connector')
     compile project(':commons:query')
     compile project(':commons:geo')
+    compile project(':commons:data') {
 
-    compile ("org.apache.hadoop:hadoop-core:1.0.3") {
+    }
+
+//    compile ("org.apache.hadoop:hadoop-mapreduce-client-core:$hadoopVersion")
+//    compile ("org.apache.hadoop:hadoop-mapreduce-client-app:$hadoopVersion")
+//    compile ("org.apache.hadoop:hadoop-common:$hadoopVersion")
+    compile ("org.apache.hadoop:hadoop-client:$hadoopVersion") {
         exclude group: 'org.mortbay.jetty'
         exclude group: 'tomcat'
     }
-    compile 'commons-io:commons-io:2.3'
+        compile 'commons-io:commons-io:2.3'
+    compile "org.xerial.snappy:snappy-java:$snappyVersion"
     testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-core:1.9.5"
     testCompile "org.codehaus.groovy:groovy-all:2.0.8"
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
+
 }
 
 task packageJavadoc(type: Jar, dependsOn: 'javadoc') {

@@ -3,15 +3,15 @@ package org.jumbodb.database.service.query.index;
 
 public class IndexKey {
 
-    private final String collectionName;
     private final String chunkKey;
+    private final String collectionName;
     private final String indexName;
 
 
-    public IndexKey(String collectionName, String chunkKey, String indexName) {
-        this.indexName = indexName;
+    public IndexKey(String chunkKey, String collectionName, String indexName) {
         this.chunkKey = chunkKey;
         this.collectionName = collectionName;
+        this.indexName = indexName;
     }
 
 

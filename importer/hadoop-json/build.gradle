@@ -7,10 +7,6 @@ apply plugin: 'eclipse'
 apply plugin: 'application'
 apply plugin: "groovy"
 
-
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 group = 'org.jumbodb.importer'
 archivesBaseName = 'hadoop-json'
 
@@ -41,6 +37,13 @@ sourceSets {
     }
 }
 
+startScripts{
+    doLast{
+        println(windowsScript.text)
+//        windowsScript.text = "testen"
+    }
+}
+
 dependencies {
     compile project(':connectors:jumbodb-hadoop-connector')
 
@@ -48,7 +51,8 @@ dependencies {
     bundle project(':connectors:jumbodb-java-connector')
     bundle project(':commons:query')
     bundle project(':commons:geo')
-    bundle 'org.xerial.snappy:snappy-java:1.0.5-M4'
+    bundle project(':commons:data')
+    bundle "org.xerial.snappy:snappy-java:$snappyVersion"
     bundle 'commons-io:commons-io:2.3'
     testCompile "org.codehaus.groovy:groovy-all:1.8.6"
     testCompile "org.spockframework:spock-core:0.6-groovy-1.8"

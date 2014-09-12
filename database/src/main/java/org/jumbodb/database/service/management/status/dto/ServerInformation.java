@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.management.status.dto;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * User: carsten
@@ -23,7 +24,6 @@ public class ServerInformation {
     private String startupTime;
     private String queryProtocolVersion;
     private String importProtocolVersion;
-    private String storageFormatVersion;
     private String indexDiskUsedSpace;
     private String indexDiskTotalSpace;
     private String indexDiskFreeSpace;
@@ -32,6 +32,25 @@ public class ServerInformation {
     private String dataDiskTotalSpace;
     private String dataDiskFreeSpace;
     private Double dataDiskUsedSpacePerc;
+    private String version;
+    private String gitRevision;
+    private String buildDate;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getGitRevision() {
+        return gitRevision;
+    }
+
+    public void setGitRevision(String gitRevision) {
+        this.gitRevision = gitRevision;
+    }
 
     public String getIndexDiskTotalSpace() {
         return indexDiskTotalSpace;
@@ -185,14 +204,6 @@ public class ServerInformation {
         this.importProtocolVersion = importProtocolVersion;
     }
 
-    public String getStorageFormatVersion() {
-        return storageFormatVersion;
-    }
-
-    public void setStorageFormatVersion(String storageFormatVersion) {
-        this.storageFormatVersion = storageFormatVersion;
-    }
-
     public String getIndexDiskUsedSpace() {
         return indexDiskUsedSpace;
     }
@@ -207,6 +218,14 @@ public class ServerInformation {
 
     public void setDataDiskUsedSpace(String dataDiskUsedSpace) {
         this.dataDiskUsedSpace = dataDiskUsedSpace;
+    }
+
+    public String getBuildDate() {
+        return buildDate;
+    }
+
+    public void setBuildDate(String buildDate) {
+        this.buildDate = buildDate;
     }
 
     @Override
@@ -225,7 +244,6 @@ public class ServerInformation {
                 ", startupTime='" + startupTime + '\'' +
                 ", queryProtocolVersion='" + queryProtocolVersion + '\'' +
                 ", importProtocolVersion='" + importProtocolVersion + '\'' +
-                ", storageFormatVersion='" + storageFormatVersion + '\'' +
                 ", indexDiskUsedSpace='" + indexDiskUsedSpace + '\'' +
                 ", indexDiskTotalSpace='" + indexDiskTotalSpace + '\'' +
                 ", indexDiskFreeSpace='" + indexDiskFreeSpace + '\'' +
@@ -234,6 +252,9 @@ public class ServerInformation {
                 ", dataDiskTotalSpace='" + dataDiskTotalSpace + '\'' +
                 ", dataDiskFreeSpace='" + dataDiskFreeSpace + '\'' +
                 ", dataDiskUsedSpacePerc=" + dataDiskUsedSpacePerc +
+                ", version='" + version + '\'' +
+                ", gitRevision='" + gitRevision + '\'' +
+                ", buildDate='" + buildDate + '\'' +
                 '}';
     }
 }

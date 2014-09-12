@@ -6,12 +6,9 @@
          version="3.0">
 
     <display-name>jumboDB</display-name>
-
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>
-            classpath:org/jumbodb/database/service/spring-services.xml
-        </param-value>
+        <param-value>classpath:org/jumbodb/database/service/spring-services.xml</param-value>
     </context-param>
 
     <!-- Creates the Spring Container shared by all Servlets and Filters -->
@@ -35,7 +32,6 @@
         <servlet-name>jumborest</servlet-name>
         <url-pattern>/jumbodb/*</url-pattern>
     </servlet-mapping>
-
 
     <filter>
         <filter-name>encodingFilter</filter-name>

@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.management.storage.dto.deliveries;
 
 import org.apache.commons.io.FileUtils;
-import org.jumbodb.database.service.management.storage.dto.collections.DeliveryChunk;
 
 import java.util.List;
 
@@ -20,14 +19,30 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
     private long compressedSize = -1;
     private long uncompressedSize = -1;
     private long indexSize = -1;
+    private boolean activeVersion = false;
+    private boolean activeChunk = false;
 
-    public ChunkedDeliveryVersion(String collapseId, String chunkKey, String version, String info, String date, List<VersionedJumboCollection> collections) {
+    public ChunkedDeliveryVersion(String collapseId, String chunkKey, String version, String info, String date, boolean activeVersion, boolean activeChunk, List<VersionedJumboCollection> collections) {
         this.collapseId = collapseId;
         this.chunkKey = chunkKey;
         this.version = version;
         this.info = info;
         this.date = date;
+        this.activeVersion = activeVersion;
         this.collections = collections;
+        this.activeChunk = activeChunk;
+    }
+
+    public boolean isActiveVersion() {
+        return activeVersion;
+    }
+
+    public boolean isActiveChunk() {
+        return activeChunk;
+    }
+
+    public boolean isActive() {
+        return isActiveChunk() && isActiveVersion();
     }
 
     public String getCollapseId() {
@@ -109,28 +124,6 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
 
     public String getFormatedIndexSize() {
         return FileUtils.byteCountToDisplaySize(getIndexSize());
-    }
-
-    public boolean isAllRunning() {
-        for (VersionedJumboCollection collection : collections) {
-            if(!collection.isActive()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean isNoneRunning() {
-        for (VersionedJumboCollection collection : collections) {
-            if(collection.isActive()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean isSomeRunning() {
-        return !isNoneRunning() && !isAllRunning();
     }
 
     @Override

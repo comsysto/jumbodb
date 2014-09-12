@@ -1,6 +1,7 @@
 package org.jumbodb.connector.hadoop;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.mapred.InputFormat;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.jumbodb.connector.hadoop.importer.ImportJobCreator;
 import org.jumbodb.connector.hadoop.index.IndexJobCreator;
 import org.jumbodb.connector.hadoop.configuration.*;
@@ -9,15 +10,21 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.datetime.snappy.GenericJsonDateTimeIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonDoubleIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.floatval.snappy.GenericJsonFloatIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.geohash.snappy.GenericJsonGeohashIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy.GenericJsonHashCode32IndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.hashcode64.snappy.GenericJsonHashCode64IndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.integer.snappy.GenericJsonIntegerIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.longval.snappy.GenericJsonLongIndexMapper;
+import org.jumbodb.connector.importer.ImportInfo;
 import org.jumbodb.connector.importer.JumboImportConnection;
-import org.jumbodb.connector.importer.MetaData;
-import org.jumbodb.connector.importer.MetaIndex;
+import org.jumbodb.data.common.meta.DeliveryProperties;
 
 import java.io.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * User: carsten
@@ -26,9 +33,8 @@ import java.util.UUID;
  */
 public class JumboJobCreator {
 
-
     public static List<ControlledJob> createIndexAndImportJob(Configuration conf, JumboGenericImportJob genericImportJob) throws IOException {
-        if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
+        if (conf.get(JumboConstants.DELIVERY_VERSION) == null) {
             conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
         }
         List<ControlledJob> controlledJobs = new LinkedList<ControlledJob>();
@@ -40,19 +46,34 @@ public class JumboJobCreator {
         for (IndexField indexField : genericImportJob.getIndexes()) {
             IndexJobCreator.IndexControlledJob indexJob = IndexJobCreator.createGenericIndexJob(conf, genericImportJob, indexField);
             ControlledJob controlledIndexJob = indexJob.getControlledJob();
-            List<ControlledJob> indexImportJobs = ImportJobCreator.createIndexImportJobs(conf, genericImportJob, indexField);
-
-            for (ControlledJob controlledJob : indexImportJobs) {
-                controlledJob.addDependingJob(controlledIndexJob);
-            }
             controlledJobs.add(controlledIndexJob);
-            controlledJobs.addAll(indexImportJobs);
+            if (conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
+                List<ControlledJob> indexImportJobs = ImportJobCreator.createIndexImportJobs(conf, genericImportJob, indexField);
+                for (ControlledJob controlledJob : indexImportJobs) {
+                    controlledJob.addDependingJob(controlledIndexJob);
+                }
+                controlledJobs.addAll(indexImportJobs);
+            }
         }
         return controlledJobs;
     }
 
+    public static void initImport(List<ImportHost> importHosts, String chunkKey, String deliveryDescription, Configuration conf) {
+        String deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
+        for (ImportHost host : importHosts) {
+            JumboImportConnection jumbo = null;
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(DeliveryProperties.DATE_PATTERN);
+                jumbo = new JumboImportConnection(host.getHost(), host.getPort());
+                jumbo.initImport(new ImportInfo(chunkKey, deliveryVersion, sdf.format(new Date()), deliveryDescription));
+            } finally {
+                IOUtils.closeStream(jumbo);
+            }
+        }
+    }
+
     public static List<ControlledJob> createIndexAndImportJob(Configuration conf, JumboCustomImportJob jumboCustomImportJob) throws IOException {
-        if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
+        if (conf.get(JumboConstants.DELIVERY_VERSION) == null) {
             conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
         }
         List<ControlledJob> controlledJobs = new LinkedList<ControlledJob>();
@@ -63,91 +84,55 @@ public class JumboJobCreator {
         for (Class<? extends AbstractIndexMapper> map : jumboCustomImportJob.getMapper()) {
             IndexJobCreator.IndexControlledJob indexJob = IndexJobCreator.createCustomIndexJob(conf, jumboCustomImportJob, map);
             ControlledJob controlledIndexJob = indexJob.getControlledJob();
-
-            IndexField indexInformation = IndexJobCreator.getIndexInformation(map);
-            List<ControlledJob> indexImportJob = ImportJobCreator.createIndexImportJobs(conf, jumboCustomImportJob, indexInformation);
-            for (ControlledJob controlledJob : indexImportJob) {
-                controlledJob.addDependingJob(controlledIndexJob);
-            }
             controlledJobs.add(controlledIndexJob);
-            controlledJobs.addAll(indexImportJob);
+            if (conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
+
+
+                IndexField indexInformation = IndexJobCreator.getIndexInformation(map);
+                List<ControlledJob> indexImportJob = ImportJobCreator.createIndexImportJobs(conf, jumboCustomImportJob, indexInformation);
+                for (ControlledJob controlledJob : indexImportJob) {
+                    controlledJob.addDependingJob(controlledIndexJob);
+                }
+                controlledJobs.addAll(indexImportJob);
+
+            }
         }
         return controlledJobs;
     }
 
-    public static void sendMetaIndex(BaseJumboImportJob genericImportJob, IndexField indexField, Configuration conf) {
+    public static void commitImport(Set<CommitNotification> commitNotifications, JobControl jobControl,
+      Configuration conf) {
+        for (CommitNotification commitNotification : commitNotifications) {
+            commitImport(commitNotification, jobControl, conf);
+        }
+    }
 
-        String type = conf.get(JumboConstants.DATA_TYPE);
-        if(!JumboConstants.DATA_TYPE_INDEX.equals(type)) {
+
+    public static void commitImport(Set<CommitNotification> commitNotifications, Configuration conf) {
+        for (CommitNotification commitNotification : commitNotifications) {
+            commitImport(commitNotification, conf);
+        }
+    }
+
+    public static void commitImport(CommitNotification commitNotification, JobControl jobControl, Configuration conf) {
+        if (!conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
             return;
         }
-        for (ImportHost importHost : genericImportJob.getHosts()) {
-            JumboImportConnection jumbo = null;
-            try {
-                jumbo = new JumboImportConnection(importHost.getHost(), importHost.getPort());
-                String collection = genericImportJob.getCollectionName();
-                MetaIndex metaData = new MetaIndex(collection, genericImportJob.getDeliveryChunkKey(), conf.get(JumboConstants.DELIVERY_VERSION), indexField.getIndexName(), indexField.getIndexStrategy(), StringUtils.join(indexField.getFields(), ";"));
-                jumbo.sendMetaIndex(metaData);
-            } finally {
-                IOUtils.closeStream(jumbo);
-            }
-        }
-
-    }
-
-
-    public static void sendMetaData(BaseJumboImportJob genericImportJob, Configuration conf) {
-        String type = conf.get(JumboConstants.DATA_TYPE);
-        if(!JumboConstants.DATA_TYPE_DATA.equals(type)) {
-            return;
-        }
-        for (ImportHost importHost : genericImportJob.getHosts()) {
-            JumboImportConnection jumbo = null;
-            try {
-                jumbo = new JumboImportConnection(importHost.getHost(), importHost.getPort());
-                String collection = genericImportJob.getCollectionName();
-                boolean activate = genericImportJob.isActivateDelivery();
-                MetaData metaData = new MetaData(collection, genericImportJob.getDeliveryChunkKey(), conf.get(JumboConstants.DELIVERY_VERSION), genericImportJob.getDataStrategy(),genericImportJob.getInputPath().toString(), activate, genericImportJob.getDescription());
-                jumbo.sendMetaData(metaData);
-            } finally {
-                IOUtils.closeStream(jumbo);
-            }
-        }
-
-    }
-
-    public static void sendFinishedNotification(Set<FinishedNotification> finishedNotifications, JobControl jobControl, Configuration conf) {
-        for (FinishedNotification finishedNotification : finishedNotifications) {
-            sendFinishedNotification(finishedNotification, jobControl, conf);
-        }
-    }
-
-
-    public static void sendFinishedNotification(Set<FinishedNotification> finishedNotifications, Configuration conf) {
-        for (FinishedNotification finishedNotification : finishedNotifications) {
-            sendFinishedNotification(finishedNotification, conf);
-        }
-    }
-
-    public static void sendFinishedNotification(FinishedNotification finishedNotification, JobControl jobControl, Configuration conf) {
-        if(!conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
-            return;
-        }
-        if(jobControl.getFailedJobList().size() == 0
+        if (jobControl.getFailedJobList().size() == 0
                 && jobControl.allFinished()) {
-            sendFinishedNotification(finishedNotification, conf);
+            commitImport(commitNotification, conf);
         }
 
     }
 
 
-    public static void sendFinishedNotification(FinishedNotification finishedNotification, Configuration conf) {
+    public static void commitImport(CommitNotification commitNotification, Configuration conf) {
         String deliveryVersion = conf.get(JumboConstants.DELIVERY_VERSION);
         JumboImportConnection jumbo = null;
         try {
-            ImportHost host = finishedNotification.getHost();
+            ImportHost host = commitNotification.getHost();
             jumbo = new JumboImportConnection(host.getHost(), host.getPort());
-            jumbo.sendFinishedNotification(finishedNotification.getDeliveryChunkKey(), deliveryVersion);
+            jumbo.commitImport(commitNotification.getDeliveryChunkKey(), deliveryVersion, commitNotification.isActivateChunk(), commitNotification.isActivateVersion());
         } finally {
             IOUtils.closeStream(jumbo);
         }

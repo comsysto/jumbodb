@@ -1,6 +1,7 @@
 package org.jumbodb.data.common.meta;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.UnhandledException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,9 +20,9 @@ public class PropertiesHelper {
             fis = new FileInputStream(file);
             props.load(fis);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new UnhandledException(e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UnhandledException(e);
         } finally {
             IOUtils.closeQuietly(fis);
         }

@@ -7,9 +7,6 @@ apply plugin: 'eclipse'
 apply plugin: 'application'
 apply plugin: 'groovy'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 group = 'org.jumbodb.benchmark.suite'
 archivesBaseName = 'jumbodb-benchmark-suite'
 
@@ -23,13 +20,14 @@ configurations {
 }
 
 dependencies {
-    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+//    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.12"
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.4.2'
 //    compile "org.apache.hadoop:hadoop-core:1.0.3"
     compile 'commons-io:commons-io:2.3'
     compile 'commons-lang:commons-lang:2.5'
     compile 'commons-collections:commons-collections:3.2.1'
     compile 'com.google.guava:guava:13.0'
-    compile 'org.xerial.snappy:snappy-java:1.0.5-M4'
+    compile 'org.xerial.snappy:snappy-java:$snappyVersion'
 //    compile 'net.minidev:json-smart:2.0-RC2'
     compile project(':commons:util')
     compile project(':commons:data')

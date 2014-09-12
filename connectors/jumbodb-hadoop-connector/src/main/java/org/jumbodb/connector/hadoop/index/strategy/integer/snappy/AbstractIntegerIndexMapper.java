@@ -49,7 +49,7 @@ public abstract class AbstractIntegerIndexMapper<T> extends AbstractIndexMapper<
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return IntegerIndexOutputFormat.class;
+        return IntegerSnappyIndexV1OutputFormat.class;
     }
 
     public abstract Integer getIndexableValue(T input);

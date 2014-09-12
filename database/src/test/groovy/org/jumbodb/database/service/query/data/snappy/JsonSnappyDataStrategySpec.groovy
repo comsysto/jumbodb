@@ -1,8 +1,10 @@
 package org.jumbodb.database.service.query.data.snappy
 
+import org.apache.commons.io.FileUtils
 import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.importer.ImportMetaFileInformation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
@@ -61,27 +63,6 @@ class JsonSnappyDataStrategySpec extends Specification {
     def "verify strategy name"() {
         expect:
         strategy.getStrategyName() == "JSON_SNAPPY_V1"
-    }
-
-    def "onImport stream should be snappy compressed saved"() {
-        setup:
-        def strToCompare = "Some content for the file"
-        def strToWrite = strToCompare + "\n"
-        def byteArrayInputStream = new ByteArrayInputStream("Some content for the file".getBytes())
-        def tmpTargetFile = File.createTempFile("outputFile", "snappy")
-        def tmpTargetPath = tmpTargetFile.getParentFile()
-        def information = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.DATA, tmpTargetFile.getName(), "collection", "index name", strToWrite.size(), "deliverykey", "version", JsonSnappyDataStrategy.JSON_SNAPPY_V1)
-        when:
-        def sha1Hash = strategy.onImport(information, byteArrayInputStream, tmpTargetPath)
-        def is = new SnappyInputStream(new FileInputStream(tmpTargetFile))
-        def reader = new BufferedReader(new InputStreamReader(is))
-        then:
-        reader.readLine() == strToCompare
-        sha1Hash == "371ade508ac7d7549439463808b57d04e972c358"
-        cleanup:
-        is.close()
-        reader.close()
-        tmpTargetFile.delete()
     }
 
     def "matches should delegate to the appropriate operation"() {
@@ -185,5 +166,38 @@ class JsonSnappyDataStrategySpec extends Specification {
         numberOfResults == 9
         3 * executorService.submit(_ as JsonSnappyRetrieveDataSetsTask) >> futureMock
         3 * futureMock.get() >> 3
+    }
+
+    def "getCompressedSize"() {
+        setup:
+        def folderStr = FileUtils.getTempDirectory().absolutePath + "/" + UUID.randomUUID().toString() + "/"
+        def folder = new File(folderStr)
+        FileUtils.forceMkdir(folder);
+        new File(folderStr + "/testdata").text = "Hello World"
+        def strategy = new JsonSnappyDataStrategy()
+        when:
+        def size = strategy.getCompressedSize(folder)
+        then:
+        size == 11
+        cleanup:
+        folder.deleteDir()
+    }
+
+
+    def "getUncompressedSize"() {
+        setup:
+        def folderStr = FileUtils.getTempDirectory().absolutePath + "/" + UUID.randomUUID().toString() + "/"
+        def folder = new File(folderStr)
+        FileUtils.forceMkdir(folder);
+        def dataFile = new File(folderStr + "/testdata")
+        def bytes = "Hello World".getBytes("UTF-8")
+        SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), dataFile, bytes.length, 32 * 1024)
+        def strategy = new JsonSnappyDataStrategy()
+        when:
+        def size = strategy.getUncompressedSize(folder)
+        then:
+        size == 11
+        cleanup:
+        folder.deleteDir()
     }
 }

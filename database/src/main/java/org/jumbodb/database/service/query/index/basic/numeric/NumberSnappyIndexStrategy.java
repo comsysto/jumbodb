@@ -1,13 +1,13 @@
 package org.jumbodb.database.service.query.index.basic.numeric;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
-import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
@@ -82,7 +82,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
     @Override
-    public boolean isResponsibleFor(String collection, String chunkKey, String indexName) {
+    public boolean isResponsibleFor(String chunkKey, String collection, String indexName) {
         IndexDefinition chunkIndex = collectionDefinition.getChunkIndex(collection, chunkKey, indexName);
         if(chunkIndex != null) {
             return getStrategyName().equals(chunkIndex.getStrategy());
@@ -96,7 +96,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
             for (DeliveryChunkDefinition deliveryChunkDefinition : collectionDefinition.getChunks(collection)) {
                 for (IndexDefinition indexDefinition : deliveryChunkDefinition.getIndexes()) {
                     if(getStrategyName().equals(indexDefinition.getStrategy())) {
-                        IndexKey indexKey = new IndexKey(collection, deliveryChunkDefinition.getChunkKey(), indexDefinition.getName());
+                        IndexKey indexKey = new IndexKey(deliveryChunkDefinition.getChunkKey(), collection, indexDefinition.getName());
                         result.put(indexKey, buildIndexRange(indexDefinition.getPath()));
                     }
                 }
@@ -107,7 +107,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
 
     protected List<IF> buildIndexRange(File indexFolder) {
         List<IF> result = new LinkedList<IF>();
-        File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".odx"));
+        File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".idx"));
         for (File indexFile : indexFiles) {
             SnappyChunks snappyChunks = getSnappyChunksByFile(indexFile);
             if(snappyChunks.getNumberOfChunks() > 0) {
@@ -157,6 +157,11 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         }
     }
 
+    @Override
+    public long getSize(File indexFolder) {
+        return FileUtils.sizeOfDirectory(indexFolder);
+    }
+
     public MultiValueMap<File, QueryClause> groupByIndexFile(String collection, String chunkKey, IndexQuery query) {
         List<IF> indexFiles = getIndexFiles(collection, chunkKey, query);
         MultiValueMap<File, QueryClause> groupByIndexFile = new LinkedMultiValueMap<File, QueryClause>();
@@ -171,7 +176,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
     protected List<IF> getIndexFiles(String collection, String chunkKey, IndexQuery query) {
-        return indexFiles.get(new IndexKey(collection, chunkKey, query.getName()));
+        return indexFiles.get(new IndexKey(chunkKey, collection, query.getName()));
     }
 
 
@@ -225,7 +230,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         long numberOfChunks = snappyChunks.getNumberOfChunks();
 //        log.trace("findFirstMatchingChunk currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");
 
-        int i = 0;
+        int checkedChunks = 0;
+        int matchedChunks = 0;
         if(currentChunk >= 0) {
             FileInputStream fis = null;
             BufferedInputStream bis = null;
@@ -251,6 +257,9 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                             T currentValue = readValueFromDataInput(byteDis);
                             int fileNameHash = byteDis.readInt();
                             long offset = byteDis.readLong();
+                            if(integerOperationSearch.matchingChunk(currentValue, queryValueRetriever)) {
+                                matchedChunks++;
+                            }
                             if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
                                 result.add(new FileOffset(fileNameHash, offset, clause.getQueryClauses()));
                             }
@@ -264,7 +273,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                             }
                         }
                         // nothing found in second block, so there isn't anything
-                        if(i > 1 && result.isEmpty()) {
+                        if(checkedChunks > 1 && matchedChunks == 0) {
+                        //    System.out.println("blub" + checkedChunks);
                             return result;
                         }
                     } finally {
@@ -273,7 +283,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                     }
 
                     currentChunk++;
-                    i++;
+                    checkedChunks++;
                 }
                 return result;
             } finally {
@@ -303,12 +313,6 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     @Override
     public void onInitialize(CollectionDefinition collectionDefinition) {
         onDataChanged(collectionDefinition);
-    }
-
-    @Override
-    public String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile) {
-        String absoluteImportPath = absoluteImportPathFile.getAbsolutePath() + "/" + information.getFileName();
-        return SnappyChunksUtil.copy(dataInputStream, new File(absoluteImportPath), information.getFileLength(), getSnappyChunkSize());
     }
 
     public abstract Map<QueryOperation, OperationSearch<T, IFV, IF>> getQueryOperationsStrategies();

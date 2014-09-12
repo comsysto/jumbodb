@@ -59,9 +59,8 @@ define(['angular', "js/monitoring/queryTabConfig.js", "js/monitoring/serverTabCo
 			fetchData();
 			$scope.msg = {};
 
-			// CARSTEN reuse ?
 			$scope.showReplication = false;
-			$scope.replication = {"port" :12001, "activate": true};
+			$scope.replication = {"port" :12001, "activateChunk": true, "activateVersion": true};
 
 			$scope.toggleReplication = function() {
 				$scope.showReplication = !$scope.showReplication;
@@ -76,26 +75,36 @@ define(['angular', "js/monitoring/queryTabConfig.js", "js/monitoring/serverTabCo
 				});
 			}
 
-			$scope.activateChunkedVersionForAllCollections = function(chunkDeliveryKey, version) {
+            $scope.activateChunk = function(chunkDeliveryKey) {
+                if(confirm('Are you sure?')) {
+                    $http.post('jumbodb/rest/chunk/' + chunkDeliveryKey + '/activate').success(function(data) {
+                        fetchData();
+                        buildMessage(data)
+                    });
+                }
+            }
+
+            $scope.inactivateChunk = function(chunkDeliveryKey) {
+                if(confirm('Are you sure?')) {
+                    $http.post('jumbodb/rest/chunk/' + chunkDeliveryKey + '/inactivate').success(function(data) {
+                        fetchData();
+                        buildMessage(data)
+                    });
+                }
+            }
+
+			$scope.activateChunkedVersion = function(chunkDeliveryKey, version) {
 				if(confirm('Are you sure?')) {
-					$http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
+					$http.post('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/activate').success(function(data) {
 						fetchData();
 						buildMessage(data)
 					});
 				}
 			}
 
-			$scope.activateChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
-				if(confirm('Are you sure?')) {
-					$http.put('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
-						fetchData();
-						buildMessage(data)
-					});
-				}
-			}
 
-			$scope.deleteChunkedVersionForAllCollections = function(chunkDeliveryKey, version) {
-				if(confirm('Are you sure?')) {
+			$scope.deleteChunkedVersion = function(chunkDeliveryKey, version) {
+				if(confirm('This action is not revertable and will delete all collection within this delivery. Are you sure?')) {
 					$http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version).success(function(data) {
 						fetchData();
 						buildMessage(data);
@@ -103,14 +112,6 @@ define(['angular', "js/monitoring/queryTabConfig.js", "js/monitoring/serverTabCo
 				}
 			}
 
-			$scope.deleteChunkedVersionInCollection = function(chunkDeliveryKey, version, collection) {
-				if(confirm('Are you sure?')) {
-					$http.delete('jumbodb/rest/version/' + chunkDeliveryKey + '/' + version + '/' + collection).success(function(data) {
-						fetchData();
-						buildMessage(data);
-					});
-				}
-			}
 
 			function buildMessage(data) {
 				var msg = {};
@@ -137,6 +138,14 @@ define(['angular', "js/monitoring/queryTabConfig.js", "js/monitoring/serverTabCo
                     buildMessage(data);
                 });
             }
+
+            $scope.triggerReloadDatabases = function() {
+                $http.post('jumbodb/rest/maintenance/databases/reload').success(function(data) {
+                    fetchData();
+                    buildMessage(data);
+                });
+            }
+
 
             function buildMessage(data) {
                 var msg = {};

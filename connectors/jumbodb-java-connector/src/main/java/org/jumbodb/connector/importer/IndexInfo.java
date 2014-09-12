@@ -1,27 +1,37 @@
 package org.jumbodb.connector.importer;
 
+import org.jumbodb.common.query.ChecksumType;
+
 /**
  * User: carsten
  * Date: 2/26/13
  * Time: 4:48 PM
  */
 public class IndexInfo implements Comparable<IndexInfo> {
-    private String collection;
-    private String indexName;
-    private String filename;
-    private long fileLength;
     private String deliveryKey;
     private String deliveryVersion;
-    private String indexStrategy;
+    private String collection;
+    private String indexName;
+    private String fileName;
+    private long fileLength;
+    private final ChecksumType checksumType;
+    private final String checksum;
 
-    public IndexInfo(String collection, String indexName, String filename, long fileLength, String deliveryKey, String deliveryVersion, String indexStrategy) {
-        this.collection = collection;
-        this.indexName = indexName;
-        this.filename = filename;
-        this.fileLength = fileLength;
+    public IndexInfo(String deliveryKey, String deliveryVersion, String collection, String indexName, String fileName,
+      long fileLength) {
+        this(deliveryKey, deliveryVersion, collection, indexName, fileName, fileLength, ChecksumType.NONE, null);
+    }
+
+    public IndexInfo(String deliveryKey, String deliveryVersion, String collection, String indexName, String fileName,
+      long fileLength, ChecksumType checksumType, String checksum) {
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
-        this.indexStrategy = indexStrategy;
+        this.collection = collection;
+        this.indexName = indexName;
+        this.fileName = fileName;
+        this.fileLength = fileLength;
+        this.checksumType = checksumType;
+        this.checksum = checksum;
     }
 
     public String getCollection() {
@@ -32,8 +42,8 @@ public class IndexInfo implements Comparable<IndexInfo> {
         return indexName;
     }
 
-    public String getFilename() {
-        return filename;
+    public String getFileName() {
+        return fileName;
     }
 
     public long getFileLength() {
@@ -48,25 +58,34 @@ public class IndexInfo implements Comparable<IndexInfo> {
         return deliveryVersion;
     }
 
-    public String getIndexStrategy() {
-        return indexStrategy;
+    public ChecksumType getChecksumType() {
+        return checksumType;
+    }
+
+    public String getChecksum() {
+        return checksum;
     }
 
     @Override
     public int compareTo(IndexInfo o) {
-        return indexName.compareTo(o.indexName);
+        int i = indexName.compareTo(o.indexName);
+        if(i != 0) {
+            return i;
+        }
+        return fileName.compareTo(o.fileName);
     }
 
     @Override
     public String toString() {
         return "IndexInfo{" +
-                "collection='" + collection + '\'' +
-                ", indexName='" + indexName + '\'' +
-                ", filename='" + filename + '\'' +
-                ", fileLength=" + fileLength +
-                ", deliveryKey='" + deliveryKey + '\'' +
-                ", deliveryVersion='" + deliveryVersion + '\'' +
-                ", indexStrategy='" + indexStrategy + '\'' +
-                '}';
+          "deliveryKey='" + deliveryKey + '\'' +
+          ", deliveryVersion='" + deliveryVersion + '\'' +
+          ", collection='" + collection + '\'' +
+          ", indexName='" + indexName + '\'' +
+          ", fileName='" + fileName + '\'' +
+          ", fileLength=" + fileLength +
+          ", checksumType=" + checksumType +
+          ", checksum='" + checksum + '\'' +
+          '}';
     }
 }

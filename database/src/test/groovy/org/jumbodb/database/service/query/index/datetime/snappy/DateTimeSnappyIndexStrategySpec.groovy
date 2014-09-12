@@ -242,11 +242,11 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.onInitialize(cd)
         when:
-        def responsible = strategy.isResponsibleFor("testCollection", "testChunkKey", "testIndex")
+        def responsible = strategy.isResponsibleFor("testChunkKey", "testCollection", "testIndex")
         then:
         responsible
         when:
-        def notResponsible = !strategy.isResponsibleFor("testCollection", "testChunkKey", "notIn")
+        def notResponsible = !strategy.isResponsibleFor("testChunkKey", "testCollection", "notIn")
         then:
         notResponsible
         cleanup:
@@ -268,11 +268,11 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         when:
         strategy.onInitialize(cd)
         def ranges = strategy.buildIndexRanges()
-        def testIndexFiles = ranges.get(new IndexKey("testCollection", "testChunkKey", "testIndex"))
+        def testIndexFiles = ranges.get(new IndexKey("testChunkKey", "testCollection", "testIndex"))
         then:
         ranges.size() == 1
         testIndexFiles.size() == 1
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         sdf.format(new Date(testIndexFiles[0].getFrom())) == "2012-01-01 12:00:00"
         sdf.format(new Date(testIndexFiles[0].getTo())) == "2012-12-29 11:34:48"
         cleanup:
@@ -302,28 +302,11 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def indexRange = strategy.buildIndexRange(indexFolder)
         then:
         indexRange.size() == 1
-        indexRange[0].getIndexFile().getName() == "part00001.odx"
+        indexRange[0].getIndexFile().getName() == "part00001.idx"
         sdf.format(new Date(indexRange[0].getFrom())) == "2012-01-01 12:00:00"
         sdf.format(new Date(indexRange[0].getTo())) == "2012-12-29 11:34:48"
         cleanup:
         indexFolder.delete()
-    }
-
-    def "onImport"() {
-        setup:
-        def indexFileContent = DateTimeDataGeneration.createIndexContent()
-        def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
-        def meta = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.INDEX, "part00001.odx", "collection", "testindex", indexFileContent.length, "deliveryKey", "deliveryVersion", "STRATEGY")
-        when:
-        def sha1Hash = strategy.onImport(meta, new ByteArrayInputStream(indexFileContent), indexFolder)
-        then:
-        new File(indexFolder.getAbsolutePath() + "/part00001.odx").exists()
-        new File(indexFolder.getAbsolutePath() + "/part00001.odx.chunks.snappy").exists()
-        SnappyChunksUtil.getSnappyChunksByFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx")).getLength() == indexFileContent.length
-        sha1Hash == "abd42b88a891fbed1c220da0ad4e5701b0aa9c90"
-        cleanup:
-        indexFolder.delete()
-
     }
 
     def "onInitialize"() {
@@ -343,7 +326,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         sdf.format(new Date(testIndexFiles[0].getFrom())) == "2012-01-01 12:00:00"
         sdf.format(new Date(testIndexFiles[0].getTo())) == "2012-12-29 11:34:48"
         cleanup:
@@ -368,7 +351,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         sdf.format(new Date(testIndexFiles[0].getFrom())) == "2012-01-01 12:00:00"
         sdf.format(new Date(testIndexFiles[0].getTo())) == "2012-12-29 11:34:48"
         cleanup:
@@ -378,7 +361,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        DateTimeDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx"))
+        DateTimeDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

@@ -10,10 +10,11 @@ class ActivePropertiesSpec extends Specification {
         setup:
         def file = File.createTempFile("test", "file")
         when:
-        ActiveProperties.writeActiveFile(file, "my_version")
+        ActiveProperties.writeActiveFile(file, "my_version", true)
         def version = ActiveProperties.getActiveDeliveryVersion(file)
         then:
         version == "my_version"
+        ActiveProperties.isDeliveryActive(file)
         cleanup:
         file.delete()
     }

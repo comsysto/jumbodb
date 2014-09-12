@@ -37,15 +37,18 @@ class NotFoundDataStrategySpec extends Specification {
         thrown IllegalStateException
     }
 
-    def "onImport should throw an exception"() {
-        when:
-        strategy.onImport(Mock(ImportMetaFileInformation), Mock(InputStream), Mock(File))
-        then:
-        thrown IllegalStateException
-    }
-
     def "strategy has no supported operations"() {
         expect:
         strategy.getSupportedOperations().size() == 0
+    }
+
+    def "compressed size is always zero"() {
+        expect:
+        strategy.getCompressedSize() == 0
+    }
+
+    def "uncompressed size is always zero"() {
+        expect:
+        strategy.getUncompressedSize() == 0
     }
 }

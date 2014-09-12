@@ -31,7 +31,10 @@ public class JumboConfigurationUtil {
     private static final Map<String, Class<? extends Mapper>> MAPPER_BY_SORT_KEY = Maps.newHashMap();
     private static final Map<String, Class<? extends WritableComparable>> WRITABLE_BY_SORT_KEY = Maps.newHashMap();
 
+    public static final String NO_SORT = "NO_SORT";
+
     static {
+        MAPPER_BY_SORT_KEY.put(NO_SORT, Mapper.class);
         MAPPER_BY_SORT_KEY.put(GenericJsonStringSortMapper.SORT_KEY, GenericJsonStringSortMapper.class);
         MAPPER_BY_SORT_KEY.put(GenericJsonDateTimeSortMapper.SORT_KEY, GenericJsonDateTimeSortMapper.class);
         MAPPER_BY_SORT_KEY.put(GenericJsonDoubleSortMapper.SORT_KEY, GenericJsonDoubleSortMapper.class);
@@ -40,6 +43,7 @@ public class JumboConfigurationUtil {
         MAPPER_BY_SORT_KEY.put(GenericJsonLongSortMapper.SORT_KEY, GenericJsonLongSortMapper.class);
         MAPPER_BY_SORT_KEY.put(GenericJsonGeohashSortMapper.SORT_KEY, GenericJsonGeohashSortMapper.class);
 
+        WRITABLE_BY_SORT_KEY.put(NO_SORT, LongWritable.class);
         WRITABLE_BY_SORT_KEY.put(GenericJsonStringSortMapper.SORT_KEY, Text.class);
         WRITABLE_BY_SORT_KEY.put(GenericJsonDateTimeSortMapper.SORT_KEY, LongWritable.class);
         WRITABLE_BY_SORT_KEY.put(GenericJsonDoubleSortMapper.SORT_KEY, DoubleWritable.class);
@@ -82,9 +86,7 @@ public class JumboConfigurationUtil {
             if(conf.get(JumboConstants.DELIVERY_CHUNK_KEY) == null) {
                 conf.set(JumboConstants.DELIVERY_CHUNK_KEY, importDefinition.getDeliveryChunkKey());
             }
-            if(conf.get(JumboConstants.DELIVERY_VERSION) == null) {
-                conf.set(JumboConstants.DELIVERY_VERSION, UUID.randomUUID().toString());
-            }
+            generateVersion(conf);
             updateHadoopConfiguration(conf, importDefinition.getHadoop());
             return importDefinition;
 
@@ -93,11 +95,27 @@ public class JumboConfigurationUtil {
         }
     }
 
+    private static String generateVersion(Configuration conf) {
+        String version = conf.get(JumboConstants.DELIVERY_VERSION);
+        if(version == null) {
+            version = UUID.randomUUID().toString();
+            conf.set(JumboConstants.DELIVERY_VERSION, version);
+        }
+        return version;
+    }
+
     public static void setSortConfig(Job conf, List<String> sort) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, true);
         conf.getConfiguration().set(JumboConstants.JUMBO_SORT_CONFIG, mapper.writeValueAsString(sort));
+    }
+
+    public static void setCollectionInfo(Job conf, String collectionInfo) throws IOException {
+        if(collectionInfo == null) {
+            return;
+        }
+        conf.getConfiguration().set(JumboConstants.JUMBO_COLLECTION_INFO, collectionInfo);
     }
 
     public static void setSortDatePatternConfig(Job conf, String sort) throws IOException {
@@ -140,57 +158,62 @@ public class JumboConfigurationUtil {
         }
     }
 
-    public static List<JumboGenericImportJob> convertToGenericImportJobs(ImportDefinition importDefinition) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        String dateStamp = sdf.format(new Date());
-
+    public static List<JumboGenericImportJob> convertToGenericImportJobs(Configuration conf, ImportDefinition importDefinition, String outputWithDate) {
         List<JumboGenericImportJob> result = new LinkedList<JumboGenericImportJob>();
         for (ImportCollection importCollection : importDefinition.getImportCollection()) {
             JumboGenericImportJob job = new JumboGenericImportJob();
             job.setIndexes(importCollection.getIndexes());
             job.setSort(importCollection.getSort());
-            job.setActivateDelivery(importCollection.getActivateDelivery() != null ? importCollection.getActivateDelivery() : importDefinition.getActivateDelivery());
             job.setCollectionName(importCollection.getCollectionName());
-            job.setDataStrategy(importCollection.getDataStrategy());
-            job.setDeliveryChunkKey(importCollection.getDeliveryChunkKey() != null ? importCollection.getDeliveryChunkKey() : importDefinition.getDeliveryChunkKey());
-            job.setDescription(importCollection.getDescription() != null ? importCollection.getDescription() : importDefinition.getDescription());
-            job.setHosts(importCollection.getHosts() != null && importCollection.getHosts().size() > 0 ? importCollection.getHosts() : importDefinition.getHosts());
+            job.setDeliveryChunkKey(importDefinition.getDeliveryChunkKey());
+            job.setDescription(importCollection.getDescription());
+            job.setHosts(importDefinition.getHosts());
+            job.setChecksumType(importDefinition.getChecksum());
             for (IndexField indexField : job.getIndexes()) {
                 if(indexField.getDatePattern() == null) {
                     indexField.setDatePattern(importDefinition.getDatePattern());
                 }
             }
-
-            String output = StringUtils.isNotBlank(importCollection.getOutput()) ? importCollection.getOutput() : importDefinition.getOutput();
-            String outputWithDate = output + "/" + dateStamp + "/";
-            String outputData = outputWithDate + "data/" + importCollection.getCollectionName() + "/";
-            String outputIndex = outputWithDate + "index/" + importCollection.getCollectionName() + "/";
-            String outputLog = outputWithDate + "log/" + importCollection.getCollectionName() + "/";
+            String subPath = importDefinition.getDeliveryChunkKey() + "/" + generateVersion(conf) + "/" + importCollection.getCollectionName() + "/";
+            String outputData = outputWithDate + "/data/" + subPath;
+            String outputIndex = outputWithDate + "/index/" + subPath;
+            String outputLog = outputWithDate + "/log/" + subPath;
+            job.setDataStrategy(importCollection.getDataStrategy());
             job.setSortDatePattern(importCollection.getSortDatePattern() != null ? importCollection.getSortDatePattern() : importDefinition.getDatePattern());
             job.setSortType(importCollection.getSortType());
             job.setInputPath(new Path(importCollection.getInput()));
-            job.setSortedOutputPath(importCollection.getSort() != null && importCollection.getSort().size() > 0 ? new Path(outputData) : null);
+            job.setSortedOutputPath(
+              importCollection.getSort() != null && importCollection.getSort().size() > 0 ? new Path(outputData) : null);
             job.setIndexOutputPath(new Path(outputIndex));
             job.setLogOutputPath(new Path(outputLog));
+            job.setNumberOfOutputFiles(importCollection.getNumberOfOutputFiles() != null ? importCollection.getNumberOfOutputFiles() : importDefinition.getNumberOfDataFiles());
             result.add(job);
         }
         return result;
     }
 
-    public static Set<FinishedNotification> convertToFinishedNotifications(ImportDefinition importDefinition) {
-        Set<FinishedNotification> result = new HashSet<FinishedNotification>();
-        for (ImportCollection importCollection : importDefinition.getImportCollection()) {
-            String deliveryChunkKey = importCollection.getDeliveryChunkKey() != null ? importCollection.getDeliveryChunkKey() : importDefinition.getDeliveryChunkKey();
-            List<ImportHost> importHosts = importCollection.getHosts() != null && importCollection.getHosts().size() > 0 ? importCollection.getHosts() : importDefinition.getHosts();
-            for (ImportHost importHost : importHosts) {
-                FinishedNotification finishedNotification = new FinishedNotification(deliveryChunkKey, importHost);
-                result.add(finishedNotification);
-            }
+    public static String getOutputPathWithDateStamp(ImportDefinition importDefinition) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        String dateStamp = sdf.format(new Date());
+        String output = importDefinition.getOutput();
+        return output + "/" + dateStamp;
+    }
+
+    public static Set<CommitNotification> convertToImportCommits(ImportDefinition importDefinition) {
+        Set<CommitNotification> result = new HashSet<CommitNotification>();
+        String deliveryChunkKey = importDefinition.getDeliveryChunkKey();
+        List<ImportHost> importHosts = importDefinition.getHosts();
+        for (ImportHost importHost : importHosts) {
+            CommitNotification commitNotification = new CommitNotification(deliveryChunkKey, importHost, importDefinition.getActivateChunk(), importDefinition.getActivateVersion());
+            result.add(commitNotification);
         }
         return result;
     }
 
     public static Class<? extends Mapper> getSortMapperByType(String type) {
+        if(type == null) {
+            return MAPPER_BY_SORT_KEY.get(NO_SORT);
+        }
         if (!MAPPER_BY_SORT_KEY.containsKey(type)) {
             throw new IllegalArgumentException("Sort type " + type + " is not supported.");
         }
@@ -198,6 +221,9 @@ public class JumboConfigurationUtil {
     }
 
     public static Class<? extends WritableComparable> getSortOutputKeyClassByType(String type) {
+        if(type == null) {
+            return WRITABLE_BY_SORT_KEY.get(NO_SORT);
+        }
         if (!WRITABLE_BY_SORT_KEY.containsKey(type)){
             throw new IllegalArgumentException("Sort type " + type + " is not supported.");
         }

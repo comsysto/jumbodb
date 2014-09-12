@@ -17,11 +17,11 @@ import java.util.Set;
  * Time: 1:07 PM
  */
 public interface IndexStrategy {
-    boolean isResponsibleFor(String collection, String chunkKey, String indexName);
+    long getSize(File indexFolder);
+    boolean isResponsibleFor(String chunkKey, String collection, String indexName);
     String getStrategyName();
     Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit, boolean resultCacheEnabled);
     Set<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);
-    String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPathFile);
 }

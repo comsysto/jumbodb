@@ -1,8 +1,9 @@
 package org.jumbodb.benchmark.generator;
 
 import org.apache.commons.io.FilenameUtils;
+import org.jumbodb.benchmark.generator.config.GenerationContext;
 import org.jumbodb.benchmark.generator.runner.SnappyV1DataFileGenerationRunner;
-import org.jumbodb.data.common.meta.DeliveryProperties;
+import org.jumbodb.data.common.meta.CollectionProperties;
 
 import java.io.File;
 import java.util.Date;
@@ -16,23 +17,24 @@ public class SnappyV1DataCollectionGenerator extends DataCollectionGenerator {
     private static final String DELIVERY_PATH = "created_by_generator";
     private static final String DELIVERY_STRATEGY = "JSON_SNAPPY_V1";
 
+    private final GenerationContext context;
 
-    public SnappyV1DataCollectionGenerator(String outputFolder, int numberOfFiles, int dataSetsPerFile,
-            int dataSetSizeInChars, String collectionName, int parallelThreads) {
-        super(outputFolder, numberOfFiles, dataSetsPerFile, dataSetSizeInChars, collectionName, parallelThreads);
+    public SnappyV1DataCollectionGenerator(GenerationContext context) {
+        super(context);
+        this.context = context;
     }
 
     @Override
-    public Callable<Void> createDataGenerationRunner(String fileName, int dataSetsPerFile, byte[][] randomizedJSONDocs) {
-        return new SnappyV1DataFileGenerationRunner(fileName, dataSetsPerFile, randomizedJSONDocs);
+    public Callable<Void> createDataGenerationRunner(String fileName, GenerationContext dataSetsPerFile, byte[][] randomizedJSONDocs) {
+        return new SnappyV1DataFileGenerationRunner(fileName, context, randomizedJSONDocs);
     }
 
     @Override
     public void createDeliveryProperties(String dataFolder, String deliveryVersion, String description){
-        DeliveryProperties.DeliveryMeta deliveryMeta = new DeliveryProperties.DeliveryMeta(deliveryVersion, description, new Date(),
-                DELIVERY_PATH, DELIVERY_STRATEGY);
+        CollectionProperties.CollectionMeta collectionMeta = new CollectionProperties.CollectionMeta("date",
+                DELIVERY_PATH, DELIVERY_STRATEGY, "info");
 
-        String deliveryPropertiesPath = FilenameUtils.concat(dataFolder, DeliveryProperties.DEFAULT_FILENAME);
-        DeliveryProperties.write(new File(deliveryPropertiesPath), deliveryMeta);
+        String deliveryPropertiesPath = FilenameUtils.concat(dataFolder, CollectionProperties.DEFAULT_FILENAME);
+        CollectionProperties.write(new File(deliveryPropertiesPath), collectionMeta);
     }
 }

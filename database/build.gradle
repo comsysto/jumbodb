@@ -7,10 +7,6 @@ apply plugin: 'eclipse'
 apply plugin: 'eclipse-wtp'
 apply plugin: "groovy"
 
-
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 archivesBaseName = 'jumbodb'
 
 sourceSets {
@@ -36,12 +32,12 @@ configurations {
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {
-        classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:0.9.9'
-        classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6.1'
+        classpath "org.gradle.api.plugins:gradle-tomcat-plugin:$tomcatPluginVersion"
+        classpath "org.gradle.api.plugins:gradle-cargo-plugin:$cargoPluginVersion"
     }
 }
 
@@ -60,14 +56,15 @@ dependencies {
     }
 
     compile 'commons-io:commons-io:2.4'
-    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
+//    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.4.2'
     compile 'commons-lang:commons-lang:2.6'
     compile 'commons-collections:commons-collections:3.2.1'
     compile 'com.google.guava:guava:13.0'
     compile 'joda-time:joda-time:2.1'
     compile 'org.freemarker:freemarker:2.3.19'
     compile 'commons-lang:commons-lang:2.6'
-    compile "org.xerial.snappy:snappy-java:1.0.5-M4"
+    compile "org.xerial.snappy:snappy-java:$snappyVersion"
     compile "net.minidev:json-smart:2.0-RC2"
     compile 'org.slf4j:slf4j-api:1.7.5'
     compile 'org.slf4j:jcl-over-slf4j:1.7.5'
@@ -118,8 +115,8 @@ dependencies {
         exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
     }
 
-    cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion"
-    cargo "org.codehaus.cargo:cargo-ant:$cargoVersion"
+//    cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion"
+//    cargo "org.codehaus.cargo:cargo-ant:$cargoVersion"
 
     //dependencies for websocket service
     // compile("org.springframework.boot:spring-boot-starter-web:0.5.0.M6")
@@ -135,6 +132,8 @@ tomcatRun {
     httpPort = 9000
     httpsPort = 9443
     enableSSL = false
+    contextPath = '/'
+
 }
 
 cargo {

@@ -7,9 +7,6 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: "groovy"
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 group = 'org.jumbodb.common.geo'
 archivesBaseName = 'jumbodb-geo'
 
@@ -34,6 +31,7 @@ task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
     from javadoc.destinationDir
     classifier = 'javadoc'
 }
+
 task packageSources(type: Jar) {
     from sourceSets.main.allSource
     classifier = 'sources'

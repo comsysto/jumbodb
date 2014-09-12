@@ -1,6 +1,5 @@
 package org.jumbodb.connector.hadoop.index.strategy.longval.snappy;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -50,7 +49,7 @@ public abstract class AbstractLongIndexMapper<T> extends AbstractIndexMapper<T> 
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return LongIndexOutputFormat.class;
+        return LongSnappyIndexV1OutputFormat.class;
     }
 
     public abstract Long getIndexableValue(T input);

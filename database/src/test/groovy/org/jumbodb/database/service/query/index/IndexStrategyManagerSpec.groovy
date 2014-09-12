@@ -1,8 +1,5 @@
 package org.jumbodb.database.service.query.index
 
-import org.jumbodb.database.service.query.data.DataKey
-import org.jumbodb.database.service.query.data.DataStrategy
-import org.jumbodb.database.service.query.data.DataStrategyManager
 import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
@@ -19,6 +16,7 @@ class IndexStrategyManagerSpec extends Specification {
         def strategyMock = Mock(IndexStrategy)
         strategyMock.getStrategyName() >> "testStrategy"
         indexStrategyManager.setStrategies([strategyMock])
+        indexStrategyManager.onInitialize(new CollectionDefinition(new HashMap<String, List<DeliveryChunkDefinition>>()))
         when:
         def strategy = indexStrategyManager.getStrategy("testStrategy")
         then:
@@ -32,7 +30,7 @@ class IndexStrategyManagerSpec extends Specification {
         indexStrategyManager.setStrategies([strategyMock])
         def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
-        strategyMock.isResponsibleFor("testCollection", "testChunkKey", "indexName") >> true
+        strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> true
         indexStrategyManager.onInitialize(cd)
         when:
         def strategy = indexStrategyManager.getStrategy("testCollection", "testChunkKey", "indexName")
@@ -47,7 +45,7 @@ class IndexStrategyManagerSpec extends Specification {
         indexStrategyManager.setStrategies([strategyMock])
         def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
-        strategyMock.isResponsibleFor("testCollection", "testChunkKey", "indexName") >> true
+        strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> true
         strategyMock.getStrategyName() >> "testStrategy"
         indexStrategyManager.onInitialize(cd)
         when:
@@ -60,14 +58,14 @@ class IndexStrategyManagerSpec extends Specification {
         setup:
         def indexStrategyManager = new IndexStrategyManager()
         def strategyMock = Mock(IndexStrategy)
-        strategyMock.isResponsibleFor("testCollection", "testChunkKey", "indexName") >> true
+        strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> true
         indexStrategyManager.setStrategies([strategyMock])
         def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         when:
         def result = indexStrategyManager.buildIndexStrategies(cd)
         then:
-        result.get(new IndexKey("testCollection", "testChunkKey", "indexName")) == strategyMock
+        result.get(new IndexKey("testChunkKey", "testCollection", "indexName")) == strategyMock
         result.size() == 1
     }
 
@@ -77,9 +75,9 @@ class IndexStrategyManagerSpec extends Specification {
         def strategyMock = Mock(IndexStrategy)
         indexStrategyManager.setStrategies([strategyMock])
         when:
-        def result = indexStrategyManager.getResponsibleStrategy(new IndexKey("testCollection", "testChunkKey", "testIndex"))
+        def result = indexStrategyManager.getResponsibleStrategy(new IndexKey("testChunkKey", "testCollection", "testIndex"))
         then:
-        1 * strategyMock.isResponsibleFor("testCollection", "testChunkKey", "testIndex") >> true
+        1 * strategyMock.isResponsibleFor("testChunkKey", "testCollection", "testIndex") >> true
         result == strategyMock
     }
 
@@ -94,7 +92,7 @@ class IndexStrategyManagerSpec extends Specification {
         indexStrategyManager.onInitialize(cd)
         then:
         1 * strategyMock.onInitialize(cd)
-        1 * strategyMock.isResponsibleFor("testCollection", "testChunkKey", "indexName") >> true
+        1 * strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> true
     }
 
     def "initialisation no responsible strategy"() {
@@ -107,7 +105,7 @@ class IndexStrategyManagerSpec extends Specification {
         when:
         indexStrategyManager.onInitialize(cd)
         then:
-        1 * strategyMock.isResponsibleFor("testCollection", "testChunkKey", "indexName") >> false
+        1 * strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> false
         thrown IllegalStateException
     }
 
@@ -122,6 +120,6 @@ class IndexStrategyManagerSpec extends Specification {
         indexStrategyManager.onDataChanged(cd)
         then:
         1 * strategyMock.onDataChanged(cd)
-        1 * strategyMock.isResponsibleFor("testCollection", "testChunkKey", "indexName") >> true
+        1 * strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> true
     }
 }

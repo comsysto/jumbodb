@@ -72,19 +72,12 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
     }
 
 
-//    public static int getBoundaryBoxComparistionValue(int point1, int point2) {
-//        int bitsToShift = getBitsToShift(point1, point2);
-//        return point1 >>> bitsToShift;
-//    }
-
     public static int getBitsToShift(int b1, int b2) {
         int max = 32;
         for (int i = 0; i < max; i++) {
             if(b1 == b2) {
                 return i;
             }
-//            System.out.println("B1 " + i + " -> " + Integer.toBinaryString(b1));
-//            System.out.println("B2 " + i + " -> " + Integer.toBinaryString(b2));
             b1 = b1 >>> 1;
             b2 = b2 >>> 1;
         }
@@ -100,13 +93,10 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
         double distInMeter = distFromInMeter(centerLat, centerLong, distLat, distLong);
         while(distInMeter < distanceInMeter) {
             double latitudeSize = geoHash.getBoundingBox().getLatitudeSize();
-//            double longitudeSize = geoHash.getBoundingBox().getLongitudeSize();
             distLat += latitudeSize;
-//            distLong += longitudeSize;
             distInMeter = distFromInMeter(centerLat, centerLong, distLat, distLong);
             prec = prec - 2;
             geoHash = withBitPrecision(centerLat, centerLong, prec);
-//            System.out.println("dist in " + distInMeter);
         }
         return geoHash;
     }
@@ -114,16 +104,18 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
      * This method uses the given number of characters as the desired precision
      * value. The hash can only be 64bits long, thus a maximum precision of 12
      * characters can be achieved.
+     *
+     * @param latitude lat
+     * @param longitude long
+     * @param numberOfCharacters number of chars
+     *
+     * @return geo hash
      */
     public static GeoHash withCharacterPrecision(double latitude, double longitude, int numberOfCharacters) {
         int desiredPrecision = (numberOfCharacters * 5 <= 60) ? numberOfCharacters * 5 : 60;
         return new GeoHash(latitude, longitude, desiredPrecision);
     }
 
-    /**
-     * create a new {@link GeoHash} with the given number of bits accuracy. This
-     * at the same time defines this hash's bounding box.
-     */
     public static GeoHash withBitPrecision(double latitude, double longitude, int numberOfBits) {
         if (Math.abs(latitude) > 90.0 || Math.abs(longitude) > 180.0) {
             throw new IllegalArgumentException("Can't have lat/lon values out of (-90,90)/(-180/180)");
@@ -152,6 +144,10 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
      * build a new {@link GeoHash} from a base32-encoded {@link String}.<br>
      * This will also set up the hashes bounding box and other values, so it can
      * also be used with functions like within().
+     *
+     * @param geohash geo hash
+     *
+     * @return geo hash
      */
     public static GeoHash fromGeohashString(String geohash) {
         double[] latitudeRange = {-90.0, 90.0};
@@ -271,8 +267,8 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
      * times next() is called to increment from one to two) This value depends
      * on the number of significant bits.
      *
-     * @param one
-     * @param two
+     * @param one hash one
+     * @param two hash two
      * @return number of steps
      */
     public static long stepsBetween(GeoHash one, GeoHash two) {
@@ -309,6 +305,8 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
      * returns the 8 adjacent hashes for this one. They are in the following
      * order:<br>
      * N, NE, E, SE, S, SW, W, NW
+     *
+     * @return geo hashes
      */
     public GeoHash[] getAdjacent() {
         GeoHash northern = getNorthernNeighbour();
@@ -322,6 +320,8 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
 
     /**
      * how many significant bits are there in this {@link GeoHash}?
+     *
+     * @return siginificant bits
      */
     public int significantBits() {
         return significantBits;
@@ -340,6 +340,8 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
      * get the base32 string for this {@link GeoHash}.<br>
      * this method only makes sense, if this hash has a multiple of 5
      * significant bits.
+     *
+     * @return base32
      */
     public String toBase32() {
         if (significantBits % 5 != 0) {
@@ -361,6 +363,9 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
 
     /**
      * returns true iff this is within the given geohash bounding box.
+     *
+     * @param boundingBox bounding box defined by geo hash
+     * @return if within
      */
     public boolean within(GeoHash boundingBox) {
         return (bits & boundingBox.mask()) == boundingBox.bits;
@@ -370,6 +375,9 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
      * find out if the given point lies within this hashes bounding box.<br>
      * <i>Note: this operation checks the bounding boxes coordinates, i.e. does
      * not use the {@link GeoHash}s special abilities.s</i>
+     *
+     * @param point point
+     * @return if contains
      */
     public boolean contains(WGS84Point point) {
         return boundingBox.contains(point);
@@ -379,6 +387,8 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
      * returns the {@link WGS84Point} that was originally used to set up this.<br>
      * If it was built from a base32-{@link String}, this is the center point of
      * the bounding box.
+     *
+     * @return point
      */
     public WGS84Point getPoint() {
         return point;
@@ -387,8 +397,9 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
     /**
      * return the center of this {@link GeoHash}s bounding box. this is rarely
      * the same point that was used to build the hash.
+     *
+     * @return point
      */
-// TODO: make sure this method works as intented for corner cases!
     public WGS84Point getBoundingBoxCenterPoint() {
         return boundingBox.getCenterPoint();
     }
@@ -547,6 +558,8 @@ public final class GeoHash implements Comparable<GeoHash>, Serializable {
 
     /**
      * return a long mask for this hashes significant bits.
+     *
+     * @return mask
      */
     private long mask() {
         if (significantBits == 0) {

@@ -12,7 +12,7 @@ import org.xerial.snappy.SnappyOutputStream
  */
 class DateTimeDataGeneration {
     def static createFile() {
-        File.createTempFile("randomindex", "odx")
+        File.createTempFile("randomindex", "idx")
     }
 
     def static createIndexContent() {

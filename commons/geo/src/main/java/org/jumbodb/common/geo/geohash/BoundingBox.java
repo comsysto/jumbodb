@@ -19,6 +19,9 @@ public class BoundingBox implements Serializable {
 
     /**
      * create a bounding box defined by two coordinates
+     *
+     * @param p1 first point
+     * @param p2 second point
      */
     public BoundingBox(WGS84Point p1, WGS84Point p2) {
         this(p1.getLatitude(), p2.getLatitude(), p1.getLongitude(), p2.getLongitude());

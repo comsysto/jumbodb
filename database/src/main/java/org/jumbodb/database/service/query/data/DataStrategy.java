@@ -1,6 +1,5 @@
 package org.jumbodb.database.service.query.data;
 
-import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.importer.ImportMetaFileInformation;
@@ -21,11 +20,12 @@ import java.util.Set;
  * Time: 1:07 PM
  */
 public interface DataStrategy {
+    long getCompressedSize(File dataFolder);
+    long getUncompressedSize(File dataFolder);
     boolean isResponsibleFor(String collection, String chunkKey);
     String getStrategyName();
     int findDataSetsByFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery);
     List<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);
-    String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPath);
 }

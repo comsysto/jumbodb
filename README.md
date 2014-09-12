@@ -10,6 +10,8 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 
 Twitter: @devproof http://twitter.com/devproof
 
+Latest version: 0.0.20 (20th Dec 2013)
+
 ## What is it good for? 
 
 - As data store for low-latency 'Big Data' apps
@@ -24,8 +26,8 @@ Twitter: @devproof http://twitter.com/devproof
 
 ## Features
 
-- Indexing your JSON data 
-- Querying over indexed and non-indexed data
+- Index your JSON data 
+- Query over indexed and non-indexed data
 - Geospatial indexes
 - Range queries (between, greather than, less than and so on)
 - Data replication (to another database)

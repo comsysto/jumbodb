@@ -14,7 +14,8 @@ class ExportDeliveryServiceSpec extends Specification {
         def service = new ExportDeliveryService()
         service.setExecutorService(executorServiceMock)
         def startReplication = new StartReplication()
-        startReplication.setActivate(true)
+        startReplication.setActivateChunk(true)
+        startReplication.setActivateVersion(true)
         startReplication.setDeliveryChunkKey("chunk_key")
         startReplication.setVersion("my_version")
         startReplication.setHost("my_host")
@@ -27,8 +28,7 @@ class ExportDeliveryServiceSpec extends Specification {
         def repl = service.getReplications()
         then:
         repl.size() == 1
-        repl.get(0).getCopyRateInBytesCompressed() == 0
-        repl.get(0).getCopyRateInBytesUncompressed() == 0
+        repl.get(0).getCopyRateInBytes() == 0
         repl.get(0).getCurrentBytes() == 0
         repl.get(0).getDeliveryChunkKey() == "chunk_key"
         repl.get(0).getHost() == "my_host"
@@ -42,7 +42,8 @@ class ExportDeliveryServiceSpec extends Specification {
         def service = new ExportDeliveryService()
         service.setExecutorService(executorServiceMock)
         def startReplication = new StartReplication()
-        startReplication.setActivate(true)
+        startReplication.setActivateVersion(true)
+        startReplication.setActivateChunk(true)
         startReplication.setDeliveryChunkKey("chunk_key")
         startReplication.setVersion("my_version")
         startReplication.setHost("my_host")
@@ -61,7 +62,8 @@ class ExportDeliveryServiceSpec extends Specification {
         def service = new ExportDeliveryService()
         service.setExecutorService(executorServiceMock)
         def startReplication = new StartReplication()
-        startReplication.setActivate(true)
+        startReplication.setActivateVersion(true)
+        startReplication.setActivateChunk(true)
         startReplication.setDeliveryChunkKey("chunk_key")
         startReplication.setVersion("my_version")
         startReplication.setHost("my_host")
@@ -83,7 +85,8 @@ class ExportDeliveryServiceSpec extends Specification {
         def service = new ExportDeliveryService()
         service.setExecutorService(executorServiceMock)
         def startReplication = new StartReplication()
-        startReplication.setActivate(true)
+        startReplication.setActivateVersion(true)
+        startReplication.setActivateChunk(true)
         startReplication.setDeliveryChunkKey("chunk_key")
         startReplication.setVersion("my_version")
         startReplication.setHost("my_host")

@@ -1,5 +1,6 @@
 package org.jumbodb.database.rest;
 
+import org.apache.commons.io.IOUtils;
 import org.jumbodb.database.rest.dto.Message;
 import org.jumbodb.database.service.exporter.ExportDelivery;
 import org.jumbodb.database.service.exporter.ExportDeliveryService;
@@ -17,7 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletContext;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * User: carsten
@@ -31,13 +36,18 @@ public class RestController {
     private StorageManagement storageManagement;
     private ExportDeliveryService exportDeliveryService;
     private QueryUtilService queryUtilService;
+    private ServletContext servletContext;
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     @ResponseBody
     public ServerInformation getStatus() {
-        return statusService.getStatus();
+        ServerInformation status = statusService.getStatus();
+        Properties buildInfo = getBuildInfo();
+        status.setVersion(checkNull(buildInfo.getProperty("Implementation-Version")));
+        status.setGitRevision(checkNull(buildInfo.getProperty("Change")));
+        status.setBuildDate(checkNull(buildInfo.getProperty("Build-Date")));
+        return status;
     }
-
 
     @RequestMapping(value = "/collections", method = RequestMethod.GET)
     @ResponseBody
@@ -68,68 +78,34 @@ public class RestController {
     public QueryResult queryWithDefault(@PathVariable String collection, @RequestBody String query) {
         return queryUtilService.findDocumentsByQuery(collection, query, 20);
     }
-//
-//    @RequestMapping(value = "/query/{collection}/stream", method = RequestMethod.POST)
-//    public void queryStream(@PathVariable String collection, @RequestBody String query, final HttpServletResponse response) throws IOException {
-//        // TOD extract and clean up
-//        final AtomicInteger counter = new AtomicInteger(0);
-//        queryUtilService.findDocumentsByQuery(collection, query, new ResultCallback() {
-//             @Override
-//             public void writeResult(byte[] result) throws IOException {
-//                synchronized (response) {
-//                    String s = new String(result, "UTF-8").trim();
-//                    response.getWriter().println(s);
-//                    response.getWriter().flush();
-//                    counter.incrementAndGet();
-//                }
-//             }
-//
-//            @Override
-//            public void collect(CancelableTask cancelableTask) {
-//                // TOD implement timeout handling
-//            }
-//
-//            @Override
-//             public boolean needsMore(JumboQuery jumboQuery) throws IOException {
-//                 return counter.get() < jumboQuery.getLimit();
-//             }
-//         });
-//        response.getWriter().println(":EOF");
-//    }
 
-    @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}", method = RequestMethod.PUT)
+
+    @RequestMapping(value = "/chunk/{chunkDeliveryKey}/activate", method = RequestMethod.POST)
     @ResponseBody
-    public Message activateChunkedVersionForAllCollections(@PathVariable String chunkDeliveryKey, @PathVariable String version) {
-        storageManagement.activateChunkedVersionForAllCollections(chunkDeliveryKey, version);
-        return new Message("activate", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' on all collections has been activated.");
+    public Message activateChunk(@PathVariable String chunkDeliveryKey) {
+        storageManagement.activateChunk(chunkDeliveryKey);
+        return new Message("activate", "Chunk '" + chunkDeliveryKey + "' has been activated.");
     }
 
-    @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}/{collection}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/chunk/{chunkDeliveryKey}/inactivate", method = RequestMethod.POST)
     @ResponseBody
-    public Message activateChunkedVersionInCollection(@PathVariable String chunkDeliveryKey, @PathVariable String version, @PathVariable String collection) {
-        storageManagement.activateChunkedVersionInCollection(chunkDeliveryKey, version, collection);
-        return new Message("activate", "Version '" + version + "' for '" + collection + "' has been activated.");
+    public Message inactivateChunk(@PathVariable String chunkDeliveryKey) {
+        storageManagement.inactivateChunk(chunkDeliveryKey);
+        return new Message("inactivate", "Chunk '" + chunkDeliveryKey + "' has been inactivated.");
+    }
+
+    @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}/activate", method = RequestMethod.POST)
+    @ResponseBody
+    public Message activateChunkedVersion(@PathVariable String chunkDeliveryKey, @PathVariable String version) {
+        storageManagement.activateChunkedVersion(chunkDeliveryKey, version);
+        return new Message("activate", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' has been activated.");
     }
 
     @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}", method = RequestMethod.DELETE)
     @ResponseBody
-    public Message deleteChunkedVersionForAllCollections(@PathVariable String chunkDeliveryKey, @PathVariable String version) {
-        storageManagement.deleteChunkedVersionForAllCollections(chunkDeliveryKey, version);
-        return new Message("delete", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' (incl. all collections) has been deleted.");
-    }
-
-    @RequestMapping(value = "/version/{chunkDeliveryKey}/{version}/{collection}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public Message deleteChunkedVersionInCollection(@PathVariable String chunkDeliveryKey, @PathVariable String version, @PathVariable String collection) {
-        storageManagement.deleteChunkedVersionInCollection(chunkDeliveryKey, version, collection);
-        return new Message("delete", "Version '" + version + "' for '" + collection + "' has been deleted.");
-    }
-
-    @RequestMapping(value = "/collection/{collection}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public Message deleteCompleteCollection(@PathVariable String collection) {
-        storageManagement.deleteCompleteCollection(collection);
-        return new Message("delete", "Complete collection '" + collection + "' has been deleted.");
+    public Message deleteChunkedVersion(@PathVariable String chunkDeliveryKey, @PathVariable String version) {
+        storageManagement.deleteChunkedVersion(chunkDeliveryKey, version);
+        return new Message("delete", "Version '" + version + "' for chunk '" + chunkDeliveryKey + "' has been deleted.");
     }
 
     @RequestMapping(value = "/replication", method = RequestMethod.POST)
@@ -177,6 +153,41 @@ public class RestController {
         }
     }
 
+    @RequestMapping(value = "/maintenance/databases/reload", method = RequestMethod.POST)
+    @ResponseBody
+    public Message triggerReloadDatabases() {
+        try {
+            storageManagement.triggerReloadDatabases();
+            return new Message("success", "Databases meta information was reloaded successfully");
+        } catch(Exception e) {
+            return new Message("error", "Exception: " + e.getMessage());
+        }
+    }
+
+    private String checkNull(String property) {
+        if(property == null) {
+            return "unknown";
+        }
+        return property;
+    }
+
+
+    private Properties getBuildInfo() {
+        InputStream resourceAsStream = null;
+        Properties props = new Properties();
+        try {
+            resourceAsStream = servletContext.getResourceAsStream("/META-INF/jumbodb.properties");
+            if(resourceAsStream == null) {
+                return props;
+            }
+            props.load(resourceAsStream);
+        } catch (IOException e) {
+            // do nothing
+        } finally {
+            IOUtils.closeQuietly(resourceAsStream);
+        }
+        return props;
+    }
 
     @Autowired
     public void setStatusService(StatusService statusService) {
@@ -196,5 +207,10 @@ public class RestController {
     @Autowired
     public void setQueryUtilService(QueryUtilService queryUtilService) {
         this.queryUtilService = queryUtilService;
+    }
+
+    @Autowired
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
     }
 }

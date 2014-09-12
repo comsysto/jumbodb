@@ -1,33 +1,42 @@
 package org.jumbodb.connector.importer;
 
+import org.jumbodb.common.query.ChecksumType;
+
 /**
  * User: carsten
  * Date: 2/26/13
  * Time: 4:48 PM
  */
 public class DataInfo {
-    private String collection;
-    private String filename;
-    private long fileLength;
     private String deliveryKey;
     private String deliveryVersion;
-    private String dataStrategy;
+    private String collection;
+    private String fileName;
+    private long fileLength;
+    private ChecksumType checksumType;
+    private String checksum;
 
-    public DataInfo(String collection, String filename, long fileLength, String deliveryKey, String deliveryVersion, String dataStrategy) {
-        this.collection = collection;
-        this.filename = filename;
-        this.fileLength = fileLength;
+    public DataInfo(String deliveryKey, String deliveryVersion, String collection, String fileName, long fileLength) {
+        this(deliveryKey, deliveryVersion, collection, fileName, fileLength, ChecksumType.NONE, null);
+    }
+
+    public DataInfo(String deliveryKey, String deliveryVersion, String collection, String fileName, long fileLength,
+      ChecksumType checksumType, String checksum) {
         this.deliveryKey = deliveryKey;
         this.deliveryVersion = deliveryVersion;
-        this.dataStrategy = dataStrategy;
+        this.collection = collection;
+        this.fileName = fileName;
+        this.fileLength = fileLength;
+        this.checksumType = checksumType;
+        this.checksum = checksum;
     }
 
     public String getCollection() {
         return collection;
     }
 
-    public String getFilename() {
-        return filename;
+    public String getFileName() {
+        return fileName;
     }
 
     public long getFileLength() {
@@ -42,19 +51,24 @@ public class DataInfo {
         return deliveryVersion;
     }
 
-    public String getDataStrategy() {
-        return dataStrategy;
+    public ChecksumType getChecksumType() {
+        return checksumType;
+    }
+
+    public String getChecksum() {
+        return checksum;
     }
 
     @Override
     public String toString() {
         return "DataInfo{" +
-                "collection='" + collection + '\'' +
-                ", filename='" + filename + '\'' +
-                ", fileLength=" + fileLength +
-                ", deliveryKey='" + deliveryKey + '\'' +
-                ", deliveryVersion='" + deliveryVersion + '\'' +
-                ", dataStrategy='" + dataStrategy + '\'' +
-                '}';
+          "collection='" + collection + '\'' +
+          ", fileName='" + fileName + '\'' +
+          ", fileLength=" + fileLength +
+          ", deliveryKey='" + deliveryKey + '\'' +
+          ", deliveryVersion='" + deliveryVersion + '\'' +
+          ", checksumType=" + checksumType +
+          ", checksum='" + checksum + '\'' +
+          '}';
     }
 }

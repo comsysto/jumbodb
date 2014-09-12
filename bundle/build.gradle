@@ -6,9 +6,6 @@ apply plugin: 'application'
 apply plugin: 'eclipse'
 apply plugin: 'eclipse-wtp'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 archivesBaseName = 'jumbodb-starter'
 applicationName = 'jumbodb'
 
@@ -114,6 +111,10 @@ task copyImporter(dependsOn: ':importer:hadoop-json:distZip') {
 
         applicationDistribution.from(locateHadoopJarPath()) {
             into 'tools/import-hadoop/'
+        }
+
+        applicationDistribution.from('docs/webapps/') {
+            into 'webapps/'
         }
     }
 }

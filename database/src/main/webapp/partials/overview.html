@@ -1,7 +1,85 @@
 <div class="page-header">
     <h2><img
-            src="https://a248.e.akamai.net/camo.github.com/e72121365e017859b38acbc10c09aec006bbc178/687474703a2f2f636f6d737973746f2e6769746875622e636f6d2f6a756d626f64622f696d672f706963732f6a756d626f2e706e67"
+            src="img/logo.png"
             style="width:600px"/></h2>
 </div>
 
+<div class="row">
+    <div class="col-md-12">
+        <h2>Server information</h2>
+        <p/>
+
+        <p style="font-weight: bold; color: green">
+            Query Server is up and running on port {{status.queryPort}}
+        </p>
+
+        <p style="font-weight: bold; color: green">
+            Import Server is up and running on port {{status.importPort}}
+        </p>
+
+        <p>
+            Data path: {{status.dataPath}}
+        </p>
+
+        <p>
+            Index path: {{status.indexPath}}
+        </p>
+
+        <p>
+            Query protocol version: {{status.queryProtocolVersion}}
+        </p>
+
+        <p>
+            Import protocol version: {{status.importProtocolVersion}}
+        </p>
+
+        <p>
+            Storage format version: {{status.storageFormatVersion}}
+        </p>
+
+        <p>
+            Number of queries since running: {{status.numberOfQueries}}
+        </p>
+
+        <p>
+            Number of results since running: {{status.numberOfResults}}
+        </p>
+
+        <p>
+            Maximum memory: {{status.maximumMemory}}
+        </p>
+
+        <p>
+            Allocated memory: {{status.allocatedMemory}}
+        </p>
+
+        <p>
+            Free memory: {{status.freeMemory}}
+        </p>
+
+        <p>
+            Total free memory: {{status.totalFreeMemory}}
+        </p>
+
+        <p>
+            Startup time: {{status.startupTime}}
+        </p>
+        <p>
+            <hr/>
+        </p>
+        <p>
+            Index partition: {{status.indexDiskUsedSpace}} of {{status.indexDiskTotalSpace}} used ({{status.indexDiskUsedSpacePerc}} %)
+        </p>
+        <p>
+            Data partition: {{status.dataDiskUsedSpace}} of {{status.dataDiskTotalSpace}} used ({{status.dataDiskUsedSpacePerc}} %)
+        </p>
+        <p>
+        <hr/>
+        </p>
+        <p>
+            Version: {{status.version}} - Build date: {{status.buildDate}} - Git Revision: {{status.gitRevision}}
+        </p>
+
+    </div>
+</div>
 <div ng-include="overviewTemplate"></div>

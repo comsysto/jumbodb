@@ -1,6 +1,8 @@
 package org.jumbodb.database.service.importer
 
 import com.google.common.io.Files
+import org.jumbodb.common.query.ChecksumType
+import org.jumbodb.data.common.meta.ActiveProperties
 import org.jumbodb.database.service.query.JumboSearcher
 import org.jumbodb.database.service.query.data.DataStrategy
 import org.jumbodb.database.service.query.data.DataStrategyManager
@@ -19,24 +21,21 @@ class ImportTaskSpec extends Specification {
         socketMock.getInetAddress() >> inetAddressMock
         inetAddressMock.getHostName() >> "a_hostname"
         def jumboSearcherMock = Mock(JumboSearcher)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def importSessionMock = Mock(DatabaseImportSession)
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
-        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
-        def dataStrategyMock = Mock(DataStrategy)
-        def metaInfo = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.DATA, "testFileName", "test_collection", null, 1234567l, "test_delivery_key", "test_version", "test_strategy")
-
-        def inputStreamMock = Mock(InputStream)
+        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, importSessionMock)
+        def metaInfo = new ImportMetaFileInformation("test_delivery_key", "test_version", "test_collection", null,
+                ImportMetaFileInformation.FileType.DATA, "testFileName", 1234567l, ChecksumType.NONE, null)
         when:
         importTask.run()
         then:
         1 * importSessionMock.runImport(_) >> { importHandler ->
-            assert importHandler[0].onImport(metaInfo, inputStreamMock) == "sha1hash"
+            importHandler[0].onImport(metaInfo, new ByteArrayInputStream("hello world".bytes))
+            File tmpImportPathByType = importTask.getTmpImportPathByType(metaInfo);
+            File file = new File(tmpImportPathByType.getAbsolutePath() + "/" + metaInfo.getFileName());
+            assert file.text == "hello world"
         }
-        1 * dataStrategyManagerMock.getStrategy("test_strategy") >> dataStrategyMock
-        1 * dataStrategyMock.onImport(metaInfo, inputStreamMock, new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection")) >> "sha1hash"
         cleanup:
         dataDir.delete()
         indexDir.delete()
@@ -49,23 +48,21 @@ class ImportTaskSpec extends Specification {
         socketMock.getInetAddress() >> inetAddressMock
         inetAddressMock.getHostName() >> "a_hostname"
         def jumboSearcherMock = Mock(JumboSearcher)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def importSessionMock = Mock(DatabaseImportSession)
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
-        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
-        def indexStrategyMock = Mock(IndexStrategy)
-        def metaInfo = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.INDEX, "testFileName", "test_collection", "test_index_name", 1234567l, "test_delivery_key", "test_version", "test_strategy")
-        def inputStreamMock = Mock(InputStream)
+        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, importSessionMock)
+        def metaInfo = new ImportMetaFileInformation("test_delivery_key", "test_version", "test_collection","test_index_name",
+                ImportMetaFileInformation.FileType.INDEX, "testFileName", 1234567l, ChecksumType.NONE, "")
         when:
         importTask.run()
         then:
         1 * importSessionMock.runImport(_) >> { importHandler ->
-            assert importHandler[0].onImport(metaInfo, inputStreamMock) == "sha1hash"
+            importHandler[0].onImport(metaInfo, new ByteArrayInputStream("hello world".bytes))
+            File tmpImportPathByType = importTask.getTmpImportPathByType(metaInfo);
+            File file = new File(tmpImportPathByType.getAbsolutePath() + "/" + metaInfo.getFileName());
+            assert file.text == "hello world"
         }
-        1 * indexStrategyManagerMock.getStrategy("test_strategy") >> indexStrategyMock
-        1 * indexStrategyMock.onImport(metaInfo, inputStreamMock, new File(indexDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection/test_index_name")) >> "sha1hash"
         cleanup:
         dataDir.delete()
         indexDir.delete()
@@ -78,12 +75,10 @@ class ImportTaskSpec extends Specification {
         socketMock.getInetAddress() >> inetAddressMock
         inetAddressMock.getHostName() >> "a_hostname"
         def jumboSearcherMock = Mock(JumboSearcher)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def importSessionMock = Mock(DatabaseImportSession)
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
-        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
+        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, importSessionMock)
         when:
         importTask.run()
         then:
@@ -102,13 +97,11 @@ class ImportTaskSpec extends Specification {
         socketMock.getInetAddress() >> inetAddressMock
         inetAddressMock.getHostName() >> "a_hostname"
         def jumboSearcherMock = Mock(JumboSearcher)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def importSessionMock = Mock(DatabaseImportSession)
         def dataDir = Files.createTempDir()
-        new File(dataDir.getAbsolutePath() + "/a_collection/test_delivery_key/test_version").mkdirs()
+        new File(dataDir.getAbsolutePath() + "/test_delivery_key/test_version/a_collection").mkdirs()
         def indexDir = Files.createTempDir()
-        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
+        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, importSessionMock)
         when:
         importTask.run()
         then:
@@ -120,152 +113,87 @@ class ImportTaskSpec extends Specification {
         indexDir.delete()
     }
 
-
-    def "onCollectionMetaData no existing collection, force activation"() {
+    def "onInit existing version"() {
         setup:
         def socketMock = Mock(Socket)
         def inetAddressMock = Mock(InetAddress)
         socketMock.getInetAddress() >> inetAddressMock
         inetAddressMock.getHostName() >> "a_hostname"
         def jumboSearcherMock = Mock(JumboSearcher)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def importSessionMock = Mock(DatabaseImportSession)
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
-        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
-        def importMetaData = new ImportMetaData("test_collection", "test_delivery_key", "test_version", "test_strategy", "test source path", "test info")
+        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, importSessionMock)
+        new File(dataDir.getAbsolutePath() + "/test_delivery_key/test_version/").mkdirs()
         when:
         importTask.run()
         then:
         1 * importSessionMock.runImport(_) >> { importHandler ->
-            importHandler[0].onCollectionMetaData(importMetaData)
+            importHandler[0].onInit("test_delivery_key", "test_version", "2012-12-12 12:12:12", "info")
         }
-        new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection/delivery.properties").exists() == true
-        new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/activate/test_collection").exists() == true
-        cleanup:
-        dataDir.delete()
-        indexDir.delete()
-    }
-
-    def "onCollectionMetaData with existing collection"() {
-        setup:
-        def socketMock = Mock(Socket)
-        def inetAddressMock = Mock(InetAddress)
-        socketMock.getInetAddress() >> inetAddressMock
-        inetAddressMock.getHostName() >> "a_hostname"
-        def jumboSearcherMock = Mock(JumboSearcher)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
-        def importSessionMock = Mock(DatabaseImportSession)
-        def dataDir = Files.createTempDir()
-        def indexDir = Files.createTempDir()
-        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
-        def importMetaData = new ImportMetaData("test_collection", "test_delivery_key", "test_version", "test_strategy", "test source path", "test info")
-        new File(dataDir.getAbsolutePath() + "/test_collection/test_delivery_key/test_version/").mkdirs()
-        new File(dataDir.getAbsolutePath() + "/test_collection/test_delivery_key/active.properties").createNewFile()
-        when:
-        importTask.run()
-        then:
-        1 * importSessionMock.runImport(_) >> { importHandler ->
-            importHandler[0].onCollectionMetaData(importMetaData)
-        }
-        new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection/delivery.properties").exists() == true
-        new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/activate/test_collection").exists() == false
+        thrown(DeliveryVersionExistsException)
         cleanup:
         dataDir.delete()
         indexDir.delete()
     }
 
 
-    def "onCollectionMetaIndex"() {
+    def "onInit version does not exist"() {
         setup:
         def socketMock = Mock(Socket)
         def inetAddressMock = Mock(InetAddress)
         socketMock.getInetAddress() >> inetAddressMock
         inetAddressMock.getHostName() >> "a_hostname"
         def jumboSearcherMock = Mock(JumboSearcher)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def importSessionMock = Mock(DatabaseImportSession)
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
-        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
-        def importMetaIndex = new ImportMetaIndex("test_collection", "test_delivery_key", "test_version", "test_index_name", "test_strategy", "source fields")
+        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, importSessionMock)
         when:
         importTask.run()
         then:
         1 * importSessionMock.runImport(_) >> { importHandler ->
-            importHandler[0].onCollectionMetaIndex(importMetaIndex)
+            importHandler[0].onInit("test_delivery_key", "test_version", "2012-12-12 12:12:12", "info")
         }
-        new File(indexDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection/test_index_name/index.properties").exists() == true
+        new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key/test_version/").exists() == true
+        new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key/test_version/delivery.properties").exists() == true
         cleanup:
         dataDir.delete()
         indexDir.delete()
     }
 
-    def "onActivateDelivery"() {
+    def "onCommit with forced activation, because first version"() {
         setup:
         def socketMock = Mock(Socket)
         def inetAddressMock = Mock(InetAddress)
         socketMock.getInetAddress() >> inetAddressMock
         inetAddressMock.getHostName() >> "a_hostname"
         def jumboSearcherMock = Mock(JumboSearcher)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def importSessionMock = Mock(DatabaseImportSession)
         def dataDir = Files.createTempDir()
         def indexDir = Files.createTempDir()
-        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
-        def importMetaData = new ImportMetaData("test_collection", "test_delivery_key", "test_version", "test_strategy", "test source path", "test info")
-        when:
-        importTask.run()
-        then:
-        1 * importSessionMock.runImport(_) >> { importHandler ->
-            importHandler[0].onActivateDelivery(importMetaData)
-        }
-        new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/activate/test_collection").exists() == true
-        cleanup:
-        dataDir.delete()
-        indexDir.delete()
-    }
-
-    def "onFinished"() {
-        setup:
-        def socketMock = Mock(Socket)
-        def inetAddressMock = Mock(InetAddress)
-        socketMock.getInetAddress() >> inetAddressMock
-        inetAddressMock.getHostName() >> "a_hostname"
-        def jumboSearcherMock = Mock(JumboSearcher)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
-        def importSessionMock = Mock(DatabaseImportSession)
-        def dataDir = Files.createTempDir()
-        def indexDir = Files.createTempDir()
-        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, dataStrategyManagerMock, indexStrategyManagerMock, importSessionMock)
+        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, importSessionMock)
 
         // creating temp folders
-        def tmpActivationFile = new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/activate/test_collection")
+        def tmpActivationFile = new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key/test_version/test_collection/")
         Files.createParentDirs(tmpActivationFile)
-        tmpActivationFile.createNewFile()
-        def tmpIndexFile = new File(indexDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection/test_index_name/index.properties")
+        def tmpIndexFile = new File(indexDir.getAbsolutePath() + "/.tmp/test_delivery_key/test_version/test_collection/test_index_name/index.properties")
         Files.createParentDirs(tmpIndexFile)
         tmpIndexFile.createNewFile()
-        def tmpDataFile = new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key_test_version/import/test_collection/delivery.properties")
-        Files.createParentDirs(tmpDataFile)
+        def tmpDataFile = new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key/test_version/delivery.properties")
         tmpDataFile.createNewFile()
         when:
         importTask.run()
         then:
         1 * importSessionMock.runImport(_) >> { importHandler ->
-            importHandler[0].onFinished("test_delivery_key", "test_version")
+            importHandler[0].onCommit("test_delivery_key", "test_version", true, true)
         }
         1 * jumboSearcherMock.onDataChanged()
-        new File(dataDir.getAbsolutePath() + "/test_collection/test_delivery_key/active.properties").exists() == true
+        new File(dataDir.getAbsolutePath() + "/test_delivery_key/active.properties").exists() == true
         tmpActivationFile.exists() == false
-        new File(indexDir.getAbsolutePath() + "/test_collection/test_delivery_key/test_version/test_index_name/index.properties").exists() == true
+        new File(indexDir.getAbsolutePath() + "/test_delivery_key/test_version/test_collection/test_index_name/index.properties").exists() == true
         tmpIndexFile.exists() == false
-        new File(dataDir.getAbsolutePath() + "/test_collection/test_delivery_key/test_version/delivery.properties").exists() == true
+        new File(dataDir.getAbsolutePath() + "/test_delivery_key/test_version/delivery.properties").exists() == true
         tmpDataFile.exists() == false
         cleanup:
         dataDir.delete()
@@ -273,11 +201,55 @@ class ImportTaskSpec extends Specification {
 
     }
 
+    def "onCommit no activation, existing version"() {
+        setup:
+        def socketMock = Mock(Socket)
+        def inetAddressMock = Mock(InetAddress)
+        socketMock.getInetAddress() >> inetAddressMock
+        inetAddressMock.getHostName() >> "a_hostname"
+        def jumboSearcherMock = Mock(JumboSearcher)
+        def importSessionMock = Mock(DatabaseImportSession)
+        def dataDir = Files.createTempDir()
+        def indexDir = Files.createTempDir()
+        def importTask = new ImportTaskWithSessionMock(socketMock, dataDir, indexDir, jumboSearcherMock, importSessionMock)
+
+        // creating existing version
+        def activationFile = new File(dataDir.getAbsolutePath() + "/test_delivery_key/active.properties")
+        Files.createParentDirs(activationFile)
+        ActiveProperties.writeActiveFile(activationFile, "oldVersion", true)
+        // creating temp folders
+        def tmpCollectionFolder = new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key/test_version/test_collection/")
+        Files.createParentDirs(tmpCollectionFolder)
+        def tmpIndexFile = new File(indexDir.getAbsolutePath() + "/.tmp/test_delivery_key/test_version/test_collection/test_index_name/index.properties")
+        Files.createParentDirs(tmpIndexFile)
+        tmpIndexFile.createNewFile()
+        def tmpDataFile = new File(dataDir.getAbsolutePath() + "/.tmp/test_delivery_key/test_version/delivery.properties")
+        tmpDataFile.createNewFile()
+        when:
+        importTask.run()
+        then:
+        1 * importSessionMock.runImport(_) >> { importHandler ->
+            importHandler[0].onCommit("test_delivery_key", "test_version", false, false)
+        }
+        1 * jumboSearcherMock.onDataChanged()
+        new File(dataDir.getAbsolutePath() + "/test_delivery_key/active.properties").exists() == true
+        ActiveProperties.isDeliveryActive(activationFile) == false
+        ActiveProperties.getActiveDeliveryVersion(activationFile) == "oldVersion"
+        tmpCollectionFolder.exists() == false
+        new File(indexDir.getAbsolutePath() + "/test_delivery_key/test_version/test_collection/test_index_name/index.properties").exists() == true
+        tmpIndexFile.exists() == false
+        new File(dataDir.getAbsolutePath() + "/test_delivery_key/test_version/delivery.properties").exists() == true
+        tmpDataFile.exists() == false
+        cleanup:
+        dataDir.delete()
+        indexDir.delete()
+    }
+
     class ImportTaskWithSessionMock extends ImportTask {
         private DatabaseImportSession session
 
-        ImportTaskWithSessionMock(Socket s, File dataDir, File indexDir, JumboSearcher jumboSearcher, DataStrategyManager dataStrategyManager, IndexStrategyManager indexStrategyManager, DatabaseImportSession session) {
-            super(s, 5, dataDir, indexDir, jumboSearcher, dataStrategyManager, indexStrategyManager)
+        ImportTaskWithSessionMock(Socket s, File dataDir, File indexDir, JumboSearcher jumboSearcher, DatabaseImportSession session) {
+            super(s, 5, dataDir, indexDir, jumboSearcher)
             this.session = session
         }
 

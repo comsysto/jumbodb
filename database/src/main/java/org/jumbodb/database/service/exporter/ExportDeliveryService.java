@@ -17,8 +17,9 @@ public class ExportDeliveryService {
 
     public void startReplication(StartReplication startReplication) {
         ExportDelivery exportDelivery = new ExportDelivery();
-        exportDelivery.setActivate(startReplication.isActivate());
-        exportDelivery.setCopyRateInBytesCompressed(0l);
+        exportDelivery.setActivateChunk(startReplication.isActivateChunk());
+        exportDelivery.setActivateVersion(startReplication.isActivateVersion());
+        exportDelivery.setCopyRateInBytes(0l);
         exportDelivery.setCurrentBytes(0l);
         exportDelivery.setTotalBytes(0l);
         exportDelivery.setHost(startReplication.getHost());

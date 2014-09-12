@@ -23,7 +23,7 @@ public class ExportDeliveryCountOutputStream extends MonitorCountingOutputStream
     @Override
     protected void onInterval(long speedInBytesPerSecond, long copiedBytesSinceLastCall) {
         super.onInterval(speedInBytesPerSecond, copiedBytesSinceLastCall);
-        exportDelivery.setCopyRateInBytesUncompressed(speedInBytesPerSecond);
+        exportDelivery.setCopyRateInBytes(speedInBytesPerSecond);
         exportDelivery.addCurrentBytes(copiedBytesSinceLastCall);
     }
 }

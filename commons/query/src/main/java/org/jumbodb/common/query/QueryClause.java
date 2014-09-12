@@ -1,8 +1,8 @@
 package org.jumbodb.common.query;
 
-import org.codehaus.jackson.annotate.JsonAutoDetect;
 
-import java.util.Collections;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import java.util.LinkedList;
 import java.util.List;
 

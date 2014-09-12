@@ -233,11 +233,11 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.GEO_WITHIN_RANGE_METER, operationMock)
         strategy.onInitialize(cd)
         when:
-        def responsible = strategy.isResponsibleFor("testCollection", "testChunkKey", "testIndex")
+        def responsible = strategy.isResponsibleFor("testChunkKey", "testCollection", "testIndex")
         then:
         responsible
         when:
-        def notResponsible = !strategy.isResponsibleFor("testCollection", "testChunkKey", "notIn")
+        def notResponsible = !strategy.isResponsibleFor("testChunkKey", "testCollection", "notIn")
         then:
         notResponsible
         cleanup:
@@ -255,11 +255,11 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         when:
         strategy.onInitialize(cd)
         def ranges = strategy.buildIndexRanges()
-        def testIndexFiles = ranges.get(new IndexKey("testCollection", "testChunkKey", "testIndex"))
+        def testIndexFiles = ranges.get(new IndexKey("testChunkKey", "testCollection", "testIndex"))
         then:
         ranges.size() == 1
         testIndexFiles.size() == 1
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         testIndexFiles[0].getFrom() == -1073671086
         testIndexFiles[0].getTo() == -1057192128
         cleanup:
@@ -287,28 +287,11 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         def indexRange = strategy.buildIndexRange(indexFolder)
         then:
         indexRange.size() == 1
-        indexRange[0].getIndexFile().getName() == "part00001.odx"
+        indexRange[0].getIndexFile().getName() == "part00001.idx"
         indexRange[0].getFrom() == -1073671086
         indexRange[0].getTo() == -1057192128
         cleanup:
         indexFolder.delete()
-    }
-
-    def "onImport"() {
-        setup:
-        def indexFileContent = GeohashDataGeneration.createIndexContent()
-        def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
-        def meta = new ImportMetaFileInformation(ImportMetaFileInformation.FileType.INDEX, "part00001.odx", "collection", "testindex", indexFileContent.length, "deliveryKey", "deliveryVersion", "STRATEGY")
-        when:
-        def sha1hash = strategy.onImport(meta, new ByteArrayInputStream(indexFileContent), indexFolder)
-        then:
-        new File(indexFolder.getAbsolutePath() + "/part00001.odx").exists()
-        new File(indexFolder.getAbsolutePath() + "/part00001.odx.chunks.snappy").exists()
-        SnappyChunksUtil.getSnappyChunksByFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx")).getLength() == indexFileContent.length
-        sha1hash == "2b91f9c3512c773fbce802e3650f750fa6a0e6e3"
-        cleanup:
-        indexFolder.delete()
-
     }
 
     def "onInitialize"() {
@@ -324,7 +307,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         testIndexFiles[0].getFrom() == -1073671086
         testIndexFiles[0].getTo() == -1057192128
         cleanup:
@@ -345,7 +328,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
-        testIndexFiles[0].getIndexFile().getName() == "part00001.odx"
+        testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
         testIndexFiles[0].getFrom() == -1073671086
         testIndexFiles[0].getTo() == -1057192128
         cleanup:
@@ -355,7 +338,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        GeohashDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.odx"))
+        GeohashDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 
@@ -370,7 +353,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(GeohashWithinRangeMeterBoxOperationSearch)
         def numberSnappyIndexFile = Mock(NumberSnappyIndexFile)
-        def clause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1f,2f], 5])
+        def clause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1f, 2f], 5])
         def valueRetriever = Mock(QueryValueRetriever)
         def strategy = new GeohashSnappyIndexStrategy()
         strategy.OPERATIONS.put(QueryOperation.GEO_WITHIN_RANGE_METER, operationMock)

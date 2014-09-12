@@ -48,7 +48,12 @@ public class NotFoundDataStrategy implements DataStrategy {
     }
 
     @Override
-    public String onImport(ImportMetaFileInformation information, InputStream dataInputStream, File absoluteImportPath) {
-        throw new IllegalStateException("Strategy " + information.getStrategy() + " was not found!");
+    public long getCompressedSize(File dataFolder) {
+        return 0l;
+    }
+
+    @Override
+    public long getUncompressedSize(File dataFolder) {
+        return 0l;
     }
 }

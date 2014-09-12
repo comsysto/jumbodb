@@ -1,0 +1,34 @@
+{
+    "description": "Carstens Twitter Test Import",
+    "deliveryChunkKey": "first_delivery",
+    "hosts": [
+        {"host": "localhost", "port": 12001}
+    ],
+    "datePattern": "EEE MMM dd HH:mm:ss Z yyyy",
+    "output": "file:///C:/Development/data/twitter/output/",
+    "numberOfDataFiles": 16,
+    "hadoop": [],
+    "checksum": "NONE",
+    "importCollection": [
+        {
+            "input": "file:///C:/Development/data/twitter/input_big/",
+            "description": "Twitter data",
+            "collectionName": "carsten.twitter",
+            "sort": ["created_at"],
+            "sortType": "STRING",
+            "dataStrategy": "JSON_SNAPPY_V1",
+            "indexes": [
+                {
+                    "indexName": "screen_name",
+                    "fields": ["user.screen_name"],
+                    "indexStrategy": "HASHCODE64_SNAPPY_V1"
+                },
+                {
+                    "indexName": "created_at",
+                    "fields": ["created_at"],
+                    "indexStrategy": "DATETIME_SNAPPY_V1"
+                }
+            ]
+        }
+    ]
+}

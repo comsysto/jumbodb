@@ -50,7 +50,7 @@ public abstract class AbstractDateTimeIndexMapper<T> extends AbstractIndexMapper
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return DateTimeIndexOutputFormat.class;
+        return DateTimeSnappyIndexV1OutputFormat.class;
     }
 
     public abstract Date getIndexableValue(T input);

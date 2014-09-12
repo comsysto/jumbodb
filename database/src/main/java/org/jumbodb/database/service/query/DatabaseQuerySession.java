@@ -1,9 +1,11 @@
 package org.jumbodb.database.service.query;
 
 import org.apache.commons.io.IOUtils;
+import org.jumbodb.connector.JumboConstants;
 import org.jumbodb.database.service.statistics.GlobalStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xerial.snappy.SnappyInputStream;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
@@ -20,31 +22,39 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DatabaseQuerySession implements Closeable {
     private final Logger log = LoggerFactory.getLogger(DatabaseQuerySession.class);
 
-    public static final int PROTOCOL_VERSION = 3;
     private Socket clientSocket;
     private InputStream inputStream;
+    private SnappyInputStream snappyInputStream;
     private DataInputStream dataInputStream;
     private OutputStream outputStream;
-    private DataOutputStream dataOutputStream;
     private BufferedOutputStream bufferedOutputStream;
     private SnappyOutputStream snappyOutputStream;
+    private DataOutputStream dataOutputStream;
 
     public DatabaseQuerySession(Socket clientSocket, int clientID) throws IOException {
         this.clientSocket = clientSocket;
         inputStream = clientSocket.getInputStream();
-        dataInputStream = new DataInputStream(inputStream);
+        snappyInputStream = new SnappyInputStream(inputStream);
+        dataInputStream = new DataInputStream(snappyInputStream);
         outputStream = clientSocket.getOutputStream();
         bufferedOutputStream = new BufferedOutputStream(outputStream);
         snappyOutputStream = new SnappyOutputStream(bufferedOutputStream);
         dataOutputStream = new DataOutputStream(snappyOutputStream);
+        dataOutputStream.flush(); // cause snappy header
     }
 
     public void query(QueryHandler queryHandler) throws IOException {
         ResultWriter resultWriter = new ResultWriter();
         try {
-            dataOutputStream.writeInt(PROTOCOL_VERSION);
-            dataOutputStream.flush();
-            snappyOutputStream.flush();
+            int protocolVersion = dataInputStream.readInt();
+            if(protocolVersion != JumboConstants.QUERY_PROTOCOL_VERSION) {
+                String error = "Wrong protocol version. Got " + protocolVersion + ", but expected " + JumboConstants.QUERY_PROTOCOL_VERSION;
+                log.warn(error);
+                dataOutputStream.writeInt(-1);
+                dataOutputStream.writeUTF(":error:wrongversion");
+                dataOutputStream.writeUTF(error);
+                return;
+            }
             String cmd = dataInputStream.readUTF();
             if (cmd.equals(":cmd:query")) {
                 String collection = dataInputStream.readUTF();
@@ -91,7 +101,6 @@ public class DatabaseQuerySession implements Closeable {
             dataOutputStream.writeUTF("An unknown error occured on server side, check database log for further information: " + e.toString());
         } finally {
             dataOutputStream.flush();
-            snappyOutputStream.flush();
             resultWriter.forceCleanup();
         }
     }
@@ -99,11 +108,12 @@ public class DatabaseQuerySession implements Closeable {
     @Override
     public void close() throws IOException {
         IOUtils.closeQuietly(dataInputStream);
-        IOUtils.closeQuietly(bufferedOutputStream);
-        IOUtils.closeQuietly(snappyOutputStream);
+        IOUtils.closeQuietly(snappyInputStream);
         IOUtils.closeQuietly(inputStream);
-        IOUtils.closeQuietly(outputStream);
         IOUtils.closeQuietly(dataOutputStream);
+        IOUtils.closeQuietly(snappyOutputStream);
+        IOUtils.closeQuietly(bufferedOutputStream);
+        IOUtils.closeQuietly(outputStream);
         IOUtils.closeQuietly(clientSocket);
     }
 

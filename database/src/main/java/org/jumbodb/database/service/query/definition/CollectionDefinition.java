@@ -2,15 +2,16 @@ package org.jumbodb.database.service.query.definition;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author Carsten Hufe
  */
 public class CollectionDefinition {
-    private Map<String, Collection<DeliveryChunkDefinition>> collections;
+    private Map<String, List<DeliveryChunkDefinition>> collections;
 
-    public CollectionDefinition(Map<String, Collection<DeliveryChunkDefinition>> collections) {
+    public CollectionDefinition(Map<String, List<DeliveryChunkDefinition>> collections) {
         this.collections = collections;
     }
 
@@ -18,8 +19,8 @@ public class CollectionDefinition {
         return collections.keySet();
     }
 
-    public Collection<DeliveryChunkDefinition> getChunks(String collectionName) {
-        Collection<DeliveryChunkDefinition> deliveryChunkDefinitions = collections.get(collectionName);
+    public List<DeliveryChunkDefinition> getChunks(String collectionName) {
+        List<DeliveryChunkDefinition> deliveryChunkDefinitions = collections.get(collectionName);
         if(deliveryChunkDefinitions == null) {
             deliveryChunkDefinitions = Collections.emptyList();
         }

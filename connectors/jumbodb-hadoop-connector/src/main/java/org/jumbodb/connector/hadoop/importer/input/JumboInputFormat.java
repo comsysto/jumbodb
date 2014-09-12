@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop.importer.input;
 
+import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
@@ -26,6 +27,21 @@ import java.util.List;
 public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
 
 
+    public static void setChecksumType(Job conf, ChecksumType checksumType) throws IOException {
+        if(checksumType == null) {
+            return;
+        }
+        conf.getConfiguration().set(JumboConstants.JUMBO_CHECKSUM_TYPE, checksumType.toString());
+    }
+
+    public static ChecksumType getChecksumType(Configuration conf) {
+        String checksum = conf.get(JumboConstants.JUMBO_CHECKSUM_TYPE);
+        if(checksum == null) {
+            return ChecksumType.NONE;
+        }
+        return ChecksumType.valueOf(checksum);
+    }
+
     public static void setDataType(JobContext context, String dataType) {
         context.getConfiguration().set(JumboConstants.DATA_TYPE, dataType);
     }
@@ -40,16 +56,6 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
 
     public static void setIndexName(JobContext context, String indexName) {
         context.getConfiguration().set(JumboConstants.INDEX_NAME, indexName);
-    }
-
-    public static void setDataStrategy(JobContext context, String dataStrategy) {
-        context.getConfiguration().set(JumboConstants.JUMBO_DATA_STRATEGY, dataStrategy);
-    }
-
-    public static void setIndexStrategy(JobContext context, IndexField indexStrategy) {
-        if(indexStrategy != null) {
-            context.getConfiguration().set(JumboConstants.JUMBO_INDEX_STRATEGY, indexStrategy.getIndexStrategy());
-        }
     }
 
     public static void setDeliveryChunkKey(JobContext context, String key) {
@@ -71,7 +77,7 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
             FileSystem fileSystem = FileSystem.get(URI.create(inputPath), configuration);
             FileStatus[] fileStatuses = fileSystem.listStatus(new Path(inputPath));
             for (FileStatus fileStatuse : fileStatuses) {
-                if(!fileStatuse.isDir()) {
+                if(!fileStatuse.isDirectory()) {
                     files.add(fileStatuse);
                 }
             }
@@ -82,7 +88,7 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
                 Path path = indexNameFolder.getPath();
                 FileStatus[] fileStatuses = fileSystem.listStatus(path);
                 for (FileStatus fileStatuse : fileStatuses) {
-                    if(!fileStatuse.isDir()) {
+                    if(!fileStatuse.isDirectory()) {
                         files.add(fileStatuse);
                     }
                 }
@@ -102,10 +108,10 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
 
     @Override
     public RecordReader<FileStatus, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-        return new OdbRecordReader();
+        return new JumboRecordReader();
     }
 
-    public static class OdbRecordReader extends RecordReader<FileStatus, NullWritable> {
+    public static class JumboRecordReader extends RecordReader<FileStatus, NullWritable> {
         private JumboInputSplit inputSplit;
         private int currentIndex = 0;
 

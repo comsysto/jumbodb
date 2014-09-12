@@ -5,6 +5,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
@@ -36,9 +37,13 @@ public class GenericJsonStringSortMapper extends Mapper<LongWritable, Text, Text
 
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-        JsonNode jsonNode = jsonMapper.readTree(value.toString());
-        keyW.set(getSortKey(jsonNode));
-        context.write(keyW, value);
+        try {
+            JsonNode jsonNode = jsonMapper.readTree(value.toString());
+            keyW.set(getSortKey(jsonNode));
+            context.write(keyW, value);
+        } catch(JsonParseException e) {
+            throw new RuntimeException(context.getInputSplit() + " +++ " + value.toString(), e);
+        }
     }
 
     private String getSortKey(JsonNode jsonNode) {

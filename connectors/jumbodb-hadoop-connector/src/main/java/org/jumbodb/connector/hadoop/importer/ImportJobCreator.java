@@ -1,5 +1,6 @@
 package org.jumbodb.connector.hadoop.importer;
 
+import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.JumboJobCreator;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
@@ -31,14 +32,13 @@ public class ImportJobCreator {
     private static ControlledJob createJumboJob(Configuration conf, Path importPath, Path reportOutputPath, String type, BaseJumboImportJob genericImportJob, ImportHost importHost, IndexField indexField) throws IOException {
         String jobName = "jumboDB Import " + importHost.getHost() + " " + importPath.toString() + ":" + type;
         System.out.println(jobName);
-        Job job = new Job(conf, jobName);
+        Job job = Job.getInstance(conf, jobName);
         JumboInputFormat.setDataType(job, type);
         JumboInputFormat.setImportPath(job, importPath);
         JumboInputFormat.setIndexName(job, indexField != null ? indexField.getIndexName() : "not_set");
         JumboInputFormat.setCollectionName(job, genericImportJob.getCollectionName());
-        JumboInputFormat.setDataStrategy(job, genericImportJob.getDataStrategy());
-        JumboInputFormat.setIndexStrategy(job, indexField);
         JumboInputFormat.setDeliveryChunkKey(job, genericImportJob.getDeliveryChunkKey());
+        JumboInputFormat.setChecksumType(job, genericImportJob.getChecksumType());
         FileOutputFormat.setOutputPath(job, reportOutputPath);
         FileInputFormat.addInputPath(job, importPath);
         job.setJarByClass(ImportJobCreator.class);
@@ -56,8 +56,6 @@ public class ImportJobCreator {
         Configuration jobConf = job.getConfiguration();
         jobConf.set(JumboConstants.HOST, importHost.getHost());
         jobConf.setInt(JumboConstants.PORT, importHost.getPort());
-        JumboJobCreator.sendMetaData(genericImportJob, job.getConfiguration());
-        JumboJobCreator.sendMetaIndex(genericImportJob, indexField, job.getConfiguration());
         return new ControlledJob(job, new ArrayList<ControlledJob>());
     }
 

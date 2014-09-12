@@ -13,19 +13,14 @@ import java.util.List;
  */
 public class ImportCollection {
     private String input;
-    private String output;
     private String description;
     private String collectionName;
-    private String deliveryChunkKey;
     private String dataStrategy;
     private List<String> sort = new LinkedList<String>();
     private String sortDatePattern;
     private String sortType = GenericJsonStringSortMapper.SORT_KEY;
     private List<IndexField> indexes = new LinkedList<IndexField>();
-    private List<ImportHost> hosts;
     private Integer numberOfOutputFiles = null;
-    private Boolean activateDelivery = null;
-
 
     public ImportCollection() {
     }
@@ -54,22 +49,6 @@ public class ImportCollection {
         this.description = description;
     }
 
-    public Boolean getActivateDelivery() {
-        return activateDelivery;
-    }
-
-    public void setActivateDelivery(Boolean activateDelivery) {
-        this.activateDelivery = activateDelivery;
-    }
-
-    public List<ImportHost> getHosts() {
-        return hosts;
-    }
-
-    public void setHosts(List<ImportHost> hosts) {
-        this.hosts = hosts;
-    }
-
     public Integer getNumberOfOutputFiles() {
         return numberOfOutputFiles;
     }
@@ -86,28 +65,12 @@ public class ImportCollection {
         this.input = input;
     }
 
-    public String getOutput() {
-        return output;
-    }
-
-    public void setOutput(String output) {
-        this.output = output;
-    }
-
     public String getCollectionName() {
         return collectionName;
     }
 
     public void setCollectionName(String collectionName) {
         this.collectionName = collectionName;
-    }
-
-    public String getDeliveryChunkKey() {
-        return deliveryChunkKey;
-    }
-
-    public void setDeliveryChunkKey(String deliveryChunkKey) {
-        this.deliveryChunkKey = deliveryChunkKey;
     }
 
     public List<String> getSort() {
@@ -139,16 +102,12 @@ public class ImportCollection {
     public String toString() {
         return "ImportCollection{" +
                 "input='" + input + '\'' +
-                ", output='" + output + '\'' +
                 ", description='" + description + '\'' +
                 ", collectionName='" + collectionName + '\'' +
-                ", deliveryChunk='" + deliveryChunkKey + '\'' +
                 ", dataStrategy='" + dataStrategy + '\'' +
                 ", sort=" + sort +
                 ", indexes=" + indexes +
-                ", hosts=" + hosts +
                 ", numberOfOutputFiles=" + numberOfOutputFiles +
-                ", activateDelivery=" + activateDelivery +
                 '}';
     }
 }

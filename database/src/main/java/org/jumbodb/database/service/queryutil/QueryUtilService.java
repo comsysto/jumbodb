@@ -1,7 +1,7 @@
 package org.jumbodb.database.service.queryutil;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.UnhandledException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.service.query.CancelableTask;
 import org.jumbodb.database.service.query.JumboSearcher;

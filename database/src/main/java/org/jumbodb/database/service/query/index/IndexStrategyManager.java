@@ -16,32 +16,35 @@ public class IndexStrategyManager {
 
     private Map<IndexKey, IndexStrategy> indexLocationsAndStrategies;
     private List<IndexStrategy> strategies;
+    private Map<String, IndexStrategy> strategiesByName;
 
 
     public void onInitialize(CollectionDefinition collectionDefinition) {
         for (IndexStrategy strategy : strategies) {
             strategy.onInitialize(collectionDefinition);
         }
+        strategiesByName = buildStrategiesByName(strategies);
         indexLocationsAndStrategies = buildIndexStrategies(collectionDefinition);
     }
 
 
     public String getStrategyKey(String collection, String chunkKey, String indexName) {
-        return indexLocationsAndStrategies.get(new IndexKey(collection, chunkKey, indexName)).getStrategyName();
+        return indexLocationsAndStrategies.get(new IndexKey(chunkKey, collection, indexName)).getStrategyName();
     }
 
     public IndexStrategy getStrategy(String collection, String chunkKey, String indexName) {
-        return indexLocationsAndStrategies.get(new IndexKey(collection, chunkKey, indexName));
+        return indexLocationsAndStrategies.get(new IndexKey(chunkKey, collection, indexName));
     }
 
     public IndexStrategy getStrategy(String strategyKey) {
-        return buildStrategiesByName(strategies).get(strategyKey);
+        return strategiesByName.get(strategyKey);
     }
 
     public void onDataChanged(CollectionDefinition collectionDefinition) {
         for (IndexStrategy strategy : strategies) {
             strategy.onDataChanged(collectionDefinition);
         }
+        strategiesByName = buildStrategiesByName(strategies);
         indexLocationsAndStrategies = buildIndexStrategies(collectionDefinition);
     }
 
@@ -57,7 +60,7 @@ public class IndexStrategyManager {
         for (String collectionName : collectionDefinition.getCollections()) {
             for (DeliveryChunkDefinition deliveryChunkDef : collectionDefinition.getChunks(collectionName)) {
                 for (IndexDefinition indexDef : deliveryChunkDef.getIndexes()) {
-                    IndexKey indexKey = new IndexKey(collectionName, deliveryChunkDef.getChunkKey(), indexDef.getName());
+                    IndexKey indexKey = new IndexKey(deliveryChunkDef.getChunkKey(), collectionName, indexDef.getName());
                     result.put(indexKey,
                             getResponsibleStrategy(indexKey));
                 }
@@ -68,7 +71,7 @@ public class IndexStrategyManager {
 
     private IndexStrategy getResponsibleStrategy(IndexKey indexKey) {
         for (IndexStrategy strategy : strategies) {
-            if(strategy.isResponsibleFor(indexKey.getCollectionName(), indexKey.getChunkKey(), indexKey.getIndexName())) {
+            if(strategy.isResponsibleFor(indexKey.getChunkKey(), indexKey.getCollectionName(), indexKey.getIndexName())) {
                 return strategy;
             }
         }

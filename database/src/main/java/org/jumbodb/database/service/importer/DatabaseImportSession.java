@@ -1,9 +1,10 @@
 package org.jumbodb.database.service.importer;
 
 import org.apache.commons.io.IOUtils;
+import org.jumbodb.connector.JumboConstants;
+import org.jumbodb.common.query.ChecksumType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xerial.snappy.SnappyInputStream;
 
 import java.io.*;
 import java.net.Socket;
@@ -16,13 +17,11 @@ import java.net.Socket;
 public class DatabaseImportSession implements Closeable {
     private Logger log = LoggerFactory.getLogger(DatabaseImportSession.class);
 
-    public static final int PROTOCOL_VERSION = 4;
     private Socket clientSocket;
     private int clientID;
     private InputStream inputStream;
-    private SnappyInputStream snappyInputStream;
-    private DataInputStream dataInputStream;
     private BufferedInputStream bufferedInputStream;
+    private DataInputStream dataInputStream;
     private OutputStream outputStream;
     private DataOutputStream dataOutputStream;
 
@@ -35,73 +34,98 @@ public class DatabaseImportSession implements Closeable {
     public void runImport(ImportHandler importHandler) throws IOException {
         outputStream = clientSocket.getOutputStream();
         dataOutputStream = new DataOutputStream(outputStream);
-        dataOutputStream.writeInt(PROTOCOL_VERSION);
-        dataOutputStream.flush();
         inputStream = clientSocket.getInputStream();
-        dataInputStream = new DataInputStream(inputStream);
+        bufferedInputStream = new BufferedInputStream(inputStream);
+        dataInputStream = new DataInputStream(bufferedInputStream);
+
+        int protocolVersion = dataInputStream.readInt();
+        if(protocolVersion != JumboConstants.IMPORT_PROTOCOL_VERSION) {
+            dataOutputStream.writeUTF(":error:wrongversion");
+            dataOutputStream.writeUTF("Wrong protocol version - Got " + protocolVersion + ", but expected " + JumboConstants.IMPORT_PROTOCOL_VERSION);
+            dataOutputStream.flush();
+            return;
+        }
+
         String cmd = dataInputStream.readUTF();
         log.info("ClientID " + clientID + " with command " + cmd);
-        if(":cmd:import:collection:data".equals(cmd)) {
+        if(":cmd:import:init".equals(cmd)) {
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
+            String date = dataInputStream.readUTF();
+            String info = dataInputStream.readUTF();
+            try {
+                importHandler.onInit(deliveryKey, deliveryVersion, date, info);
+                dataOutputStream.writeUTF(":success");
+            } catch (DeliveryVersionExistsException e) {
+                log.error("Existing delivery", e);
+                dataOutputStream.writeUTF(":error:deliveryversionexists");
+                dataOutputStream.writeUTF(e.getMessage());
+            }
+            dataOutputStream.flush();
+        }
+        else if(":cmd:import:collection:data".equals(cmd)) {
             ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.DATA;
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
             String collection = dataInputStream.readUTF();
             String filename = dataInputStream.readUTF();
             long fileLength = dataInputStream.readLong();
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String dataStrategy = dataInputStream.readUTF();
-            ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, null, fileLength, deliveryKey, deliveryVersion, dataStrategy);
-            bufferedInputStream = new BufferedInputStream(inputStream, 32768);
-            snappyInputStream = new SnappyInputStream(bufferedInputStream);
-            String sha1Hash = importHandler.onImport(meta, snappyInputStream);
-            dataOutputStream.writeUTF(sha1Hash);
+            ChecksumType checksumType = ChecksumType.valueOf(dataInputStream.readUTF());
+            String checksum = checksumType != ChecksumType.NONE ? dataInputStream.readUTF() : null;
+            ImportMetaFileInformation meta = new ImportMetaFileInformation(deliveryKey, deliveryVersion, collection,
+                null, type, filename, fileLength, checksumType, checksum);
+            try {
+                importHandler.onImport(meta, dataInputStream);
+                dataOutputStream.writeUTF(":success");
+            } catch (FileChecksumException e) {
+                log.error("Checksum exception", e);
+                dataOutputStream.writeUTF(":error:checksum");
+                dataOutputStream.writeUTF(e.getMessage());
+            }
             dataOutputStream.flush();
         } else if(":cmd:import:collection:index".equals(cmd)) {
             ImportMetaFileInformation.FileType type = ImportMetaFileInformation.FileType.INDEX;
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
             String collection = dataInputStream.readUTF();
             String indexName = dataInputStream.readUTF();
             String filename = dataInputStream.readUTF();
             long fileLength = dataInputStream.readLong();
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String indexStrategy = dataInputStream.readUTF();
-            ImportMetaFileInformation meta = new ImportMetaFileInformation(type, filename, collection, indexName, fileLength, deliveryKey, deliveryVersion, indexStrategy);
-            bufferedInputStream = new BufferedInputStream(inputStream, 32768);
-            snappyInputStream = new SnappyInputStream(bufferedInputStream);
-            String sha1Hash = importHandler.onImport(meta, snappyInputStream);
-            dataOutputStream.writeUTF(sha1Hash);
-            dataOutputStream.flush();
-        } else if(":cmd:import:collection:meta:data".equals(cmd)) {
-            String collection = dataInputStream.readUTF();
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String dataStrategy = dataInputStream.readUTF();
-            String sourcePath = dataInputStream.readUTF();
-            boolean activate = dataInputStream.readBoolean();
-            String info = dataInputStream.readUTF();
-            ImportMetaData meta = new ImportMetaData(collection, deliveryKey, deliveryVersion, dataStrategy, sourcePath, info);
-            importHandler.onCollectionMetaData(meta);
-            if(activate) {
-                importHandler.onActivateDelivery(meta);
+            ChecksumType checksumType = ChecksumType.valueOf(dataInputStream.readUTF());
+            String checksum = checksumType != ChecksumType.NONE ? dataInputStream.readUTF() : null;
+            ImportMetaFileInformation meta = new ImportMetaFileInformation(deliveryKey, deliveryVersion, collection,
+                    indexName, type, filename, fileLength, checksumType, checksum);
+            try {
+                importHandler.onImport(meta, dataInputStream);
+                dataOutputStream.writeUTF(":success");
+            } catch (FileChecksumException e) {
+                log.error("Checksum exception", e);
+                dataOutputStream.writeUTF(":error:checksum");
+                dataOutputStream.writeUTF(e.getMessage());
             }
-        } else if(":cmd:import:collection:meta:index".equals(cmd)) {
-            String collection = dataInputStream.readUTF();
-            String deliveryKey = dataInputStream.readUTF();
-            String deliveryVersion = dataInputStream.readUTF();
-            String indexName = dataInputStream.readUTF();
-            String strategy = dataInputStream.readUTF();
-            String indexSourceFields = dataInputStream.readUTF();
-            ImportMetaIndex meta = new ImportMetaIndex(collection, deliveryKey, deliveryVersion, indexName, strategy, indexSourceFields);
-            importHandler.onCollectionMetaIndex(meta);
+            dataOutputStream.flush();
         } else if(":cmd:import:delivery:version:exists".equals(cmd)) {
-//            String collection = dataInputStream.readUTF();
             String deliveryKey = dataInputStream.readUTF();
             String deliveryVersion = dataInputStream.readUTF();
             boolean b = importHandler.existsDeliveryVersion(deliveryKey, deliveryVersion);
             dataOutputStream.writeBoolean(b);
             dataOutputStream.flush();
-        } else if(":cmd:import:finished".equals(cmd)) {
-            log.info(":cmd:import:finished");
-            importHandler.onFinished(dataInputStream.readUTF(), dataInputStream.readUTF());
+        } else if(":cmd:import:commit".equals(cmd)) {
+            log.info(cmd);
+            String deliveryKey = dataInputStream.readUTF();
+            String deliveryVersion = dataInputStream.readUTF();
+            boolean activateChunk = dataInputStream.readBoolean();
+            boolean activateVersion = dataInputStream.readBoolean();
+            try {
+                importHandler.onCommit(deliveryKey, deliveryVersion, activateChunk, activateVersion);
+                dataOutputStream.writeUTF(":success");
+                dataOutputStream.flush();
+            } catch (Throwable ex) {
+                dataOutputStream.writeUTF(":error:unknown");
+                dataOutputStream.writeUTF("Failed to commit: " + ex.getMessage());
+                dataOutputStream.flush();
+            }
+
         } else {
             throw new UnsupportedOperationException("Unsupported command: " + cmd);
         }
@@ -109,7 +133,6 @@ public class DatabaseImportSession implements Closeable {
 
     @Override
     public void close() throws IOException {
-        IOUtils.closeQuietly(snappyInputStream);
         IOUtils.closeQuietly(dataInputStream);
         IOUtils.closeQuietly(bufferedInputStream);
         IOUtils.closeQuietly(inputStream);

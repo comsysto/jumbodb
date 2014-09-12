@@ -9,7 +9,7 @@ public class PartitionUtil {
         long section = (maxValue / partitionCount);
         long value = (long)intValue + (long)Integer.MAX_VALUE;
         int partition = (int) (value / section);
-        if(intValue == partition) {
+        if(intValue == partition && partition > 0) {
             partition--;
         }
         return partition;

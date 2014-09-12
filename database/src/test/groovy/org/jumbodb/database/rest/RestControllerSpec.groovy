@@ -2,8 +2,6 @@ package org.jumbodb.database.rest
 
 import org.jumbodb.database.service.exporter.ExportDeliveryService
 import org.jumbodb.database.service.exporter.StartReplication
-import org.jumbodb.database.service.management.status.StatusService
-import org.jumbodb.database.service.management.status.dto.ServerInformation
 import org.jumbodb.database.service.management.storage.StorageManagement
 import org.jumbodb.database.service.management.storage.dto.maintenance.TemporaryFiles
 import org.jumbodb.database.service.queryutil.QueryUtilService
@@ -36,6 +34,17 @@ class RestControllerSpec extends Specification {
         controller.maintenanceCleanup()
         then:
         1 * storageManagementMock.maintenanceCleanupTemporaryFiles()
+    }
+
+    def "triggerReloadDatabases"() {
+        setup:
+        def controller = new RestController()
+        def storageManagementMock = Mock(StorageManagement)
+        controller.setStorageManagement(storageManagementMock)
+        when:
+        controller.triggerReloadDatabases()
+        then:
+        1 * storageManagementMock.triggerReloadDatabases()
     }
 
     def "getJumboCollections"() {
@@ -86,59 +95,49 @@ class RestControllerSpec extends Specification {
         1 * queryUtilServiceMock.findDocumentsByQuery("collection", "my_query", -1) >> returnValueMock
     }
 
-    def "activateChunkedVersionForAllCollections"() {
+
+    def "activateChunk"() {
         setup:
         def controller = new RestController()
         def storageManagementMock = Mock(StorageManagement)
         controller.setStorageManagement(storageManagementMock)
         when:
-        controller.activateChunkedVersionForAllCollections("chunk_key", "version").type == "activate"
+        controller.activateChunk("chunk_key").type == "activate"
         then:
-        1 * storageManagementMock.activateChunkedVersionForAllCollections("chunk_key", "version")
+        1 * storageManagementMock.activateChunk("chunk_key")
     }
 
-    def "activateChunkedVersionInCollection"() {
+    def "inactivateChunk"() {
         setup:
         def controller = new RestController()
         def storageManagementMock = Mock(StorageManagement)
         controller.setStorageManagement(storageManagementMock)
         when:
-        controller.activateChunkedVersionInCollection("chunk_key", "version", "collection").type == "activate"
+        controller.inactivateChunk("chunk_key").type == "activate"
         then:
-        1 * storageManagementMock.activateChunkedVersionInCollection("chunk_key", "version", "collection")
+        1 * storageManagementMock.inactivateChunk("chunk_key")
     }
 
-    def "deleteChunkedVersionForAllCollections"() {
+    def "activateChunkedVersion"() {
         setup:
         def controller = new RestController()
         def storageManagementMock = Mock(StorageManagement)
         controller.setStorageManagement(storageManagementMock)
         when:
-        controller.deleteChunkedVersionForAllCollections("chunk_key", "version").type == "delete"
+        controller.activateChunkedVersion("chunk_key", "version").type == "activate"
         then:
-        1 * storageManagementMock.deleteChunkedVersionForAllCollections("chunk_key", "version")
+        1 * storageManagementMock.activateChunkedVersion("chunk_key", "version")
     }
 
-    def "deleteChunkedVersionInCollection"() {
+    def "deleteChunkedVersion"() {
         setup:
         def controller = new RestController()
         def storageManagementMock = Mock(StorageManagement)
         controller.setStorageManagement(storageManagementMock)
         when:
-        controller.deleteChunkedVersionInCollection("chunk_key", "version", "collection").type == "delete"
+        controller.deleteChunkedVersion("chunk_key", "version").type == "delete"
         then:
-        1 * storageManagementMock.deleteChunkedVersionInCollection("chunk_key", "version", "collection")
-    }
-
-    def "deleteCompleteCollection"() {
-        setup:
-        def controller = new RestController()
-        def storageManagementMock = Mock(StorageManagement)
-        controller.setStorageManagement(storageManagementMock)
-        when:
-        controller.deleteChunkedVersionInCollection("chunk_key", "version", "collection").type == "delete"
-        then:
-        1 * storageManagementMock.deleteChunkedVersionInCollection("chunk_key", "version", "collection")
+        1 * storageManagementMock.deleteChunkedVersion("chunk_key", "version")
     }
 
     def "startReplication"() {

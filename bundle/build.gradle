@@ -37,13 +37,9 @@ dependencies {
     compile "org.eclipse.jdt.core.compiler:ecj:3.6"
 }
 
-applicationDistribution.from('../README.md'){
-    into "."
-}
+applicationDistribution.from('../README.md')
 
-applicationDistribution.from('../database/LICENSE'){
-    into "."
-}
+applicationDistribution.from('../database/LICENSE')
 
 def retrieveWarFileName() {
     def p = project(':database')

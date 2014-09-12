@@ -10,7 +10,7 @@ Download: http://repository-comsysto.forge.cloudbees.com/release/org/jumbodb/dat
 
 Twitter: @devproof http://twitter.com/devproof
 
-Latest version: 0.0.20 (20th Dec 2013)
+Latest version: 0.1.0 (12th Sep 2014)
 
 ## What is it good for? 
 

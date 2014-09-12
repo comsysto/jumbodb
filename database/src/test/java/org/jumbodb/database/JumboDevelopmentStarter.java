@@ -1,6 +1,5 @@
 package org.jumbodb.database;
 
-import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 

@@ -1,13 +1,5 @@
 group = 'org.jumbodb'
 
-repositories {
-    mavenCentral()
-    maven{ url "http://repository-comsysto.forge.cloudbees.com/release" }
-    maven{ url "http://repository-comsysto.forge.cloudbees.com/snapshot/" }
-    maven{ url "http://maven.springframework.org/release" }
-    maven{ url "http://maven.springframework.org/milestone" }
-}
-
 allprojects {
     apply plugin: 'idea'
 }
@@ -38,7 +30,6 @@ buildscript {
     repositories { jcenter() }
     dependencies { classpath 'com.netflix.nebula:gradle-info-plugin:1.9.+' }
 }
-
 
 idea {
     module {

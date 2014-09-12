@@ -1,0 +1,1 @@
+This folder is only for the Tomcat to unpack the WAR file.

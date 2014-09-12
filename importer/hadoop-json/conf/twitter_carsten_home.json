@@ -8,7 +8,7 @@
     "output": "file:///C:/Development/data/twitter/output/",
     "numberOfDataFiles": 16,
     "hadoop": [],
-    "checksum": "SHA1",
+    "checksum": "NONE",
     "importCollection": [
         {
             "input": "file:///C:/Development/data/twitter/input_big/",

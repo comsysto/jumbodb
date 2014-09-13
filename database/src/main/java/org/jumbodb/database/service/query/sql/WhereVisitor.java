@@ -1,12 +1,14 @@
+package org.jumbodb.database.service.query.sql;
+
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
-import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.QueryOperation;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +23,22 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     private List<JsonQuery> ands = new LinkedList<JsonQuery>();
     private JsonQuery current;
 
+
     public List<JsonQuery> getOrs() {
+        if(current != null)  {
+            return Arrays.asList(current);
+        } else if(!ands.isEmpty()) {
+            JsonQuery last = null;
+            for (JsonQuery and : ands) {
+                if (last != null) {
+                    and.setAnd(last);
+                }
+                last = and;
+            }
+            if (last != null) {
+                ors.add(last);
+            }
+        }
         return ors;
     }
 
@@ -105,14 +122,6 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         current = new JsonQuery(column.getFullyQualifiedName(), operation, value);
     }
 
-//    @Override
-//    public void visit(Parenthesis parenthesis) {
-//        // Klammern....
-//        super.visit(parenthesis);
-//        System.out.println("parenthesis " + parenthesis);
-//    }
-
-
     @Override
     public void visit(StringValue value) {
         this.value = value.getValue();
@@ -132,18 +141,21 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(DoubleValue value) {
-        super.visit(value);
+        this.value = value.getValue();
     }
 
     @Override
     public void visit(LongValue value) {
-        super.visit(value);
+        // CARSTEN conversion später checken, da int auf int verglichen werden muss
+        this.value = (int)value.getValue();
     }
+
+
 
     @Override
     public void visit(DateValue value) {
-        this.operation = QueryOperation.GT;
-        super.visit(value);
+        // CARSTEN date sauber implementieren
+        this.value = value.getValue();
     }
 
     @Override

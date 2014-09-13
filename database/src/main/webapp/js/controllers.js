@@ -167,40 +167,54 @@ define(['angular' ], function (angular) {
 		// More involved example where controller is required from an external file
 		.controller('BrowseCtrl', ['$scope', '$http', function($scope, $http) {
 			$scope.results = {};
+			$scope.explain = {};
 			$scope.collections = [];
-			$scope.query = "{\"limit\": 5}";
+			$scope.sqlQuery = "";
+			$scope.jsonQuery = "";
+			$scope.explainedSql = {};
 
 			$http.get('jumbodb/rest/query/collections').success(function(data) {
 				$scope.collections = data;
 			});
 
-			$scope.setCurrentCollection = function() {
+			$scope.setCurrentCollectionJson = function() {
 				var res = $scope.collections;
 				for(var i = 0; i < res.length; i++) {
-					if(res[i].collection == $scope.collection) {
+					if(res[i].collection == $scope.collectionJson) {
 						$scope.currentCollection = res[i];
-						break;
+                        $scope.jsonQuery = '{"collection": "' + $scope.currentCollection.collection + '", "limit": 5}';
 					}
 				}
 			}
 
-			$scope.searchJsonQuery = function(collection, query) {
-				$http.post('jumbodb/rest/query/json/defaultLimit', query).success(function(data) {
+			$scope.setCurrentCollectionSql = function() {
+				var res = $scope.collections;
+				for(var i = 0; i < res.length; i++) {
+					if(res[i].collection == $scope.collectionSql) {
+                        $scope.currentCollection = res[i];
+                        $scope.sqlQuery = 'SELECT * FROM ' + $scope.currentCollection.collection + ' LIMIT 5';
+					}
+				}
+			}
+
+			$scope.searchJsonQuery = function(jsonQuery) {
+				$http.post('jumbodb/rest/query/json/defaultLimit', jsonQuery).success(function(data) {
 					$scope.results = data;
 					buildMessage(data);
 				});
 			}
 
-            $scope.searchSqlQuery = function(collection, query) {
-                $http.post('jumbodb/rest/query/sql/defaultLimit', query).success(function(data) {
+            $scope.searchSqlQuery = function(sqlQuery) {
+                $http.post('jumbodb/rest/query/sql/defaultLimit', sqlQuery).success(function(data) {
                     $scope.results = data;
                     buildMessage(data);
                 });
             }
 
-            $scope.explainSql = function(collection, query) {
-                $http.post('jumbodb/rest/query/sql/explain', query).success(function(data) {
-                    $scope.explain = data;
+            $scope.explainSqlQuery = function(sqlQuery) {
+                $http.post('jumbodb/rest/query/sql/explain', sqlQuery).success(function(data) {
+                    $scope.explainedSql = data;
+                    buildMessage(data);
                 });
             }
 
@@ -211,11 +225,10 @@ define(['angular' ], function (angular) {
 			}
 
 			function buildMessage(data) {
-				var msg = {};
+                $scope.msg = {};
 				if(data.message) {
-					msg.error = true;
-					msg.message = data.message;
-					$scope.msg = msg;
+                    $scope.msg.error = true;
+                    $scope.msg.message = data.message;
 				}
 			}
 

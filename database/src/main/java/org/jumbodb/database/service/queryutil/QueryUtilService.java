@@ -3,10 +3,7 @@ package org.jumbodb.database.service.queryutil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.JumboQuery;
-import org.jumbodb.database.service.query.CancelableTask;
-import org.jumbodb.database.service.query.JumboQueryConverterService;
-import org.jumbodb.database.service.query.JumboSearcher;
-import org.jumbodb.database.service.query.ResultCallback;
+import org.jumbodb.database.service.query.*;
 import org.jumbodb.database.service.queryutil.dto.ExplainResult;
 import org.jumbodb.database.service.queryutil.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Required;
@@ -40,25 +37,34 @@ public class QueryUtilService {
                 jumboQuery.setLimit(defaultLimit);
             }
             return findDocumentsByQuery(jumboQuery);
-        } catch (IOException e) {
-            throw new UnhandledException(e);
-
+        } catch (Exception e) {
+            return new QueryResult(e.getMessage());
         }
     }
 
     // CARSTEN unit test
     public QueryResult findDocumentsBySqlQuery(final String sql, final Integer defaultLimit) {
-        JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(sql);
-        if(jumboQuery.getLimit() == -1) {
-            jumboQuery.setLimit(defaultLimit);
+        try {
+            JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(sql);
+            if (jumboQuery.getLimit() == -1) {
+                jumboQuery.setLimit(defaultLimit);
+            }
+            return findDocumentsByQuery(jumboQuery);
+        } catch(Exception e) {
+            return new QueryResult(e.getMessage());
         }
-        return findDocumentsByQuery(jumboQuery);
+
     }
 
     // CARSTEN unit test
     public ExplainResult explainSqlQuery(final String sql) {
-        JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(sql);
-        return new ExplainResult(jumboQuery, Arrays.asList("add the executions")); // CARSTEN implement add the executions with chunk, version and size
+        try {
+            JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(sql);
+            return new ExplainResult(jumboQuery, Arrays.asList("add the executions")); // CARSTEN implement add the executions with chunk, version and size
+        } catch(Exception e) {
+            return new ExplainResult(e.getMessage());
+        }
+
     }
 
     private QueryResult findDocumentsByQuery(final JumboQuery jumboQuery) {

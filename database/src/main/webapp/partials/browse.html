@@ -9,70 +9,232 @@
             <div class="alert alert-danger" ng-show="msg.error">
                 {{msg.message}}
             </div>
-            <form class="form-horizontal" name="searchForm">
-                <div class="form-group">
-                    <label class="col-sm-2 control-label" for="collection">Collection</label>
-                    <div class="col-sm-8">
-                        <select id="collection" ng-model="collection" class="form-control" ng-required="true" ng-change="setCurrentCollection()">
-                            <option ng-repeat="col in collections">{{col.collection}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label" for="query">Query</label>
-                    <div class="col-sm-8">
-                        <textarea id="query" rows="6" class="input-lg form-control" ng-model="query" ng-required="true">
-                        </textarea>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" ng-disabled="searchForm.$invalid" class="btn btn-default" ng-click="searchJsonQuery(collection, query)">Search</button>
-                    </div>
-                </div>
 
-                <div class="form-group" ng-hide="!currentCollection">
-                    <label class="control-label">Collection Information</label>
-                    <div class="controls">
-                        <p><b>Data strategy: </b> {{currentCollection.dataStrategy}}</p>
-                        <p><b>Supported data queries: </b> {{currentCollection.supportedOperations}}</p>
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr>
-                                <th>Index Name</th>
-                                <th>Strategy</th>
-                                <th>Supported operations</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="index in currentCollection.indexes">
-                                    <td>{{index.name}}</td>
-                                    <td>{{index.strategy}}</td>
-                                    <td>{{index.supportedOperations}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <tabset>
+                <tab heading="SQL Query">
+                    <p/>
+                    <form class="form-horizontal" name="searchForm">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="collectionQuery">Collection</label>
 
-            </form>
+                            <div class="col-sm-8">
+                                <select id="collectionQuery" ng-model="collectionSql" class="form-control" ng-required="true"
+                                        ng-change="setCurrentCollectionSql()">
+                                    <option ng-repeat="col in collections">{{col.collection}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="querySql">Query</label>
 
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Result</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="result in results.results">
-                    <td>{{$index + 1}}</td>
-                    <td>
-                        <pre ng-bind-html-unsafe="formatJson(result)"></pre>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                            <div class="col-sm-8">
+                                <textarea id="querySql" rows="6" class="input-lg form-control" ng-model="sqlQuery"
+                                          ng-required="true">
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-default"
+                                        ng-click="searchSqlQuery(sqlQuery)">Search
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" ng-hide="!currentCollection">
+                            <label class="control-label">Collection Information</label>
+
+                            <div class="controls">
+                                <p><b>Data strategy: </b> {{currentCollection.dataStrategy}}</p>
+
+                                <p><b>Supported data queries: </b> {{currentCollection.supportedOperations}}</p>
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>Index Name</th>
+                                        <th>Strategy</th>
+                                        <th>Supported operations</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr ng-repeat="index in currentCollection.indexes">
+                                        <td>{{index.name}}</td>
+                                        <td>{{index.strategy}}</td>
+                                        <td>{{index.supportedOperations}}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </form>
+
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Result</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="result in results.results">
+                            <td>{{$index + 1}}</td>
+                            <td>
+                                <pre ng-bind-html-unsafe="formatJson(result)"></pre>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </tab>
+                <tab heading="SQL Explain">
+                    <p/>
+                    <form class="form-horizontal" name="searchForm">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="collectionExplainSql">Collection</label>
+
+                            <div class="col-sm-8">
+                                <select id="collectionExplainSql" ng-model="collectionSql" class="form-control" ng-required="true"
+                                        ng-change="setCurrentCollectionSql()">
+                                    <option ng-repeat="col in collections">{{col.collection}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="explainSql">Query</label>
+
+                            <div class="col-sm-8">
+                                <textarea id="explainSql" rows="6" class="input-lg form-control" ng-model="sqlQuery"
+                                          ng-required="true">
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-default"
+                                        ng-click="explainSqlQuery(sqlQuery)">Explain
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" ng-hide="!currentCollection">
+                            <label class="control-label">Collection Information</label>
+
+                            <div class="controls">
+                                <p><b>Data strategy: </b> {{currentCollection.dataStrategy}}</p>
+
+                                <p><b>Supported data queries: </b> {{currentCollection.supportedOperations}}</p>
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>Index Name</th>
+                                        <th>Strategy</th>
+                                        <th>Supported operations</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr ng-repeat="index in currentCollection.indexes">
+                                        <td>{{index.name}}</td>
+                                        <td>{{index.strategy}}</td>
+                                        <td>{{index.supportedOperations}}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </form>
+
+                    <table class="table table-bordered" ng-show="explain">
+                        <thead>
+                        <tr>
+                            <th>Explain</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <pre ng-bind-html-unsafe="formatJson(explainedSql)"></pre>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </tab>
+                <tab heading="Json Query">
+                    <p/>
+                    <form class="form-horizontal" name="searchForm">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="collectionJson">Collection</label>
+
+                            <div class="col-sm-8">
+                                <select id="collectionJson" ng-model="collectionJson" class="form-control" ng-required="true"
+                                        ng-change="setCurrentCollectionJson()">
+                                    <option ng-repeat="col in collections">{{col.collection}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="queryJson">Query</label>
+
+                            <div class="col-sm-8">
+                                <textarea id="queryJson" rows="6" class="input-lg form-control" ng-model="jsonQuery"
+                                          ng-required="true">
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-default"
+                                        ng-click="searchJsonQuery(jsonQuery)">Search
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" ng-hide="!currentCollection">
+                            <label class="control-label">Collection Information</label>
+
+                            <div class="controls">
+                                <p><b>Data strategy: </b> {{currentCollection.dataStrategy}}</p>
+
+                                <p><b>Supported data queries: </b> {{currentCollection.supportedOperations}}</p>
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>Index Name</th>
+                                        <th>Strategy</th>
+                                        <th>Supported operations</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr ng-repeat="index in currentCollection.indexes">
+                                        <td>{{index.name}}</td>
+                                        <td>{{index.strategy}}</td>
+                                        <td>{{index.supportedOperations}}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </form>
+
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Result</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="result in results.results">
+                            <td>{{$index + 1}}</td>
+                            <td>
+                                <pre ng-bind-html-unsafe="formatJson(result)"></pre>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </tab>
+            </tabset>
         </div>
     </div>
 </div>

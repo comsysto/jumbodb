@@ -53,9 +53,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        if (!searchQuery.getJsonQuery().isEmpty()) {
-            fullScanData();
-        } else {
+        if (searchQuery.getJsonQuery().isEmpty() && !searchQuery.getIndexQuery().isEmpty()) {
             long start = System.currentTimeMillis();
             if(resultCacheEnabled) {
                 List<FileOffset> leftOffsets = extractOffsetsFromCacheAndWriteResultForExisting();
@@ -72,6 +70,8 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 findLeftDatasetsAndWriteResults(offsets);
                 log.trace("Time for retrieving " + results + " (caching disabled) datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
             }
+        } else {
+            fullScanData();
         }
         return results;
     }

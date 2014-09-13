@@ -9,11 +9,20 @@ import java.util.List;
  */
 public class ExplainResult {
     private JumboQuery query;
+    private String message;
     private List<String> executionPath;
+
+    public ExplainResult(String message) {
+        this.message = message;
+    }
 
     public ExplainResult(JumboQuery query, List<String> executionPath) {
         this.query = query;
         this.executionPath = executionPath;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public JumboQuery getQuery() {

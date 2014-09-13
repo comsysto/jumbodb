@@ -6,7 +6,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.jumbodb.database.service.query.FileOffset;
@@ -53,7 +52,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        if (searchQuery.getIndexQuery().size() == 0) {
+        if (!searchQuery.getJsonQuery().isEmpty()) {
             fullScanData();
         } else {
             long start = System.currentTimeMillis();
@@ -137,8 +136,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 if(resultCacheEnabled) {
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), dataSetFromOffsetsGroup);
                 }
-                if (matchingFilter(dataSetFromOffsetsGroup, searchQuery.getJsonQuery())
-                        && matchingFilter(dataSetFromOffsetsGroup, offset.getJsonQueries())) {
+                if (matchingFilter(dataSetFromOffsetsGroup, offset.getJsonQueries())) {
                     if(!resultCallback.needsMore(searchQuery)) {
                         return;
                     }
@@ -170,6 +168,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             long count = 0;
             String line;
             while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
+                // CARSTEN hier mit OR auch das FileOffset checken falls Index und Json Query am Root level abgefragt werden
                 if (matchingFilter(line, searchQuery.getJsonQuery())) {
                     resultCallback.writeResult(line.getBytes("UTF-8"));
                     results++;
@@ -197,8 +196,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             Cache.ValueWrapper valueWrapper = datasetsByOffsetsCache.get(new CacheFileOffset(file, offset.getOffset()));
             if(valueWrapper != null) {
                 byte[] dataSetFromOffsetsGroup = (byte[]) valueWrapper.get();
-                if (matchingFilter(dataSetFromOffsetsGroup, searchQuery.getJsonQuery())
-                        && matchingFilter(dataSetFromOffsetsGroup, offset.getJsonQueries())) {
+                if (matchingFilter(dataSetFromOffsetsGroup, offset.getJsonQueries())) {
                     if(!resultCallback.needsMore(searchQuery)) {
                         return Collections.emptyList(); // return empty list enough found!
                     }
@@ -282,35 +280,41 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             return true;
         }
         Map<String, Object> parsedJson = (Map<String, Object>)jsonParser.parse(s);
-        return matchingFilter(parsedJson, jsonQueries);
+        return matchingFilter(parsedJson, new HashMap<String, Object>(), jsonQueries);
     }
 
-    private boolean matchingFilter(Map<String, Object> parsedJson, List<JsonQuery> jsonQueries) throws ParseException {
+    private boolean matchingFilter(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache, List<JsonQuery> jsonQueries) throws ParseException {
         if (jsonQueries.size() == 0) {
             return true;
         }
-        boolean matching = true;
         for (JsonQuery jsonQuery : jsonQueries) {
-            String[] split = StringUtils.split(jsonQuery.getFieldName(), '.');
-            Object lastObj = parsedJson;
-            for (String key : split) {
-                if (lastObj != null) {
-                    Map<String, Object> map = (Map<String, Object>) lastObj;
-                    lastObj = map.get(key);
-                }
-            }
-            boolean queryClauseMatch = false;
-            for (QueryClause queryClause : jsonQuery.getClauses()) {
-                if(lastObj != null) {
-                    if(strategy.matches(queryClause, lastObj)) {
-                        queryClauseMatch = matchingFilter(parsedJson, queryClause.getQueryClauses());
-                        break;
+            Object lastObj = findValueFromJson(parsedJson, queriedValuesCache, jsonQuery);
+            if(lastObj != null) {
+                if(strategy.matches(jsonQuery, lastObj)) {
+                    if(jsonQuery.getAnd() != null) {
+                        return matchingFilter(parsedJson, queriedValuesCache, Arrays.asList(jsonQuery.getAnd()));
                     }
+                    return matchingFilter(parsedJson, queriedValuesCache, jsonQuery.getOrs());
                 }
             }
-            matching &= queryClauseMatch;
         }
-        return matching;
+        return false;
+    }
+
+    private Object findValueFromJson(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache, JsonQuery jsonQuery) {
+        if(queriedValuesCache.containsKey(jsonQuery.getFieldName())) {
+            return queriedValuesCache.get(jsonQuery.getFieldName());
+        }
+        String[] split = StringUtils.split(jsonQuery.getFieldName(), '.');
+        Object lastObj = parsedJson;
+        for (String key : split) {
+            if (lastObj != null) {
+                Map<String, Object> map = (Map<String, Object>) lastObj;
+                lastObj = map.get(key);
+            }
+        }
+        queriedValuesCache.put(jsonQuery.getFieldName(), lastObj);
+        return lastObj;
     }
 
     private byte[] getDataSetFromOffsetsGroup(byte[] buffer, int fromOffset, int datasetLength) {

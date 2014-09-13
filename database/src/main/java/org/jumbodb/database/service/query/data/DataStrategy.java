@@ -22,7 +22,7 @@ import java.util.Set;
 public interface DataStrategy {
     long getCompressedSize(File dataFolder);
     long getUncompressedSize(File dataFolder);
-    boolean isResponsibleFor(String collection, String chunkKey);
+    boolean isResponsibleFor(String chunkKey, String collection);
     String getStrategyName();
     int findDataSetsByFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery);
     List<QueryOperation> getSupportedOperations();

@@ -13,10 +13,19 @@ import java.util.*;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class JumboQuery {
+    private String collection;
     private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
     private List<JsonQuery> jsonQuery = new LinkedList<JsonQuery>();
     private int limit = -1;
     private boolean resultCacheEnabled = true;
+
+    public String getCollection() {
+        return collection;
+    }
+
+    public void setCollection(String collection) {
+        this.collection = collection;
+    }
 
     public boolean isResultCacheEnabled() {
         return resultCacheEnabled;
@@ -46,9 +55,9 @@ public class JumboQuery {
         return this.jsonQuery.add(jsonQuery);
     }
 
-    public boolean addJsonQuery(String fieldName, List<QueryClause> indexValues) {
-        return addJsonQuery(new JsonQuery(fieldName, indexValues));
-    }
+//    public boolean addJsonQuery(String fieldName, List<QueryClause> indexValues) {
+//        return addJsonQuery(new JsonQuery(fieldName, indexValues));
+//    }
 
     public List<IndexQuery> getIndexQuery() {
         return indexQuery;

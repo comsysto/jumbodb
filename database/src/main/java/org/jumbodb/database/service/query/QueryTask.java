@@ -1,5 +1,7 @@
 package org.jumbodb.database.service.query;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.common.query.JumboQuery;
@@ -42,27 +44,41 @@ public class QueryTask implements Runnable {
             databaseQuerySession = createDatabaseQuerySession();
             databaseQuerySession.query(new DatabaseQuerySession.QueryHandler() {
                 @Override
-                public int onQuery(String collection, byte[] query, final DatabaseQuerySession.ResultWriter resultWriter) {
-                    Future<Integer> submit = queryTaskTimeoutExecutor.submit(new QueryTimeoutTask(collection, query, resultWriter));
+                public int onJsonQuery(byte[] query, final DatabaseQuerySession.ResultWriter resultWriter) {
                     try {
+                        JumboQuery searchQuery = jsonMapper.readValue(query, JumboQuery.class);
+                        Future<Integer> submit = queryTaskTimeoutExecutor.submit(new QueryTimeoutTask(searchQuery, resultWriter));
                         return submit.get(queryTimeoutInSeconds, TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
                         cancelAllRunningTasks();
-                        logQuery(e.getMessage(), collection, query);
+                        logQuery(e.getMessage(), query);
                         throw new JumboUnknownException(e.getMessage());
                     } catch (ExecutionException e) {
                         cancelAllRunningTasks();
                         Throwable cause = e.getCause();
-                        logQuery(cause.getMessage(), collection, query);
+                        logQuery(cause.getMessage(), query);
                         if(cause instanceof RuntimeException) {
                             throw (RuntimeException)cause;
                         }
                         throw new JumboUnknownException(cause.getMessage());
                     } catch (TimeoutException e) {
-                        logQuery("Timed out after: " + queryTimeoutInSeconds + " seconds.", collection, query);
+                        logQuery("Timed out after: " + queryTimeoutInSeconds + " seconds.", query);
                         cancelAllRunningTasks();
                         throw new JumboTimeoutException("Timed out after: " + queryTimeoutInSeconds + " seconds.");
+                    } catch (JsonMappingException e) {
+                        throw new JumboUnknownException(e.getMessage());
+                    } catch (JsonParseException e) {
+                        throw new JumboUnknownException(e.getMessage());
+                    } catch (IOException e) {
+                        throw new JumboUnknownException(e.getMessage());
                     }
+                }
+
+                // CARSTEN unit test
+                @Override
+                public int onSqlQuery(byte[] query, DatabaseQuerySession.ResultWriter resultWriter) {
+                    // CARSTEN implement me
+                    return 0;
                 }
             });
         } catch (IOException e) {
@@ -73,13 +89,11 @@ public class QueryTask implements Runnable {
         }
     }
 
-    private void logQuery(String errorMessage, String collection, byte[] query) {
+    private void logQuery(String errorMessage, byte[] query) {
         try {
             StringBuilder buf = new StringBuilder();
             buf.append("\n############################################################################\n");
             buf.append(errorMessage);
-            buf.append("\n========================== Collection  ==============================\n");
-            buf.append(collection);
             buf.append("\n========================== Jumbo DB Query ==================================\n");
             buf.append(new String(query, "UTF-8"));
             longRunningLog.warn(buf.toString());
@@ -103,44 +117,37 @@ public class QueryTask implements Runnable {
 
 
     private class QueryTimeoutTask implements Callable<Integer> {
-        private String collection;
-        private byte[] query;
+        private JumboQuery query;
         private DatabaseQuerySession.ResultWriter resultWriter;
 
-        private QueryTimeoutTask(String collection, byte[] query, DatabaseQuerySession.ResultWriter resultWriter) {
-            this.collection = collection;
+        private QueryTimeoutTask(JumboQuery query, DatabaseQuerySession.ResultWriter resultWriter) {
             this.query = query;
             this.resultWriter = resultWriter;
         }
 
         @Override
         public Integer call() {
-            try {
-                JumboQuery searchQuery = jsonMapper.readValue(query, JumboQuery.class);
-                return jumboSearcher.findResultAndWriteIntoCallback(collection, searchQuery, new ResultCallback() {
-                    @Override
-                    public void writeResult(byte[] result) throws IOException {
-                        resultWriter.writeResult(result);
-                        numberOfResults.incrementAndGet();
-                    }
+            return jumboSearcher.findResultAndWriteIntoCallback(query, new ResultCallback() {
+                @Override
+                public void writeResult(byte[] result) throws IOException {
+                    resultWriter.writeResult(result);
+                    numberOfResults.incrementAndGet();
+                }
 
-                    @Override
-                    public boolean needsMore(JumboQuery jumboQuery) throws IOException {
-                        final int limit = jumboQuery.getLimit();
-                        if (limit == -1) {
-                            return true;
-                        }
-                        return numberOfResults.get() < limit;
+                @Override
+                public boolean needsMore(JumboQuery jumboQuery) throws IOException {
+                    final int limit = jumboQuery.getLimit();
+                    if (limit == -1) {
+                        return true;
                     }
+                    return numberOfResults.get() < limit;
+                }
 
-                    @Override
-                    public void collect(CancelableTask cancelableTask) {
-                        cancelableTasks.add(cancelableTask);
-                    }
-                });
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+                @Override
+                public void collect(CancelableTask cancelableTask) {
+                    cancelableTasks.add(cancelableTask);
+                }
+            });
         }
     }
 

@@ -67,9 +67,9 @@ public class JumboSearcher {
         }
     }
 
-    public int findResultAndWriteIntoCallback(String collectionName, JumboQuery searchQuery,
+    public int findResultAndWriteIntoCallback(JumboQuery searchQuery,
       ResultCallback resultCallback) {
-        Collection<DeliveryChunkDefinition> deliveryChunks = collectionDefinition.getChunks(collectionName);
+        Collection<DeliveryChunkDefinition> deliveryChunks = collectionDefinition.getChunks(searchQuery.getCollection());
         if (deliveryChunks != null && deliveryChunks.size() > 0) {
             List<Future<Integer>> futures = new LinkedList<Future<Integer>>();
             for (DeliveryChunkDefinition deliveryChunk : deliveryChunks) {
@@ -80,7 +80,7 @@ public class JumboSearcher {
             }
             return getNumberOfResultsFromFuturesAndHandleTimeOut(futures);
         } else {
-            throw new JumboCollectionMissingException("Collection '" + collectionName + "' does not exist!");
+            throw new JumboCollectionMissingException("Collection '" + searchQuery.getCollection() + "' does not exist!");
         }
     }
 
@@ -121,7 +121,7 @@ public class JumboSearcher {
                 if (result == null) {
                     result = new HashSet<FileOffset>(fileOffsets);
                 } else {
-                    result.retainAll(fileOffsets);
+                    result.addAll(fileOffsets);
                 }
             }
             return result;

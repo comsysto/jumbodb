@@ -2,6 +2,7 @@ package org.jumbodb.common.query;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)

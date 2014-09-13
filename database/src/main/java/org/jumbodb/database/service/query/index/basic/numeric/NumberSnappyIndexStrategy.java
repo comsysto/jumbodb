@@ -138,7 +138,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     @Override
     public Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit, boolean resultCacheEnabled) {
         try {
-            MultiValueMap<File, QueryClause> groupedByIndexFile = groupByIndexFile(collection, chunkKey, query);
+            MultiValueMap<File, QueryClause> groupedByIndexFile = groupByIndexFile(chunkKey, collection, query);
             List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
 
             for (Map.Entry<File, List<QueryClause>> clausesPerIndexFile : groupedByIndexFile.entrySet()) {
@@ -162,8 +162,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         return FileUtils.sizeOfDirectory(indexFolder);
     }
 
-    public MultiValueMap<File, QueryClause> groupByIndexFile(String collection, String chunkKey, IndexQuery query) {
-        List<IF> indexFiles = getIndexFiles(collection, chunkKey, query);
+    public MultiValueMap<File, QueryClause> groupByIndexFile(String chunkKey, String collection, IndexQuery query) {
+        List<IF> indexFiles = getIndexFiles(chunkKey, collection, query);
         MultiValueMap<File, QueryClause> groupByIndexFile = new LinkedMultiValueMap<File, QueryClause>();
         for (IF indexFile : indexFiles) {
             for (QueryClause queryClause : query.getClauses()) {
@@ -175,7 +175,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         return groupByIndexFile;
     }
 
-    protected List<IF> getIndexFiles(String collection, String chunkKey, IndexQuery query) {
+    protected List<IF> getIndexFiles(String chunkKey, String collection, IndexQuery query) {
         return indexFiles.get(new IndexKey(chunkKey, collection, query.getName()));
     }
 

@@ -2,6 +2,7 @@ package org.jumbodb.database.service.query;
 
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.connector.JumboConstants;
+import org.jumbodb.connector.exception.JumboUnknownException;
 import org.jumbodb.database.service.statistics.GlobalStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,6 @@ import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -47,7 +47,7 @@ public class DatabaseQuerySession implements Closeable {
         ResultWriter resultWriter = new ResultWriter();
         try {
             int protocolVersion = dataInputStream.readInt();
-            if(protocolVersion != JumboConstants.QUERY_PROTOCOL_VERSION) {
+            if (protocolVersion != JumboConstants.QUERY_PROTOCOL_VERSION) {
                 String error = "Wrong protocol version. Got " + protocolVersion + ", but expected " + JumboConstants.QUERY_PROTOCOL_VERSION;
                 log.warn(error);
                 dataOutputStream.writeInt(-1);
@@ -56,15 +56,20 @@ public class DatabaseQuerySession implements Closeable {
                 return;
             }
             String cmd = dataInputStream.readUTF();
-            if (cmd.equals(":cmd:query")) {
-                String collection = dataInputStream.readUTF();
-                log.info("Collection: " + collection);
+            if (cmd.startsWith(":cmd:query")) {
                 int size = dataInputStream.readInt();
                 byte[] jsonQueryDocument = new byte[size];
                 dataInputStream.readFully(jsonQueryDocument);
                 long start = System.currentTimeMillis();
                 resultWriter.start();
-                int numberOfResults = queryHandler.onQuery(collection, jsonQueryDocument, resultWriter);
+                int numberOfResults = 0;
+                if (cmd.equals(":cmd:query:json")) {
+                    numberOfResults = queryHandler.onJsonQuery(jsonQueryDocument, resultWriter);
+                } else if (cmd.equals(":cmd:query:sql")) {
+                    numberOfResults = queryHandler.onSqlQuery(jsonQueryDocument, resultWriter);
+                } else {
+                    throw new JumboCommonException("cmd " + cmd + " is not supported!");
+                }
                 GlobalStatistics.incNumberOfQueries(1l);
                 GlobalStatistics.incNumberOfResults(numberOfResults);
                 log.info("Full result in " + (System.currentTimeMillis() - start) + "ms with " + numberOfResults + " results");
@@ -72,29 +77,34 @@ public class DatabaseQuerySession implements Closeable {
                 dataOutputStream.writeInt(-1); // After -1 command follows
                 dataOutputStream.writeUTF(":result:end");
             }
-        } catch(JumboTimeoutException e) {
+        } catch (JumboTimeoutException e) {
             log.warn("Handled error through query", e);
             dataOutputStream.writeInt(-1);
             dataOutputStream.writeUTF(":error:timeout");
             dataOutputStream.writeUTF(e.getMessage());
-        } catch(JumboCollectionMissingException e) {
+        } catch (JumboCollectionMissingException e) {
             log.warn("Handled error through query", e);
             dataOutputStream.writeInt(-1);
             dataOutputStream.writeUTF(":error:collection:missing");
             dataOutputStream.writeUTF(e.getMessage());
-        } catch(JumboIndexMissingException e) {
+        } catch (JumboIndexMissingException e) {
             log.warn("Handled error through query", e);
             dataOutputStream.writeInt(-1);
             dataOutputStream.writeUTF(":error:collection:index:missing");
             dataOutputStream.writeUTF(e.getMessage());
-        } catch(JumboCommonException e) {
+        } catch (JumboCommonException e) {
             log.warn("Handled error through query", e);
             dataOutputStream.writeInt(-1);
             dataOutputStream.writeUTF(":error:common");
             dataOutputStream.writeUTF(e.getMessage());
-        } catch(EOFException e) {
+        } catch (EOFException e) {
             log.warn("Connection was unexpectly closed by the client.");
-        } catch(RuntimeException e) {
+        } catch (JumboUnknownException e) {
+            log.warn("Unhandled error", e);
+            dataOutputStream.writeInt(-1);
+            dataOutputStream.writeUTF(":error:unknown");
+            dataOutputStream.writeUTF(e.getMessage());
+        } catch (RuntimeException e) {
             log.warn("Unhandled error", e);
             dataOutputStream.writeInt(-1);
             dataOutputStream.writeUTF(":error:unknown");
@@ -125,7 +135,7 @@ public class DatabaseQuerySession implements Closeable {
         public void writeResult(byte[] result) {
             try {
                 int i = count.incrementAndGet();
-                if(i % 50000 == 0) {
+                if (i % 50000 == 0) {
                     log.info("Results written to buffer: " + i + " Currently in buffer: " + queue.size());
                 }
                 queue.put(result);
@@ -137,9 +147,9 @@ public class DatabaseQuerySession implements Closeable {
         @Override
         public void run() {
             try {
-                while(running || queue.size() > 0) {
+                while (running || queue.size() > 0) {
                     byte dataset[] = queue.take();
-                    if(dataset.length > 0) {
+                    if (dataset.length > 0) {
                         dataOutputStream.writeInt(dataset.length);
                         dataOutputStream.write(dataset);
                     }
@@ -157,7 +167,7 @@ public class DatabaseQuerySession implements Closeable {
             try {
                 running = false;
                 queue.put(new byte[0]);
-                while(queue.size() > 0) {
+                while (queue.size() > 0) {
                     Thread.sleep(50);
                 }
             } catch (InterruptedException e) {
@@ -172,6 +182,8 @@ public class DatabaseQuerySession implements Closeable {
     }
 
     public interface QueryHandler {
-        int onQuery(String collection, byte[] query, DatabaseQuerySession.ResultWriter resultWriter);
+        int onJsonQuery(byte[] query, DatabaseQuerySession.ResultWriter resultWriter);
+
+        int onSqlQuery(byte[] query, DatabaseQuerySession.ResultWriter resultWriter);
     }
 }

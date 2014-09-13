@@ -2,12 +2,13 @@ package org.jumbodb.database.service.query.data.snappy
 
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
+import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
-class LtJsonOperationSearchSpec extends spock.lang.Specification {
+class LtJsonOperationSearchSpec extends Specification {
     def operation = new LtJsonOperationSearch()
 
     @Unroll

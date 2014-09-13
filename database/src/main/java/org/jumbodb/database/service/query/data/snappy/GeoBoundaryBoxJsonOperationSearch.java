@@ -1,9 +1,8 @@
 package org.jumbodb.database.service.query.data.snappy;
 
 import org.jumbodb.common.geo.geohash.BoundingBox;
-import org.jumbodb.common.geo.geohash.GeoHash;
 import org.jumbodb.common.geo.geohash.WGS84Point;
-import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.common.query.JsonQuery;
 
 import java.util.List;
 
@@ -12,9 +11,9 @@ import java.util.List;
  */
 public class GeoBoundaryBoxJsonOperationSearch implements JsonOperationSearch {
     @Override
-    public boolean matches(QueryClause queryClause, Object value) {
-        if(value instanceof List) {
-            List<List<Number>> coords = (List<List<Number>>) queryClause.getValue();
+    public boolean matches(JsonQuery jsonQuery, Object value) {
+        if (value instanceof List) {
+            List<List<Number>> coords = (List<List<Number>>) jsonQuery.getValue();
             List<Number> valuePoint = (List<Number>) value;
             double latitude1 = coords.get(0).get(0).doubleValue();
             double longitude1 = coords.get(0).get(1).doubleValue();

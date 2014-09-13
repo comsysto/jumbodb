@@ -29,7 +29,7 @@ class DataStrategyManagerSpec extends Specification {
         dataStrategyManager.setStrategies([strategyMock])
         def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
-        strategyMock.isResponsibleFor("testCollection", "testChunkKey") >> true
+        strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
         dataStrategyManager.onInitialize(cd)
         when:
         def strategy = dataStrategyManager.getStrategy("testCollection", "testChunkKey")
@@ -44,7 +44,7 @@ class DataStrategyManagerSpec extends Specification {
         dataStrategyManager.setStrategies([strategyMock])
         def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
-        strategyMock.isResponsibleFor("testCollection", "testChunkKey") >> true
+        strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
         strategyMock.getStrategyName() >> "testStrategy"
         dataStrategyManager.onInitialize(cd)
         when:
@@ -57,7 +57,7 @@ class DataStrategyManagerSpec extends Specification {
         setup:
         def dataStrategyManager = new DataStrategyManager()
         def strategyMock = Mock(DataStrategy)
-        strategyMock.isResponsibleFor("testCollection", "testChunkKey") >> true
+        strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
         dataStrategyManager.setStrategies([strategyMock])
         def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
@@ -76,7 +76,7 @@ class DataStrategyManagerSpec extends Specification {
         when:
         def result = dataStrategyManager.getResponsibleStrategy(new DataKey("testChunkKey", "testCollection"))
         then:
-        1 * strategyMock.isResponsibleFor("testCollection", "testChunkKey") >> true
+        1 * strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
         result == strategyMock
     }
 
@@ -91,7 +91,7 @@ class DataStrategyManagerSpec extends Specification {
         dataStrategyManager.onInitialize(cd)
         then:
         1 * strategyMock.onInitialize(cd)
-        1 * strategyMock.isResponsibleFor("testCollection", "testChunkKey") >> true
+        1 * strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
     }
 
     def "initialisation no responsible strategy"() {
@@ -104,7 +104,7 @@ class DataStrategyManagerSpec extends Specification {
         when:
         dataStrategyManager.onInitialize(cd)
         then:
-        1 * strategyMock.isResponsibleFor("testCollection", "testChunkKey") >> false
+        1 * strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> false
         thrown IllegalStateException
     }
 
@@ -119,6 +119,6 @@ class DataStrategyManagerSpec extends Specification {
         dataStrategyManager.onDataChanged(cd)
         then:
         1 * strategyMock.onDataChanged(cd)
-        1 * strategyMock.isResponsibleFor("testCollection", "testChunkKey") >> true
+        1 * strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
     }
 }

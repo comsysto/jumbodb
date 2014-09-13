@@ -1,6 +1,7 @@
 package org.jumbodb.connector.query;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Time: 10:53 AM
  */
 public class JumboQueryConnection {
+    public static final String CMD_QUERY_JSON = ":cmd:query:json";
+    public static final String CMD_QUERY_SQL = ":cmd:query:sql";
     private Logger log = LoggerFactory.getLogger(JumboQueryConnection.class);
 
     private final String host;
@@ -45,7 +48,21 @@ public class JumboQueryConnection {
         return objectMapper;
     }
 
-    public <T> Iterable<T> findWithStreamedResult(final String collection, final Class<T> jsonClazz, final JumboQuery searchQuery) {
+    public <T> Iterable<T> findWithStreamedResult(Class<T> jsonClazz, JumboQuery searchQuery) {
+        final byte[] bytes = getBytesFromJumboQuery(searchQuery);
+        return findWithStreamedResult(jsonClazz, bytes, CMD_QUERY_JSON);
+    }
+
+    public <T> Iterable<T> findWithStreamedResult(Class<T> jsonClazz, String searchQuery) {
+        try {
+            byte[] bytes = searchQuery.getBytes("UTF-8");
+            return findWithStreamedResult(jsonClazz, bytes, CMD_QUERY_SQL);
+        } catch (UnsupportedEncodingException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
+    private <T> Iterable<T> findWithStreamedResult(final Class<T> jsonClazz, final byte[] bytes, final String type) {
         final AtomicBoolean finished = new AtomicBoolean(false);
         final LinkedBlockingQueue<T> queue = new LinkedBlockingQueue<T>();
         JumboIterable<T> it = new JumboIterable<T>(new Iterator<T>() {
@@ -78,7 +95,7 @@ public class JumboQueryConnection {
         new Thread() {
             @Override
             public void run() {
-                findWithCallback(collection, jsonClazz, searchQuery, new ResultHandler<T>() {
+                findWithCallback(jsonClazz, bytes, type, new ResultHandler<T>() {
                     @Override
                     public void onResult(T dataset) {
                         try {
@@ -100,7 +117,6 @@ public class JumboQueryConnection {
                 });
             }
         }.start();
-
         return it;
     }
 
@@ -108,9 +124,26 @@ public class JumboQueryConnection {
         return JumboConstants.QUERY_WAITING_TIMEOUT_IN_MS;
     }
 
-    public <T> List<T> find(String collection, Class<T> jsonClazz, JumboQuery searchQuery) {
+    public <T> List<T> find(Class<T> jsonClazz, JumboQuery searchQuery) {
         final List<T> result = new LinkedList<T>();
-        findWithCallback(collection, jsonClazz, searchQuery, new ResultHandler<T>() {
+        byte[] bytes = getBytesFromJumboQuery(searchQuery);
+        findWithCallback(jsonClazz, bytes, CMD_QUERY_JSON, createResultHandler(result));
+        return result;
+    }
+
+    // CARSTEN unit test
+    public <T> List<T> find(Class<T> jsonClazz, String sql) {
+        try {
+            final List<T> result = new LinkedList<T>();
+            findWithCallback(jsonClazz, sql.getBytes("UTF-8"), CMD_QUERY_SQL, createResultHandler(result));
+            return result;
+        } catch (UnsupportedEncodingException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
+    private <T> ResultHandler<T> createResultHandler(final List<T> result) {
+        return new ResultHandler<T>() {
             @Override
             public void onResult(T dataset) {
                 result.add(dataset);
@@ -124,11 +157,18 @@ public class JumboQueryConnection {
             @Override
             public void onError() {
             }
-        });
-        return result;
+        };
     }
 
-    private <T> void findWithCallback(String collection, Class<T> jsonClazz, JumboQuery searchQuery, ResultHandler<T> resultHandler) {
+    private byte[] getBytesFromJumboQuery(JumboQuery searchQuery) {
+        try {
+            return jsonMapper.writeValueAsBytes(searchQuery);
+        } catch (JsonProcessingException e) {
+            throw new UnhandledException(e);
+        }
+    }
+
+    private <T> void findWithCallback(Class<T> jsonClazz, byte[] queryBytes, String queryType, ResultHandler<T> resultHandler) {
         long start = System.currentTimeMillis();
         Socket sock = null;
         OutputStream os = null;
@@ -150,12 +190,11 @@ public class JumboQueryConnection {
             sis = new SnappyInputStream(bis);
             dis = new DataInputStream(sis);
             dos.writeInt(JumboConstants.QUERY_PROTOCOL_VERSION);
-            dos.writeUTF(":cmd:query");
-            dos.writeUTF(collection);
-            byte[] queryBytes = jsonMapper.writeValueAsBytes(searchQuery);
+            dos.writeUTF(queryType);
             dos.writeInt(queryBytes.length);
             dos.write(queryBytes);
             dos.flush();
+            // ende send query
             int byteArrayLength;
             byte[] jsonByteArray = new byte[1024];
             while((byteArrayLength = dis.readInt()) > -1) {
@@ -192,7 +231,6 @@ public class JumboQueryConnection {
             }
             else if(cmd.equals(":error:collection:missing")) {
                 log.warn("Collection is missing: " + dis.readUTF());
-//                throw new JumboCollectionMissingException(dis.readUTF());
             }
             else if(cmd.equals(":error:collection:index:missing")) {
                 throw new JumboIndexMissingException(dis.readUTF());

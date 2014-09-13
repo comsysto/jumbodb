@@ -5,11 +5,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.UnhandledException;
+import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
-import org.jumbodb.data.common.snappy.SnappyChunksUtil;
-import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.FutureCancelableTask;
 import org.jumbodb.database.service.query.ResultCallback;
@@ -43,6 +41,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
 
     private Map<QueryOperation, JsonOperationSearch> createOperations() {
         Map<QueryOperation, JsonOperationSearch> operations = new HashMap<QueryOperation, JsonOperationSearch>();
+        operations.put(QueryOperation.OR, new OrJsonOperationSearch());
         operations.put(QueryOperation.EQ, new EqJsonOperationSearch());
         operations.put(QueryOperation.NE, new NeJsonOperationSearch());
         operations.put(QueryOperation.GT, new GtJsonOperationSearch());
@@ -54,7 +53,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
     }
 
     @Override
-    public boolean isResponsibleFor(String collection, String chunkKey) {
+    public boolean isResponsibleFor(String chunkKey, String collection) {
         DeliveryChunkDefinition chunk = collectionDefinition.getChunk(collection, chunkKey);
         if(chunk == null) {
             return false;
@@ -127,7 +126,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
     }
 
     @Override
-    public boolean matches(QueryClause queryClause, Object value) {
+    public boolean matches(JsonQuery queryClause, Object value) {
         JsonOperationSearch jsonOperationSearch = getOperations().get(queryClause.getQueryOperation());
         if(jsonOperationSearch == null) {
             throw new UnsupportedOperationException("OperationSearch is not supported: " + queryClause.getQueryOperation());

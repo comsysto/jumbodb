@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.data.notfound
 
 import org.jumbodb.common.query.JumboQuery
-import org.jumbodb.database.service.importer.ImportMetaFileInformation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
@@ -15,7 +14,7 @@ class NotFoundDataStrategySpec extends Specification {
 
     def "strategy should always be responsible because it's the last strategy"() {
         expect:
-        strategy.isResponsibleFor(collection, chunk);
+        strategy.isResponsibleFor(chunk, collection);
         where:
         collection      | chunk
         "a_collection"  | "a_chunk_key"

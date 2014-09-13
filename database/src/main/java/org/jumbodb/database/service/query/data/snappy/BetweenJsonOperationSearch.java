@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.data.snappy;
 
+import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.QueryClause;
 
 import java.util.List;
@@ -9,8 +10,8 @@ import java.util.List;
  */
 public class BetweenJsonOperationSearch implements JsonOperationSearch {
     @Override
-    public boolean matches(QueryClause queryClause, Object value) {
-        List<Number> searchValue = (List<Number>) queryClause.getValue();
+    public boolean matches(JsonQuery jsonQuery, Object value) {
+        List<Number> searchValue = (List<Number>) jsonQuery.getValue();
         Number searchFrom = searchValue.get(0);
         Number searchTo = searchValue.get(1);
         if(value instanceof Double) {

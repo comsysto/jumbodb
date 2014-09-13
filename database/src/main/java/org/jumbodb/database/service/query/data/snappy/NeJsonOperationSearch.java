@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.data.snappy;
 
+import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.QueryClause;
 
 /**
@@ -7,7 +8,7 @@ import org.jumbodb.common.query.QueryClause;
  */
 public class NeJsonOperationSearch implements JsonOperationSearch {
     @Override
-    public boolean matches(QueryClause queryClause, Object value) {
-        return !queryClause.getValue().equals(value);
+    public boolean matches(JsonQuery jsonQuery, Object value) {
+        return !jsonQuery.getValue().equals(value);
     }
 }

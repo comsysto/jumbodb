@@ -1,14 +1,14 @@
 package org.jumbodb.database.service.query.data.snappy;
 
-import org.jumbodb.common.query.QueryClause;
+import org.jumbodb.common.query.JsonQuery;
 
 /**
  * @author Carsten Hufe
  */
 public class LtJsonOperationSearch implements JsonOperationSearch {
     @Override
-    public boolean matches(QueryClause queryClause, Object value) {
-        Number searchValue = (Number) queryClause.getValue();
+    public boolean matches(JsonQuery jsonQuery, Object value) {
+        Number searchValue = (Number) jsonQuery.getValue();
         if(value instanceof Double) {
             Double dv = (Double) value;
             return dv < searchValue.doubleValue();

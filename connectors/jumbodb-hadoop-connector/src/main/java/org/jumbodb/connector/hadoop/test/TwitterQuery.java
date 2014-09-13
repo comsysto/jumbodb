@@ -20,6 +20,7 @@ public class TwitterQuery {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
 //        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
         JumboQuery query = new JumboQuery();
+        query.setCollection("carsten.twitter");
         query.setLimit(10);
 //        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
 //        query.addJsonQuery("user.screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
@@ -76,7 +77,7 @@ public class TwitterQuery {
 //        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS, "_id.date", Arrays.asList((Object)new Long(20121002)));
 //        query.addJsonQuery(JumboQuery.JsonComparisionType.EQUALS, "_id.toCell", Arrays.asList((Object)"11211422244", "1121332341112"));
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find("carsten.twitter", Map.class, query);
+        List<Map> daily = jumboDriver.find(Map.class, query);
         for (Map map : daily) {
             System.out.println(map.get("created_at") + " -> " + map.get("text"));
 //            System.out.println(map.get("text"));

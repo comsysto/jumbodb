@@ -5,13 +5,11 @@ import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
-import org.jumbodb.database.service.importer.ImportMetaFileInformation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
 import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
-import org.xerial.snappy.SnappyInputStream
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -39,7 +37,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         strategy.onInitialize(cd)
         cd.getChunk("collection", "chunk") >> dcd
         expect:
-        strategy.isResponsibleFor("collection", "chunk")
+        strategy.isResponsibleFor("chunk", "collection")
     }
 
     def "should not responsible, because different strategy name"() {
@@ -49,7 +47,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         strategy.onInitialize(cd)
         cd.getChunk("collection", "chunk") >> dcd
         expect:
-        !strategy.isResponsibleFor("collection", "chunk")
+        !strategy.isResponsibleFor("chunk", "collection")
     }
 
     def "should not responsible, because collection does not exist"() {
@@ -57,7 +55,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         def cd = Mock(CollectionDefinition)
         strategy.onInitialize(cd)
         expect:
-        !strategy.isResponsibleFor("collection", "chunk")
+        !strategy.isResponsibleFor("chunk", "collection")
     }
 
     def "verify strategy name"() {

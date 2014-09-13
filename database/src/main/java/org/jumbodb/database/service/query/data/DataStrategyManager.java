@@ -66,7 +66,7 @@ public class DataStrategyManager {
     private DataStrategy getResponsibleStrategy(DataKey dataKey) {
         for (DataStrategy strategy : strategies) {
 
-            if(strategy.isResponsibleFor(dataKey.getCollectionName(), dataKey.getChunkKey())) {
+            if(strategy.isResponsibleFor(dataKey.getChunkKey(), dataKey.getCollectionName())) {
                 return strategy;
             }
         }

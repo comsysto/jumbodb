@@ -3,8 +3,6 @@ package org.jumbodb.database.service.query.index.datetime.snappy
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.data.common.snappy.SnappyChunksUtil
-import org.jumbodb.database.service.importer.ImportMetaFileInformation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
@@ -126,7 +124,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def query = new IndexQuery("testIndex", [queryClause])
 
         when:
-        def groupedByIndex = strategy.groupByIndexFile("testCollection", "testChunkKey", query)
+        def groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", query)
         def keys = groupedByIndex.keySet()
         def fileKey = keys.iterator().next()
         then:
@@ -134,7 +132,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         keys.size() == 1
         groupedByIndex.get(fileKey).get(0) == queryClause
         when:
-        groupedByIndex = strategy.groupByIndexFile("testCollection", "testChunkKey", query)
+        groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", query)
         keys = groupedByIndex.keySet()
         then:
         1 * operationMock.acceptIndexFile(_, _) >> false
@@ -323,7 +321,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         when:
         strategy.onDataChanged(cd)
-        def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
+        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
@@ -348,7 +346,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         when:
         strategy.onDataChanged(cd)
-        def testIndexFiles = strategy.getIndexFiles("testCollection", "testChunkKey", new IndexQuery("testIndex", []))
+        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", new IndexQuery("testIndex", []))
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"

@@ -22,6 +22,7 @@ public class TwitterEx10Query {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("ex10-dev01.devproof.org", 12002);
 //        JumboQueryConnection jumboDriver = new JumboQueryConnection("ex4s-dev01.devproof.org", 12002);
         JumboQuery query = new JumboQuery();
+        query.setCollection("twitter");
         query.setResultCacheEnabled(false);
 //        query.addIndexQuery("screen_name",  Arrays.asList(new QueryClause(QueryOperation.EQ, "alexjenkins29")));
 //        query.setLimit(20);
@@ -61,7 +62,7 @@ public class TwitterEx10Query {
         ObjectMapper om = new ObjectMapper();
         System.out.println(om.writeValueAsString(query));
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find("twitter", Map.class, query);
+        List<Map> daily = jumboDriver.find(Map.class, query);
         for (Map map : daily) {
             System.out.println(map.get("created_at") + " (" + ((Map) map.get("user")).get("screen_name") + ")" + " -> " + map.get("text"));
             System.out.println("==========");

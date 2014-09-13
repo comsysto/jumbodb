@@ -2,7 +2,6 @@ package org.jumbodb.database.service.query.data.notfound;
 
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryOperation;
-import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
@@ -10,7 +9,6 @@ import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +18,7 @@ import java.util.List;
  */
 public class NotFoundDataStrategy implements DataStrategy {
     @Override
-    public boolean isResponsibleFor(String collection, String chunkKey) {
+    public boolean isResponsibleFor(String chunkKey, String collection) {
         return true;
     }
 

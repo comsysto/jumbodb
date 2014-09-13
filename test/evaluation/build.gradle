@@ -47,6 +47,8 @@ dependencies {
     compile 'org.xerial.snappy:snappy-java:$snappyVersion'
     compile 'org.msgpack:msgpack:0.6.7'
     compile 'net.minidev:json-smart:2.0-RC2'
+//    compile 'com.foundationdb:fdb-sql-parser:1.4.0'
+    compile 'com.github.jsqlparser:jsqlparser:0.9'
     compile project(':connectors:jumbodb-java-connector')
 
 //    compile 'de.undercouch:bson4jackson:2.0.0'

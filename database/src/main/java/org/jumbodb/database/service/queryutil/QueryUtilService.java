@@ -42,7 +42,7 @@ public class QueryUtilService {
                     if(jumboQuery.getLimit() == -1) {
                         jumboQuery.setLimit(defaultLimit);
                     }
-                    jumboSearcher.findResultAndWriteIntoCallback(collection, jumboQuery, new ResultCallback() {
+                    jumboSearcher.findResultAndWriteIntoCallback(jumboQuery, new ResultCallback() {
                         @Override
                         public void writeResult(byte[] dataSet) throws IOException {
                             synchronized (result) {
@@ -89,17 +89,6 @@ public class QueryUtilService {
             task.cancel();
         }
     }
-
-//    public void findDocumentsByQuery(String collection, String query, ResultCallback callback) {
-//        final ObjectMapper mapper = new ObjectMapper();
-//        try {
-//            final JumboQuery jumboQuery = mapper.readValue(query, JumboQuery.class);
-//            jumboSearcher.findResultAndWriteIntoCallback(collection, jumboQuery, callback);
-//
-//        } catch (IOException e) {
-//            throw new UnhandledException(e);
-//        }
-//    }
 
     @Required
     public void setJumboSearcher(JumboSearcher jumboSearcher) {

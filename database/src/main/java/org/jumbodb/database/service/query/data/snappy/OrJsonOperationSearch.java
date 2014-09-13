@@ -5,9 +5,10 @@ import org.jumbodb.common.query.JsonQuery;
 /**
  * @author Carsten Hufe
  */
-public class EqJsonOperationSearch implements JsonOperationSearch {
+// CARSTEN unit test
+public class OrJsonOperationSearch implements JsonOperationSearch {
     @Override
     public boolean matches(JsonQuery jsonQuery, Object value) {
-        return jsonQuery.getValue().equals(value);
+        return true;
     }
 }

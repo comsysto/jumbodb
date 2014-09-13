@@ -11,6 +11,7 @@ import spock.lang.Specification
 /**
  * @author Carsten Hufe
  */
+// CARSTEN test SQL query
 class DatabaseQuerySessionSpec extends Specification {
 
     def "command query with result"() {

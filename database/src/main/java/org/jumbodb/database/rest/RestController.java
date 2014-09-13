@@ -79,14 +79,14 @@ public class RestController {
     }
 
     // CARSTEN unit test
-    @RequestMapping(value = "/query/sql/", method = RequestMethod.POST)
+    @RequestMapping(value = "/query/sql", method = RequestMethod.POST)
     @ResponseBody
     public QueryResult querySql(@RequestBody String query) {
         return queryUtilService.findDocumentsBySqlQuery(query, -1);
     }
 
     // CARSTEN unit test
-    @RequestMapping(value = "/query/sql/", method = RequestMethod.POST)
+    @RequestMapping(value = "/query/sql/explain", method = RequestMethod.POST)
     @ResponseBody
     public ExplainResult explainSql(@RequestBody String query) {
         return queryUtilService.explainSqlQuery(query);

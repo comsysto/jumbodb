@@ -125,7 +125,7 @@
     <bean id="queryServer" class="org.jumbodb.database.service.query.QueryServer" init-method="start" destroy-method="stop">
         <constructor-arg ref="jumboConfig"/>
         <constructor-arg ref="jumboSearcher"/>
-        <constructor-arg value="jumboQueryConverterService"/>
+        <constructor-arg ref="jumboQueryConverterService"/>
         <constructor-arg value="${jumbodb.query.timeout.seconds}"/>
     </bean>
 

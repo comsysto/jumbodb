@@ -184,12 +184,25 @@ define(['angular' ], function (angular) {
 				}
 			}
 
-			$scope.search = function(collection, query) {
-				$http.post('jumbodb/rest/query/' + collection + "/defaultLimit", query).success(function(data) {
+			$scope.searchJsonQuery = function(collection, query) {
+				$http.post('jumbodb/rest/query/json/defaultLimit', query).success(function(data) {
 					$scope.results = data;
 					buildMessage(data);
 				});
 			}
+
+            $scope.searchSqlQuery = function(collection, query) {
+                $http.post('jumbodb/rest/query/sql/defaultLimit', query).success(function(data) {
+                    $scope.results = data;
+                    buildMessage(data);
+                });
+            }
+
+            $scope.explainSql = function(collection, query) {
+                $http.post('jumbodb/rest/query/sql/explain', query).success(function(data) {
+                    $scope.explain = data;
+                });
+            }
 
 			$scope.formatJson = function(json) {
 				delete json["$$hashKey"]

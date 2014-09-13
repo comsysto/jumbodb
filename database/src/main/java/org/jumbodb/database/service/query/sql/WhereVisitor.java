@@ -146,8 +146,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(LongValue value) {
-        // CARSTEN conversion später checken, da int auf int verglichen werden muss
-        this.value = (int)value.getValue();
+        this.value = value.getValue();
     }
 
 

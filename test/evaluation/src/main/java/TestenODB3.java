@@ -41,8 +41,8 @@ public class TestenODB3 {
 
 
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find(Map.class, query);
-//        System.out.println(daily);
+        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM carsten.twitter where id = 327770995446403073");
+        System.out.println(daily);
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }
 }

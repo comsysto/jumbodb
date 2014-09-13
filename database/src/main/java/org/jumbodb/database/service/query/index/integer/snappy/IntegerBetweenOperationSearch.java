@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.FileDataRetriever;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
@@ -43,7 +44,7 @@ public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
     }
 
     @Override
-    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new IntegerBetweenQueryValueRetriever(queryClause);
+    public QueryValueRetriever getQueryValueRetriever(IndexQuery indexQuery) {
+        return new IntegerBetweenQueryValueRetriever(indexQuery);
     }
 }

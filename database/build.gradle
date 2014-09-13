@@ -70,6 +70,7 @@ dependencies {
     compile 'org.slf4j:jcl-over-slf4j:1.7.5'
     compile 'org.slf4j:log4j-over-slf4j:1.7.5'
     compile 'commons-codec:commons-codec:1.8'
+    compile 'com.github.jsqlparser:jsqlparser:0.9'
 //    compile 'org.slf4j:slf4j-jdk14:1.7.5'
 //    compile 'org.slf4j:slf4j-log4j12:1.7.5'
     compile 'ch.qos.logback:logback-classic:1.0.13'

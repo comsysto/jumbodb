@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.basic.numeric;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.data.common.snappy.SnappyChunks;
 
@@ -23,5 +24,5 @@ public interface OperationSearch<T, IFV, IF extends NumberSnappyIndexFile<IFV>> 
      * @return
      */
     boolean searchFinished(T currentValue, QueryValueRetriever queryValueRetriever, boolean resultsFound);
-    QueryValueRetriever getQueryValueRetriever(QueryClause queryClause);
+    QueryValueRetriever getQueryValueRetriever(IndexQuery indexQuery);
 }

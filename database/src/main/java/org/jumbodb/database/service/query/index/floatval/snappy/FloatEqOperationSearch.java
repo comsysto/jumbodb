@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.floatval.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberEqOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
@@ -49,7 +50,7 @@ public class FloatEqOperationSearch extends NumberEqOperationSearch<Float, Float
     }
 
     @Override
-    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new FloatQueryValueRetriever(queryClause);
+    public QueryValueRetriever getQueryValueRetriever(IndexQuery indexQuery) {
+        return new FloatQueryValueRetriever(indexQuery);
     }
 }

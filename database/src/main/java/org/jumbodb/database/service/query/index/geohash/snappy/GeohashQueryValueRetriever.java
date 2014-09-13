@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.geohash.snappy;
 import org.jumbodb.common.geo.geohash.BoundingBox;
 import org.jumbodb.common.geo.geohash.GeoHash;
 import org.jumbodb.common.geo.geohash.WGS84Point;
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
@@ -24,18 +25,18 @@ public class GeohashQueryValueRetriever implements QueryValueRetriever {
 
 
 
-    public GeohashQueryValueRetriever(QueryClause queryClause) {
-        if(queryClause.getQueryOperation() == QueryOperation.GEO_BOUNDARY_BOX) {
-            List<List<Number>> coords = (List<List<Number>>) queryClause.getValue();
+    public GeohashQueryValueRetriever(IndexQuery indexQuery) {
+        if(indexQuery.getQueryOperation() == QueryOperation.GEO_BOUNDARY_BOX) {
+            List<List<Number>> coords = (List<List<Number>>) indexQuery.getValue();
             double latitude1 = coords.get(0).get(0).doubleValue();
             double longitude1 = coords.get(0).get(1).doubleValue();
             double latitude2 = coords.get(1).get(0).doubleValue();
             double longitude2 = coords.get(1).get(1).doubleValue();
             initializeBoundaryBox(latitude1, longitude1, latitude2, longitude2);
         }
-        if(queryClause.getQueryOperation() == QueryOperation.GEO_WITHIN_RANGE_METER) {
+        if(indexQuery.getQueryOperation() == QueryOperation.GEO_WITHIN_RANGE_METER) {
             // calculate boundary box from range ... later with geohashes it's anyway a square
-            List<?> coords = (List<?>) queryClause.getValue();
+            List<?> coords = (List<?>) indexQuery.getValue();
             List<Number> point = (List<Number>) coords.get(0);
             double latitude = point.get(0).doubleValue();
             double longitude =  point.get(1).doubleValue();

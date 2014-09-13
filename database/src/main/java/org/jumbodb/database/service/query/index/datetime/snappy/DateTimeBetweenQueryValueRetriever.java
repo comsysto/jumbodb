@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.index.datetime.snappy;
 
 import org.apache.commons.lang.UnhandledException;
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
@@ -16,10 +17,10 @@ import java.util.List;
 public class DateTimeBetweenQueryValueRetriever implements QueryValueRetriever {
     private List<Long> value;
 
-    public DateTimeBetweenQueryValueRetriever(QueryClause queryClause) {
+    public DateTimeBetweenQueryValueRetriever(IndexQuery indexQuery) {
         SimpleDateFormat sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN);
         value = new ArrayList<Long>(2);
-        List<?> vals = (List<?>) queryClause.getValue();
+        List<?> vals = (List<?>) indexQuery.getValue();
         try {
             for (Object obj : vals) {
                 if(obj instanceof String) {

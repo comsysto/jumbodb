@@ -20,7 +20,7 @@ public interface IndexStrategy {
     long getSize(File indexFolder);
     boolean isResponsibleFor(String chunkKey, String collection, String indexName);
     String getStrategyName();
-    Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit, boolean resultCacheEnabled);
+    Set<FileOffset> findFileOffsets(String chunkKey, String collection, String indexName, List<IndexQuery> indexQueries, int queryLimit, boolean resultCacheEnabled);
     Set<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);
     void onDataChanged(CollectionDefinition collectionDefinition);

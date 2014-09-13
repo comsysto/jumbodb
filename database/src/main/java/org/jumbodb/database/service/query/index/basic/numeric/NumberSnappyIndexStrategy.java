@@ -5,7 +5,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.jumbodb.database.service.query.FileOffset;
@@ -60,7 +59,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         return snappyChunksByFile;
     }
 
-    public Set<FileOffset> searchOffsetsByClauses(File indexFile, Set<QueryClause> clauses, int queryLimit, boolean resultCacheEnabled) throws IOException {
+    public Set<FileOffset> searchOffsetsByClauses(File indexFile, Set<IndexQuery> indexQueries, int queryLimit, boolean resultCacheEnabled) throws IOException {
         long start = System.currentTimeMillis();
         RandomAccessFile raf = null;
         List<FileOffset> result = new LinkedList<FileOffset>();
@@ -68,9 +67,9 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
             SnappyChunks snappyChunks = getSnappyChunksByFile(indexFile);
             raf = new RandomAccessFile(indexFile, "r");
 
-            for (QueryClause clause : clauses) {
+            for (IndexQuery indexQuery : indexQueries) {
                 if(queryLimit == -1 || queryLimit > result.size()) {
-                    result.addAll(findOffsetForClause(indexFile, raf, clause, snappyChunks, queryLimit, resultCacheEnabled));
+                    result.addAll(findOffsetForClause(indexFile, raf, indexQuery, snappyChunks, queryLimit, resultCacheEnabled));
                 }
             }
 
@@ -136,14 +135,14 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
     @Override
-    public Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit, boolean resultCacheEnabled) {
+    public Set<FileOffset> findFileOffsets(String chunkKey, String collection, String indexName, List<IndexQuery> indexQueries, int queryLimit, boolean resultCacheEnabled) {
         try {
-            MultiValueMap<File, QueryClause> groupedByIndexFile = groupByIndexFile(chunkKey, collection, query);
+            MultiValueMap<File, IndexQuery> groupedByIndexFile = groupByIndexFile(chunkKey, collection, indexName, indexQueries);
             List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
 
-            for (Map.Entry<File, List<QueryClause>> clausesPerIndexFile : groupedByIndexFile.entrySet()) {
+            for (Map.Entry<File, List<IndexQuery>> clausesPerIndexFile : groupedByIndexFile.entrySet()) {
                 tasks.add(indexFileExecutor.submit(new NumberSnappyIndexTask(this, clausesPerIndexFile.getKey(),
-                        new HashSet<QueryClause>(clausesPerIndexFile.getValue()), queryLimit, resultCacheEnabled)));
+                        new HashSet<IndexQuery>(clausesPerIndexFile.getValue()), queryLimit, resultCacheEnabled)));
             }
             Set<FileOffset> result = new HashSet<FileOffset>();
             for (Future<Set<FileOffset>> task : tasks) {
@@ -162,46 +161,52 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         return FileUtils.sizeOfDirectory(indexFolder);
     }
 
-    public MultiValueMap<File, QueryClause> groupByIndexFile(String chunkKey, String collection, IndexQuery query) {
-        List<IF> indexFiles = getIndexFiles(chunkKey, collection, query);
-        MultiValueMap<File, QueryClause> groupByIndexFile = new LinkedMultiValueMap<File, QueryClause>();
+    public MultiValueMap<File, IndexQuery> groupByIndexFile(String chunkKey, String collection, String indexName, List<IndexQuery> indexQueries) {
+        List<IF> indexFiles = getIndexFiles(chunkKey, collection, indexName);
+        MultiValueMap<File, IndexQuery> groupByIndexFile = new LinkedMultiValueMap<File, IndexQuery>();
         for (IF indexFile : indexFiles) {
-            for (QueryClause queryClause : query.getClauses()) {
-                if(acceptIndexFile(queryClause, indexFile)) {
-                    groupByIndexFile.add(indexFile.getIndexFile(), queryClause);
+            for (IndexQuery indexQuery : indexQueries) {
+                if(acceptIndexFile(indexQuery, indexFile)) {
+                    groupByIndexFile.add(indexFile.getIndexFile(), indexQuery);
                 }
             }
+//            for (QueryClause queryClause : indexQueries.getClauses()) {
+//                if(acceptIndexFile(queryClause, indexFile)) {
+//                    groupByIndexFile.add(indexFile.getIndexFile(), queryClause);
+//                }
+//            }
         }
         return groupByIndexFile;
     }
 
-    protected List<IF> getIndexFiles(String chunkKey, String collection, IndexQuery query) {
-        return indexFiles.get(new IndexKey(chunkKey, collection, query.getName()));
+    protected List<IF> getIndexFiles(String chunkKey, String collection, String indexName) {
+        return indexFiles.get(new IndexKey(chunkKey, collection, indexName));
     }
 
 
-    protected Set<FileOffset> findOffsetForClause(final File indexFile, final RandomAccessFile indexRaf, QueryClause clause, final SnappyChunks snappyChunks, int queryLimit, boolean resultCacheEnabled) throws IOException {
+    protected Set<FileOffset> findOffsetForClause(File indexFile, RandomAccessFile indexRaf, IndexQuery indexQuery,
+                                                  SnappyChunks snappyChunks, int queryLimit, boolean resultCacheEnabled) throws IOException {
         if(resultCacheEnabled) {
-            CacheIndexClause key = new CacheIndexClause(indexFile, clause.getQueryOperation(), clause.getValue());
+            CacheIndexClause key = new CacheIndexClause(indexFile, indexQuery.getQueryOperation(), indexQuery.getValue());
             Cache.ValueWrapper valueWrapper = indexQueryCache.get(key);
             if(valueWrapper != null) {
                 return (Set<FileOffset>) valueWrapper.get();
             }
-            Set<FileOffset> fileOffsets = getFileOffsets(indexFile, indexRaf, clause, snappyChunks, queryLimit);
+            Set<FileOffset> fileOffsets = getFileOffsets(indexFile, indexRaf, indexQuery, snappyChunks, queryLimit);
             indexQueryCache.put(key, fileOffsets);
             return fileOffsets;
 
         } else {
-            return getFileOffsets(indexFile, indexRaf, clause, snappyChunks, queryLimit);
+            return getFileOffsets(indexFile, indexRaf, indexQuery, snappyChunks, queryLimit);
         }
     }
 
-    private Set<FileOffset> getFileOffsets(final File indexFile, final RandomAccessFile indexRaf, QueryClause clause, final SnappyChunks snappyChunks, int queryLimit) throws IOException {
-        OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(clause.getQueryOperation());
+    private Set<FileOffset> getFileOffsets(final File indexFile, final RandomAccessFile indexRaf, IndexQuery indexQuery, final SnappyChunks snappyChunks, int queryLimit) throws IOException {
+        OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(indexQuery.getQueryOperation());
         if(integerOperationSearch == null) {
-            throw new UnsupportedOperationException("QueryOperation is not supported: " + clause.getQueryOperation());
+            throw new UnsupportedOperationException("QueryOperation is not supported: " + indexQuery.getQueryOperation());
         }
-        QueryValueRetriever queryValueRetriever = integerOperationSearch.getQueryValueRetriever(clause);
+        QueryValueRetriever queryValueRetriever = integerOperationSearch.getQueryValueRetriever(indexQuery);
         FileDataRetriever fileDataRetriever = new FileDataRetriever() {
 
             public byte[] getUncompressedBlock(long searchChunk) throws IOException {
@@ -261,7 +266,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                                 matchedChunks++;
                             }
                             if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
-                                result.add(new FileOffset(fileNameHash, offset, clause.getQueryClauses()));
+                                result.add(new FileOffset(fileNameHash, offset, indexQuery));
                             }
                             else if(integerOperationSearch.searchFinished(currentValue, queryValueRetriever, result.size() > 0)) {
 //                            else if(!result.isEmpty()) {
@@ -292,17 +297,16 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
                 IOUtils.closeQuietly(fis);
             }
         }
-        Set<FileOffset> result = Collections.emptySet();
-        return result;
+        return Collections.emptySet();
     }
 
 
-    public boolean acceptIndexFile(QueryClause queryClause, IF indexFile) {
-        OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(queryClause.getQueryOperation());
+    public boolean acceptIndexFile(IndexQuery indexQuery, IF indexFile) {
+        OperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(indexQuery.getQueryOperation());
         if(integerOperationSearch == null) {
-            throw new UnsupportedOperationException("QueryOperation is not supported: " + queryClause.getQueryOperation());
+            throw new UnsupportedOperationException("QueryOperation is not supported: " + indexQuery.getQueryOperation());
         }
-        return integerOperationSearch.acceptIndexFile(integerOperationSearch.getQueryValueRetriever(queryClause), indexFile);
+        return integerOperationSearch.acceptIndexFile(integerOperationSearch.getQueryValueRetriever(indexQuery), indexFile);
     }
 
     @Override

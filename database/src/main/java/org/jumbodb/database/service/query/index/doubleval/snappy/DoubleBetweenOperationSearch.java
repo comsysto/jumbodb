@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.FileDataRetriever;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
@@ -43,7 +44,7 @@ public class DoubleBetweenOperationSearch extends DoubleEqOperationSearch {
     }
 
     @Override
-    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new DoubleBetweenQueryValueRetriever(queryClause);
+    public QueryValueRetriever getQueryValueRetriever(IndexQuery indexQuery) {
+        return new DoubleBetweenQueryValueRetriever(indexQuery);
     }
 }

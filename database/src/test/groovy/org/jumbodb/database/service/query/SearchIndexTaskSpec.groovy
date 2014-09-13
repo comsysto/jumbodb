@@ -26,7 +26,7 @@ class SearchIndexTaskSpec extends Specification {
         when:
         def offsets = searchIndexTask.call()
         then:
-        1 * indexStrategyManagerMock.getStrategy("testCollection", "testChunkKey", "testIndex") >> indexStrategyMock
+        1 * indexStrategyManagerMock.getStrategy("testChunkKey", "testCollection", "testIndex") >> indexStrategyMock
         1 * indexStrategyMock.findFileOffsets("testCollection", "testChunkKey", query, 10, true) >> expectedOffset
         expectedOffset == offsets
     }
@@ -41,7 +41,7 @@ class SearchIndexTaskSpec extends Specification {
         when:
         searchIndexTask.call()
         then:
-        1 * indexStrategyManagerMock.getStrategy("testCollection", "testChunkKey", "otherIndex") >> null
+        1 * indexStrategyManagerMock.getStrategy("testChunkKey", "testCollection", "otherIndex") >> null
         thrown JumboIndexMissingException
     }
 }

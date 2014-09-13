@@ -8,6 +8,7 @@ import org.jumbodb.database.service.query.index.IndexStrategy;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -25,8 +26,9 @@ public class NotFoundIndexStrategy implements IndexStrategy {
     }
 
     @Override
-    public Set<FileOffset> findFileOffsets(String collection, String chunkKey, IndexQuery query, int queryLimit, boolean resultCacheEnabled) {
-        throw new IllegalStateException("No index strategy found for " + collection + " " + chunkKey);
+    public Set<FileOffset> findFileOffsets(String chunkKey, String collection, String indexName, List<IndexQuery> indexQueries,
+                                           int queryLimit, boolean resultCacheEnabled) {
+        throw new IllegalStateException("No index strategy found for " + chunkKey + " " + collection);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package org.jumbodb.database.service.queryutil
 
-import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.database.service.query.JumboSearcher
 import spock.lang.Specification
 
@@ -18,7 +17,7 @@ class QueryUtilServiceSpec extends Specification {
         { "indexQuery": [], "jsonQuery": [], "limit": 10}
         """
         when:
-        def queryResult = queryUtilService.findDocumentsByQuery("testCollection", query, 20)
+        def queryResult = queryUtilService.findDocumentsByJsonQuery("testCollection", query, 20)
         then:
         queryResult.getMessage() == null
         queryResult.getResults()[0] == [sample: "result", anumber: 4]
@@ -39,7 +38,7 @@ class QueryUtilServiceSpec extends Specification {
         { "indexQuery": [], "jsonQuery": [], "limit": 10}
         """
         when:
-        def queryResult = queryUtilService.findDocumentsByQuery("testCollection", query, 20)
+        def queryResult = queryUtilService.findDocumentsByJsonQuery("testCollection", query, 20)
         then:
         queryResult.getResults() == null
         queryResult.getMessage() == "java.io.IOException: test exception"

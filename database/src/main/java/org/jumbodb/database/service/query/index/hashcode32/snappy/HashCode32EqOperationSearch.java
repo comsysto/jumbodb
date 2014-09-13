@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.hashcode32.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
@@ -12,7 +13,7 @@ import org.jumbodb.database.service.query.index.integer.snappy.IntegerEqOperatio
 public class HashCode32EqOperationSearch extends IntegerEqOperationSearch {
 
     @Override
-    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new HashCode32QueryValueRetriever(queryClause);
+    public QueryValueRetriever getQueryValueRetriever(IndexQuery indexQuery) {
+        return new HashCode32QueryValueRetriever(indexQuery);
     }
 }

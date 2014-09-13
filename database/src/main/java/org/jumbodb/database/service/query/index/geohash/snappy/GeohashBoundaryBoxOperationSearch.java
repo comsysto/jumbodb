@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.geohash.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberEqOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
@@ -97,7 +98,7 @@ public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<G
     }
 
     @Override
-    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new GeohashQueryValueRetriever(queryClause);
+    public QueryValueRetriever getQueryValueRetriever(IndexQuery indexQuery) {
+        return new GeohashQueryValueRetriever(indexQuery);
     }
 }

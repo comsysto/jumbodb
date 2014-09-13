@@ -19,12 +19,7 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.cache.CacheManager;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -105,13 +100,18 @@ public class JumboSearcher {
             return Collections.emptyList();
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
-        for (IndexQuery indexQuery : searchQuery.getIndexQuery()) {
+//        for (IndexQuery indexQuery : searchQuery.getIndexQuery()) {
+        Map<String, List<IndexQuery>> indexGroupedByIndexName = groupByIndexName(searchQuery);
+        for (String indexName : indexGroupedByIndexName.keySet()) {
+            List<IndexQuery> indexQueries = indexGroupedByIndexName.get(indexName);
             Future<Set<FileOffset>> future = indexExecutor.submit(
-              new SearchIndexTask(deliveryChunkDefinition, indexQuery, indexStrategyManager, searchQuery.getLimit(),
-                searchQuery.isResultCacheEnabled()));
+                    new SearchIndexTask(deliveryChunkDefinition, indexName, indexQueries, indexStrategyManager, searchQuery.getLimit(),
+                            searchQuery.isResultCacheEnabled()));
             tasks.add(future);
             resultCallback.collect(new FutureCancelableTask(future));
         }
+
+//        }
 
         try {
             Collection<FileOffset> result = null;
@@ -124,12 +124,82 @@ public class JumboSearcher {
                     result.addAll(fileOffsets);
                 }
             }
-            return result;
+            return filterOffsets(result, searchQuery);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
             throw (RuntimeException) e.getCause();
         }
+    }
+
+    // CARSTEN unit test
+    // CARSTEN ab hier durchdebuggen und schauen ob das verhalten ok ist
+    private Collection<FileOffset> filterOffsets(Collection<FileOffset> fileOffsets, JumboQuery searchQuery) {
+        Collection<FileOffset> result = new HashSet<FileOffset>();
+        Map<IndexQuery, List<FileOffset>> groupByIndexQuery = groupByIndexQuery(result);
+
+        for (IndexQuery indexQuery : searchQuery.getIndexQuery()) {
+            result.addAll(getIndexesApplyAndLogic(indexQuery, fileOffsets, groupByIndexQuery));
+        }
+        return result;
+    }
+
+    private Set<FileOffset> getIndexesApplyAndLogic(IndexQuery indexQuery, Collection<FileOffset> fileOffsets, Map<IndexQuery, List<FileOffset>> groupByIndexQuery) {
+        Set<FileOffset> result = new HashSet<FileOffset>();
+        IndexQuery andIndex = indexQuery.getAndIndex();
+        List<FileOffset> fileOffset = groupByIndexQuery.get(indexQuery);
+        result.addAll(fileOffset);
+        if(andIndex != null) {
+            result.retainAll(getIndexesApplyAndLogic(andIndex, fileOffsets, groupByIndexQuery));
+        }
+        return result;
+    }
+
+    // CARSTEN unit test
+    private Map<IndexQuery, List<FileOffset>> groupByIndexQuery(Collection<FileOffset> fileOffsets) {
+        Map<IndexQuery, List<FileOffset>> result = new HashMap<IndexQuery, List<FileOffset>>();
+        for (FileOffset fileOffset : fileOffsets) {
+            List<FileOffset> tmpOffsets = result.get(fileOffset.getIndexQuery());
+            if(tmpOffsets == null) {
+                tmpOffsets = new LinkedList<FileOffset>();
+                result.put(fileOffset.getIndexQuery(), tmpOffsets);
+            }
+            tmpOffsets.add(fileOffset);
+        }
+        return result;
+    }
+
+    // CARSTEN unit test
+    private Map<String, List<IndexQuery>> groupByIndexName(JumboQuery searchQuery) {
+        Map<String, List<IndexQuery>> result = new HashMap<String, List<IndexQuery>>();
+        List<IndexQuery> allIndexQueries = getAllIndexQueries(searchQuery.getIndexQuery());
+        for (IndexQuery indexQuery : allIndexQueries) {
+            List<IndexQuery> indexQueries = result.get(indexQuery.getName());
+            if(indexQueries == null) {
+                indexQueries = new LinkedList<IndexQuery>();
+                result.put(indexQuery.getName(), indexQueries);
+            }
+            indexQueries.add(indexQuery);
+        }
+        return result;
+    }
+
+    private List<IndexQuery> getAllIndexQueries(List<IndexQuery> indexQuery) {
+        List<IndexQuery> result = new LinkedList<IndexQuery>();
+        for (IndexQuery query : indexQuery) {
+            result.addAll(getAllIndexQueries(query));
+        }
+        return result;
+    }
+
+    private List<IndexQuery> getAllIndexQueries(IndexQuery query) {
+        List<IndexQuery> result = new LinkedList<IndexQuery>();
+        result.add(query);
+        IndexQuery andIndex = query.getAndIndex();
+        if(andIndex != null) {
+            result.addAll(getAllIndexQueries(andIndex));
+        }
+        return result;
     }
 
     protected class SearchDeliveryChunkTask implements Callable<Integer> {
@@ -203,7 +273,7 @@ public class JumboSearcher {
     }
 
     public IndexStrategy getIndexStrategy(String chunkKey, String collection, String indexName) {
-        return indexStrategyManager.getStrategy(collection, chunkKey, indexName);
+        return indexStrategyManager.getStrategy(chunkKey, collection, indexName);
     }
 
     public IndexStrategy getIndexStrategy(String key) {

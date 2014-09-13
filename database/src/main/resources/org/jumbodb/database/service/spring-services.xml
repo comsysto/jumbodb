@@ -111,6 +111,8 @@
     <bean id="indexExecutor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" destroy-method="shutdown">
     </bean>
 
+    <bean id="jumboQueryConverterService" class="org.jumbodb.database.service.query.JumboQueryConverterService"></bean>
+
     <bean id="jumboSearcher" class="org.jumbodb.database.service.query.JumboSearcher" init-method="onInitialize">
         <property name="chunkExecutor" ref="chunkExecutor"/>
         <property name="indexExecutor" ref="indexExecutor"/>
@@ -123,6 +125,7 @@
     <bean id="queryServer" class="org.jumbodb.database.service.query.QueryServer" init-method="start" destroy-method="stop">
         <constructor-arg ref="jumboConfig"/>
         <constructor-arg ref="jumboSearcher"/>
+        <constructor-arg value="jumboQueryConverterService"/>
         <constructor-arg value="${jumbodb.query.timeout.seconds}"/>
     </bean>
 
@@ -150,6 +153,7 @@
 
     <bean id="queryUtilService" class="org.jumbodb.database.service.queryutil.QueryUtilService">
         <property name="jumboSearcher" ref="jumboSearcher"/>
+        <property name="jumboQueryConverterService" ref="jumboQueryConverterService"/>
     </bean>
 
 

@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.floatval.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
@@ -12,9 +13,9 @@ import java.util.List;
 public class FloatBetweenQueryValueRetriever implements QueryValueRetriever {
     private List<Float> value;
 
-    public FloatBetweenQueryValueRetriever(QueryClause queryClause) {
+    public FloatBetweenQueryValueRetriever(IndexQuery indexQuery) {
         value = new ArrayList<Float>(2);
-        List<? extends Number> vals = (List<? extends Number>) queryClause.getValue();
+        List<? extends Number> vals = (List<? extends Number>) indexQuery.getValue();
         for (Number val : vals) {
             value.add(val.floatValue());
         }

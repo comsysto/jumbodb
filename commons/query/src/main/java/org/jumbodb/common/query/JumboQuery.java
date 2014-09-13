@@ -47,9 +47,9 @@ public class JumboQuery {
         return this.indexQuery.add(indexComparision);
     }
 
-    public boolean addIndexQuery(String indexName, List<QueryClause> indexValues) {
-        return addIndexQuery(new IndexQuery(indexName, indexValues));
-    }
+//    public boolean addIndexQuery(String indexName, List<QueryClause> indexValues) {
+//        return addIndexQuery(new IndexQuery(indexName, indexValues));
+//    }
 
     public boolean addJsonQuery(JsonQuery jsonQuery) {
         return this.jsonQuery.add(jsonQuery);

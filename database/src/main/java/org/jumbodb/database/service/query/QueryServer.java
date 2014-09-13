@@ -26,14 +26,16 @@ public class QueryServer {
     private ExecutorService serverSocketExecutor = Executors.newCachedThreadPool();
     private ExecutorService queryTaskTimeoutExecutor = Executors.newCachedThreadPool();
     private JumboSearcher jumboSearcher;
+    private JumboQueryConverterService jumboQueryConverterService;
     private final ObjectMapper jsonMapper;
     private JumboConfiguration config;
     private  ServerSocket serverSocket;
     private long queryTimeoutInSeconds;
 
-    public QueryServer(JumboConfiguration config, JumboSearcher jumboSearcher, long queryTimeoutInSeconds) {
+    public QueryServer(JumboConfiguration config, JumboSearcher jumboSearcher, JumboQueryConverterService jumboQueryConverterService, long queryTimeoutInSeconds) {
         this.jumboSearcher = jumboSearcher;
         this.config = config;
+        this.jumboQueryConverterService = jumboQueryConverterService;
         this.queryTimeoutInSeconds = queryTimeoutInSeconds;
         this.jsonMapper = new ObjectMapper();
         this.jsonMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -51,7 +53,7 @@ public class QueryServer {
                     log.info("Configuration " + config.toString());
                     while (serverActive) {
                         Socket clientSocket = serverSocket.accept();
-                        serverSocketExecutor.submit(new QueryTask(clientSocket, id++, jumboSearcher, jsonMapper, queryTaskTimeoutExecutor, queryTimeoutInSeconds));
+                        serverSocketExecutor.submit(new QueryTask(clientSocket, id++, jumboSearcher, jumboQueryConverterService, jsonMapper, queryTaskTimeoutExecutor, queryTimeoutInSeconds));
                     }
                     log.info("QueryServer stopped");
                 } catch (Exception e) {

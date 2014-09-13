@@ -28,11 +28,11 @@ public class IndexStrategyManager {
     }
 
 
-    public String getStrategyKey(String collection, String chunkKey, String indexName) {
+    public String getStrategyKey(String chunkKey, String collection, String indexName) {
         return indexLocationsAndStrategies.get(new IndexKey(chunkKey, collection, indexName)).getStrategyName();
     }
 
-    public IndexStrategy getStrategy(String collection, String chunkKey, String indexName) {
+    public IndexStrategy getStrategy(String chunkKey, String collection, String indexName) {
         return indexLocationsAndStrategies.get(new IndexKey(chunkKey, collection, indexName));
     }
 

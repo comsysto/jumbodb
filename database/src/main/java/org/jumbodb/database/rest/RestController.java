@@ -13,6 +13,7 @@ import org.jumbodb.database.service.management.storage.dto.deliveries.ChunkedDel
 import org.jumbodb.database.service.management.storage.dto.maintenance.TemporaryFiles;
 import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilCollection;
 import org.jumbodb.database.service.queryutil.QueryUtilService;
+import org.jumbodb.database.service.queryutil.dto.ExplainResult;
 import org.jumbodb.database.service.queryutil.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,9 +26,7 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * User: carsten
- * Date: 4/3/13
- * Time: 11:45 AM
+ * @author Carsten Hufe
  */
 @Controller
 @RequestMapping(value = "/rest")
@@ -67,16 +66,37 @@ public class RestController {
         return storageManagement.findQueryableCollections();
     }
 
-    @RequestMapping(value = "/query/{collection}/", method = RequestMethod.POST)
+    @RequestMapping(value = "/query/json/", method = RequestMethod.POST)
     @ResponseBody
-    public QueryResult query(@PathVariable String collection, @RequestBody String query) {
-        return queryUtilService.findDocumentsByQuery(collection, query, -1);
+    public QueryResult queryJson(@RequestBody String query) {
+        return queryUtilService.findDocumentsByJsonQuery(query, -1);
     }
 
-    @RequestMapping(value = "/query/{collection}/defaultLimit", method = RequestMethod.POST)
+    @RequestMapping(value = "/query/json/defaultLimit", method = RequestMethod.POST)
     @ResponseBody
-    public QueryResult queryWithDefault(@PathVariable String collection, @RequestBody String query) {
-        return queryUtilService.findDocumentsByQuery(collection, query, 20);
+    public QueryResult queryJsonWithDefault(@RequestBody String query) {
+        return queryUtilService.findDocumentsByJsonQuery(query, 20);
+    }
+
+    // CARSTEN unit test
+    @RequestMapping(value = "/query/sql/", method = RequestMethod.POST)
+    @ResponseBody
+    public QueryResult querySql(@RequestBody String query) {
+        return queryUtilService.findDocumentsBySqlQuery(query, -1);
+    }
+
+    // CARSTEN unit test
+    @RequestMapping(value = "/query/sql/", method = RequestMethod.POST)
+    @ResponseBody
+    public ExplainResult explainSql(@RequestBody String query) {
+        return queryUtilService.explainSqlQuery(query);
+    }
+
+    // CARSTEN unit test
+    @RequestMapping(value = "/query/sql/defaultLimit", method = RequestMethod.POST)
+    @ResponseBody
+    public QueryResult querySqlWithDefault(@RequestBody String query) {
+        return queryUtilService.findDocumentsBySqlQuery(query, 20);
     }
 
 

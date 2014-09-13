@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.longval.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.FileDataRetriever;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
@@ -43,7 +44,7 @@ public class LongBetweenOperationSearch extends LongEqOperationSearch {
     }
 
     @Override
-    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new LongBetweenQueryValueRetriever(queryClause);
+    public QueryValueRetriever getQueryValueRetriever(IndexQuery indexQuery) {
+        return new LongBetweenQueryValueRetriever(indexQuery);
     }
 }

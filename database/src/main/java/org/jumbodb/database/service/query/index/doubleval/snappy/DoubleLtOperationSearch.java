@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberLtOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
@@ -24,7 +25,7 @@ public class DoubleLtOperationSearch extends NumberLtOperationSearch<Double, Dou
     }
 
     @Override
-    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new DoubleQueryValueRetriever(queryClause);
+    public QueryValueRetriever getQueryValueRetriever(IndexQuery indexQuery) {
+        return new DoubleQueryValueRetriever(indexQuery);
     }
 }

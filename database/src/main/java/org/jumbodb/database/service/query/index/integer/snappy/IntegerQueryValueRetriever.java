@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
@@ -9,8 +10,8 @@ import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetrieve
 public class IntegerQueryValueRetriever implements QueryValueRetriever {
     private Integer value;
 
-    public IntegerQueryValueRetriever(QueryClause queryClause) {
-        value = ((Number) queryClause.getValue()).intValue();
+    public IntegerQueryValueRetriever(IndexQuery indexQuery) {
+        value = ((Number) indexQuery.getValue()).intValue();
     }
 
     @Override

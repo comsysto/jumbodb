@@ -92,7 +92,7 @@ class RestControllerSpec extends Specification {
         when:
         controller.query("collection", "my_query") == returnValueMock
         then:
-        1 * queryUtilServiceMock.findDocumentsByQuery("collection", "my_query", -1) >> returnValueMock
+        1 * queryUtilServiceMock.findDocumentsByJsonQuery("collection", "my_query", -1) >> returnValueMock
     }
 
 

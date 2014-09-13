@@ -2,6 +2,7 @@ package org.jumbodb.database.service.query.index.hashcode64.snappy;
 
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.HashCode64;
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
@@ -15,8 +16,8 @@ import java.util.Date;
 public class HashCode64QueryValueRetriever implements QueryValueRetriever {
     private Long value;
 
-    public HashCode64QueryValueRetriever(QueryClause queryClause) {
-        Object objValue = queryClause.getValue();
+    public HashCode64QueryValueRetriever(IndexQuery indexQuery) {
+        Object objValue = indexQuery.getValue();
         if(objValue instanceof String) {
             value = HashCode64.hash((String) objValue);
         }

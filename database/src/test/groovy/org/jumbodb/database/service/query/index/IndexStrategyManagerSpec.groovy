@@ -33,7 +33,7 @@ class IndexStrategyManagerSpec extends Specification {
         strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> true
         indexStrategyManager.onInitialize(cd)
         when:
-        def strategy = indexStrategyManager.getStrategy("testCollection", "testChunkKey", "indexName")
+        def strategy = indexStrategyManager.getStrategy("testChunkKey", "testCollection", "indexName")
         then:
         strategy == strategyMock
     }
@@ -49,7 +49,7 @@ class IndexStrategyManagerSpec extends Specification {
         strategyMock.getStrategyName() >> "testStrategy"
         indexStrategyManager.onInitialize(cd)
         when:
-        def strategyKey = indexStrategyManager.getStrategyKey("testCollection", "testChunkKey", "indexName")
+        def strategyKey = indexStrategyManager.getStrategyKey("testChunkKey", "testCollection", "indexName")
         then:
         strategyKey == "testStrategy"
     }

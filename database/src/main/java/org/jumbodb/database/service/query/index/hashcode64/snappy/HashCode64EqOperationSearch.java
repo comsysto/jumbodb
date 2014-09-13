@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.hashcode64.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
@@ -12,7 +13,7 @@ import org.jumbodb.database.service.query.index.longval.snappy.LongEqOperationSe
 public class HashCode64EqOperationSearch extends LongEqOperationSearch {
 
     @Override
-    public QueryValueRetriever getQueryValueRetriever(QueryClause queryClause) {
-        return new HashCode64QueryValueRetriever(queryClause);
+    public QueryValueRetriever getQueryValueRetriever(IndexQuery indexQuery) {
+        return new HashCode64QueryValueRetriever(indexQuery);
     }
 }

@@ -4,6 +4,7 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
@@ -136,7 +137,8 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 if(resultCacheEnabled) {
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), dataSetFromOffsetsGroup);
                 }
-                if (matchingFilter(dataSetFromOffsetsGroup, offset.getJsonQueries())) {
+                IndexQuery indexQuery = offset.getIndexQuery();
+                if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getAndJson())) {
                     if(!resultCallback.needsMore(searchQuery)) {
                         return;
                     }
@@ -196,7 +198,8 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             Cache.ValueWrapper valueWrapper = datasetsByOffsetsCache.get(new CacheFileOffset(file, offset.getOffset()));
             if(valueWrapper != null) {
                 byte[] dataSetFromOffsetsGroup = (byte[]) valueWrapper.get();
-                if (matchingFilter(dataSetFromOffsetsGroup, offset.getJsonQueries())) {
+                IndexQuery indexQuery = offset.getIndexQuery();
+                if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getAndJson())) {
                     if(!resultCallback.needsMore(searchQuery)) {
                         return Collections.emptyList(); // return empty list enough found!
                     }
@@ -265,6 +268,12 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             result += snappyChunks.get(i) + 4; // 4 byte for length of chunk
         }
         return result + 16;
+    }
+    private boolean matchingFilter(byte[] s, JsonQuery jsonQuery) throws ParseException, IOException {
+        if(jsonQuery == null) {
+            return true;
+        }
+        return matchingFilter(s, Arrays.asList(jsonQuery));
     }
 
     private boolean matchingFilter(byte[] s, List<JsonQuery> jsonQueries) throws ParseException, IOException {

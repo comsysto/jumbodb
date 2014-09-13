@@ -4,13 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.service.query.CancelableTask;
+import org.jumbodb.database.service.query.JumboQueryConverterService;
 import org.jumbodb.database.service.query.JumboSearcher;
 import org.jumbodb.database.service.query.ResultCallback;
+import org.jumbodb.database.service.queryutil.dto.ExplainResult;
 import org.jumbodb.database.service.queryutil.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Required;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,7 @@ import java.util.concurrent.*;
  */
 public class QueryUtilService {
     private JumboSearcher jumboSearcher;
+    private JumboQueryConverterService jumboQueryConverterService;
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
     @PreDestroy
@@ -28,7 +32,36 @@ public class QueryUtilService {
         executorService.shutdownNow();
     }
 
-    public QueryResult findDocumentsByQuery(final String collection, final String query, final Integer defaultLimit) {
+    public QueryResult findDocumentsByJsonQuery(final String query, final Integer defaultLimit) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JumboQuery jumboQuery = mapper.readValue(query, JumboQuery.class);
+            if(jumboQuery.getLimit() == -1) {
+                jumboQuery.setLimit(defaultLimit);
+            }
+            return findDocumentsByQuery(jumboQuery);
+        } catch (IOException e) {
+            throw new UnhandledException(e);
+
+        }
+    }
+
+    // CARSTEN unit test
+    public QueryResult findDocumentsBySqlQuery(final String sql, final Integer defaultLimit) {
+        JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(sql);
+        if(jumboQuery.getLimit() == -1) {
+            jumboQuery.setLimit(defaultLimit);
+        }
+        return findDocumentsByQuery(jumboQuery);
+    }
+
+    // CARSTEN unit test
+    public ExplainResult explainSqlQuery(final String sql) {
+        JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(sql);
+        return new ExplainResult(jumboQuery, Arrays.asList("add the executions")); // CARSTEN implement add the executions with chunk, version and size
+    }
+
+    private QueryResult findDocumentsByQuery(final JumboQuery jumboQuery) {
         final ObjectMapper mapper = new ObjectMapper();
         long start = System.currentTimeMillis();
         final List<Map<String, Object>> result = new LinkedList<Map<String, Object>>();
@@ -37,11 +70,6 @@ public class QueryUtilService {
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                try {
-                    final JumboQuery jumboQuery = mapper.readValue(query, JumboQuery.class);
-                    if(jumboQuery.getLimit() == -1) {
-                        jumboQuery.setLimit(defaultLimit);
-                    }
                     jumboSearcher.findResultAndWriteIntoCallback(jumboQuery, new ResultCallback() {
                         @Override
                         public void writeResult(byte[] dataSet) throws IOException {
@@ -61,10 +89,6 @@ public class QueryUtilService {
                         }
                     });
 
-
-                } catch (IOException e) {
-                    throw new UnhandledException(e);
-                }
             }
         };
         Future<?> submit = executorService.submit(runnable);
@@ -93,5 +117,10 @@ public class QueryUtilService {
     @Required
     public void setJumboSearcher(JumboSearcher jumboSearcher) {
         this.jumboSearcher = jumboSearcher;
+    }
+
+    @Required
+    public void setJumboQueryConverterService(JumboQueryConverterService jumboQueryConverterService) {
+        this.jumboQueryConverterService = jumboQueryConverterService;
     }
 }

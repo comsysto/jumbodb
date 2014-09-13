@@ -21,6 +21,7 @@ public class QueryTask implements Runnable {
     private Socket clientSocket;
     private int clientID = -1;
     private JumboSearcher jumboSearcher;
+    private JumboQueryConverterService jumboQueryConverterService;
     private final ObjectMapper jsonMapper;
     private ExecutorService queryTaskTimeoutExecutor;
     private long queryTimeoutInSeconds;
@@ -28,10 +29,12 @@ public class QueryTask implements Runnable {
     private AtomicInteger numberOfResults = new AtomicInteger();
     private LinkedBlockingQueue<CancelableTask> cancelableTasks = new LinkedBlockingQueue<CancelableTask>();
 
-    public QueryTask(Socket s, int clientID, JumboSearcher jumboSearcher, ObjectMapper jsonMapper, ExecutorService queryTaskTimeoutExecutor, long queryTimeoutInSeconds) {
+    public QueryTask(Socket s, int clientID, JumboSearcher jumboSearcher, JumboQueryConverterService jumboQueryConverterService,
+                     ObjectMapper jsonMapper, ExecutorService queryTaskTimeoutExecutor, long queryTimeoutInSeconds) {
         clientSocket = s;
         this.clientID = clientID;
         this.jumboSearcher = jumboSearcher;
+        this.jumboQueryConverterService = jumboQueryConverterService;
         this.jsonMapper = jsonMapper;
         this.queryTaskTimeoutExecutor = queryTaskTimeoutExecutor;
         this.queryTimeoutInSeconds = queryTimeoutInSeconds;
@@ -77,8 +80,29 @@ public class QueryTask implements Runnable {
                 // CARSTEN unit test
                 @Override
                 public int onSqlQuery(byte[] query, DatabaseQuerySession.ResultWriter resultWriter) {
-                    // CARSTEN implement me
-                    return 0;
+                    try {
+                        JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(new String(query, "UTF-8"));
+                        Future<Integer> submit = queryTaskTimeoutExecutor.submit(new QueryTimeoutTask(jumboQuery, resultWriter));
+                        return submit.get(queryTimeoutInSeconds, TimeUnit.SECONDS);
+                    } catch (UnsupportedEncodingException e) {
+                        throw new JumboUnknownException(e.getMessage());
+                    } catch (InterruptedException e) {
+                        cancelAllRunningTasks();
+                        logQuery(e.getMessage(), query);
+                        throw new JumboUnknownException(e.getMessage());
+                    } catch (ExecutionException e) {
+                        cancelAllRunningTasks();
+                        Throwable cause = e.getCause();
+                        logQuery(cause.getMessage(), query);
+                        if(cause instanceof RuntimeException) {
+                            throw (RuntimeException)cause;
+                        }
+                        throw new JumboUnknownException(cause.getMessage());
+                    } catch (TimeoutException e) {
+                        logQuery("Timed out after: " + queryTimeoutInSeconds + " seconds.", query);
+                        cancelAllRunningTasks();
+                        throw new JumboTimeoutException("Timed out after: " + queryTimeoutInSeconds + " seconds.");
+                    }
                 }
             });
         } catch (IOException e) {

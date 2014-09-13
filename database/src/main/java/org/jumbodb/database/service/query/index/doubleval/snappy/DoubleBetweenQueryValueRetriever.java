@@ -1,5 +1,6 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy;
 
+import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
@@ -12,9 +13,9 @@ import java.util.List;
 public class DoubleBetweenQueryValueRetriever implements QueryValueRetriever {
     private List<Double> value;
 
-    public DoubleBetweenQueryValueRetriever(QueryClause queryClause) {
+    public DoubleBetweenQueryValueRetriever(IndexQuery indexQuery) {
         value = new ArrayList<Double>(2);
-        List<? extends Number> vals = (List<? extends Number>) queryClause.getValue();
+        List<? extends Number> vals = (List<? extends Number>) indexQuery.getValue();
         for (Number val : vals) {
             value.add(val.doubleValue());
         }

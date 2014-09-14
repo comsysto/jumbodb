@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.longval.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import spock.lang.Specification
@@ -15,8 +15,8 @@ class LongLtOperationSearchSpec extends Specification {
     @Unroll
     def "less match #value > #testValue == #isLess"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.LT, value)
-        operation.matching(testValue, operation.getQueryValueRetriever(queryClause)) == isLess
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.LT, value)
+        operation.matching(testValue, operation.getQueryValueRetriever(indexQuery)) == isLess
         where:
         value | testValue | isLess
         2l    | 2l        | false
@@ -32,7 +32,7 @@ class LongLtOperationSearchSpec extends Specification {
         def retriever = LongDataGeneration.createFileDataRetriever(file, snappyChunks)
 
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:
@@ -54,9 +54,9 @@ class LongLtOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile value=#queryValue indexFileFrom=#indexFileFrom indexFileTo=#indexFileTo"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.LT, queryValue)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.LT, queryValue)
         def indexFile = new NumberSnappyIndexFile<Long>(indexFileFrom, indexFileTo, Mock(File))
-        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        operation.acceptIndexFile(operation.getQueryValueRetriever(indexQuery), indexFile) == accept
         where:
         queryValue | indexFileFrom | indexFileTo | accept
         0l         | 1l            | 11l         | false
@@ -69,7 +69,7 @@ class LongLtOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, 5l))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.LT, 5l))
         then:
         valueRetriever instanceof LongQueryValueRetriever
     }

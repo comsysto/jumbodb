@@ -1,9 +1,7 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy
 
-import org.apache.commons.lang.UnhandledException
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeBetweenQueryValueRetriever
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -14,7 +12,7 @@ class DoubleBetweenQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify double parsing #queryValue"() {
         expect:
-        def retriever = new DoubleBetweenQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, queryValue))
+        def retriever = new DoubleBetweenQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, queryValue))
         retriever.getValue() == converted
         where:
         queryValue     | converted
@@ -24,7 +22,7 @@ class DoubleBetweenQueryValueRetrieverSpec extends Specification {
 
     def "expect exception on bullshit string"() {
         when:
-        new DoubleBetweenQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, ["bullshit", "andso"]))
+        new DoubleBetweenQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, ["bullshit", "andso"]))
         then:
         thrown ClassCastException
     }

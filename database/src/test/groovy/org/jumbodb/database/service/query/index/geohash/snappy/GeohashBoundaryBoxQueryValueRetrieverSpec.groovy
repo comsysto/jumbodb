@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.geohash.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -12,7 +12,7 @@ class GeohashBoundaryBoxQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify boundary box parsing #queryValue"() {
         expect:
-        def retriever = new GeohashQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, queryValue))
+        def retriever = new GeohashQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GEO_BOUNDARY_BOX, queryValue))
         def container = retriever.getValue()
         container instanceof GeohashContainer
         def value = container.getSplittedBoxes()[0] // upperLeftBox
@@ -26,7 +26,7 @@ class GeohashBoundaryBoxQueryValueRetrieverSpec extends Specification {
 
     def "expect exception on bullshit string"() {
         when:
-        new GeohashQueryValueRetriever(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, ["bullshit", "andso"]))
+        new GeohashQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GEO_BOUNDARY_BOX, ["bullshit", "andso"]))
         then:
         thrown ClassCastException
     }

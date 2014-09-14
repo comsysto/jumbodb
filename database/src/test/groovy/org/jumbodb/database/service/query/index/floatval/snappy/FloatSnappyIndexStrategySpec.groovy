@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.index.floatval.snappy
 
 import org.jumbodb.common.query.IndexQuery
-import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.definition.CollectionDefinition
@@ -119,18 +118,17 @@ class FloatSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         setupCache(strategy)
         strategy.onInitialize(cd)
-        def queryClause = new QueryClause(QueryOperation.EQ, 12345f)
-        def query = new IndexQuery("testIndex", [queryClause])
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345f)
         when:
-        def groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", query)
+        def groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", "testIndex", [query])
         def keys = groupedByIndex.keySet()
         def fileKey = keys.iterator().next()
         then:
         1 * operationMock.acceptIndexFile(_, _) >> true
         keys.size() == 1
-        groupedByIndex.get(fileKey).get(0) == queryClause
+        groupedByIndex.get(fileKey).get(0) == query
         when:
-        groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", query)
+        groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", "testIndex", [query])
         keys = groupedByIndex.keySet()
         then:
         1 * operationMock.acceptIndexFile(_, _) >> false
@@ -151,18 +149,17 @@ class FloatSnappyIndexStrategySpec extends Specification {
         strategy.setIndexFileExecutor(executorMock)
         setupCache(strategy)
         strategy.onInitialize(cd)
-        def queryClause = new QueryClause(QueryOperation.EQ, 12345f)
-        def query = new IndexQuery("testIndex", [queryClause])
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345f)
         def expectedOffsets = ([12345l, 67890l] as Set)
         when:
-        def fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
+        def fileOffsets = strategy.findFileOffsets("testChunkKey", "testCollection", "testIndex", [query], 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> true
         1 * futureMock.get() >> expectedOffsets
         1 * executorMock.submit(_) >> futureMock
         fileOffsets == expectedOffsets
         when:
-        fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
+        fileOffsets = strategy.findFileOffsets("testChunkKey", "testCollection", "testIndex", [query], 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> false
         0 * executorMock.submit(_) >> futureMock
@@ -178,14 +175,14 @@ class FloatSnappyIndexStrategySpec extends Specification {
         setupCache(strategy)
         def indexFile = FloatDataGeneration.createFile()
         FloatDataGeneration.createIndexFile(indexFile)
-        def queryClause1 = new QueryClause(QueryOperation.EQ, 1000f)
-        def queryClause2 = new QueryClause(QueryOperation.EQ, 3000f)
-        def queryClause3 = new QueryClause(QueryOperation.EQ, 3000.33f) // should not exist, so no result for it
-        def queryClause4 = new QueryClause(QueryOperation.EQ, 5000f)
+        def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000f)
+        def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000f)
+        def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 3000.33f) // should not exist, so no result for it
+        def query4 = new IndexQuery("testIndex", QueryOperation.EQ, 5000f)
         when:
-        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5, true)
+        def fileOffsets = strategy.searchOffsetsByIndexQueries(indexFile, ([query1, query2, query3, query4] as Set), 5, true)
         then:
-        fileOffsets == ([new FileOffset(50000, 101000l, []), new FileOffset(50000, 103000l, []), new FileOffset(50000, 105000l, [])] as Set)
+        fileOffsets == ([new FileOffset(50000, 101000l, query1), new FileOffset(50000, 103000l, query2), new FileOffset(50000, 105000l, query4)] as Set)
         cleanup:
         indexFile.delete()
     }
@@ -199,13 +196,13 @@ class FloatSnappyIndexStrategySpec extends Specification {
         def snappyChunks = FloatDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
-        def queryClause = new QueryClause(QueryOperation.EQ, 3333f)
-        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3333f)
+        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
         then:
-        fileOffsets == ([new FileOffset(50000, 103333l, [])] as Set)
+        fileOffsets == ([new FileOffset(50000, 103333l, indexQuery)] as Set)
         when:
-        queryClause = new QueryClause(QueryOperation.EQ, 3.3f) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
+        indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3.3f) // should not exist, so no result for it
+        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -294,7 +291,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         when:
         strategy.onDataChanged(cd)
-        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", new IndexQuery("testIndex", []))
+        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", "testIndex")
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
@@ -315,7 +312,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         when:
         strategy.onDataChanged(cd)
-        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", new IndexQuery("testIndex", []))
+        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", "testIndex")
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
@@ -334,7 +331,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
 
     def createCollectionDefinition(indexFolder) {
         def index = new IndexDefinition("testIndex", indexFolder, "FLOAT_SNAPPY_V1")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [index], [:], "FLOAT_SNAPPY_V1")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "FLOAT_SNAPPY_V1")]]
         new CollectionDefinition(cdMap)
     }
 
@@ -343,20 +340,20 @@ class FloatSnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(FloatEqOperationSearch)
         def numberSnappyIndexFile = Mock(NumberSnappyIndexFile)
-        def clause = new QueryClause(QueryOperation.EQ, 5f)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 5f)
         def valueRetriever = Mock(QueryValueRetriever)
         def strategy = new FloatSnappyIndexStrategy()
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         when:
-        def result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        def result = strategy.acceptIndexFile(indexQuery, numberSnappyIndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
+        1 * operationMock.getQueryValueRetriever(indexQuery) >> valueRetriever
         1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> true
         result == true
         when:
-        result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        result = strategy.acceptIndexFile(indexQuery, numberSnappyIndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
+        1 * operationMock.getQueryValueRetriever(indexQuery) >> valueRetriever
         1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> false
         result == false
     }
@@ -371,7 +368,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
             }
         }
         when:
-        strategy.acceptIndexFile(new QueryClause(QueryOperation.EQ, 5f), Mock(NumberSnappyIndexFile))
+        strategy.acceptIndexFile(new IndexQuery("testIndex", QueryOperation.EQ, 5f), Mock(NumberSnappyIndexFile))
         then:
         thrown UnsupportedOperationException
     }

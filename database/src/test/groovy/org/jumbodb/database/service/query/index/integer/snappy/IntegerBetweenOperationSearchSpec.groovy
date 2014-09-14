@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.integer.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import spock.lang.Specification
@@ -15,9 +15,9 @@ class IntegerBetweenOperationSearchSpec extends Specification {
     @Unroll
     def "between match #from < #testValue > #to == #isBetween"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.BETWEEN, Arrays.asList(from, to))
 
-        operation.matching(testValue, operation.getQueryValueRetriever(queryClause)) == isBetween
+        operation.matching(testValue, operation.getQueryValueRetriever(indexQuery)) == isBetween
         where:
         from | to | testValue | isBetween
         1    | 5  | 2         | true
@@ -35,7 +35,7 @@ class IntegerBetweenOperationSearchSpec extends Specification {
         def snappyChunks = IntegerDataGeneration.createIndexFile(file)
         def retriever = IntegerDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchValue, 20000l])), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, [searchValue, 20000l])), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:
@@ -57,9 +57,9 @@ class IntegerBetweenOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile from=#indexFileFrom to=#indexFileTo "() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(queryFrom, queryTo))
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.BETWEEN, Arrays.asList(queryFrom, queryTo))
         def indexFile = new NumberSnappyIndexFile<Integer>(indexFileFrom, indexFileTo, Mock(File));
-        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        operation.acceptIndexFile(operation.getQueryValueRetriever(indexQuery), indexFile) == accept
         where:
         queryFrom | queryTo | indexFileFrom | indexFileTo | accept
         1         | 10      | 2             | 9           | true
@@ -71,7 +71,7 @@ class IntegerBetweenOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, []))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, []))
         then:
         valueRetriever instanceof IntegerBetweenQueryValueRetriever
     }

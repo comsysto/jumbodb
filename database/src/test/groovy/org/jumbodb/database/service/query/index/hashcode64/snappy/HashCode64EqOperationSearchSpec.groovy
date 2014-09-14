@@ -1,14 +1,9 @@
 package org.jumbodb.database.service.query.index.hashcode64.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
-import org.jumbodb.database.service.query.index.integer.snappy.IntegerDataGeneration
-import org.jumbodb.database.service.query.index.longval.snappy.LongDataGeneration
-import org.jumbodb.database.service.query.index.longval.snappy.LongEqOperationSearch
-import org.jumbodb.database.service.query.index.longval.snappy.LongQueryValueRetriever
-import org.jumbodb.database.service.query.index.longval.snappy.LongSnappyIndexStrategy
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -81,7 +76,7 @@ class HashCode64EqOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, 5l))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, 5l))
         then:
         valueRetriever instanceof HashCode64QueryValueRetriever
     }

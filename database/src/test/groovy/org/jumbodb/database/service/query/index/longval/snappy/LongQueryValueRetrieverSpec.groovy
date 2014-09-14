@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.longval.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -12,7 +12,7 @@ class LongQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify long parsing #queryValue"() {
         expect:
-        def retriever = new LongQueryValueRetriever(new QueryClause(QueryOperation.EQ, queryValue))
+        def retriever = new LongQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, queryValue))
         retriever.getValue() == converted
         where:
         queryValue | converted
@@ -22,7 +22,7 @@ class LongQueryValueRetrieverSpec extends Specification {
 
     def "expect exception on bullshit string"() {
         when:
-        new LongQueryValueRetriever(new QueryClause(QueryOperation.EQ, "bullshit"))
+        new LongQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, "bullshit"))
         then:
         thrown ClassCastException
     }

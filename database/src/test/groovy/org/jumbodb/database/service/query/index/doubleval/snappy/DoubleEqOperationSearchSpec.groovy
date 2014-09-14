@@ -1,16 +1,10 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeDataGeneration
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeEqOperationSearch
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeQueryValueRetriever
-import org.jumbodb.database.service.query.index.datetime.snappy.DateTimeSnappyIndexStrategy
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import java.text.SimpleDateFormat
 
 /**
  * @author Carsten Hufe
@@ -21,8 +15,8 @@ class DoubleEqOperationSearchSpec extends Specification {
     @Unroll
     def "equal match #value == #testValue == #isEqual"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.EQ, value)
-        operation.matching(testValue, operation.getQueryValueRetriever(queryClause)) == isEqual
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, value)
+        operation.matching(testValue, operation.getQueryValueRetriever(indexQuery)) == isEqual
         where:
         value    | testValue  | isEqual
         33.333d  | 33.333d    | true
@@ -38,7 +32,7 @@ class DoubleEqOperationSearchSpec extends Specification {
         def snappyChunks = DoubleDataGeneration.createIndexFile(file)
         def retriever = DoubleDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, searchValue)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:
@@ -60,9 +54,9 @@ class DoubleEqOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile value=#queryValue indexFileFrom=#indexFileFrom indexFileTo=#indexFileTo"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.EQ, queryValue)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, queryValue)
         def indexFile = new NumberSnappyIndexFile<Double>(indexFileFrom, indexFileTo, Mock(File));
-        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        operation.acceptIndexFile(operation.getQueryValueRetriever(indexQuery), indexFile) == accept
         where:
         queryValue | indexFileFrom | indexFileTo | accept
         0.99d      | 1d            | 11d         | false
@@ -75,7 +69,7 @@ class DoubleEqOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, 5d))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, 5d))
         then:
         valueRetriever instanceof DoubleQueryValueRetriever
     }

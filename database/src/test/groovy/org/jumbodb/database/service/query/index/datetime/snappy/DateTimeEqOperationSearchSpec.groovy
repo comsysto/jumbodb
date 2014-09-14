@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.datetime.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import spock.lang.Specification
@@ -17,10 +17,10 @@ class DateTimeEqOperationSearchSpec extends Specification {
     @Unroll
     def "equal match #value == #testValue == #isEqual"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.EQ, value)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, value)
         def sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN)
 
-        operation.matching(sdf.parse(testValue).getTime(), operation.getQueryValueRetriever(queryClause)) == isEqual
+        operation.matching(sdf.parse(testValue).getTime(), operation.getQueryValueRetriever(indexQuery)) == isEqual
         where:
         value                 | testValue             | isEqual
         "2012-10-01 12:00:00" | "2012-10-01 12:00:00" | true
@@ -36,7 +36,7 @@ class DateTimeEqOperationSearchSpec extends Specification {
         def snappyChunks = DateTimeDataGeneration.createIndexFile(file)
         def retriever = DateTimeDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, searchDate)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:
@@ -56,10 +56,10 @@ class DateTimeEqOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile value=#queryValue indexFileFrom=#indexFileFrom indexFileTo=#indexFileTo"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.EQ, queryValue)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, queryValue)
         def sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN)
         def indexFile = new NumberSnappyIndexFile<Long>(sdf.parse(indexFileFrom).getTime(), sdf.parse(indexFileTo).getTime(), Mock(File));
-        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        operation.acceptIndexFile(operation.getQueryValueRetriever(indexQuery), indexFile) == accept
         where:
         queryValue            | indexFileFrom         | indexFileTo           | accept
         "2012-10-01 12:00:00" | "2012-11-01 12:00:01" | "2013-10-01 11:59:59" | false
@@ -72,7 +72,7 @@ class DateTimeEqOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, "2013-10-01 11:59:59"))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, "2013-10-01 11:59:59"))
         then:
         valueRetriever instanceof DateTimeQueryValueRetriever
     }

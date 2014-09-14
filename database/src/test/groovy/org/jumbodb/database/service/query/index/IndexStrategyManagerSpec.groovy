@@ -28,7 +28,7 @@ class IndexStrategyManagerSpec extends Specification {
         def indexStrategyManager = new IndexStrategyManager()
         def strategyMock = Mock(IndexStrategy)
         indexStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> true
         indexStrategyManager.onInitialize(cd)
@@ -43,7 +43,7 @@ class IndexStrategyManagerSpec extends Specification {
         def indexStrategyManager = new IndexStrategyManager()
         def strategyMock = Mock(IndexStrategy)
         indexStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> true
         strategyMock.getStrategyName() >> "testStrategy"
@@ -60,7 +60,7 @@ class IndexStrategyManagerSpec extends Specification {
         def strategyMock = Mock(IndexStrategy)
         strategyMock.isResponsibleFor("testChunkKey", "testCollection", "indexName") >> true
         indexStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         when:
         def result = indexStrategyManager.buildIndexStrategies(cd)
@@ -86,7 +86,7 @@ class IndexStrategyManagerSpec extends Specification {
         def indexStrategyManager = new IndexStrategyManager()
         def strategyMock = Mock(IndexStrategy)
         indexStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         when:
         indexStrategyManager.onInitialize(cd)
@@ -100,7 +100,7 @@ class IndexStrategyManagerSpec extends Specification {
         def indexStrategyManager = new IndexStrategyManager()
         def strategyMock = Mock(IndexStrategy)
         indexStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         when:
         indexStrategyManager.onInitialize(cd)
@@ -114,7 +114,7 @@ class IndexStrategyManagerSpec extends Specification {
         def indexStrategyManager = new IndexStrategyManager()
         def strategyMock = Mock(IndexStrategy)
         indexStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [new IndexDefinition("indexName", Mock(File), "STRATEGY")], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         when:
         indexStrategyManager.onDataChanged(cd)

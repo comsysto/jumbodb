@@ -1,9 +1,8 @@
 package org.jumbodb.database.service.query.index.datetime.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
-import org.jumbodb.database.service.query.index.doubleval.snappy.DoubleDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -18,10 +17,10 @@ class DateTimeBetweenOperationSearchSpec extends Specification {
     @Unroll
     def "between match #from < #testValue > #to == #isBetween"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.BETWEEN, Arrays.asList(from, to))
         def sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN)
 
-        operation.matching(sdf.parse(testValue).getTime(), operation.getQueryValueRetriever(queryClause)) == isBetween
+        operation.matching(sdf.parse(testValue).getTime(), operation.getQueryValueRetriever(indexQuery)) == isBetween
         where:
         from                  | to                    | testValue             | isBetween
         "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-11-01 12:00:00" | true
@@ -39,7 +38,7 @@ class DateTimeBetweenOperationSearchSpec extends Specification {
         def snappyChunks = DateTimeDataGeneration.createIndexFile(file)
         def retriever = DateTimeDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, [searchDate, "2013-01-01 12:00:00"])), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, [searchDate, "2013-01-01 12:00:00"])), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:
@@ -59,10 +58,10 @@ class DateTimeBetweenOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile from=#indexFileFrom to=#indexFileTo "() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(queryFrom, queryTo))
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.BETWEEN, Arrays.asList(queryFrom, queryTo))
         def sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN)
         def indexFile = new NumberSnappyIndexFile<Long>(sdf.parse(indexFileFrom).getTime(), sdf.parse(indexFileTo).getTime(), Mock(File));
-        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        operation.acceptIndexFile(operation.getQueryValueRetriever(indexQuery), indexFile) == accept
         where:
         queryFrom             | queryTo               | indexFileFrom         | indexFileTo           | accept
         "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-11-01 12:00:01" | "2013-10-01 11:59:59" | true
@@ -73,7 +72,7 @@ class DateTimeBetweenOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, []))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, []))
         then:
         valueRetriever instanceof DateTimeBetweenQueryValueRetriever
     }

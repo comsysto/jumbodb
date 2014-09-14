@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import spock.lang.Specification
@@ -15,8 +15,8 @@ class DoubleGtOperationSearchSpec extends Specification {
     @Unroll
     def "greater match #value < #testValue == #isGreater"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.GT, value)
-        operation.matching(testValue, operation.getQueryValueRetriever(queryClause)) == isGreater
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.GT, value)
+        operation.matching(testValue, operation.getQueryValueRetriever(indexQuery)) == isGreater
         where:
         value | testValue | isGreater
         5d    | 5d        | false
@@ -31,7 +31,7 @@ class DoubleGtOperationSearchSpec extends Specification {
         def snappyChunks = DoubleDataGeneration.createIndexFile(file)
         def retriever = DoubleDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.GT, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT, searchValue)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:
@@ -53,7 +53,7 @@ class DoubleGtOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile value=#queryValue indexFileFrom=#indexFileFrom indexFileTo=#indexFileTo"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.GT, queryValue)
+        def queryClause = new IndexQuery("testIndex", QueryOperation.GT, queryValue)
         def indexFile = new NumberSnappyIndexFile<Double>(indexFileFrom, indexFileTo, Mock(File));
         operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
         where:
@@ -68,7 +68,7 @@ class DoubleGtOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.GT, 5d))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT, 5d))
         then:
         valueRetriever instanceof DoubleQueryValueRetriever
     }

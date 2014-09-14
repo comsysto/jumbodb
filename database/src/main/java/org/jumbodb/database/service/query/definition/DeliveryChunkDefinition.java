@@ -11,7 +11,7 @@ public class DeliveryChunkDefinition {
     private Map<Integer, File> dataFiles;
     private String dataStrategy;
 
-    public DeliveryChunkDefinition(String collection, String chunkKey, List<IndexDefinition> indexes, Map<Integer, File> dataFiles, String dataStrategy) {
+    public DeliveryChunkDefinition(String chunkKey, String collection, List<IndexDefinition> indexes, Map<Integer, File> dataFiles, String dataStrategy) {
         this.collection = collection;
         this.chunkKey = chunkKey;
         this.indexes = indexes;

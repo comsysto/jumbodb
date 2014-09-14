@@ -1,7 +1,7 @@
 package org.jumbodb.database.service.query.index.geohash.snappy
 
 import org.jumbodb.common.geo.geohash.GeoHash
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import spock.lang.Specification
@@ -16,9 +16,9 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
     @Unroll
     def "equal match #value == #testValue == #isEqual"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, value)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, value)
         def geohash = GeoHash.withBitPrecision(testValue[0], testValue[1], 32).intValue()
-        operation.matching(new GeohashCoords(geohash, testValue[0], testValue[1]), operation.getQueryValueRetriever(queryClause)) == isEqual
+        operation.matching(new GeohashCoords(geohash, testValue[0], testValue[1]), operation.getQueryValueRetriever(indexQuery)) == isEqual
         where:
         value                           | testValue              | isEqual
         [[48.207688, 11.331185], 1]     | [48.208416, 11.332958] | false  // olching
@@ -40,7 +40,7 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
         def snappyChunks = GeohashDataGeneration.createIndexFile(file)
         def retriever = GeohashDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, searchValue)), snappyChunks) == expectedChunk
         cleanup:
         file.delete()
         where:
@@ -61,9 +61,9 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile value=#queryValue indexFileFrom=#indexFileFrom indexFileTo=#indexFileTo"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, queryValue)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, queryValue)
         def indexFile = new NumberSnappyIndexFile<Integer>(indexFileFrom, indexFileTo, Mock(File));
-        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        operation.acceptIndexFile(operation.getQueryValueRetriever(indexQuery), indexFile) == accept
         where:
         queryValue             | indexFileFrom | indexFileTo | accept
         [[1.0, 0.00], 0]       | -1073671086   | -1062627760 | false
@@ -79,7 +79,7 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1f, 2f], 5]))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1f, 2f], 5]))
         then:
         valueRetriever instanceof GeohashQueryValueRetriever
     }

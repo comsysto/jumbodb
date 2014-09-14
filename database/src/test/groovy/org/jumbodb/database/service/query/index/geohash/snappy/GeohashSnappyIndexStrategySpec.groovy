@@ -191,7 +191,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         def queryClause2 = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
         def queryClause3 = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 20.48], 1000])
         when:
-        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3] as Set), 1000, true)
+        def fileOffsets = strategy.searchOffsetsByIndexQueries(indexFile, ([queryClause1, queryClause2, queryClause3] as Set), 1000, true)
         then:
         fileOffsets == ([new FileOffset(50000, 102047l, []), new FileOffset(50000, 100000, [])] as Set)
         cleanup:
@@ -208,12 +208,12 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def queryClause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
-        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
+        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, queryClause, snappyChunks, 5, true)
         then:
         fileOffsets == ([new FileOffset(50000, 100000l, [])] as Set)
         when:
         queryClause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
+        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, queryClause, snappyChunks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -342,7 +342,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
 
     def createCollectionDefinition(indexFolder) {
         def index = new IndexDefinition("testIndex", indexFolder, "GEOHASH_SNAPPY_V1")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [index], [:], "GEOHASH_SNAPPY_V1")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "GEOHASH_SNAPPY_V1")]]
         new CollectionDefinition(cdMap)
     }
 

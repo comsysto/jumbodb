@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.integer.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import spock.lang.Specification
@@ -15,8 +15,8 @@ class IntegerNeOperationSearchSpec extends Specification {
     @Unroll
     def "not equal match #value != #testValue == #isNotEqual"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.NE, value)
-        operation.matching(testValue, operation.getQueryValueRetriever(queryClause)) == isNotEqual
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.NE, value)
+        operation.matching(testValue, operation.getQueryValueRetriever(indexQuery)) == isNotEqual
         where:
         value | testValue | isNotEqual
         5     | 5         | false
@@ -32,7 +32,7 @@ class IntegerNeOperationSearchSpec extends Specification {
         def retriever = IntegerDataGeneration.createFileDataRetriever(file, snappyChunks)
 
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:
@@ -54,9 +54,9 @@ class IntegerNeOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile value=#queryValue indexFileFrom=#indexFileFrom indexFileTo=#indexFileTo"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.NE, queryValue)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.NE, queryValue)
         def indexFile = new NumberSnappyIndexFile<Integer>(indexFileFrom, indexFileTo, Mock(File));
-        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        operation.acceptIndexFile(operation.getQueryValueRetriever(indexQuery), indexFile) == accept
         where:
         queryValue | indexFileFrom | indexFileTo | accept
         0          | 1             | 11          | true
@@ -70,7 +70,7 @@ class IntegerNeOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.NE, 5))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.NE, 5))
         then:
         valueRetriever instanceof IntegerQueryValueRetriever
     }

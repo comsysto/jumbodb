@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.integer.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -12,7 +12,7 @@ class IntegerQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify integer parsing #queryValue"() {
         expect:
-        def retriever = new IntegerQueryValueRetriever(new QueryClause(QueryOperation.EQ, queryValue))
+        def retriever = new IntegerQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, queryValue))
         retriever.getValue() == converted
         where:
         queryValue | converted
@@ -22,7 +22,7 @@ class IntegerQueryValueRetrieverSpec extends Specification {
 
     def "expect exception on bullshit string"() {
         when:
-        new IntegerQueryValueRetriever(new QueryClause(QueryOperation.EQ, "bullshit"))
+        new IntegerQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, "bullshit"))
         then:
         thrown ClassCastException
     }

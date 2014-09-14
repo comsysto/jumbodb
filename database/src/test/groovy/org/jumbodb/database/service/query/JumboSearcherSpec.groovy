@@ -21,7 +21,6 @@ import spock.lang.Specification
 
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Future
 
 /**
  * @author Carsten Hufe
@@ -224,7 +223,7 @@ class JumboSearcherSpec extends Specification {
        new JumboSearcher() {
            @Override
            protected CollectionDefinition getCollectionDefinition() {
-               def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [new IndexDefinition("testIndex", new File("."), "INDEX_STRATEGY")], [:], "DATA_STRATEGY")]]
+               def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [new IndexDefinition("testIndex", new File("."), "INDEX_STRATEGY")], [:], "DATA_STRATEGY")]]
                return new CollectionDefinition(cdMap)
            }
        }

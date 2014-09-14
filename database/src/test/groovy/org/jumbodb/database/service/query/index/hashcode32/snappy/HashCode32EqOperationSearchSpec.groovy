@@ -1,10 +1,9 @@
 package org.jumbodb.database.service.query.index.hashcode32.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever
-import org.jumbodb.database.service.query.index.integer.snappy.IntegerDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -77,7 +76,7 @@ class HashCode32EqOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.EQ, "What ever"))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, "What ever"))
         then:
         valueRetriever instanceof HashCode32QueryValueRetriever
     }

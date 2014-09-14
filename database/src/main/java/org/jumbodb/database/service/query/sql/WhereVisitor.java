@@ -17,7 +17,7 @@ import java.util.List;
  * Created by Carsten on 12.09.2014.
  */
 public class WhereVisitor extends ExpressionVisitorAdapter {
-    private List<Object> expressions = new ArrayList<Object>(2);
+    private List<Object> expressions = new ArrayList<Object>();
     private List<JsonQuery> ors = new LinkedList<JsonQuery>();
     private List<JsonQuery> ands = new LinkedList<JsonQuery>();
     private JsonQuery current;

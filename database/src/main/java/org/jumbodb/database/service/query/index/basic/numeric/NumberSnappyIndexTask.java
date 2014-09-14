@@ -2,7 +2,6 @@ package org.jumbodb.database.service.query.index.basic.numeric;
 
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.FileOffset;
 
 import java.io.File;
@@ -27,6 +26,6 @@ public class NumberSnappyIndexTask<T, IFV, IF extends NumberSnappyIndexFile<IFV>
 
     @Override
     public Set<FileOffset> call() throws Exception {
-        return tifNumberSnappyIndexStrategy.searchOffsetsByClauses(indexFile, indexQueries, queryLimit, resultCacheEnabled);
+        return tifNumberSnappyIndexStrategy.searchOffsetsByIndexQueries(indexFile, indexQueries, queryLimit, resultCacheEnabled);
     }
 }

@@ -19,7 +19,7 @@ class SearchIndexTaskSpec extends Specification {
         def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def indexStrategyMock = Mock(IndexStrategy)
         def indexes = [new IndexDefinition("testIndex", Mock(File), "INDEX_STRATEGY")]
-        def chunkDefinition = new DeliveryChunkDefinition("testCollection", "testChunkKey", indexes, [:], "DATA_STRATEGY")
+        def chunkDefinition = new DeliveryChunkDefinition("testChunkKey", "testCollection", indexes, [:], "DATA_STRATEGY")
         def query = new IndexQuery("testIndex", [new QueryClause(QueryOperation.EQ, 4)])
         def searchIndexTask = new SearchIndexTask(chunkDefinition, query, indexStrategyManagerMock, 10, true)
         def expectedOffset = [new FileOffset(50000, 1234l, []), new FileOffset(50000, 2345l, [])] as Set
@@ -35,7 +35,7 @@ class SearchIndexTaskSpec extends Specification {
         setup:
         def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def indexes = [new IndexDefinition("testIndex", Mock(File), "INDEX_STRATEGY")]
-        def chunkDefinition = new DeliveryChunkDefinition("testCollection", "testChunkKey", indexes, [:], "DATA_STRATEGY")
+        def chunkDefinition = new DeliveryChunkDefinition("testChunkKey", "testCollection", indexes, [:], "DATA_STRATEGY")
         def query = new IndexQuery("otherIndex", [new QueryClause(QueryOperation.EQ, 4)])
         def searchIndexTask = new SearchIndexTask(chunkDefinition, query, indexStrategyManagerMock, 10, true)
         when:

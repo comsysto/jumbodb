@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.index.datetime.snappy
 
 import org.jumbodb.common.query.IndexQuery
-import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.definition.CollectionDefinition
@@ -17,7 +16,6 @@ import spock.lang.Specification
 import java.text.SimpleDateFormat
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
-
 
 /**
  * @author Carsten Hufe
@@ -120,19 +118,18 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.setIndexSnappyChunksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.onInitialize(cd)
-        def queryClause = new QueryClause(QueryOperation.EQ, "2012-06-29 11:34:48")
-        def query = new IndexQuery("testIndex", [queryClause])
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, "2012-06-29 11:34:48")
 
         when:
-        def groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", query)
+        def groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", "testIndex", [query])
         def keys = groupedByIndex.keySet()
         def fileKey = keys.iterator().next()
         then:
         1 * operationMock.acceptIndexFile(_, _) >> true
         keys.size() == 1
-        groupedByIndex.get(fileKey).get(0) == queryClause
+        groupedByIndex.get(fileKey).get(0) == query
         when:
-        groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", query)
+        groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", "testIndex", [query])
         keys = groupedByIndex.keySet()
         then:
         1 * operationMock.acceptIndexFile(_, _) >> false
@@ -156,18 +153,17 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.setIndexSnappyChunksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.onInitialize(cd)
-        def queryClause = new QueryClause(QueryOperation.EQ, "2012-06-29 11:34:48")
-        def query = new IndexQuery("testIndex", [queryClause])
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, "2012-06-29 11:34:48")
         def expectedOffsets = ([12345l, 67890l] as Set)
         when:
-        def fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
+        def fileOffsets = strategy.findFileOffsets("testChunkKey", "testCollection", "testIndex", [query], 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> true
         1 * futureMock.get() >> expectedOffsets
         1 * executorMock.submit(_) >> futureMock
         fileOffsets == expectedOffsets
         when:
-        fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
+        fileOffsets = strategy.findFileOffsets("testChunkKey", "testCollection", "testIndex", [query], 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> false
         0 * executorMock.submit(_) >> futureMock
@@ -176,7 +172,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         indexFolder.delete()
     }
 
-    def "searchOffsetsByClauses"() {
+    def "searchOffsetsByIndexQueries"() {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new DateTimeSnappyIndexStrategy()
@@ -187,20 +183,20 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.setIndexSnappyChunksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.setIndexQueryCache(cacheMock)
-        def queryClause1 = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
-        def queryClause2 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:00")
-        def queryClause3 = new QueryClause(QueryOperation.EQ, "2012-05-01 12:00:01") // should not exist, so no result for it
-        def queryClause4 = new QueryClause(QueryOperation.EQ, "2012-12-29 11:34:48")
+        def query1 = new IndexQuery("testIndex", QueryOperation.EQ, "2012-01-01 12:00:00")
+        def query2 = new IndexQuery("testIndex", QueryOperation.EQ, "2012-05-01 12:00:00")
+        def query3 = new IndexQuery("testIndex", QueryOperation.EQ, "2012-05-01 12:00:01") // should not exist, so no result for it
+        def query4 = new IndexQuery("testIndex", QueryOperation.EQ, "2012-12-29 11:34:48")
 
         when:
-        def fileOffsets = strategy.searchOffsetsByClauses(indexFile, ([queryClause1, queryClause2, queryClause3, queryClause4] as Set), 5, true)
+        def fileOffsets = strategy.searchOffsetsByIndexQueries(indexFile, ([query1, query2, query3, query4] as Set), 5, true)
         then:
-        fileOffsets == ([new FileOffset(50000, 1356777388000, []), new FileOffset(50000, 1335866500000, []), new FileOffset(50000, 1325415700000, [])] as Set)
+        fileOffsets == ([new FileOffset(50000, 1356777388000, query1), new FileOffset(50000, 1335866500000, query2), new FileOffset(50000, 1325415700000, query4)] as Set)
         cleanup:
         indexFile.delete()
     }
 
-    def "findOffsetForClause"() {
+    def "findOffsetForIndexQuery"() {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new DateTimeSnappyIndexStrategy()
@@ -213,13 +209,13 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.setIndexQueryCache(cacheMock)
         when:
-        def queryClause = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:00")
-        def fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, "2012-01-01 12:00:00")
+        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
         then:
-        fileOffsets == ([new FileOffset(50000, 1325415700000, [])] as Set)
+        fileOffsets == ([new FileOffset(50000, 1325415700000, indexQuery)] as Set)
         when:
-        queryClause = new QueryClause(QueryOperation.EQ, "2012-01-01 12:00:01") // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForClause(indexFile, ramFile, queryClause, snappyChunks, 5, true)
+        indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, "2012-01-01 12:00:01") // should not exist, so no result for it
+        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -280,7 +276,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
     def "createIndexFileDescription"() {
         setup:
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        def indexFile = File.createTempFile("part00001", "odx")
+        def indexFile = File.createTempFile("part00001", "idx")
         def snappyChunks = DateTimeDataGeneration.createIndexFile(indexFile)
         when:
         def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
@@ -321,7 +317,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         when:
         strategy.onDataChanged(cd)
-        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", new IndexQuery("testIndex", []))
+        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", "testIndex")
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
@@ -346,7 +342,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         when:
         strategy.onDataChanged(cd)
-        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", new IndexQuery("testIndex", []))
+        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", "testIndex")
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
@@ -365,7 +361,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
 
     def createCollectionDefinition(indexFolder) {
         def index = new IndexDefinition("testIndex", indexFolder, "DATETIME_SNAPPY_V1")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testCollection", "testChunkKey", [index], [:], "DATETIME_SNAPPY_V1")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "DATETIME_SNAPPY_V1")]]
         new CollectionDefinition(cdMap)
     }
 
@@ -374,20 +370,20 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(DateTimeEqOperationSearch)
         def numberSnappyIndexFile = Mock(NumberSnappyIndexFile)
-        def clause = new QueryClause(QueryOperation.EQ, "a date")
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, "a date")
         def valueRetriever = Mock(QueryValueRetriever)
         def strategy = new DateTimeSnappyIndexStrategy()
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         when:
-        def result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        def result = strategy.acceptIndexFile(indexQuery, numberSnappyIndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
+        1 * operationMock.getQueryValueRetriever(indexQuery) >> valueRetriever
         1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> true
         result == true
         when:
-        result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        result = strategy.acceptIndexFile(indexQuery, numberSnappyIndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
+        1 * operationMock.getQueryValueRetriever(indexQuery) >> valueRetriever
         1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> false
         result == false
     }
@@ -402,7 +398,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
             }
         }
         when:
-        strategy.acceptIndexFile(new QueryClause(QueryOperation.EQ, "a date"), Mock(NumberSnappyIndexFile))
+        strategy.acceptIndexFile(new IndexQuery("testIndex", QueryOperation.EQ, "a date"), Mock(NumberSnappyIndexFile))
         then:
         thrown UnsupportedOperationException
     }

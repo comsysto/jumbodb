@@ -59,7 +59,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
         return snappyChunksByFile;
     }
 
-    public Set<FileOffset> searchOffsetsByClauses(File indexFile, Set<IndexQuery> indexQueries, int queryLimit, boolean resultCacheEnabled) throws IOException {
+    public Set<FileOffset> searchOffsetsByIndexQueries(File indexFile, Set<IndexQuery> indexQueries, int queryLimit, boolean resultCacheEnabled) throws IOException {
         long start = System.currentTimeMillis();
         RandomAccessFile raf = null;
         List<FileOffset> result = new LinkedList<FileOffset>();
@@ -69,7 +69,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
 
             for (IndexQuery indexQuery : indexQueries) {
                 if(queryLimit == -1 || queryLimit > result.size()) {
-                    result.addAll(findOffsetForClause(indexFile, raf, indexQuery, snappyChunks, queryLimit, resultCacheEnabled));
+                    result.addAll(findOffsetForIndexQuery(indexFile, raf, indexQuery, snappyChunks, queryLimit, resultCacheEnabled));
                 }
             }
 
@@ -184,8 +184,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberSnappyI
     }
 
 
-    protected Set<FileOffset> findOffsetForClause(File indexFile, RandomAccessFile indexRaf, IndexQuery indexQuery,
-                                                  SnappyChunks snappyChunks, int queryLimit, boolean resultCacheEnabled) throws IOException {
+    protected Set<FileOffset> findOffsetForIndexQuery(File indexFile, RandomAccessFile indexRaf, IndexQuery indexQuery,
+                                                      SnappyChunks snappyChunks, int queryLimit, boolean resultCacheEnabled) throws IOException {
         if(resultCacheEnabled) {
             CacheIndexClause key = new CacheIndexClause(indexFile, indexQuery.getQueryOperation(), indexQuery.getValue());
             Cache.ValueWrapper valueWrapper = indexQueryCache.get(key);

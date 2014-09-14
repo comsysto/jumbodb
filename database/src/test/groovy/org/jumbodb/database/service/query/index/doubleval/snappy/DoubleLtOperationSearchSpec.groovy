@@ -1,11 +1,10 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import spock.lang.Specification
 import spock.lang.Unroll
-
 
 /**
  * @author Carsten Hufe
@@ -16,8 +15,8 @@ class DoubleLtOperationSearchSpec extends Specification {
     @Unroll
     def "less match #value > #testValue == #isLess"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.LT, value)
-        operation.matching(testValue, operation.getQueryValueRetriever(queryClause)) == isLess
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.LT, value)
+        operation.matching(testValue, operation.getQueryValueRetriever(indexQuery)) == isLess
         where:
         value | testValue | isLess
         2d    | 2d        | false
@@ -32,7 +31,7 @@ class DoubleLtOperationSearchSpec extends Specification {
         def snappyChunks = DoubleDataGeneration.createIndexFile(file)
         def retriever = DoubleDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.LT, searchValue)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:
@@ -54,9 +53,9 @@ class DoubleLtOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile value=#queryValue indexFileFrom=#indexFileFrom indexFileTo=#indexFileTo"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.LT, queryValue)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.LT, queryValue)
         def indexFile = new NumberSnappyIndexFile<Double>(indexFileFrom, indexFileTo, Mock(File))
-        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        operation.acceptIndexFile(operation.getQueryValueRetriever(indexQuery), indexFile) == accept
         where:
         queryValue | indexFileFrom | indexFileTo | accept
         0.99d      | 1d            | 11d         | false
@@ -69,7 +68,7 @@ class DoubleLtOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.LT, 5d))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.LT, 5d))
         then:
         valueRetriever instanceof DoubleQueryValueRetriever
     }

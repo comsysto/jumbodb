@@ -1,7 +1,7 @@
 package org.jumbodb.database.service.query.index.hashcode64.snappy
 
 import org.jumbodb.common.query.HashCode64
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -13,7 +13,7 @@ class HashCode64QueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify hashcode parsing #queryValue"() {
         expect:
-        def retriever = new HashCode64QueryValueRetriever(new QueryClause(QueryOperation.EQ, queryValue))
+        def retriever = new HashCode64QueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, queryValue))
         retriever.getValue() == converted
         where:
         queryValue    | converted
@@ -24,7 +24,7 @@ class HashCode64QueryValueRetrieverSpec extends Specification {
 
     def "expect exception on non string"() {
         when:
-        new HashCode64QueryValueRetriever(new QueryClause(QueryOperation.EQ, new Object()))
+        new HashCode64QueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, new Object()))
         then:
         thrown IllegalArgumentException
     }

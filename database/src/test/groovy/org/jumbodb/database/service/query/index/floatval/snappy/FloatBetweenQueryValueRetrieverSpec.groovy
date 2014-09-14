@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.floatval.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -12,7 +12,7 @@ class FloatBetweenQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify float parsing #queryValue"() {
         expect:
-        def retriever = new FloatBetweenQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, queryValue))
+        def retriever = new FloatBetweenQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, queryValue))
         retriever.getValue() == converted
         where:
         queryValue     | converted
@@ -22,7 +22,7 @@ class FloatBetweenQueryValueRetrieverSpec extends Specification {
 
     def "expect exception on bullshit string"() {
         when:
-        new FloatBetweenQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, ["bullshit", "andso"]))
+        new FloatBetweenQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, ["bullshit", "andso"]))
         then:
         thrown ClassCastException
     }

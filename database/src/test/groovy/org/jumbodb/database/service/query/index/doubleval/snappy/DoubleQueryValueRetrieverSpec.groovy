@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -12,7 +12,7 @@ class DoubleQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify double parsing #queryValue"() {
         expect:
-        def retriever = new DoubleQueryValueRetriever(new QueryClause(QueryOperation.EQ, queryValue))
+        def retriever = new DoubleQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, queryValue))
         retriever.getValue() == converted
         where:
         queryValue | converted
@@ -22,7 +22,7 @@ class DoubleQueryValueRetrieverSpec extends Specification {
 
     def "expect exception on bullshit string"() {
         when:
-        new DoubleQueryValueRetriever(new QueryClause(QueryOperation.EQ, "bullshit"))
+        new DoubleQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, "bullshit"))
         then:
         thrown ClassCastException
     }

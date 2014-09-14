@@ -33,7 +33,7 @@ class JsonSnappyDataStrategySpec extends Specification {
     def "should be responsible, because collection, chunk and strategy are matching"() {
         setup:
         def cd = Mock(CollectionDefinition)
-        def dcd = new DeliveryChunkDefinition("collection", "chunk", [], [:], "JSON_SNAPPY_V1")
+        def dcd = new DeliveryChunkDefinition("chunk", "collection", [], [:], "JSON_SNAPPY_V1")
         strategy.onInitialize(cd)
         cd.getChunk("collection", "chunk") >> dcd
         expect:
@@ -43,7 +43,7 @@ class JsonSnappyDataStrategySpec extends Specification {
     def "should not responsible, because different strategy name"() {
         setup:
         def cd = Mock(CollectionDefinition)
-        def dcd = new DeliveryChunkDefinition("collection", "chunk", [], [:], "WHATEVER_STRATEGY")
+        def dcd = new DeliveryChunkDefinition("chunk", "collection", [], [:], "WHATEVER_STRATEGY")
         strategy.onInitialize(cd)
         cd.getChunk("collection", "chunk") >> dcd
         expect:
@@ -124,7 +124,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         dataFiles.put(1, mockFile)
         dataFiles.put(2, mockFile)
         dataFiles.put(3, mockFile)
-        def deliveryChunkDefinition = new DeliveryChunkDefinition("testcollection", "testchunkkey", indexes, dataFiles, JsonSnappyDataStrategy.JSON_SNAPPY_V1)
+        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", indexes, dataFiles, JsonSnappyDataStrategy.JSON_SNAPPY_V1)
         def fileOffsets = [
                 new FileOffset(1, 12, []),
                 new FileOffset(1, 13, []),
@@ -155,7 +155,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         dataFiles.put(1, mockFile)
         dataFiles.put(2, mockFile)
         dataFiles.put(3, mockFile)
-        def deliveryChunkDefinition = new DeliveryChunkDefinition("testcollection", "testchunkkey", [], dataFiles, JsonSnappyDataStrategy.JSON_SNAPPY_V1)
+        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", [], dataFiles, JsonSnappyDataStrategy.JSON_SNAPPY_V1)
         def jumboQuery = new JumboQuery()
         def resultCallback = Mock(ResultCallback)
         when:

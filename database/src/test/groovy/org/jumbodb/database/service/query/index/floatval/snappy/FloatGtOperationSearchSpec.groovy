@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.floatval.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile
 import spock.lang.Specification
@@ -15,8 +15,8 @@ class FloatGtOperationSearchSpec extends Specification {
     @Unroll
     def "greater match #value < #testValue == #isGreater"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.GT, value)
-        operation.matching(testValue, operation.getQueryValueRetriever(queryClause)) == isGreater
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.GT, value)
+        operation.matching(testValue, operation.getQueryValueRetriever(indexQuery)) == isGreater
         where:
         value | testValue | isGreater
         5f    | 5f        | false
@@ -31,7 +31,7 @@ class FloatGtOperationSearchSpec extends Specification {
         def snappyChunks = FloatDataGeneration.createIndexFile(file)
         def retriever = FloatDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new QueryClause(QueryOperation.GT, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT, searchValue)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:
@@ -53,9 +53,9 @@ class FloatGtOperationSearchSpec extends Specification {
     @Unroll
     def "acceptIndexFile value=#queryValue indexFileFrom=#indexFileFrom indexFileTo=#indexFileTo"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.GT, queryValue)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.GT, queryValue)
         def indexFile = new NumberSnappyIndexFile<Float>(indexFileFrom, indexFileTo, Mock(File));
-        operation.acceptIndexFile(operation.getQueryValueRetriever(queryClause), indexFile) == accept
+        operation.acceptIndexFile(operation.getQueryValueRetriever(indexQuery), indexFile) == accept
         where:
         queryValue | indexFileFrom | indexFileTo | accept
         0.99f      | 1f            | 11f         | true
@@ -68,7 +68,7 @@ class FloatGtOperationSearchSpec extends Specification {
 
     def "getQueryValueRetriever"() {
         when:
-        def valueRetriever = operation.getQueryValueRetriever(new QueryClause(QueryOperation.GT, 5f))
+        def valueRetriever = operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT, 5f))
         then:
         valueRetriever instanceof FloatQueryValueRetriever
     }

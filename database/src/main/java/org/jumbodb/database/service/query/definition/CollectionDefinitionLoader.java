@@ -73,7 +73,7 @@ public class CollectionDefinitionLoader {
             resDataFiles.put(dataFile.getName().hashCode(), dataFile);
         }
         Collections.sort(resIndexFiles);
-        return new DeliveryChunkDefinition(collectionName, chunkKey, resIndexFiles, resDataFiles, getDataStrategy(collectionDataFolder));
+        return new DeliveryChunkDefinition(chunkKey, collectionName, resIndexFiles, resDataFiles, getDataStrategy(collectionDataFolder));
     }
 
     private static String getIndexStrategy(File indexFolder) {

@@ -1,8 +1,7 @@
 package org.jumbodb.database.service.query.index.integer.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.database.service.query.index.longval.snappy.LongBetweenQueryValueRetriever
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -13,7 +12,7 @@ class IntegerBetweenQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify long parsing #queryValue"() {
         expect:
-        def retriever = new IntegerBetweenQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, queryValue))
+        def retriever = new IntegerBetweenQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, queryValue))
         retriever.getValue() == converted
         where:
         queryValue | converted
@@ -24,7 +23,7 @@ class IntegerBetweenQueryValueRetrieverSpec extends Specification {
 
     def "expect exception on bullshit string"() {
         when:
-        new IntegerBetweenQueryValueRetriever(new QueryClause(QueryOperation.BETWEEN, ["bullshit", "andso"]))
+        new IntegerBetweenQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, ["bullshit", "andso"]))
         then:
         thrown ClassCastException
     }

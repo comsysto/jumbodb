@@ -1,7 +1,7 @@
 package org.jumbodb.database.service.query.index.datetime.snappy
 
 import org.apache.commons.lang.UnhandledException
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -14,7 +14,7 @@ class DateTimeQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify date string parsing #queryValue"() {
         expect:
-        def retriever = new DateTimeQueryValueRetriever(new QueryClause(QueryOperation.EQ, queryValue))
+        def retriever = new DateTimeQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, queryValue))
         retriever.getValue() == converted
         where:
         queryValue            | converted
@@ -25,7 +25,7 @@ class DateTimeQueryValueRetrieverSpec extends Specification {
     @Unroll
     def "verify date long parsing #queryValue"() {
         expect:
-        def retriever = new DateTimeQueryValueRetriever(new QueryClause(QueryOperation.EQ, queryValue))
+        def retriever = new DateTimeQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, queryValue))
         retriever.getValue() == converted
         where:
         queryValue    | converted
@@ -35,7 +35,7 @@ class DateTimeQueryValueRetrieverSpec extends Specification {
 
     def "expect exception on bullshit string"() {
         when:
-        new DateTimeQueryValueRetriever(new QueryClause(QueryOperation.EQ, "bullshit"))
+        new DateTimeQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, "bullshit"))
         then:
         thrown UnhandledException
     }

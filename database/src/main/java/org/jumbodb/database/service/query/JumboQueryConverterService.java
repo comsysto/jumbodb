@@ -62,8 +62,9 @@ public class JumboQueryConverterService {
         // CARSTEN column and column vergleich wär cool a = b
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where ((a = 'b' or z = 'z') and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'");
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'");
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h') and (g = 'g' or y = 'y' or o = 'o')) or x = 'x'");
-        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where aaa(aa)");
+        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h') and (g = 'g' or y = 'y' or o = 'o')) or x = 'x'");
+        long start = System.currentTimeMillis();
+//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where aaa = 'bb'");
 
 
 
@@ -86,5 +87,6 @@ public class JumboQueryConverterService {
         selectBody.getWhere().accept(expressionVisitor);
         List<JsonQuery> jsonQueries = expressionVisitor.getOrs();
         System.out.println(jsonQueries);
+        System.out.println("time " + ( System.currentTimeMillis() - start));
     }
 }

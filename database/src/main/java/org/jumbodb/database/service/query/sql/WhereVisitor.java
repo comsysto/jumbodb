@@ -8,6 +8,7 @@ import net.sf.jsqlparser.schema.Column;
 import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.QueryOperation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,9 +17,7 @@ import java.util.List;
  * Created by Carsten on 12.09.2014.
  */
 public class WhereVisitor extends ExpressionVisitorAdapter {
-    private QueryOperation operation;
-    private Column column;
-    private Object value;
+    private List<Object> expressions = new ArrayList<Object>(2);
     private List<JsonQuery> ors = new LinkedList<JsonQuery>();
     private List<JsonQuery> ands = new LinkedList<JsonQuery>();
     private JsonQuery current;
@@ -102,36 +101,94 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(EqualsTo expr) {
-        operation = QueryOperation.EQ;
         super.visit(expr);
-        current = new JsonQuery(column.getFullyQualifiedName(), operation, value);
+        idenicalEvaluation(QueryOperation.EQ);
+    }
+
+    private void idenicalEvaluation(QueryOperation eq) {
+        if(hasTwoColumns()) {
+            throw new IllegalArgumentException("comparision on two columns are not supported yet");
+        }
+        else if(hasOneColumns()) {
+            Column firstColumn = getFirstColumn();
+            current = new JsonQuery(firstColumn.getFullyQualifiedName(), eq, getFirstValue());
+        }
+        else {
+            throw new IllegalArgumentException("minimum one field is required for query criteria");
+        }
+    }
+
+    private boolean hasOneColumns() {
+        return hasColumnLeft()
+                || hasColumnRight();
+    }
+
+    private boolean hasTwoColumns() {
+        return hasColumnLeft()
+                && hasColumnRight();
+    }
+
+    private Column getFirstColumn() {
+        if(hasColumnLeft()) {
+            return getColumnLeft();
+        }
+        return getColumnRight();
+    }
+
+    private Object getFirstValue() {
+        if(hasColumnLeft()) {
+            return getValueRight();
+        }
+        return getValueLeft();
+    }
+
+    private Column getColumnRight() {
+        return (Column)expressions.get(1);
+    }
+
+    private Column getColumnLeft() {
+        return (Column)expressions.get(0);
+    }
+
+    private Object getValueRight() {
+        return expressions.get(1);
+    }
+
+    private Object getValueLeft() {
+        return expressions.get(0);
+    }
+
+    private boolean hasColumnRight() {
+        return expressions.get(1) instanceof Column;
+    }
+
+    private boolean hasColumnLeft() {
+        return expressions.get(0) instanceof Column;
     }
 
 
     @Override
     public void visit(Column column) {
-        System.out.print("col  " + column.getFullyQualifiedName());
-        this.column = column;
-        super.visit(column);
+        expressions.add(column);
     }
 
     @Override
     public void visit(LikeExpression expr) {
-        operation = QueryOperation.EQ;
-        super.visit(expr);
-        current = new JsonQuery(column.getFullyQualifiedName(), operation, value);
+        // CARSTEN implement with contains
+//        operation = QueryOperation.EQ;
+//        super.visit(expr);
+//        current = new JsonQuery(column.getFullyQualifiedName(), operation, value);
     }
 
     @Override
     public void visit(StringValue value) {
-        this.value = value.getValue();
+        expressions.add(value.getValue());
     }
 
     @Override
     public void visit(GreaterThan expr) {
-        // CARSTEN aufpassen, spaltenname kann auch rechts stehen
-        this.operation = QueryOperation.GT;
         super.visit(expr);
+        greaterLessEvaluation(QueryOperation.GT, QueryOperation.LT);
     }
 
     @Override
@@ -141,20 +198,20 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(DoubleValue value) {
-        this.value = value.getValue();
+        expressions.add(value.getValue());
     }
 
     @Override
     public void visit(LongValue value) {
-        this.value = value.getValue();
+        expressions.add(value.getValue());
     }
 
 
 
     @Override
     public void visit(DateValue value) {
+        expressions.add(value.getValue());
         // CARSTEN date sauber implementieren
-        this.value = value.getValue();
     }
 
     @Override
@@ -165,6 +222,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(NotEqualsTo expr) {
         super.visit(expr);
+        idenicalEvaluation(QueryOperation.NE);
     }
 
     @Override
@@ -188,6 +246,26 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(MinorThan expr) {
         super.visit(expr);
+        greaterLessEvaluation(QueryOperation.LT, QueryOperation.GT);
+    }
+
+    private void greaterLessEvaluation(QueryOperation leftOp, QueryOperation rightOp) {
+        if(hasTwoColumns()) {
+            throw new IllegalArgumentException("comparision on two columns are not supported yet");
+        }
+        else if(hasOneColumns()) {
+            if(hasColumnLeft()) {
+                Column firstColumn = getColumnLeft();
+                current = new JsonQuery(firstColumn.getFullyQualifiedName(), leftOp, getValueRight());
+            }
+            else {
+                Column firstColumn = getColumnRight();
+                current = new JsonQuery(firstColumn.getFullyQualifiedName(), rightOp, getValueLeft());
+            }
+        }
+        else {
+            throw new IllegalArgumentException("minimum one field is required for query criteria");
+        }
     }
 
     @Override

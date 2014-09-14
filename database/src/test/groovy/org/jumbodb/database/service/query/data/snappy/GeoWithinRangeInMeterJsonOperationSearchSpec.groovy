@@ -1,20 +1,21 @@
 package org.jumbodb.database.service.query.data.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.QueryOperation
+import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
-class GeoWithinRangeInMeterJsonOperationSearchSpec extends spock.lang.Specification {
+class GeoWithinRangeInMeterJsonOperationSearchSpec extends Specification {
     def operation = new GeoWithinRangeInMeterJsonOperationSearch()
 
     @Unroll
     def "should match inside the range [#lat, #lon] and [#testLat, #testLon] with distance #distance meter == #isWithingRange"() {
         expect:
         List<Double> p1 = Arrays.asList(lat, lon)
-        QueryClause q = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(p1, distance));
+        def q = new JsonQuery("testField", QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(p1, distance));
         operation.matches(q, Arrays.asList(testLat, testLon)) == isWithingRange
         where:
         lat       | lon       | distance | testLat   | testLon   | isWithingRange

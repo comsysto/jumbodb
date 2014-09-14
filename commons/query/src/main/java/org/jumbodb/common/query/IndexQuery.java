@@ -13,6 +13,9 @@ public class IndexQuery {
     private JsonQuery andJson;
     private IndexQuery andIndex;
 
+    public IndexQuery() {
+    }
+
     public IndexQuery(String name, QueryOperation queryOperation, Object value) {
         this.name = name;
         this.queryOperation = queryOperation;

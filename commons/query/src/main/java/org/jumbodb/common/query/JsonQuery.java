@@ -28,6 +28,13 @@ public class JsonQuery {
         this.value = value;
     }
 
+    public JsonQuery(String fieldName, QueryOperation queryOperation, Object value, JsonQuery and) {
+        this.fieldName = fieldName;
+        this.queryOperation = queryOperation;
+        this.value = value;
+        this.and = and;
+    }
+
     public String getFieldName() {
         return fieldName;
     }

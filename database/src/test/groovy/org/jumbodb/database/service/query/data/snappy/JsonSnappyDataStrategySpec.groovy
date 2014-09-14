@@ -1,8 +1,9 @@
 package org.jumbodb.database.service.query.data.snappy
 
 import org.apache.commons.io.FileUtils
+import org.jumbodb.common.query.IndexQuery
+import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.JumboQuery
-import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.query.FileOffset
@@ -79,19 +80,19 @@ class JsonSnappyDataStrategySpec extends Specification {
             }
         }
         when:
-        customStrategy.matches(new QueryClause(QueryOperation.EQ, "testValue"), "testValue")
+        customStrategy.matches(new JsonQuery("testField", QueryOperation.EQ, "testValue"), "testValue")
         then:
         1 * eqOperation.matches(_, "testValue")
         when:
-        customStrategy.matches(new QueryClause(QueryOperation.GT, "testValue"), "testValue")
+        customStrategy.matches(new JsonQuery("testField", QueryOperation.GT, "testValue"), "testValue")
         then:
         1 * gtOperation.matches(_, "testValue")
         when:
-        customStrategy.matches(new QueryClause(QueryOperation.LT, "testValue"), "testValue")
+        customStrategy.matches(new JsonQuery("testField", QueryOperation.LT, "testValue"), "testValue")
         then:
         1 * ltOperation.matches(_, "testValue")
         when:
-        customStrategy.matches(new QueryClause(QueryOperation.BETWEEN, "testValue"), "testValue")
+        customStrategy.matches(new JsonQuery("testField", QueryOperation.BETWEEN, "testValue"), "testValue")
         then:
         thrown UnsupportedOperationException
     }
@@ -99,17 +100,17 @@ class JsonSnappyDataStrategySpec extends Specification {
     def "buildFileOffsetsMap should group by filename hash"() {
         when:
         def fileOffsets = [
-                new FileOffset(1, 12, []),
-                new FileOffset(1, 13, []),
-                new FileOffset(2, 15, []),
-                new FileOffset(1, 14, []),
-                new FileOffset(1, 15, []),
-                new FileOffset(2, 17, [])
+                new FileOffset(1, 12, null),
+                new FileOffset(1, 13, null),
+                new FileOffset(2, 15, null),
+                new FileOffset(1, 14, null),
+                new FileOffset(1, 15, null),
+                new FileOffset(2, 17, null)
         ]
         def result = strategy.buildFileOffsetsMap(fileOffsets)
         then:
-        result.get(1) as Set == [12, 13, 14, 15].collect{ new FileOffset(1, it, [])} as Set
-        result.get(2) as Set == [15, 17].collect{ new FileOffset(2, it, [])} as Set
+        result.get(1) as Set == [12, 13, 14, 15].collect { new FileOffset(1, it, null) } as Set
+        result.get(2) as Set == [15, 17].collect { new FileOffset(2, it, null) } as Set
     }
 
     def "findDataSetsByFileOffsets should run index search and submit 2 tasks, because offsets are spread in 2 files"() {
@@ -126,15 +127,15 @@ class JsonSnappyDataStrategySpec extends Specification {
         dataFiles.put(3, mockFile)
         def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", indexes, dataFiles, JsonSnappyDataStrategy.JSON_SNAPPY_V1)
         def fileOffsets = [
-                new FileOffset(1, 12, []),
-                new FileOffset(1, 13, []),
-                new FileOffset(2, 15, []),
-                new FileOffset(1, 14, []),
-                new FileOffset(1, 15, []),
-                new FileOffset(2, 17, [])
+                new FileOffset(1, 12, null),
+                new FileOffset(1, 13, null),
+                new FileOffset(2, 15, null),
+                new FileOffset(1, 14, null),
+                new FileOffset(1, 15, null),
+                new FileOffset(2, 17, null)
         ]
         def jumboQuery = new JumboQuery()
-        jumboQuery.addIndexQuery("myindex", [new QueryClause(QueryOperation.EQ, "value")])
+        jumboQuery.addIndexQuery(new IndexQuery("myindex", QueryOperation.EQ, "value"))
         def resultCallback = Mock(ResultCallback)
         when:
         def numberOfResults = customStrategy.findDataSetsByFileOffsets(deliveryChunkDefinition, fileOffsets, resultCallback, jumboQuery)

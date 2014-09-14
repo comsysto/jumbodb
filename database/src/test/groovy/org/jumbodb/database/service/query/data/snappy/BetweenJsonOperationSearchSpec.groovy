@@ -1,20 +1,21 @@
 package org.jumbodb.database.service.query.data.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.QueryOperation
+import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
-class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
+class BetweenJsonOperationSearchSpec extends Specification {
     def operation = new BetweenJsonOperationSearch()
 
     @Unroll
     def "between double match #from < #testValue > #to == #isBetween"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
-        operation.matches(queryClause, testValue) == isBetween
+        def jsonQuery = new JsonQuery("testField", QueryOperation.BETWEEN, Arrays.asList(from, to))
+        operation.matches(jsonQuery, testValue) == isBetween
         where:
         from | to  | testValue | isBetween
         2d   | 10d | 5d        | true
@@ -28,8 +29,8 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     @Unroll
     def "between float match #from < #testValue > #to == #isBetween"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
-        operation.matches(queryClause, testValue) == isBetween
+        def jsonQuery = new JsonQuery("testField", QueryOperation.BETWEEN, Arrays.asList(from, to))
+        operation.matches(jsonQuery, testValue) == isBetween
         where:
         from | to  | testValue | isBetween
         2f   | 10f | 5f        | true
@@ -43,8 +44,8 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     @Unroll
     def "between integer match #from < #testValue > #to == #isBetween"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
-        operation.matches(queryClause, testValue) == isBetween
+        def jsonQuery = new JsonQuery("testField", QueryOperation.BETWEEN, Arrays.asList(from, to))
+        operation.matches(jsonQuery, testValue) == isBetween
         where:
         from | to | testValue | isBetween
         2    | 10 | 5         | true
@@ -59,8 +60,8 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
     @Unroll
     def "between long match #from < #testValue > #to == #isBetween"() {
         expect:
-        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(from, to))
-        operation.matches(queryClause, testValue) == isBetween
+        def jsonQuery = new JsonQuery("testField", QueryOperation.BETWEEN, Arrays.asList(from, to))
+        operation.matches(jsonQuery, testValue) == isBetween
         where:
         from | to  | testValue | isBetween
         2l   | 10l | 5l        | true
@@ -73,8 +74,8 @@ class BetweenJsonOperationSearchSpec extends spock.lang.Specification {
 
     def "illegal argument exception expected"() {
         when:
-        def queryClause = new QueryClause(QueryOperation.BETWEEN, Arrays.asList(5, 10))
-        operation.matches(queryClause, "illegal")
+        def jsonQuery = new JsonQuery("testField", QueryOperation.BETWEEN, Arrays.asList(5, 10))
+        operation.matches(jsonQuery, "illegal")
         then:
         thrown IllegalArgumentException
     }

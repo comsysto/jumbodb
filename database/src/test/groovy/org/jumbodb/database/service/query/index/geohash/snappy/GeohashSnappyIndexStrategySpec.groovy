@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.index.geohash.snappy
 
 import org.jumbodb.common.query.IndexQuery
-import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.definition.CollectionDefinition
@@ -128,18 +127,17 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         setupCache(strategy)
         strategy.onInitialize(cd)
-        def queryClause = new QueryClause(QueryOperation.EQ, 12345)
-        def query = new IndexQuery("testIndex", [queryClause])
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345)
         when:
-        def groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", query)
+        def groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", "testIndex", [query])
         def keys = groupedByIndex.keySet()
         def fileKey = keys.iterator().next()
         then:
         1 * operationMock.acceptIndexFile(_, _) >> true
         keys.size() == 1
-        groupedByIndex.get(fileKey).get(0) == queryClause
+        groupedByIndex.get(fileKey).get(0) == query
         when:
-        groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", query)
+        groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", "testIndex", [query])
         keys = groupedByIndex.keySet()
         then:
         1 * operationMock.acceptIndexFile(_, _) >> false
@@ -160,18 +158,17 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         strategy.setIndexFileExecutor(executorMock)
         setupCache(strategy)
         strategy.onInitialize(cd)
-        def queryClause = new QueryClause(QueryOperation.EQ, 12345)
-        def query = new IndexQuery("testIndex", [queryClause])
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345)
         def expectedOffsets = ([12345l, 67890l] as Set)
         when:
-        def fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
+        def fileOffsets = strategy.findFileOffsets("testChunkKey", "testCollection", "testIndex", [query], 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> true
         1 * futureMock.get() >> expectedOffsets
         1 * executorMock.submit(_) >> futureMock
         fileOffsets == expectedOffsets
         when:
-        fileOffsets = strategy.findFileOffsets("testCollection", "testChunkKey", query, 10, true)
+        fileOffsets = strategy.findFileOffsets("testChunkKey", "testCollection", "testIndex", [query], 10, true)
         then:
         1 * operationMock.acceptIndexFile(_, _) >> false
         0 * executorMock.submit(_) >> futureMock
@@ -180,25 +177,25 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         indexFolder.delete()
     }
 
-    def "searchOffsetsByClauses"() {
+    def "searchOffsetsByIndexQueries"() {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new GeohashSnappyIndexStrategy()
         setupCache(strategy)
         def indexFile = GeohashDataGeneration.createFile()
         GeohashDataGeneration.createIndexFile(indexFile)
-        def queryClause1 = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
-        def queryClause2 = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
-        def queryClause3 = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 20.48], 1000])
+        def query1 = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
+        def query2 = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
+        def query3 = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 20.48], 1000])
         when:
-        def fileOffsets = strategy.searchOffsetsByIndexQueries(indexFile, ([queryClause1, queryClause2, queryClause3] as Set), 1000, true)
+        def fileOffsets = strategy.searchOffsetsByIndexQueries(indexFile, ([query1, query2, query3] as Set), 1000, true)
         then:
-        fileOffsets == ([new FileOffset(50000, 102047l, []), new FileOffset(50000, 100000, [])] as Set)
+        fileOffsets == ([new FileOffset(50000, 102047l, query1), new FileOffset(50000, 100000, query3)] as Set)
         cleanup:
         indexFile.delete()
     }
 
-    def "findOffsetForClause"() {
+    def "findOffsetForIndexQuery"() {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new GeohashSnappyIndexStrategy()
@@ -207,13 +204,13 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         def snappyChunks = GeohashDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
-        def queryClause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
-        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, queryClause, snappyChunks, 5, true)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
+        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
         then:
-        fileOffsets == ([new FileOffset(50000, 100000l, [])] as Set)
+        fileOffsets == ([new FileOffset(50000, 100000l, indexQuery)] as Set)
         when:
-        queryClause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, queryClause, snappyChunks, 5, true)
+        indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
+        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -302,7 +299,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         setupCache(strategy)
         when:
         strategy.onDataChanged(cd)
-        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", new IndexQuery("testIndex", []))
+        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", "testIndex")
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
@@ -323,7 +320,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         setupCache(strategy)
         when:
         strategy.onDataChanged(cd)
-        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", new IndexQuery("testIndex", []))
+        def testIndexFiles = strategy.getIndexFiles("testChunkKey", "testCollection", "testIndex")
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
@@ -351,20 +348,20 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         setup:
         def operationMock = Mock(GeohashWithinRangeMeterBoxOperationSearch)
         def numberSnappyIndexFile = Mock(NumberSnappyIndexFile)
-        def clause = new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, [[1f, 2f], 5])
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1f, 2f], 5])
         def valueRetriever = Mock(QueryValueRetriever)
         def strategy = new GeohashSnappyIndexStrategy()
         strategy.OPERATIONS.put(QueryOperation.GEO_WITHIN_RANGE_METER, operationMock)
         when:
-        def result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        def result = strategy.acceptIndexFile(indexQuery, numberSnappyIndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
+        1 * operationMock.getQueryValueRetriever(indexQuery) >> valueRetriever
         1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> true
         result == true
         when:
-        result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        result = strategy.acceptIndexFile(indexQuery, numberSnappyIndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
+        1 * operationMock.getQueryValueRetriever(indexQuery) >> valueRetriever
         1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> false
         result == false
     }
@@ -379,7 +376,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
             }
         }
         when:
-        strategy.acceptIndexFile(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, 5), Mock(NumberSnappyIndexFile))
+        strategy.acceptIndexFile(new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, 5), Mock(NumberSnappyIndexFile))
         then:
         thrown UnsupportedOperationException
     }

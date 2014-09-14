@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.data.snappy
 
-import org.jumbodb.common.query.QueryClause
+import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.QueryOperation
 import spock.lang.Unroll
 
@@ -15,7 +15,7 @@ class GeoBoundaryBoxJsonOperationSearchSpec extends spock.lang.Specification {
         expect:
         List<Double> p1 = Arrays.asList(lat1, lon1)
         List<Double> p2 = Arrays.asList(lat2, lon2)
-        QueryClause q = new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(p1, p2));
+        def q = new JsonQuery("testField", QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(p1, p2));
         operation.matches(q, Arrays.asList(testLat, testLon)) == isInBoundaryBox
         where:
         lat1      | lon1      | lat2      | lon2      | testLat   | testLon   | isInBoundaryBox

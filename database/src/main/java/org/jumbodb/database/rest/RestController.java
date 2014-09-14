@@ -78,21 +78,18 @@ public class RestController {
         return queryUtilService.findDocumentsByJsonQuery(query, 20);
     }
 
-    // CARSTEN unit test
     @RequestMapping(value = "/query/sql", method = RequestMethod.POST)
     @ResponseBody
     public QueryResult querySql(@RequestBody String query) {
         return queryUtilService.findDocumentsBySqlQuery(query, -1);
     }
 
-    // CARSTEN unit test
     @RequestMapping(value = "/query/sql/explain", method = RequestMethod.POST)
     @ResponseBody
     public ExplainResult explainSql(@RequestBody String query) {
         return queryUtilService.explainSqlQuery(query);
     }
 
-    // CARSTEN unit test
     @RequestMapping(value = "/query/sql/defaultLimit", method = RequestMethod.POST)
     @ResponseBody
     public QueryResult querySqlWithDefault(@RequestBody String query) {

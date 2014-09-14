@@ -11,7 +11,7 @@ subprojects {
     apply plugin: 'info'
   
     group = 'org.jumbodb'
-    version = '0.1.0'
+    version = '0.2.0-SNAPSHOT'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7

@@ -29,7 +29,7 @@ public class QueryUtilService {
         executorService.shutdownNow();
     }
 
-    public QueryResult findDocumentsByJsonQuery(final String query, final Integer defaultLimit) {
+    public QueryResult findDocumentsByJsonQuery(String query, Integer defaultLimit) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JumboQuery jumboQuery = mapper.readValue(query, JumboQuery.class);
@@ -43,7 +43,7 @@ public class QueryUtilService {
     }
 
     // CARSTEN unit test
-    public QueryResult findDocumentsBySqlQuery(final String sql, final Integer defaultLimit) {
+    public QueryResult findDocumentsBySqlQuery(String sql, Integer defaultLimit) {
         try {
             JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(sql);
             if (jumboQuery.getLimit() == -1) {
@@ -57,7 +57,7 @@ public class QueryUtilService {
     }
 
     // CARSTEN unit test
-    public ExplainResult explainSqlQuery(final String sql) {
+    public ExplainResult explainSqlQuery(String sql) {
         try {
             JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(sql);
             return new ExplainResult(jumboQuery, Arrays.asList("add the executions")); // CARSTEN implement add the executions with chunk, version and size

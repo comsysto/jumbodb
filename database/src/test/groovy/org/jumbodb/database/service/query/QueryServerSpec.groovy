@@ -15,8 +15,9 @@ class QueryServerSpec extends Specification {
         def jumboSearcherMock = Mock(JumboSearcher)
         def dataFileMock = Mock(File)
         def indexFileMock = Mock(File)
+        def queryConverterService = Mock(JumboQueryConverterService)
         def config = new JumboConfiguration(12002, 12001, dataFileMock, indexFileMock)
-        def queryServer = new QueryServer(config, jumboSearcherMock, 500l)
+        def queryServer = new QueryServer(config, jumboSearcherMock, queryConverterService, 500l)
         def executorMock = Mock(ExecutorService)
         queryServer.setServerSocketExecutor(executorMock)
         queryServer.start()
@@ -35,10 +36,11 @@ class QueryServerSpec extends Specification {
     def "test start up and stop"() {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
+        def queryConverterService = Mock(JumboQueryConverterService)
         def dataFileMock = Mock(File)
         def indexFileMock = Mock(File)
         def config = new JumboConfiguration(13002, 13001, dataFileMock, indexFileMock)
-        def queryServer = new QueryServer(config, jumboSearcherMock, 500l)
+        def queryServer = new QueryServer(config, jumboSearcherMock, queryConverterService, 500l)
         queryServer.start()
         when:
         queryServer.stop()

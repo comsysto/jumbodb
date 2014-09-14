@@ -20,14 +20,14 @@ class SearchIndexTaskSpec extends Specification {
         def indexStrategyMock = Mock(IndexStrategy)
         def indexes = [new IndexDefinition("testIndex", Mock(File), "INDEX_STRATEGY")]
         def chunkDefinition = new DeliveryChunkDefinition("testChunkKey", "testCollection", indexes, [:], "DATA_STRATEGY")
-        def query = new IndexQuery("testIndex", [new QueryClause(QueryOperation.EQ, 4)])
-        def searchIndexTask = new SearchIndexTask(chunkDefinition, query, indexStrategyManagerMock, 10, true)
-        def expectedOffset = [new FileOffset(50000, 1234l, []), new FileOffset(50000, 2345l, [])] as Set
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 4)
+        def searchIndexTask = new SearchIndexTask(chunkDefinition, "testIndex", [query], indexStrategyManagerMock, 10, true)
+        def expectedOffset = [new FileOffset(50000, 1234l, query), new FileOffset(50000, 2345l, query)] as Set
         when:
         def offsets = searchIndexTask.call()
         then:
         1 * indexStrategyManagerMock.getStrategy("testChunkKey", "testCollection", "testIndex") >> indexStrategyMock
-        1 * indexStrategyMock.findFileOffsets("testCollection", "testChunkKey", query, 10, true) >> expectedOffset
+        1 * indexStrategyMock.findFileOffsets("testChunkKey", "testCollection", "testIndex", [query], 10, true) >> expectedOffset
         expectedOffset == offsets
     }
 
@@ -36,8 +36,8 @@ class SearchIndexTaskSpec extends Specification {
         def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def indexes = [new IndexDefinition("testIndex", Mock(File), "INDEX_STRATEGY")]
         def chunkDefinition = new DeliveryChunkDefinition("testChunkKey", "testCollection", indexes, [:], "DATA_STRATEGY")
-        def query = new IndexQuery("otherIndex", [new QueryClause(QueryOperation.EQ, 4)])
-        def searchIndexTask = new SearchIndexTask(chunkDefinition, query, indexStrategyManagerMock, 10, true)
+        def query = new IndexQuery("otherIndex", QueryOperation.EQ, 4)
+        def searchIndexTask = new SearchIndexTask(chunkDefinition, "otherIndex", [query], indexStrategyManagerMock, 10, true)
         when:
         searchIndexTask.call()
         then:

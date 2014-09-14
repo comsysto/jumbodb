@@ -5,6 +5,7 @@ import org.jumbodb.database.service.exporter.StartReplication
 import org.jumbodb.database.service.management.storage.StorageManagement
 import org.jumbodb.database.service.management.storage.dto.maintenance.TemporaryFiles
 import org.jumbodb.database.service.queryutil.QueryUtilService
+import org.jumbodb.database.service.queryutil.dto.ExplainResult
 import org.jumbodb.database.service.queryutil.dto.QueryResult
 import spock.lang.Specification
 
@@ -83,16 +84,65 @@ class RestControllerSpec extends Specification {
         1 * storageManagementMock.findQueryableCollections() >> returnValueMock
     }
 
-    def "query"() {
+    def "queryJson"() {
         setup:
         def controller = new RestController()
         def queryUtilServiceMock = Mock(QueryUtilService)
         def returnValueMock = Mock(QueryResult)
         controller.setQueryUtilService(queryUtilServiceMock)
         when:
-        controller.query("collection", "my_query") == returnValueMock
+        controller.queryJson("my_query") == returnValueMock
         then:
-        1 * queryUtilServiceMock.findDocumentsByJsonQuery("collection", "my_query", -1) >> returnValueMock
+        1 * queryUtilServiceMock.findDocumentsByJsonQuery("my_query", -1) >> returnValueMock
+    }
+
+
+    def "queryJsonWithDefault"() {
+        setup:
+        def controller = new RestController()
+        def queryUtilServiceMock = Mock(QueryUtilService)
+        def returnValueMock = Mock(QueryResult)
+        controller.setQueryUtilService(queryUtilServiceMock)
+        when:
+        controller.queryJsonWithDefault("my_query") == returnValueMock
+        then:
+        1 * queryUtilServiceMock.findDocumentsByJsonQuery("my_query", 20) >> returnValueMock
+    }
+
+    def "querySqlWithDefault"() {
+        setup:
+        def controller = new RestController()
+        def queryUtilServiceMock = Mock(QueryUtilService)
+        def returnValueMock = Mock(QueryResult)
+        controller.setQueryUtilService(queryUtilServiceMock)
+        when:
+        controller.querySqlWithDefault("my_query") == returnValueMock
+        then:
+        1 * queryUtilServiceMock.findDocumentsBySqlQuery("my_query", 20) >> returnValueMock
+    }
+
+    def "querySql"() {
+        setup:
+        def controller = new RestController()
+        def queryUtilServiceMock = Mock(QueryUtilService)
+        def returnValueMock = Mock(QueryResult)
+        controller.setQueryUtilService(queryUtilServiceMock)
+        when:
+        controller.querySql("my_query") == returnValueMock
+        then:
+        1 * queryUtilServiceMock.findDocumentsBySqlQuery("my_query", -1) >> returnValueMock
+    }
+
+    def "explainSql"() {
+        setup:
+        def controller = new RestController()
+        def queryUtilServiceMock = Mock(QueryUtilService)
+        def returnValueMock = Mock(ExplainResult)
+        controller.setQueryUtilService(queryUtilServiceMock)
+        when:
+        controller.explainSql("my_query") == returnValueMock
+        then:
+        1 * queryUtilServiceMock.explainSqlQuery("my_query") >> returnValueMock
     }
 
 

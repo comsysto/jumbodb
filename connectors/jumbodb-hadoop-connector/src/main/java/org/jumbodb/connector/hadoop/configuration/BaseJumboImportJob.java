@@ -50,10 +50,7 @@ public class BaseJumboImportJob {
     }
 
     public Path getSortedInputPath() {
-        if(sortedOutputPath != null) {
-            return sortedOutputPath;
-        }
-        return inputPath;
+        return sortedOutputPath;
     }
 
     public void setSortedOutputPath(Path sortedOutputPath) {

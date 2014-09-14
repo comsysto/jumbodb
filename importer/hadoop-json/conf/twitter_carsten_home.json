@@ -14,8 +14,6 @@
             "input": "file:///C:/Development/data/twitter/input/",
             "description": "Twitter data",
             "collectionName": "carsten.twitter",
-            "sort": ["created_at"],
-            "sortType": "STRING",
             "dataStrategy": "JSON_SNAPPY_V1",
             "indexes": [
                 {

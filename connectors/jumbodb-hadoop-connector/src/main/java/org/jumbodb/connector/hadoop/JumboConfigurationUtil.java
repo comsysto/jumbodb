@@ -163,7 +163,6 @@ public class JumboConfigurationUtil {
         for (ImportCollection importCollection : importDefinition.getImportCollection()) {
             JumboGenericImportJob job = new JumboGenericImportJob();
             job.setIndexes(importCollection.getIndexes());
-            job.setSort(importCollection.getSort());
             job.setCollectionName(importCollection.getCollectionName());
             job.setDeliveryChunkKey(importDefinition.getDeliveryChunkKey());
             job.setDescription(importCollection.getDescription());
@@ -181,9 +180,9 @@ public class JumboConfigurationUtil {
             job.setDataStrategy(importCollection.getDataStrategy());
             job.setSortDatePattern(importCollection.getSortDatePattern() != null ? importCollection.getSortDatePattern() : importDefinition.getDatePattern());
             job.setSortType(importCollection.getSortType());
+            job.setSort(importCollection.getSort());
             job.setInputPath(new Path(importCollection.getInput()));
-            job.setSortedOutputPath(
-              importCollection.getSort() != null && importCollection.getSort().size() > 0 ? new Path(outputData) : null);
+            job.setSortedOutputPath(new Path(outputData));
             job.setIndexOutputPath(new Path(outputIndex));
             job.setLogOutputPath(new Path(outputLog));
             job.setNumberOfOutputFiles(importCollection.getNumberOfOutputFiles() != null ? importCollection.getNumberOfOutputFiles() : importDefinition.getNumberOfDataFiles());

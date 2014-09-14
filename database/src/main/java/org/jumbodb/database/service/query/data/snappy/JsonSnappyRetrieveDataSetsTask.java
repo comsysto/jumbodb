@@ -111,8 +111,6 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 // load to result buffer till line break
                 int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
                 int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
-//                    int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, (int)(searchOffset - resultBufferStartOffset));
-//                    int datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                 while((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
                     int read1 = bis.read(compressedLengthBuffer);
                     compressedFileStreamPosition += read1;
@@ -123,16 +121,13 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                     uncompressedFileStreamPosition += uncompressLength;
                     datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
                     resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
-//                        resultBuffer = concat(readBufferUncompressed, resultBuffer, uncompressLength);
                     resultBufferEndOffset = uncompressedFileStreamPosition - 1;
                     resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
                     datasetStartOffset = 0;
                     lineBreakOffset = findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
                 }
 
-//                    int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : resultBuffer.length ;
                 int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
-//                    byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, 0, datasetLength);
                 byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
                 if(resultCacheEnabled) {
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), dataSetFromOffsetsGroup);

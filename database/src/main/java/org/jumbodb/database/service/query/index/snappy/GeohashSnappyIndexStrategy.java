@@ -63,6 +63,8 @@ public class GeohashSnappyIndexStrategy extends NumberSnappyIndexStrategy<Geohas
 
     @Override
     public String getStrategyName() {
+
+        // CARSTEN rename remove version everywhere
         return "GEOHASH_SNAPPY_V1";
     }
 }

@@ -65,6 +65,7 @@ public class FloatSnappyIndexStrategy extends NumberSnappyIndexStrategy<Float, F
 
     @Override
     public String getStrategyName() {
+        // CARSTEN rename remove version everywhere
         return "FLOAT_SNAPPY_V1";
     }
 }

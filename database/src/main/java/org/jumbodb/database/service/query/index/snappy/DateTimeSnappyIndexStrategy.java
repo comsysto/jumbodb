@@ -29,6 +29,7 @@ public class DateTimeSnappyIndexStrategy extends LongSnappyIndexStrategy {
 
     @Override
     public String getStrategyName() {
+        // CARSTEN rename remove version everywhere
         return "DATETIME_SNAPPY_V1";
     }
 }

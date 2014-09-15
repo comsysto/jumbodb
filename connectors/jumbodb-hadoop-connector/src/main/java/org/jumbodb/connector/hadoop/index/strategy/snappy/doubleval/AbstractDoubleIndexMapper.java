@@ -16,6 +16,7 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractDoubleIndexMapper<T> extends AbstractIndexMapper<T> {
+    // CARSTEN remove version from name
     public static final String DOUBLE_SNAPPY_V_1 = "DOUBLE_SNAPPY_V1";
 
     private DoubleWritable keyW = new DoubleWritable();

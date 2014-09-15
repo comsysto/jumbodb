@@ -15,6 +15,7 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractLongIndexMapper<T> extends AbstractIndexMapper<T> {
+    // CARSTEN remove version from name
     public static final String LONG_SNAPPY_V1 = "LONG_SNAPPY_V1";
 
     private LongWritable keyW = new LongWritable();

@@ -18,6 +18,7 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
+// CARSTEN remove version from name
 public class SnappyDataV1InputFormat extends FileInputFormat<LongWritable, Text> {
 
     @Override

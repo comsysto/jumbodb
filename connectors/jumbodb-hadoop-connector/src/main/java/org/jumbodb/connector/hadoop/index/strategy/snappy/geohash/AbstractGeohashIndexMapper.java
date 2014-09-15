@@ -17,6 +17,7 @@ import java.util.List;
  * Time: 3:26 PM
  */
 public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<T> {
+    // CARSTEN remove version from name
     public static final String GEOHASH_SNAPPY_V1 = "GEOHASH_SNAPPY_V1";
     private IntWritable keyW = new IntWritable();
     private GeoFileOffsetWritable valueW = new GeoFileOffsetWritable();
@@ -39,6 +40,7 @@ public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<
 
     @Override
     public String getStrategy() {
+        // CARSTEN remove version from name
         return GEOHASH_SNAPPY_V1;
     }
 

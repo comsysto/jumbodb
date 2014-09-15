@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
+// CARSTEN remove version from name
 public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
     public static final String STRATEGY_KEY = "JSON_SNAPPY_V1";
     public static final int SNAPPY_BLOCK_SIZE = 32768;

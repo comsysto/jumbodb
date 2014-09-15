@@ -13,6 +13,7 @@ import java.io.IOException;
  * Date: 11/3/12
  * Time: 3:26 PM
  */
+// CARSTEN remove version from name
 public abstract class AbstractFloatIndexMapper<T> extends AbstractIndexMapper<T> {
     public static final String FLOAT_SNAPPY_V_1 = "FLOAT_SNAPPY_V1";
 

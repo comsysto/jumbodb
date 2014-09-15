@@ -65,6 +65,7 @@ public class DoubleSnappyIndexStrategy extends NumberSnappyIndexStrategy<Double,
 
     @Override
     public String getStrategyName() {
+        // CARSTEN rename remove version everywhere
         return "DOUBLE_SNAPPY_V1";
     }
 }

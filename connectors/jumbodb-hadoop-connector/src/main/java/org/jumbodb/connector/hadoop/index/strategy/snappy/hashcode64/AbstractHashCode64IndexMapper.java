@@ -16,6 +16,7 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractHashCode64IndexMapper<T> extends AbstractIndexMapper<T> {
+    // CARSTEN remove version from name
     public static final String HASHCODE64_SNAPPY_V1 = "HASHCODE64_SNAPPY_V1";
 
     private LongWritable keyW = new LongWritable();

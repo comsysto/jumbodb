@@ -6,6 +6,7 @@ import org.jumbodb.connector.hadoop.index.output.index.AbstractSnappyIndexV1Outp
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+// CARSTEN remove version from name
 public class GeohashSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1OutputFormat<IntWritable, GeoFileOffsetWritable> {
 
     @Override

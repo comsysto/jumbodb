@@ -43,6 +43,7 @@ import org.xerial.snappy.SnappyInputStream;
 /**
  * Treats keys as offset in file and value as line.
  */
+// CARSTEN remove version from name
 @InterfaceAudience.LimitedPrivate({"MapReduce", "Pig"})
 @InterfaceStability.Evolving
 public class SnappyDataV1LineRecordReader extends RecordReader<LongWritable, Text> {

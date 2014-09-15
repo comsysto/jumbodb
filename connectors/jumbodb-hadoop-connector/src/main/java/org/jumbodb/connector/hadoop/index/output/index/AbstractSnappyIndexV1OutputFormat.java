@@ -26,6 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
+// CARSTEN remove version from name
 public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableComparable, OV> extends FileOutputFormat<T, OV> {
 
     @Override

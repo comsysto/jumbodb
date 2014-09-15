@@ -28,6 +28,7 @@ public class HashCode32SnappyIndexStrategy extends IntegerSnappyIndexStrategy {
 
     @Override
     public String getStrategyName() {
+        // CARSTEN rename remove version everywhere
         return "HASHCODE32_SNAPPY_V1";
     }
 }

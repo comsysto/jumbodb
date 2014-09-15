@@ -16,6 +16,7 @@ import java.util.Date;
  * Time: 3:26 PM
  */
 public abstract class AbstractDateTimeIndexMapper<T> extends AbstractIndexMapper<T> {
+    // CARSTEN remove version from name
     public static final String DATETIME_SNAPPY_V1 = "DATETIME_SNAPPY_V1";
 
     private LongWritable keyW = new LongWritable();
@@ -34,6 +35,7 @@ public abstract class AbstractDateTimeIndexMapper<T> extends AbstractIndexMapper
 
     @Override
     public String getStrategy() {
+        // CARSTEN remove version from name
         return DATETIME_SNAPPY_V1;
     }
 

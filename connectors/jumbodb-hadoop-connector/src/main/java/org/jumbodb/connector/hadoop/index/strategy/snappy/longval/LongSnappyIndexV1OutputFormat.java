@@ -8,6 +8,7 @@ import org.jumbodb.connector.hadoop.index.strategy.snappy.hashcode64.AbstractHas
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+// CARSTEN remove version from name
 public class LongSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1OutputFormat<LongWritable, FileOffsetWritable> {
 
     @Override

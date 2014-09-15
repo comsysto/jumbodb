@@ -284,7 +284,11 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         throw new IllegalArgumentException("not supported");
     }
 
-
+    @Override
+    public void visit(TimestampValue value) {
+        super.visit(value);
+        throw new IllegalArgumentException("not supported");
+    }
 
     @Override
     public void visit(SubSelect subSelect) {

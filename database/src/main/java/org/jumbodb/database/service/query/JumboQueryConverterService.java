@@ -64,7 +64,8 @@ public class JumboQueryConverterService {
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'");
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h') and (g = 'g' or y = 'y' or o = 'o')) or x = 'x'");
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where exists(aaaa)");
-        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test where field in (aaaa, 'bbb', 'ccc')");
+//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test where field in (aaaa, 'bbb', 'ccc')");
+        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test where field = {ts '2012-12-12 12:12:12'}");
         long start = System.currentTimeMillis();
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where aaa = 'bb'");
 

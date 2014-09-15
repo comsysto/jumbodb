@@ -230,7 +230,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     public void visit(InExpression expr) {
         // CARSTEN implement later
         expr.getLeftExpression().accept(this);
-//        expr.getLeftItemsList().accept(this);
+//        expr.getLeftItemsList().accept(this); // causes null
         expr.getRightItemsList().accept(this);
         throw new IllegalArgumentException("not supported");
     }

@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
  * Time: 4:16 PM
  */
 public interface ResultCallback {
+    // CARSTEN change result to Map<String, Object> full json tree...
     void writeResult(byte[] result) throws IOException;
     boolean needsMore(JumboQuery jumboQuery) throws IOException;
     void collect(CancelableTask cancelableTask);

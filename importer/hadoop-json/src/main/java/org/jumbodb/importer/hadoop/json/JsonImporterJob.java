@@ -24,7 +24,6 @@ import org.jumbodb.connector.hadoop.configuration.DataStrategy;
 import org.jumbodb.connector.hadoop.configuration.ImportDefinition;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
-import org.jumbodb.connector.hadoop.index.output.data.SnappyDataV1OutputFormat;
 
 import java.util.Collections;
 import java.util.List;

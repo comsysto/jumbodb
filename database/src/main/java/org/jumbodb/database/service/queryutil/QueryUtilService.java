@@ -76,6 +76,7 @@ public class QueryUtilService {
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
+                // CARSTEN should try to reuse functions in frontend
                     jumboSearcher.findResultAndWriteIntoCallback(jumboQuery, new ResultCallback() {
                         @Override
                         public void writeResult(byte[] dataSet) throws IOException {

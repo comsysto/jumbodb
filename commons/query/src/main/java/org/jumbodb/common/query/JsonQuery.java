@@ -7,10 +7,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+// CARSTEN rename to DataQuery!
 public class JsonQuery {
-    private String fieldName;
+    private String fieldName; // CARSTEN rename to left
+    // CARSTEN add leftType = VALUE OR COLUMN
     private QueryOperation queryOperation;
-    private Object value;
+    // CARSTEN add rightType = VALUE OR COLUMN
+    private Object value;     // CARSTEN add field right
     private JsonQuery and;
     private List<JsonQuery> ors = new LinkedList<JsonQuery>();
 

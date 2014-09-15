@@ -140,6 +140,7 @@ public class QueryTask implements Runnable {
     }
 
 
+    // CARSTEN static machen!
     private class QueryTimeoutTask implements Callable<Integer> {
         private JumboQuery query;
         private DatabaseQuerySession.ResultWriter resultWriter;
@@ -151,9 +152,14 @@ public class QueryTask implements Runnable {
 
         @Override
         public Integer call() {
+            // CARSTEN mehrere Implementierungen von ResultCallback machen und anhang von query die richtige auswaehlen
+            // CARSTEN eine impl. für group by mit entsprechnder synchronisierung, möglicherweise Multimaps.synchronized nutzen
+            // CARSTEN implementierung für groovy auswertung.
             return jumboSearcher.findResultAndWriteIntoCallback(query, new ResultCallback() {
                 @Override
+                // CARSTEN anstelle von byte[] wird der komplett geparste Json Tree benötigt, da hier die selektion statt findet.
                 public void writeResult(byte[] result) throws IOException {
+                    // CARSTEN hier in seperater implementierung group auswertung.
                     resultWriter.writeResult(result);
                     numberOfResults.incrementAndGet();
                 }

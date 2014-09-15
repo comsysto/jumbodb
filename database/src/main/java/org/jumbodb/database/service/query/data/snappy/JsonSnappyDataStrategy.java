@@ -38,6 +38,7 @@ import java.util.concurrent.Future;
  * @author Carsten Hufe
  */
 public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch {
+    // CARSTEN rename strategy to JSON_SNAPPY_LB
     public static final String JSON_SNAPPY_V1 = "JSON_SNAPPY_V1";
     private Logger log = LoggerFactory.getLogger(JsonSnappyDataStrategy.class);
 
@@ -135,11 +136,13 @@ public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch
     }
 
     @Override
+    // CARSTEN change signature to     public boolean matches(QueryOperation queryOperation, Object leftValue, Object rightValue) {
     public boolean matches(JsonQuery queryClause, Object value) {
         DataOperationSearch jsonOperationSearch = getOperations().get(queryClause.getQueryOperation());
         if(jsonOperationSearch == null) {
             throw new UnsupportedOperationException("OperationSearch is not supported: " + queryClause.getQueryOperation());
         }
+        // CARSTEN pass left and rightValue
         return jsonOperationSearch.matches(queryClause, value);
     }
 

@@ -130,6 +130,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
                 byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
                 if(resultCacheEnabled) {
+                    // CARSTEN cache only parsed data
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), dataSetFromOffsetsGroup);
                 }
                 IndexQuery indexQuery = offset.getIndexQuery();
@@ -190,6 +191,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private List<FileOffset> extractOffsetsFromCacheAndWriteResultForExisting() throws IOException, ParseException {
         List<FileOffset> notFoundOffsets = new ArrayList<FileOffset>(offsets.size());
         for (FileOffset offset : offsets) {
+            // CARSTEN cache only parsed data
             Cache.ValueWrapper valueWrapper = datasetsByOffsetsCache.get(new CacheFileOffset(file, offset.getOffset()));
             if(valueWrapper != null) {
                 byte[] dataSetFromOffsetsGroup = (byte[]) valueWrapper.get();
@@ -292,8 +294,13 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             return true;
         }
         for (JsonQuery jsonQuery : jsonQueries) {
+            // CARSTEN method getLeftValue
             Object lastObj = findValueFromJson(parsedJson, queriedValuesCache, jsonQuery);
+            // CARSTEN method getRightValue
+
             if(lastObj != null) {
+                // CARSTEN handle EXISTS QueryOperation at this position
+                // CARSTEN pass left and rightValue
                 if(strategy.matches(jsonQuery, lastObj)) {
                     if(jsonQuery.getAnd() != null) {
                         return matchingFilter(parsedJson, queriedValuesCache, Arrays.asList(jsonQuery.getAnd()));

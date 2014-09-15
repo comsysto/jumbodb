@@ -43,7 +43,7 @@
         <constructor-arg value="${jumbodb.index.threadpool.size}" />
     </bean>
 
-    <bean id="baseNumberIndexStrategy" abstract="true" class="org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy">
+    <bean id="baseNumberIndexStrategy" abstract="true" class="org.jumbodb.database.service.query.index.snappy.NumberSnappyIndexStrategy">
         <property name="indexFileExecutor" ref="indexFileExecutor"/>
         <property name="indexBlockRangesCache" ref="indexBlockRangesCache"/>
         <property name="indexSnappyChunksCache" ref="indexSnappyChunksCache"/>
@@ -53,14 +53,14 @@
     <bean id="indexStrategyManager" class="org.jumbodb.database.service.query.index.IndexStrategyManager">
         <property name="strategies">
             <list>
-                <bean class="org.jumbodb.database.service.query.index.hashcode32.snappy.HashCode32SnappyIndexStrategy" parent="baseNumberIndexStrategy" />
-                <bean class="org.jumbodb.database.service.query.index.hashcode64.snappy.HashCode64SnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
-                <bean class="org.jumbodb.database.service.query.index.integer.snappy.IntegerSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
-                <bean class="org.jumbodb.database.service.query.index.floatval.snappy.FloatSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
-                <bean class="org.jumbodb.database.service.query.index.doubleval.snappy.DoubleSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
-                <bean class="org.jumbodb.database.service.query.index.longval.snappy.LongSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
-                <bean class="org.jumbodb.database.service.query.index.datetime.snappy.DateTimeSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
-                <bean class="org.jumbodb.database.service.query.index.geohash.snappy.GeohashSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.snappy.HashCode32SnappyIndexStrategy" parent="baseNumberIndexStrategy" />
+                <bean class="org.jumbodb.database.service.query.index.snappy.HashCode64SnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.snappy.IntegerSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.snappy.FloatSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.snappy.DoubleSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.snappy.LongSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.snappy.DateTimeSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.snappy.GeohashSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
                 <bean class="org.jumbodb.database.service.query.index.notfound.NotFoundIndexStrategy"/>
             </list>
         </property>

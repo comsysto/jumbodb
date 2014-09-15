@@ -3,34 +3,21 @@ package org.jumbodb.connector.hadoop.index;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.DataStrategies;
-import org.jumbodb.connector.hadoop.configuration.DataStrategy;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 import org.jumbodb.connector.hadoop.configuration.IndexStrategies;
 import org.jumbodb.connector.hadoop.configuration.JumboCustomImportJob;
 import org.jumbodb.connector.hadoop.configuration.JumboGenericImportJob;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
-import org.jumbodb.connector.hadoop.index.output.data.SnappyDataV1InputFormat;
-import org.jumbodb.connector.hadoop.index.strategy.datetime.snappy.GenericJsonDateTimeIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.doubleval.snappy.GenericJsonDoubleIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.floatval.snappy.GenericJsonFloatIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.geohash.snappy.GenericJsonGeohashIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.hashcode.snappy.GenericJsonHashCode32IndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.hashcode64.snappy.GenericJsonHashCode64IndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.integer.snappy.GenericJsonIntegerIndexMapper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.jumbodb.connector.hadoop.index.strategy.longval.snappy.GenericJsonLongIndexMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * User: carsten

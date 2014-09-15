@@ -5,6 +5,7 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.QueryOperation;
 
@@ -228,8 +229,10 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(InExpression expr) {
         // CARSTEN implement later
+        expr.getLeftExpression().accept(this);
+//        expr.getLeftItemsList().accept(this);
+        expr.getRightItemsList().accept(this);
         throw new IllegalArgumentException("not supported");
-//        super.visit(expr);
     }
 
     @Override
@@ -241,6 +244,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(NullValue value) {
         super.visit(value);
+        throw new IllegalArgumentException("not supported");
     }
 
     @Override
@@ -276,9 +280,17 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(ExistsExpression expr) {
         // CARSTEN implement later
+        super.visit(expr);
         throw new IllegalArgumentException("not supported");
     }
 
+
+
+    @Override
+    public void visit(SubSelect subSelect) {
+        super.visit(subSelect);
+        throw new IllegalArgumentException("not supported");
+    }
 
     @Override
     public void visit(Function function) {

@@ -1,16 +1,14 @@
 package org.jumbodb.database.service.query.index.longval.snappy;
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberLtOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
 /**
  * @author Carsten Hufe
  */
-public class LongLtOperationSearch extends NumberLtOperationSearch<Long,Long,  NumberSnappyIndexFile<Long>> {
+public class LongLtOperationSearch extends NumberLtOperationSearch<Long, Long, NumberSnappyIndexFile<Long>> {
 
     @Override
     public boolean matching(Long currentValue, QueryValueRetriever queryValueRetriever) {
@@ -19,7 +17,8 @@ public class LongLtOperationSearch extends NumberLtOperationSearch<Long,Long,  N
     }
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Long> snappyIndexFile) {
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever,
+      NumberSnappyIndexFile<Long> snappyIndexFile) {
         Long searchValue = queryValueRetriever.getValue();
         return searchValue > snappyIndexFile.getTo() || searchValue > snappyIndexFile.getFrom();
     }

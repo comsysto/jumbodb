@@ -1,10 +1,8 @@
 package org.jumbodb.database.service.query.index.doubleval.snappy;
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberEqOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
 /**
@@ -44,7 +42,8 @@ public class DoubleEqOperationSearch extends NumberEqOperationSearch<Double, Dou
     }
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Double> snappyIndexFile) {
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever,
+      NumberSnappyIndexFile<Double> snappyIndexFile) {
         Double searchValue = queryValueRetriever.getValue();
         return searchValue >= snappyIndexFile.getFrom() && searchValue <= snappyIndexFile.getTo();
     }

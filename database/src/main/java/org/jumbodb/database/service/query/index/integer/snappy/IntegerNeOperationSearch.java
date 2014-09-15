@@ -1,10 +1,8 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberNeOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
 /**
@@ -18,16 +16,17 @@ public class IntegerNeOperationSearch extends NumberNeOperationSearch<Integer, I
     }
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> snappyIndexFile) {
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever,
+      NumberSnappyIndexFile<Integer> snappyIndexFile) {
         Integer searchValue = queryValueRetriever.getValue();
         boolean fromNe = !searchValue.equals(snappyIndexFile.getFrom());
         boolean toNe = !searchValue.equals(snappyIndexFile.getTo());
         return fromNe || toNe;
     }
 
-     @Override
+    @Override
     public boolean matching(Integer currentValue, QueryValueRetriever queryValueRetriever) {
-         Integer searchValue = queryValueRetriever.getValue();
+        Integer searchValue = queryValueRetriever.getValue();
         return !currentValue.equals(searchValue);
     }
 

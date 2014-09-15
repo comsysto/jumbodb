@@ -136,21 +136,21 @@ public class JumboSearcher {
     // CARSTEN ab hier durchdebuggen und schauen ob das verhalten ok ist
     private Collection<FileOffset> filterOffsets(Collection<FileOffset> fileOffsets, JumboQuery searchQuery) {
         Collection<FileOffset> result = new HashSet<FileOffset>();
-        Map<IndexQuery, List<FileOffset>> groupByIndexQuery = groupByIndexQuery(result);
+        Map<IndexQuery, List<FileOffset>> groupByIndexQuery = groupByIndexQuery(fileOffsets);
 
         for (IndexQuery indexQuery : searchQuery.getIndexQuery()) {
-            result.addAll(getIndexesApplyAndLogic(indexQuery, fileOffsets, groupByIndexQuery));
+            result.addAll(getIndexesApplyAndLogic(indexQuery, groupByIndexQuery));
         }
         return result;
     }
 
-    private Set<FileOffset> getIndexesApplyAndLogic(IndexQuery indexQuery, Collection<FileOffset> fileOffsets, Map<IndexQuery, List<FileOffset>> groupByIndexQuery) {
+    private Set<FileOffset> getIndexesApplyAndLogic(IndexQuery indexQuery, Map<IndexQuery, List<FileOffset>> groupByIndexQuery) {
         Set<FileOffset> result = new HashSet<FileOffset>();
         IndexQuery andIndex = indexQuery.getAndIndex();
         List<FileOffset> fileOffset = groupByIndexQuery.get(indexQuery);
         result.addAll(fileOffset);
         if(andIndex != null) {
-            result.retainAll(getIndexesApplyAndLogic(andIndex, fileOffsets, groupByIndexQuery));
+            result.retainAll(getIndexesApplyAndLogic(andIndex, groupByIndexQuery));
         }
         return result;
     }
@@ -218,7 +218,7 @@ public class JumboSearcher {
         public Integer call() throws Exception {
             Collection<FileOffset> fileOffsets = findFileOffsets(deliveryChunk, searchQuery, resultCallback);
             DataStrategy strategy = dataStrategyManager
-              .getStrategy(deliveryChunk.getCollection(), deliveryChunk.getChunkKey());
+              .getStrategy(deliveryChunk.getChunkKey(), deliveryChunk.getCollection());
             return strategy.findDataSetsByFileOffsets(deliveryChunk, fileOffsets, resultCallback, searchQuery);
         }
     }
@@ -285,7 +285,7 @@ public class JumboSearcher {
     }
 
     public DataStrategy getDataStrategy(String chunkKey, String collection) {
-        return dataStrategyManager.getStrategy(collection, chunkKey);
+        return dataStrategyManager.getStrategy(chunkKey, collection);
     }
 
     @Required

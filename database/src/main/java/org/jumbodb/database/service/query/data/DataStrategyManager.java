@@ -27,11 +27,11 @@ public class DataStrategyManager {
     }
 
 
-    public String getStrategyKey(String collection, String chunkKey) {
+    public String getStrategyKey(String chunkKey, String collection) {
         return dataLocationsAndStrategies.get(new DataKey(chunkKey, collection)).getStrategyName();
     }
 
-    public DataStrategy getStrategy(String collection, String chunkKey) {
+    public DataStrategy getStrategy(String chunkKey, String collection) {
         return dataLocationsAndStrategies.get(new DataKey(chunkKey, collection));
     }
 

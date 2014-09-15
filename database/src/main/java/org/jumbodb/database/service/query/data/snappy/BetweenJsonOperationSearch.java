@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.data.snappy;
 
 import org.jumbodb.common.query.JsonQuery;
-import org.jumbodb.common.query.QueryClause;
 
 import java.util.List;
 
@@ -14,23 +13,24 @@ public class BetweenJsonOperationSearch implements JsonOperationSearch {
         List<Number> searchValue = (List<Number>) jsonQuery.getValue();
         Number searchFrom = searchValue.get(0);
         Number searchTo = searchValue.get(1);
-        if(value instanceof Double) {
+        if (value instanceof Double) {
             Double dv = (Double) value;
             return searchFrom.doubleValue() < dv && dv < searchTo.doubleValue();
 
-        } else if(value instanceof Float) {
+        } else if (value instanceof Float) {
             Float dv = (Float) value;
             return searchFrom.floatValue() < dv && dv < searchTo.floatValue();
 
-        } else if(value instanceof Integer) {
+        } else if (value instanceof Integer) {
             Integer dv = (Integer) value;
             return searchFrom.intValue() < dv && dv < searchTo.intValue();
 
-        } else if(value instanceof Long) {
+        } else if (value instanceof Long) {
             Long dv = (Long) value;
             return searchFrom.longValue() < dv && dv < searchTo.longValue();
         } else {
-            throw new IllegalArgumentException(value.getClass().getSimpleName() + " is not supported for this search type.");
+            throw new IllegalArgumentException(
+              value.getClass().getSimpleName() + " is not supported for this search type.");
         }
     }
 }

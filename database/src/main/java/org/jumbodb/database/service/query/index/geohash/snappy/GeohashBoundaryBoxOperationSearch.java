@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.index.geohash.snappy;
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberEqOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
@@ -13,7 +12,7 @@ public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<G
 
     @Override
     public boolean matching(GeohashCoords currentValue, QueryValueRetriever queryValueRetriever) {
-        if(matchingChunk(currentValue, queryValueRetriever)) {
+        if (matchingChunk(currentValue, queryValueRetriever)) {
             GeohashContainer container = queryValueRetriever.getValue();
             GeohashBoundaryBox searchValue = container.getAppropriateBoundaryBox(currentValue);
             return containsPoint(currentValue, searchValue, container);
@@ -30,14 +29,16 @@ public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<G
         return (currentValue.getGeohash() >> bitsToShift) == searchedGeohash;
     }
 
-    protected boolean containsPoint(GeohashCoords currentValue, GeohashBoundaryBox searchValue, GeohashContainer container) {
+    protected boolean containsPoint(GeohashCoords currentValue, GeohashBoundaryBox searchValue,
+      GeohashContainer container) {
         return searchValue.contains(currentValue.getLatitude(), currentValue.getLongitude());
     }
 
     @Override
-    public boolean searchFinished(GeohashCoords currentValue, QueryValueRetriever queryValueRetriever, boolean resultsFound) {
+    public boolean searchFinished(GeohashCoords currentValue, QueryValueRetriever queryValueRetriever,
+      boolean resultsFound) {
         // test if geohash is still matching
-        if(!resultsFound) {
+        if (!resultsFound) {
             return false;
         }
         GeohashContainer container = queryValueRetriever.getValue();
@@ -83,14 +84,15 @@ public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<G
     }
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Integer> snappyIndexFile) {
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever,
+      NumberSnappyIndexFile<Integer> snappyIndexFile) {
         GeohashContainer searchValue = queryValueRetriever.getValue();
         for (GeohashBoundaryBox geohashBoundaryBox : searchValue.getSplittedBoxes()) {
             int geohash = geohashBoundaryBox.getGeohashFirstMatchingBits();
             int bitsToShift = geohashBoundaryBox.getBitsToShift();
             int from = snappyIndexFile.getFrom() >> bitsToShift;
             int to = snappyIndexFile.getTo() >> bitsToShift;
-            if(geohash >= from && geohash <= to) {
+            if (geohash >= from && geohash <= to) {
                 return true;
             }
         }

@@ -6,9 +6,10 @@ import spock.lang.Specification
 /**
  * @author Carsten Hufe
  */
+// CARSTEN test sql
 class QueryUtilServiceSpec extends Specification {
 
-    def "findDocumentsByQuery"() {
+    def "findDocumentsByJsonQuery"() {
         setup:
         def jumboSearcherMock = Mock(JumboSearcher)
         def queryUtilService = new QueryUtilService()
@@ -22,7 +23,7 @@ class QueryUtilServiceSpec extends Specification {
         queryResult.getMessage() == null
         queryResult.getResults()[0] == [sample: "result", anumber: 4]
         queryResult.getResults()[1] == [sample: "another result", anumber: 6]
-        1 * jumboSearcherMock.findResultAndWriteIntoCallback(_, _) >> { collection, jumboQuery, resultWriter ->
+        1 * jumboSearcherMock.findResultAndWriteIntoCallback(_, _) >> { jumboQuery, resultWriter ->
             resultWriter.writeResult("""{"sample": "result", "anumber": 4}""".getBytes("UTF-8"))
             resultWriter.writeResult("""{"sample": "another result", "anumber": 6}""".getBytes("UTF-8"))
             return 2
@@ -41,8 +42,8 @@ class QueryUtilServiceSpec extends Specification {
         def queryResult = queryUtilService.findDocumentsByJsonQuery(query, 20)
         then:
         queryResult.getResults() == null
-        queryResult.getMessage() == "java.io.IOException: test exception"
-        1 * jumboSearcherMock.findResultAndWriteIntoCallback(_, _) >> { collection, jumboQuery, resultWriter ->
+        queryResult.getMessage() == "test exception"
+        1 * jumboSearcherMock.findResultAndWriteIntoCallback(_, _) >> { jumboQuery, resultWriter ->
             throw new IOException("test exception")
         }
     }

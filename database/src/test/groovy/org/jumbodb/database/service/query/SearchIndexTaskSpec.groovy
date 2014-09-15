@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query
 
 import org.jumbodb.common.query.IndexQuery
-import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition

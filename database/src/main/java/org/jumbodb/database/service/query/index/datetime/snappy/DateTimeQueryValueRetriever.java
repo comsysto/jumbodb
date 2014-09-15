@@ -2,7 +2,6 @@ package org.jumbodb.database.service.query.index.datetime.snappy;
 
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
 import java.text.ParseException;
@@ -18,7 +17,7 @@ public class DateTimeQueryValueRetriever implements QueryValueRetriever {
 
     public DateTimeQueryValueRetriever(IndexQuery indexQuery) {
         Object obj = indexQuery.getValue();
-        if(obj instanceof String) {
+        if (obj instanceof String) {
             String date = (String) obj;
             SimpleDateFormat sdf = new SimpleDateFormat(DATE_SEARCH_PATTERN);
             try {

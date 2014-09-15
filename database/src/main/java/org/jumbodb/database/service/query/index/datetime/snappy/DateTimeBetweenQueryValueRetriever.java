@@ -2,7 +2,6 @@ package org.jumbodb.database.service.query.index.datetime.snappy;
 
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
 import java.text.ParseException;
@@ -23,7 +22,7 @@ public class DateTimeBetweenQueryValueRetriever implements QueryValueRetriever {
         List<?> vals = (List<?>) indexQuery.getValue();
         try {
             for (Object obj : vals) {
-                if(obj instanceof String) {
+                if (obj instanceof String) {
                     String date = (String) obj;
                     Date parse = sdf.parse(date);
                     value.add(parse.getTime());

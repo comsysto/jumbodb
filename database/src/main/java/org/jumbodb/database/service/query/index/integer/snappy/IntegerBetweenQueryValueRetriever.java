@@ -1,7 +1,6 @@
 package org.jumbodb.database.service.query.index.integer.snappy;
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
 import java.util.ArrayList;

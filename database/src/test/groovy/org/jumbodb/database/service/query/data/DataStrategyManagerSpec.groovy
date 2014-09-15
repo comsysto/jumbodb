@@ -32,7 +32,7 @@ class DataStrategyManagerSpec extends Specification {
         strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
         dataStrategyManager.onInitialize(cd)
         when:
-        def strategy = dataStrategyManager.getStrategy("testCollection", "testChunkKey")
+        def strategy = dataStrategyManager.getStrategy("testChunkKey", "testCollection")
         then:
         strategy == strategyMock
     }
@@ -48,7 +48,7 @@ class DataStrategyManagerSpec extends Specification {
         strategyMock.getStrategyName() >> "testStrategy"
         dataStrategyManager.onInitialize(cd)
         when:
-        def strategyKey = dataStrategyManager.getStrategyKey("testCollection", "testChunkKey")
+        def strategyKey = dataStrategyManager.getStrategyKey("testChunkKey", "testCollection")
         then:
         strategyKey == "testStrategy"
     }

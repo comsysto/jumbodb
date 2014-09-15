@@ -1,10 +1,8 @@
 package org.jumbodb.database.service.query.index.floatval.snappy;
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.QueryClause;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberEqOperationSearch;
 import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexFile;
-import org.jumbodb.database.service.query.index.basic.numeric.NumberSnappyIndexStrategy;
 import org.jumbodb.database.service.query.index.basic.numeric.QueryValueRetriever;
 
 /**
@@ -44,7 +42,8 @@ public class FloatEqOperationSearch extends NumberEqOperationSearch<Float, Float
     }
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberSnappyIndexFile<Float> snappyIndexFile) {
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever,
+      NumberSnappyIndexFile<Float> snappyIndexFile) {
         Float searchValue = queryValueRetriever.getValue();
         return searchValue >= snappyIndexFile.getFrom() && searchValue <= snappyIndexFile.getTo();
     }

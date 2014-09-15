@@ -1,8 +1,8 @@
 package org.jumbodb.database.service.query
 
 import org.apache.commons.io.FileUtils
+import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.JumboQuery
-import org.jumbodb.common.query.QueryClause
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.data.common.meta.CollectionProperties
 import org.jumbodb.data.common.meta.IndexProperties
@@ -70,16 +70,18 @@ class JumboSearcherSpec extends Specification {
         def dataStrategyMock = Mock(DataStrategy)
         def js = createJumboSearcher()
         def resultCallBack = Mock(ResultCallback)
-        def offsets = [new FileOffset(50000, 1234l, []), new FileOffset(50000, 2345l, [])] as Set
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, "value")
+        def offsets = [new FileOffset(50000, 1234l, indexQuery), new FileOffset(50000, 2345l, indexQuery)] as Set
         js.setIndexStrategyManager(indexStrategyManagerMock)
         js.setDataStrategyManager(dataStrategyManagerMock)
         js.setChunkExecutor(chunkExecutorMock)
         js.setIndexExecutor(indexExecutorMock)
         js.onInitialize()
         def query = new JumboQuery()
-        query.addIndexQuery("testIndex", [new QueryClause(QueryOperation.EQ, "value")])
+        query.setCollection("testCollection")
+        query.addIndexQuery(indexQuery)
         when:
-        def numberOfResults = js.findResultAndWriteIntoCallback("testCollection", query, resultCallBack)
+        def numberOfResults = js.findResultAndWriteIntoCallback(query, resultCallBack)
         then:
         numberOfResults == 2
         1 * chunkExecutorMock.submit(_ as Callable) >> { task ->
@@ -89,7 +91,7 @@ class JumboSearcherSpec extends Specification {
         1 * indexExecutorMock.submit(_ as SearchIndexTask) >> {
             return new AsyncResult<Set<FileOffset>>(offsets)
         }
-        1 * dataStrategyManagerMock.getStrategy("testCollection", "testChunkKey") >> dataStrategyMock
+        1 * dataStrategyManagerMock.getStrategy("testChunkKey", "testCollection") >> dataStrategyMock
         1 * dataStrategyMock.findDataSetsByFileOffsets(_, offsets, _, query) >> 2
     }
 
@@ -108,8 +110,9 @@ class JumboSearcherSpec extends Specification {
         js.setIndexExecutor(indexExecutorMock)
         js.onInitialize()
         def query = new JumboQuery()
+        query.setCollection("testCollection")
         when:
-        def numberOfResults = js.findResultAndWriteIntoCallback("testCollection", query, resultCallBack)
+        def numberOfResults = js.findResultAndWriteIntoCallback(query, resultCallBack)
         then:
         numberOfResults == 2
         1 * chunkExecutorMock.submit(_ as Callable) >> { task ->
@@ -117,7 +120,7 @@ class JumboSearcherSpec extends Specification {
             return new AsyncResult<Integer>(result.call())
         }
         0 * indexExecutorMock.submit(_ as SearchIndexTask)
-        1 * dataStrategyManagerMock.getStrategy("testCollection", "testChunkKey") >> dataStrategyMock
+        1 * dataStrategyManagerMock.getStrategy("testChunkKey", "testCollection") >> dataStrategyMock
         1 * dataStrategyMock.findDataSetsByFileOffsets(_, [], _, query) >> 2
     }
 
@@ -129,8 +132,10 @@ class JumboSearcherSpec extends Specification {
         js.setIndexStrategyManager(indexStrategyManagerMock)
         js.setDataStrategyManager(dataStrategyManagerMock)
         js.onInitialize()
+        def query = new JumboQuery()
+        query.setCollection("collections_does_not_exist")
         when:
-        js.findResultAndWriteIntoCallback("collections_does_not_exist", new JumboQuery(), Mock(ResultCallback))
+        js.findResultAndWriteIntoCallback(query, Mock(ResultCallback))
         then:
         thrown JumboCollectionMissingException
     }

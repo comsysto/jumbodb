@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.data.snappy;
+package org.jumbodb.database.service.query.data.common;
 
 import org.jumbodb.common.query.JsonQuery;
 
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
-public class BetweenJsonOperationSearch implements JsonOperationSearch {
+public class BetweenDataOperationSearch implements DataOperationSearch {
     @Override
     public boolean matches(JsonQuery jsonQuery, Object value) {
         List<Number> searchValue = (List<Number>) jsonQuery.getValue();

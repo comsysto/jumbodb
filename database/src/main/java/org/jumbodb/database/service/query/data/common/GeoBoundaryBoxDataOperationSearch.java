@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.data.snappy;
+package org.jumbodb.database.service.query.data.common;
 
 import org.jumbodb.common.geo.geohash.BoundingBox;
 import org.jumbodb.common.geo.geohash.WGS84Point;
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
-public class GeoBoundaryBoxJsonOperationSearch implements JsonOperationSearch {
+public class GeoBoundaryBoxDataOperationSearch implements DataOperationSearch {
     @Override
     public boolean matches(JsonQuery jsonQuery, Object value) {
         if (value instanceof List) {

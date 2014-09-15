@@ -8,6 +8,7 @@ import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
+import org.jumbodb.database.service.query.data.common.DataOperationSearch
 import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
@@ -66,13 +67,13 @@ class JsonSnappyDataStrategySpec extends Specification {
 
     def "matches should delegate to the appropriate operation"() {
         setup:
-        def eqOperation = Mock(JsonOperationSearch)
-        def gtOperation = Mock(JsonOperationSearch)
-        def ltOperation = Mock(JsonOperationSearch)
+        def eqOperation = Mock(DataOperationSearch)
+        def gtOperation = Mock(DataOperationSearch)
+        def ltOperation = Mock(DataOperationSearch)
         def customStrategy = new JsonSnappyDataStrategy() {
             @Override
-            public Map<QueryOperation, JsonOperationSearch> getOperations() {
-                def ops = new HashMap<QueryOperation, JsonOperationSearch>()
+            public Map<QueryOperation, DataOperationSearch> getOperations() {
+                def ops = new HashMap<QueryOperation, DataOperationSearch>()
                 ops.put(QueryOperation.EQ, eqOperation)
                 ops.put(QueryOperation.GT, gtOperation)
                 ops.put(QueryOperation.LT, ltOperation)

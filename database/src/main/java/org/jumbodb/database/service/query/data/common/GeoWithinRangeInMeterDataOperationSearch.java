@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.data.snappy;
+package org.jumbodb.database.service.query.data.common;
 
 import org.jumbodb.common.geo.geohash.GeoHash;
 import org.jumbodb.common.query.JsonQuery;
@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
-public class GeoWithinRangeInMeterJsonOperationSearch implements JsonOperationSearch {
+public class GeoWithinRangeInMeterDataOperationSearch implements DataOperationSearch {
     @Override
     public boolean matches(JsonQuery jsonQuery, Object value) {
         if (value instanceof List) {

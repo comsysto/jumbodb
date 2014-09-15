@@ -1,15 +1,16 @@
-package org.jumbodb.database.service.query.data.snappy
+package org.jumbodb.database.service.query.data.common
 
 import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.database.service.query.data.common.GtDataOperationSearch
 import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
-class GtJsonOperationSearchSpec extends Specification {
-    def operation = new GtJsonOperationSearch()
+class GtDataOperationSearchSpec extends Specification {
+    def operation = new GtDataOperationSearch()
 
     @Unroll
     def "greater than double match #testValue > #value == #isGreaterThan"() {

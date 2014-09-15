@@ -1,15 +1,16 @@
-package org.jumbodb.database.service.query.data.snappy
+package org.jumbodb.database.service.query.data.common
 
 import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.database.service.query.data.common.GeoWithinRangeInMeterDataOperationSearch
 import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
-class GeoWithinRangeInMeterJsonOperationSearchSpec extends Specification {
-    def operation = new GeoWithinRangeInMeterJsonOperationSearch()
+class GeoWithinRangeInMeterDataOperationSearchSpec extends Specification {
+    def operation = new GeoWithinRangeInMeterDataOperationSearch()
 
     @Unroll
     def "should match inside the range [#lat, #lon] and [#testLat, #testLon] with distance #distance meter == #isWithingRange"() {

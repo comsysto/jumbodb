@@ -1,15 +1,16 @@
-package org.jumbodb.database.service.query.data.snappy
+package org.jumbodb.database.service.query.data.common
 
 import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.database.service.query.data.common.NeDataOperationSearch
 import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
-class NeJsonOperationSearchSpec extends Specification {
-    def operation = new NeJsonOperationSearch()
+class NeDataOperationSearchSpec extends Specification {
+    def operation = new NeDataOperationSearch()
 
     @Unroll
     def "matches non equality #value ne #testValue == #isNotEquals"() {

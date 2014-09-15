@@ -12,6 +12,15 @@ import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.FutureCancelableTask;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
+import org.jumbodb.database.service.query.data.common.BetweenDataOperationSearch;
+import org.jumbodb.database.service.query.data.common.DataOperationSearch;
+import org.jumbodb.database.service.query.data.common.GeoBoundaryBoxDataOperationSearch;
+import org.jumbodb.database.service.query.data.common.GeoWithinRangeInMeterDataOperationSearch;
+import org.jumbodb.database.service.query.data.common.GtDataOperationSearch;
+import org.jumbodb.database.service.query.data.common.EqDataOperationSearch;
+import org.jumbodb.database.service.query.data.common.LtDataOperationSearch;
+import org.jumbodb.database.service.query.data.common.NeDataOperationSearch;
+import org.jumbodb.database.service.query.data.common.OrDataOperationSearch;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.slf4j.Logger;
@@ -28,7 +37,7 @@ import java.util.concurrent.Future;
 /**
  * @author Carsten Hufe
  */
-public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch {
+public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch {
     public static final String JSON_SNAPPY_V1 = "JSON_SNAPPY_V1";
     private Logger log = LoggerFactory.getLogger(JsonSnappyDataStrategy.class);
 
@@ -36,19 +45,19 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
     private Cache dataSnappyChunksCache;
     private Cache datasetsByOffsetsCache;
 
-    private final Map<QueryOperation, JsonOperationSearch> OPERATIONS = createOperations();
+    private final Map<QueryOperation, DataOperationSearch> OPERATIONS = createOperations();
     private CollectionDefinition collectionDefinition;
 
-    private Map<QueryOperation, JsonOperationSearch> createOperations() {
-        Map<QueryOperation, JsonOperationSearch> operations = new HashMap<QueryOperation, JsonOperationSearch>();
-        operations.put(QueryOperation.OR, new OrJsonOperationSearch());
-        operations.put(QueryOperation.EQ, new EqJsonOperationSearch());
-        operations.put(QueryOperation.NE, new NeJsonOperationSearch());
-        operations.put(QueryOperation.GT, new GtJsonOperationSearch());
-        operations.put(QueryOperation.LT, new LtJsonOperationSearch());
-        operations.put(QueryOperation.BETWEEN, new BetweenJsonOperationSearch());
-        operations.put(QueryOperation.GEO_BOUNDARY_BOX, new GeoBoundaryBoxJsonOperationSearch());
-        operations.put(QueryOperation.GEO_WITHIN_RANGE_METER, new GeoWithinRangeInMeterJsonOperationSearch());
+    private Map<QueryOperation, DataOperationSearch> createOperations() {
+        Map<QueryOperation, DataOperationSearch> operations = new HashMap<QueryOperation, DataOperationSearch>();
+        operations.put(QueryOperation.OR, new OrDataOperationSearch());
+        operations.put(QueryOperation.EQ, new EqDataOperationSearch());
+        operations.put(QueryOperation.NE, new NeDataOperationSearch());
+        operations.put(QueryOperation.GT, new GtDataOperationSearch());
+        operations.put(QueryOperation.LT, new LtDataOperationSearch());
+        operations.put(QueryOperation.BETWEEN, new BetweenDataOperationSearch());
+        operations.put(QueryOperation.GEO_BOUNDARY_BOX, new GeoBoundaryBoxDataOperationSearch());
+        operations.put(QueryOperation.GEO_WITHIN_RANGE_METER, new GeoWithinRangeInMeterDataOperationSearch());
         return operations;
     }
 
@@ -121,13 +130,13 @@ public class JsonSnappyDataStrategy implements DataStrategy, JsonOperationSearch
         return result;
     }
 
-    public Map<QueryOperation, JsonOperationSearch> getOperations() {
+    public Map<QueryOperation, DataOperationSearch> getOperations() {
         return OPERATIONS;
     }
 
     @Override
     public boolean matches(JsonQuery queryClause, Object value) {
-        JsonOperationSearch jsonOperationSearch = getOperations().get(queryClause.getQueryOperation());
+        DataOperationSearch jsonOperationSearch = getOperations().get(queryClause.getQueryOperation());
         if(jsonOperationSearch == null) {
             throw new UnsupportedOperationException("OperationSearch is not supported: " + queryClause.getQueryOperation());
         }

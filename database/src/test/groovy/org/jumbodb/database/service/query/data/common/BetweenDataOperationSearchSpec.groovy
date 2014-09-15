@@ -1,15 +1,16 @@
-package org.jumbodb.database.service.query.data.snappy
+package org.jumbodb.database.service.query.data.common
 
 import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.database.service.query.data.common.BetweenDataOperationSearch
 import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
-class BetweenJsonOperationSearchSpec extends Specification {
-    def operation = new BetweenJsonOperationSearch()
+class BetweenDataOperationSearchSpec extends Specification {
+    def operation = new BetweenDataOperationSearch()
 
     @Unroll
     def "between double match #from < #testValue > #to == #isBetween"() {

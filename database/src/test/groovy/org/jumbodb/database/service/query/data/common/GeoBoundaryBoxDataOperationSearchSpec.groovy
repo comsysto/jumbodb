@@ -1,14 +1,15 @@
-package org.jumbodb.database.service.query.data.snappy
+package org.jumbodb.database.service.query.data.common
 
 import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.QueryOperation
+import org.jumbodb.database.service.query.data.common.GeoBoundaryBoxDataOperationSearch
 import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
  */
-class GeoBoundaryBoxJsonOperationSearchSpec extends spock.lang.Specification {
-    def operation = new GeoBoundaryBoxJsonOperationSearch()
+class GeoBoundaryBoxDataOperationSearchSpec extends spock.lang.Specification {
+    def operation = new GeoBoundaryBoxDataOperationSearch()
 
     @Unroll
     def "should match the boundary box [[#lat1, #lon1][#lat2, #lon2]] with point [#testLat, #testLon] == #isInBoundaryBox"() {

@@ -1,11 +1,11 @@
-package org.jumbodb.database.service.query.data.snappy;
+package org.jumbodb.database.service.query.data.common;
 
 import org.jumbodb.common.query.JsonQuery;
 
 /**
  * @author Carsten Hufe
  */
-public class EqJsonOperationSearch implements JsonOperationSearch {
+public class EqDataOperationSearch implements DataOperationSearch {
     @Override
     public boolean matches(JsonQuery jsonQuery, Object value) {
         if(value instanceof Number) {

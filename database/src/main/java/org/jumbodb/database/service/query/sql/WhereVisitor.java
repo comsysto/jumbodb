@@ -270,7 +270,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     public void visit(Function function) {
         // CARSTEN implement geo spatial functions
         // CARSTEN implement idx functions
-        // CARSTEN implement restrictedNames function, bspw ist 'delete' nicht in SQL erlaubt
+        // CARSTEN implement restrictedNames function call it "field('delete') similar to idx(), bspw ist 'delete' nicht in SQL erlaubt
         System.out.println("function name " + function.getName());
         System.out.println("function params 1 " + function.getParameters().getExpressions().get(0));
         System.out.println("function params 2 " + function.getParameters().getExpressions().get(1));

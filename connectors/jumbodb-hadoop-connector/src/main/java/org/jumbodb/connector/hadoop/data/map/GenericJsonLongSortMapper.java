@@ -1,7 +1,6 @@
-package org.jumbodb.connector.hadoop.index.map;
+package org.jumbodb.connector.hadoop.data.map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -18,11 +17,11 @@ import java.util.List;
  * Date: 4/17/13
  * Time: 4:52 PM
  */
-public class GenericJsonDoubleSortMapper extends Mapper<LongWritable, Text, DoubleWritable, Text> {
-    public static final String SORT_KEY = "DOUBLE";
+public class GenericJsonLongSortMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
+    public static final String SORT_KEY = "LONG";
 
     private ObjectMapper jsonMapper;
-    private DoubleWritable keyW = new DoubleWritable();
+    private LongWritable keyW = new LongWritable();
     private List<String> sortFields;
 
     @Override
@@ -43,19 +42,19 @@ public class GenericJsonDoubleSortMapper extends Mapper<LongWritable, Text, Doub
         context.write(keyW, value);
     }
 
-    private Double getSortKey(JsonNode jsonNode) {
+    private Long getSortKey(JsonNode jsonNode) {
         return getValueFor(sortFields.get(0), jsonNode);
     }
 
-    private Double getValueFor(String key, JsonNode jsonNode) {
+    private Long getValueFor(String key, JsonNode jsonNode) {
         String[] split = StringUtils.split(key, ".");
         for (String s : split) {
             jsonNode = jsonNode.path(s);
         }
         if(jsonNode.isValueNode()) {
-            Double s = jsonNode.getDoubleValue();
+            Long s = jsonNode.getLongValue();
             return s;
         }
-        return 0d;
+        return 0l;
     }
 }

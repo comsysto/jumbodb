@@ -65,7 +65,6 @@ public class IntegerSnappyIndexStrategy extends NumberSnappyIndexStrategy<Intege
 
     @Override
     public String getStrategyName() {
-        // CARSTEN rename remove version everywhere
-        return "INTEGER_SNAPPY_V1";
+        return "INTEGER_SNAPPY";
     }
 }

@@ -6,7 +6,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.common.geo.geohash.GeoHash;
-import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,8 +17,7 @@ import java.util.List;
  * Time: 3:26 PM
  */
 public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<T> {
-    // CARSTEN remove version from name
-    public static final String GEOHASH_SNAPPY_V1 = "GEOHASH_SNAPPY_V1";
+    public static final String GEOHASH_SNAPPY = "GEOHASH_SNAPPY";
     private IntWritable keyW = new IntWritable();
     private GeoFileOffsetWritable valueW = new GeoFileOffsetWritable();
 
@@ -41,7 +40,7 @@ public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<
     @Override
     public String getStrategy() {
         // CARSTEN remove version from name
-        return GEOHASH_SNAPPY_V1;
+        return GEOHASH_SNAPPY;
     }
 
 
@@ -62,7 +61,7 @@ public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return GeohashSnappyIndexV1OutputFormat.class;
+        return GeohashSnappyIndexOutputFormat.class;
     }
 
     public abstract List<Double> getIndexableValue(T input);

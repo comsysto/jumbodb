@@ -6,7 +6,8 @@ import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import org.jumbodb.common.query.JsonQuery;
+import org.jumbodb.common.query.DataQuery;
+import org.jumbodb.common.query.FieldType;
 import org.jumbodb.common.query.QueryOperation;
 
 import java.util.ArrayList;
@@ -19,17 +20,17 @@ import java.util.List;
  */
 public class WhereVisitor extends ExpressionVisitorAdapter {
     private List<Object> expressions = new ArrayList<Object>();
-    private List<JsonQuery> ors = new LinkedList<JsonQuery>();
-    private List<JsonQuery> ands = new LinkedList<JsonQuery>();
-    private JsonQuery current;
+    private List<DataQuery> ors = new LinkedList<DataQuery>();
+    private List<DataQuery> ands = new LinkedList<DataQuery>();
+    private DataQuery current;
 
 
-    public List<JsonQuery> getOrs() {
+    public List<DataQuery> getOrs() {
         if(current != null)  {
             return Arrays.asList(current);
         } else if(!ands.isEmpty()) {
-            JsonQuery last = null;
-            for (JsonQuery and : ands) {
+            DataQuery last = null;
+            for (DataQuery and : ands) {
                 if (last != null) {
                     and.setAnd(last);
                 }
@@ -56,10 +57,10 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         }
 
         if (!leftWhereVisitor.ors.isEmpty()) {
-            ands.add(new JsonQuery(leftWhereVisitor.ors));
+            ands.add(new DataQuery(leftWhereVisitor.ors));
         }
         if (!rightWhereVisitor.ors.isEmpty()) {
-            ands.add(new JsonQuery(rightWhereVisitor.ors));
+            ands.add(new DataQuery(rightWhereVisitor.ors));
         }
         ands.addAll(leftWhereVisitor.ands);
         ands.addAll(rightWhereVisitor.ands);
@@ -71,8 +72,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         expr.getLeftExpression().accept(leftWhereVisitor);
         WhereVisitor rightWhereVisitor = new WhereVisitor();
         expr.getRightExpression().accept(rightWhereVisitor);
-        List<JsonQuery> leftJsonQueries = leftWhereVisitor.ors;
-        List<JsonQuery> rightJsonQueries = rightWhereVisitor.ors;
+        List<DataQuery> leftJsonQueries = leftWhereVisitor.ors;
+        List<DataQuery> rightJsonQueries = rightWhereVisitor.ors;
         ors.addAll(leftJsonQueries);
         ors.addAll(rightJsonQueries);
         if (leftWhereVisitor.current != null) {
@@ -87,8 +88,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     private void concatAnd(WhereVisitor leftWhereVisitor) {
         if (!leftWhereVisitor.ands.isEmpty()) {
-            JsonQuery last = null;
-            for (JsonQuery and : leftWhereVisitor.ands) {
+            DataQuery last = null;
+            for (DataQuery and : leftWhereVisitor.ands) {
                 if (last != null) {
                     and.setAnd(last);
                 }
@@ -103,52 +104,40 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(EqualsTo expr) {
         super.visit(expr);
-        idenicalEvaluation(QueryOperation.EQ);
+        boolEvaluation(QueryOperation.EQ);
     }
 
-    private void idenicalEvaluation(QueryOperation eq) {
-        if(hasTwoColumns()) {
-            throw new IllegalArgumentException("comparision on two columns are not supported yet");
-        }
-        else if(hasOneColumns()) {
-            Column firstColumn = getFirstColumn();
-            current = new JsonQuery(firstColumn.getFullyQualifiedName(), eq, getFirstValue());
+    private void boolEvaluation(QueryOperation eq) {
+        if(expressions.size() == 2) {
+            current = createDataQuery(eq);
         }
         else {
             throw new IllegalArgumentException("minimum one field is required for query criteria");
         }
     }
 
-    private boolean hasOneColumns() {
-        return hasColumnLeft()
-                || hasColumnRight();
+    private DataQuery createDataQuery(QueryOperation operation) {
+        FieldType leftType = getFieldTypeLeft();
+        FieldType rightType = getFieldTypeRight();
+        Object left = leftType == FieldType.FIELD ? getColumnLeft() : getValueLeft();
+        Object right = rightType == FieldType.FIELD ? getColumnRight() : getValueRight();
+        return new DataQuery(left, leftType, operation, right, rightType);
     }
 
-    private boolean hasTwoColumns() {
-        return hasColumnLeft()
-                && hasColumnRight();
+    private String getColumnRight() {
+        return ((Column)expressions.get(1)).getFullyQualifiedName();
     }
 
-    private Column getFirstColumn() {
-        if(hasColumnLeft()) {
-            return getColumnLeft();
-        }
-        return getColumnRight();
+    private String getColumnLeft() {
+        return ((Column)expressions.get(0)).getFullyQualifiedName();
     }
 
-    private Object getFirstValue() {
-        if(hasColumnLeft()) {
-            return getValueRight();
-        }
-        return getValueLeft();
+    private FieldType getFieldTypeLeft() {
+        return expressions.get(0) instanceof Column ? FieldType.FIELD : FieldType.VALUE;
     }
 
-    private Column getColumnRight() {
-        return (Column)expressions.get(1);
-    }
-
-    private Column getColumnLeft() {
-        return (Column)expressions.get(0);
+    private FieldType getFieldTypeRight() {
+        return expressions.get(1) instanceof Column ? FieldType.FIELD : FieldType.VALUE;
     }
 
     private Object getValueRight() {
@@ -189,7 +178,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(GreaterThan expr) {
         super.visit(expr);
-        greaterLessEvaluation(QueryOperation.GT, QueryOperation.LT);
+        boolEvaluation(QueryOperation.GT);
     }
 
     @Override
@@ -223,7 +212,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(NotEqualsTo expr) {
         super.visit(expr);
-        idenicalEvaluation(QueryOperation.NE);
+        boolEvaluation(QueryOperation.NE);
     }
 
     @Override
@@ -250,26 +239,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(MinorThan expr) {
         super.visit(expr);
-        greaterLessEvaluation(QueryOperation.LT, QueryOperation.GT);
-    }
-
-    private void greaterLessEvaluation(QueryOperation leftOp, QueryOperation rightOp) {
-        if(hasTwoColumns()) {
-            throw new IllegalArgumentException("comparision on two columns are not supported yet");
-        }
-        else if(hasOneColumns()) {
-            if(hasColumnLeft()) {
-                Column firstColumn = getColumnLeft();
-                current = new JsonQuery(firstColumn.getFullyQualifiedName(), leftOp, getValueRight());
-            }
-            else {
-                Column firstColumn = getColumnRight();
-                current = new JsonQuery(firstColumn.getFullyQualifiedName(), rightOp, getValueLeft());
-            }
-        }
-        else {
-            throw new IllegalArgumentException("minimum one field is required for query criteria");
-        }
+        boolEvaluation(QueryOperation.LT);
     }
 
     @Override
@@ -299,6 +269,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(Function function) {
         // CARSTEN implement geo spatial functions
+        // CARSTEN implement idx functions
+        // CARSTEN implement restrictedNames function, bspw ist 'delete' nicht in SQL erlaubt
         System.out.println("function name " + function.getName());
         System.out.println("function params 1 " + function.getParameters().getExpressions().get(0));
         System.out.println("function params 2 " + function.getParameters().getExpressions().get(1));

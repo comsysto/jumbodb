@@ -27,7 +27,8 @@ public class CollectionProperties {
         String sourcePath = properties.getProperty("sourcePath");
         String strategy = properties.getProperty("strategy");
         String info = properties.getProperty("info");
-        return new CollectionMeta(date, sourcePath, strategy, info);
+        String dateFormat = properties.getProperty("dateFormat");
+        return new CollectionMeta(date, sourcePath, strategy, info, dateFormat);
 
     }
 
@@ -37,6 +38,7 @@ public class CollectionProperties {
         deliveryInfo.setProperty("date", collectionMeta.getDate());
         deliveryInfo.setProperty("strategy", collectionMeta.getStrategy());
         deliveryInfo.setProperty("info", collectionMeta.getInfo());
+        deliveryInfo.setProperty("dateFormat", collectionMeta.getDateFormat());
 
         FileOutputStream deliveryInfoFos = null;
         try {
@@ -53,13 +55,15 @@ public class CollectionProperties {
         private String date;
         private String sourcePath;
         private String strategy;
+        private String dateFormat;
         private String info;
 
-        public CollectionMeta(String date, String sourcePath, String strategy, String info) {
+        public CollectionMeta(String date, String sourcePath, String strategy, String info, String dateFormat) {
             this.date = date;
             this.sourcePath = sourcePath;
             this.strategy = strategy;
             this.info = info;
+            this.dateFormat = dateFormat;
         }
 
 
@@ -77,6 +81,11 @@ public class CollectionProperties {
 
         public String getInfo() {
             return info;
+        }
+
+        // CARSTEN wire date to collection info
+        public String getDateFormat() {
+            return dateFormat;
         }
     }
 }

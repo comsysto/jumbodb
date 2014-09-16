@@ -1,7 +1,5 @@
 package org.jumbodb.database.service.query.data.common;
 
-import org.jumbodb.common.query.JsonQuery;
-
 import java.util.List;
 
 /**
@@ -9,28 +7,32 @@ import java.util.List;
  */
 public class BetweenDataOperationSearch implements DataOperationSearch {
     @Override
-    public boolean matches(JsonQuery jsonQuery, Object value) {
-        List<Number> searchValue = (List<Number>) jsonQuery.getValue();
+    public boolean matches(Object leftValue, Object rightValue) {
+        // CARSTEN left value is the one to check, verify when building query
+        if (isNotNumber(leftValue)) {
+            return false;
+        }
+        List<Number> searchValue = (List<Number>) rightValue;
         Number searchFrom = searchValue.get(0);
         Number searchTo = searchValue.get(1);
-        if (value instanceof Double) {
-            Double dv = (Double) value;
-            return searchFrom.doubleValue() < dv && dv < searchTo.doubleValue();
-
-        } else if (value instanceof Float) {
-            Float dv = (Float) value;
-            return searchFrom.floatValue() < dv && dv < searchTo.floatValue();
-
-        } else if (value instanceof Integer) {
-            Integer dv = (Integer) value;
-            return searchFrom.intValue() < dv && dv < searchTo.intValue();
-
-        } else if (value instanceof Long) {
-            Long dv = (Long) value;
-            return searchFrom.longValue() < dv && dv < searchTo.longValue();
+        if (leftValue instanceof Double) {
+            Double leftDouble = (Double) leftValue;
+            return searchFrom.doubleValue() <= leftDouble && leftDouble <= searchTo.doubleValue();
+        } else if (leftValue instanceof Long) {
+            Long leftLong = (Long) leftValue;
+            return searchFrom.longValue() <= leftLong && leftLong <= searchTo.longValue();
+        } else if (leftValue instanceof Float) {
+            Float leftFloat = (Float) leftValue;
+            return searchFrom.floatValue() <= leftFloat && leftFloat <= searchTo.floatValue();
+        } else if (leftValue instanceof Integer) {
+            Integer leftInt = (Integer) leftValue;
+            return searchFrom.intValue() <= leftInt && leftInt <= searchTo.intValue();
         } else {
-            throw new IllegalArgumentException(
-              value.getClass().getSimpleName() + " is not supported for this search type.");
+            return false;
         }
+    }
+
+    private boolean isNotNumber(final Object value) {
+        return !(value instanceof Number);
     }
 }

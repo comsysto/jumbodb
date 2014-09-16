@@ -1,6 +1,6 @@
 package org.jumbodb.connector.hadoop.configuration;
 
-import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.snappy.datetime.GenericJsonDateTimeIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.snappy.doubleval.GenericJsonDoubleIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.snappy.floatval.GenericJsonFloatIndexMapper;
@@ -22,14 +22,14 @@ public class IndexStrategies {
 
     private static Map<String, Class<? extends AbstractIndexMapper>> createIndexMapper() {
         Map<String, Class<? extends AbstractIndexMapper>> indexMapper = new HashMap<String, Class<? extends AbstractIndexMapper>>();
-        indexMapper.put(GenericJsonHashCode32IndexMapper.HASHCODE32_SNAPPY_V1, GenericJsonHashCode32IndexMapper.class);
-        indexMapper.put(GenericJsonHashCode64IndexMapper.HASHCODE64_SNAPPY_V1, GenericJsonHashCode64IndexMapper.class);
-        indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY_V1, GenericJsonIntegerIndexMapper.class);
-        indexMapper.put(GenericJsonLongIndexMapper.LONG_SNAPPY_V1, GenericJsonLongIndexMapper.class);
-        indexMapper.put(GenericJsonFloatIndexMapper.FLOAT_SNAPPY_V_1, GenericJsonFloatIndexMapper.class);
-        indexMapper.put(GenericJsonDoubleIndexMapper.DOUBLE_SNAPPY_V_1, GenericJsonDoubleIndexMapper.class);
-        indexMapper.put(GenericJsonGeohashIndexMapper.GEOHASH_SNAPPY_V1, GenericJsonGeohashIndexMapper.class);
-        indexMapper.put(GenericJsonDateTimeIndexMapper.DATETIME_SNAPPY_V1, GenericJsonDateTimeIndexMapper.class);
+        indexMapper.put(GenericJsonHashCode32IndexMapper.HASHCODE32_SNAPPY, GenericJsonHashCode32IndexMapper.class);
+        indexMapper.put(GenericJsonHashCode64IndexMapper.HASHCODE64_SNAPPY, GenericJsonHashCode64IndexMapper.class);
+        indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY, GenericJsonIntegerIndexMapper.class);
+        indexMapper.put(GenericJsonLongIndexMapper.LONG_SNAPPY, GenericJsonLongIndexMapper.class);
+        indexMapper.put(GenericJsonFloatIndexMapper.FLOAT_SNAPPY, GenericJsonFloatIndexMapper.class);
+        indexMapper.put(GenericJsonDoubleIndexMapper.DOUBLE_SNAPPY, GenericJsonDoubleIndexMapper.class);
+        indexMapper.put(GenericJsonGeohashIndexMapper.GEOHASH_SNAPPY, GenericJsonGeohashIndexMapper.class);
+        indexMapper.put(GenericJsonDateTimeIndexMapper.DATETIME_SNAPPY, GenericJsonDateTimeIndexMapper.class);
         return Collections.unmodifiableMap(indexMapper);
     }
 

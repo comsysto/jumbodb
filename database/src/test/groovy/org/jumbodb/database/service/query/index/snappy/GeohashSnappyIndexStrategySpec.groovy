@@ -41,7 +41,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         when:
         def strategyName = strategy.getStrategyName()
         then:
-        strategyName == "GEOHASH_SNAPPY_V1"
+        strategyName == "GEOHASH_SNAPPY"
     }
 
     def "verify chunk size"() {
@@ -341,8 +341,8 @@ class GeohashSnappyIndexStrategySpec extends Specification {
     }
 
     def createCollectionDefinition(indexFolder) {
-        def index = new IndexDefinition("testIndex", indexFolder, "GEOHASH_SNAPPY_V1")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "GEOHASH_SNAPPY_V1")]]
+        def index = new IndexDefinition("testIndex", indexFolder, "GEOHASH_SNAPPY")
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "GEOHASH_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

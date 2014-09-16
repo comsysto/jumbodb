@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.jumbodb.connector.hadoop.index.output.data;
+package org.jumbodb.connector.hadoop.data.output;
 
 import java.io.IOException;
 
@@ -26,11 +26,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.Seekable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.compress.CodecPool;
-import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -43,11 +40,10 @@ import org.xerial.snappy.SnappyInputStream;
 /**
  * Treats keys as offset in file and value as line.
  */
-// CARSTEN remove version from name
 @InterfaceAudience.LimitedPrivate({"MapReduce", "Pig"})
 @InterfaceStability.Evolving
-public class SnappyDataV1LineRecordReader extends RecordReader<LongWritable, Text> {
-    private static final Log LOG = LogFactory.getLog(SnappyDataV1LineRecordReader.class);
+public class JsonSnappyLineBreakDataLineRecordReader extends RecordReader<LongWritable, Text> {
+    private static final Log LOG = LogFactory.getLog(JsonSnappyLineBreakDataLineRecordReader.class);
     public static final String MAX_LINE_LENGTH =
             "mapreduce.input.linerecordreader.line.maxlength";
 
@@ -60,10 +56,10 @@ public class SnappyDataV1LineRecordReader extends RecordReader<LongWritable, Tex
     private Text value;
     private byte[] recordDelimiterBytes;
 
-    public SnappyDataV1LineRecordReader() {
+    public JsonSnappyLineBreakDataLineRecordReader() {
     }
 
-    public SnappyDataV1LineRecordReader(byte[] recordDelimiter) {
+    public JsonSnappyLineBreakDataLineRecordReader(byte[] recordDelimiter) {
         this.recordDelimiterBytes = recordDelimiter;
     }
 

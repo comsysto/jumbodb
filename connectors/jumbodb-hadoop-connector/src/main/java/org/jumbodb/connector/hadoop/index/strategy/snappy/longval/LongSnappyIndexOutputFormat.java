@@ -2,14 +2,13 @@ package org.jumbodb.connector.hadoop.index.strategy.snappy.longval;
 
 import org.apache.hadoop.io.LongWritable;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
-import org.jumbodb.connector.hadoop.index.output.index.AbstractSnappyIndexV1OutputFormat;
+import org.jumbodb.connector.hadoop.index.output.AbstractSnappyIndexOutputFormat;
 import org.jumbodb.connector.hadoop.index.strategy.snappy.hashcode64.AbstractHashCode64IndexMapper;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-// CARSTEN remove version from name
-public class LongSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1OutputFormat<LongWritable, FileOffsetWritable> {
+public class LongSnappyIndexOutputFormat extends AbstractSnappyIndexOutputFormat<LongWritable, FileOffsetWritable> {
 
     @Override
     protected void write(LongWritable k, FileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException {
@@ -25,6 +24,6 @@ public class LongSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1OutputFo
 
     @Override
     protected String getStrategy() {
-        return AbstractHashCode64IndexMapper.HASHCODE64_SNAPPY_V1;
+        return AbstractLongIndexMapper.LONG_SNAPPY;
     }
 }

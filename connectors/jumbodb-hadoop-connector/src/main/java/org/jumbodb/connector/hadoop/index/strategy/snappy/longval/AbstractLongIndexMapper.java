@@ -5,7 +5,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
-import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
 
 import java.io.IOException;
 
@@ -15,8 +15,7 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractLongIndexMapper<T> extends AbstractIndexMapper<T> {
-    // CARSTEN remove version from name
-    public static final String LONG_SNAPPY_V1 = "LONG_SNAPPY_V1";
+    public static final String LONG_SNAPPY = "LONG_SNAPPY";
 
     private LongWritable keyW = new LongWritable();
     private FileOffsetWritable valueW = new FileOffsetWritable();
@@ -34,7 +33,7 @@ public abstract class AbstractLongIndexMapper<T> extends AbstractIndexMapper<T> 
 
     @Override
     public String getStrategy() {
-        return LONG_SNAPPY_V1;
+        return LONG_SNAPPY;
     }
 
 
@@ -50,7 +49,7 @@ public abstract class AbstractLongIndexMapper<T> extends AbstractIndexMapper<T> 
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return LongSnappyIndexV1OutputFormat.class;
+        return LongSnappyIndexOutputFormat.class;
     }
 
     public abstract Long getIndexableValue(T input);

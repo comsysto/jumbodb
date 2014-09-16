@@ -4,26 +4,40 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jumbodb.common.query.DataQuery;
+import org.jumbodb.common.query.FieldType;
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
+import org.jumbodb.data.common.snappy.SnappyChunks;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
-import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
-import org.jumbodb.data.common.snappy.SnappyChunks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.xerial.snappy.Snappy;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
-public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
-    private Logger log = LoggerFactory.getLogger(JsonSnappyRetrieveDataSetsTask.class);
+public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer> {
+    private Logger log = LoggerFactory.getLogger(JsonSnappyLineBreakRetrieveDataSetsTask.class);
 
     private final boolean resultCacheEnabled;
     private final File file;
@@ -32,14 +46,16 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private final long fileLength;
     private final JumboQuery searchQuery;
     private final ResultCallback resultCallback;
-    private JsonSnappyDataStrategy strategy;
+    private JsonSnappyLineBreakDataStrategy strategy;
     private final List<FileOffset> offsets;
     public static final byte[] EMPTY_BUFFER = new byte[0];
     private int results = 0;
     private JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
 
 
-    public JsonSnappyRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery, ResultCallback resultCallback, JsonSnappyDataStrategy strategy, Cache datasetsByOffsetsCache, Cache dataSnappyChunksCache) {
+    public JsonSnappyLineBreakRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
+      ResultCallback resultCallback, JsonSnappyLineBreakDataStrategy strategy, Cache datasetsByOffsetsCache,
+      Cache dataSnappyChunksCache) {
         this.file = file;
         this.datasetsByOffsetsCache = datasetsByOffsetsCache;
         this.dataSnappyChunksCache = dataSnappyChunksCache;
@@ -55,20 +71,22 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     public Integer call() throws Exception {
         if (searchQuery.getJsonQuery().isEmpty() && !searchQuery.getIndexQuery().isEmpty()) {
             long start = System.currentTimeMillis();
-            if(resultCacheEnabled) {
+            if (resultCacheEnabled) {
                 List<FileOffset> leftOffsets = extractOffsetsFromCacheAndWriteResultForExisting();
-                if(leftOffsets.isEmpty()) {
-                    log.trace("Time for retrieving " + results + " only from cache " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+                if (leftOffsets.isEmpty()) {
+                    log.trace("Time for retrieving " + results + " only from cache " + file.getName() + " in " + (System
+                      .currentTimeMillis() - start) + "ms");
                     return results;
                 }
                 int cacheResult = results;
                 findLeftDatasetsAndWriteResults(leftOffsets);
-                log.trace("Time for retrieving " + results + " (" + cacheResult + " from cache) datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+                log.trace("Time for retrieving " + results + " (" + cacheResult + " from cache) datasets from " + file
+                  .getName() + " in " + (System.currentTimeMillis() - start) + "ms");
 
-            }
-            else {
+            } else {
                 findLeftDatasetsAndWriteResults(offsets);
-                log.trace("Time for retrieving " + results + " (caching disabled) datasets from " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+                log.trace("Time for retrieving " + results + " (caching disabled) datasets from " + file
+                  .getName() + " in " + (System.currentTimeMillis() - start) + "ms");
             }
         } else {
             fullScanData();
@@ -95,10 +113,11 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             for (FileOffset offset : leftOffsets) {
                 long searchOffset = offset.getOffset();
                 // delete buffer when offset is not inside range and skip
-                if(resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
+                if (resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
                     long chunkIndex = (searchOffset / snappyChunks.getChunkSize());
                     long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
-                    long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex, snappyChunks.getChunkSize());
+                    long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex,
+                      snappyChunks.getChunkSize());
                     long chunkOffsetToSkip = chunkOffsetCompressed - compressedFileStreamPosition;
                     long skip = skipToOffset(bis, chunkOffsetToSkip);
                     compressedFileStreamPosition += skip;
@@ -110,16 +129,18 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
                 // load to result buffer till line break
                 int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
-                int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
-                while((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
+                int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer,
+                  datasetStartOffset);
+                while ((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
                     int read1 = bis.read(compressedLengthBuffer);
                     compressedFileStreamPosition += read1;
                     int compressedLength = SnappyUtil.readInt(compressedLengthBuffer, 0);
                     int read = bis.read(readBufferCompressed, 0, compressedLength);
                     compressedFileStreamPosition += read;
-                    int uncompressLength = Snappy.uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
+                    int uncompressLength = Snappy
+                      .uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
                     uncompressedFileStreamPosition += uncompressLength;
-                    datasetStartOffset = (int)(searchOffset - resultBufferStartOffset);
+                    datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
                     resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
                     resultBufferEndOffset = uncompressedFileStreamPosition - 1;
                     resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
@@ -128,14 +149,15 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 }
 
                 int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
-                byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
-                if(resultCacheEnabled) {
+                byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset,
+                  datasetLength);
+                if (resultCacheEnabled) {
                     // CARSTEN cache only parsed data
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), dataSetFromOffsetsGroup);
                 }
                 IndexQuery indexQuery = offset.getIndexQuery();
                 if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getAndJson())) {
-                    if(!resultCallback.needsMore(searchQuery)) {
+                    if (!resultCallback.needsMore(searchQuery)) {
                         return;
                     }
                     resultCallback.writeResult(dataSetFromOffsetsGroup);
@@ -193,18 +215,17 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         for (FileOffset offset : offsets) {
             // CARSTEN cache only parsed data
             Cache.ValueWrapper valueWrapper = datasetsByOffsetsCache.get(new CacheFileOffset(file, offset.getOffset()));
-            if(valueWrapper != null) {
+            if (valueWrapper != null) {
                 byte[] dataSetFromOffsetsGroup = (byte[]) valueWrapper.get();
                 IndexQuery indexQuery = offset.getIndexQuery();
                 if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getAndJson())) {
-                    if(!resultCallback.needsMore(searchQuery)) {
+                    if (!resultCallback.needsMore(searchQuery)) {
                         return Collections.emptyList(); // return empty list enough found!
                     }
                     resultCallback.writeResult(dataSetFromOffsetsGroup);
                     results++;
                 }
-            }
-            else {
+            } else {
                 notFoundOffsets.add(offset);
             }
         }
@@ -213,7 +234,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
     private SnappyChunks getSnappyChunksByFile() {
         Cache.ValueWrapper valueWrapper = dataSnappyChunksCache.get(file);
-        if(valueWrapper != null) {
+        if (valueWrapper != null) {
             return (SnappyChunks) valueWrapper.get();
         }
         SnappyChunks snappyChunksByFile = SnappyChunksUtil.getSnappyChunksByFile(file);
@@ -225,7 +246,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     private long skipToOffset(BufferedInputStream bis, long chunkOffsetToSkip) throws IOException {
         long skipped = 0l;
         long lastSkipped = -1l;
-        while(skipped != chunkOffsetToSkip || lastSkipped != 0l) {
+        while (skipped != chunkOffsetToSkip || lastSkipped != 0l) {
             lastSkipped = bis.skip(chunkOffsetToSkip - skipped);
             skipped += lastSkipped;
         }
@@ -233,10 +254,10 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     }
 
     protected byte[] getResultBuffer(byte[] lastBuffer, long toSkip) {
-        if(toSkip >= 0) {
+        if (toSkip >= 0) {
             return EMPTY_BUFFER;
         }
-        int length = Math.abs((int)toSkip);
+        int length = Math.abs((int) toSkip);
         byte[] last = new byte[length];
         System.arraycopy(lastBuffer, lastBuffer.length - length, last, 0, length);
         return last;
@@ -245,7 +266,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
     protected byte[] concat(int datasetStartOffset, byte[] readBuffer, byte[] resultBuffer, int readBufferLength) {
         int resBufLen = resultBuffer.length - datasetStartOffset;
         byte[] tmp = new byte[resBufLen + readBufferLength];
-        if(resBufLen < 0) {
+        if (resBufLen < 0) {
             int abs = Math.abs(resBufLen);
             System.arraycopy(readBuffer, abs, tmp, 0, readBufferLength - abs);
         } else {
@@ -261,19 +282,20 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
 
     protected long calculateChunkOffsetCompressed(long chunkIndex, List<Integer> snappyChunks) {
         long result = 0l;
-        for(int i = 0; i < chunkIndex; i++) {
+        for (int i = 0; i < chunkIndex; i++) {
             result += snappyChunks.get(i) + 4; // 4 byte for length of chunk
         }
         return result + 16;
     }
-    private boolean matchingFilter(byte[] s, JsonQuery jsonQuery) throws ParseException, IOException {
-        if(jsonQuery == null) {
+
+    private boolean matchingFilter(byte[] s, DataQuery jsonQuery) throws ParseException, IOException {
+        if (jsonQuery == null) {
             return true;
         }
         return matchingFilter(s, Arrays.asList(jsonQuery));
     }
 
-    private boolean matchingFilter(byte[] s, List<JsonQuery> jsonQueries) throws ParseException, IOException {
+    private boolean matchingFilter(byte[] s, List<DataQuery> jsonQueries) throws ParseException, IOException {
         if (jsonQueries.size() == 0) {
             return true;
         }
@@ -281,28 +303,27 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return matchingFilter(in, jsonQueries);
     }
 
-    private boolean matchingFilter(String s, List<JsonQuery> jsonQueries) throws ParseException {
+    private boolean matchingFilter(String s, List<DataQuery> jsonQueries) throws ParseException {
         if (jsonQueries.size() == 0) {
             return true;
         }
-        Map<String, Object> parsedJson = (Map<String, Object>)jsonParser.parse(s);
+        Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(s);
         return matchingFilter(parsedJson, new HashMap<String, Object>(), jsonQueries);
     }
 
-    private boolean matchingFilter(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache, List<JsonQuery> jsonQueries) throws ParseException {
+    private boolean matchingFilter(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache,
+      List<DataQuery> jsonQueries) throws ParseException {
         if (jsonQueries.size() == 0) {
             return true;
         }
-        for (JsonQuery jsonQuery : jsonQueries) {
-            // CARSTEN method getLeftValue
-            Object lastObj = findValueFromJson(parsedJson, queriedValuesCache, jsonQuery);
-            // CARSTEN method getRightValue
+        for (DataQuery jsonQuery : jsonQueries) {
+            Object leftValue = findLeftValue(parsedJson, queriedValuesCache, jsonQuery);
+            Object rightValue = findLeftValue(parsedJson, queriedValuesCache, jsonQuery);
 
-            if(lastObj != null) {
+            if (leftValue != null) {
                 // CARSTEN handle EXISTS QueryOperation at this position
-                // CARSTEN pass left and rightValue
-                if(strategy.matches(jsonQuery, lastObj)) {
-                    if(jsonQuery.getAnd() != null) {
+                if (strategy.matches(jsonQuery.getQueryOperation(), leftValue, rightValue)) {
+                    if (jsonQuery.getAnd() != null) {
                         return matchingFilter(parsedJson, queriedValuesCache, Arrays.asList(jsonQuery.getAnd()));
                     }
                     return matchingFilter(parsedJson, queriedValuesCache, jsonQuery.getOrs());
@@ -312,11 +333,26 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
         return false;
     }
 
-    private Object findValueFromJson(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache, JsonQuery jsonQuery) {
-        if(queriedValuesCache.containsKey(jsonQuery.getFieldName())) {
-            return queriedValuesCache.get(jsonQuery.getFieldName());
+    private Object findLeftValue(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache,
+      DataQuery jsonQuery) {
+        return retrieveValue(parsedJson, queriedValuesCache, jsonQuery.getLeftType(), jsonQuery.getLeft());
+    }
+
+    private Object findRightValue(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache,
+      DataQuery jsonQuery) {
+        return retrieveValue(parsedJson, queriedValuesCache, jsonQuery.getRightType(), jsonQuery.getRight());
+    }
+
+    private Object retrieveValue(final Map<String, Object> parsedJson, final Map<String, Object> queriedValuesCache,
+      final FieldType type, final Object value) {
+        if (type == FieldType.VALUE) {
+            return value;
         }
-        String[] split = StringUtils.split(jsonQuery.getFieldName(), '.');
+        String fieldName = (String) value;
+        if (queriedValuesCache.containsKey(fieldName)) {
+            return queriedValuesCache.get(fieldName);
+        }
+        String[] split = StringUtils.split(fieldName, '.');
         Object lastObj = parsedJson;
         for (String key : split) {
             if (lastObj != null) {
@@ -324,7 +360,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
                 lastObj = map.get(key);
             }
         }
-        queriedValuesCache.put(jsonQuery.getFieldName(), lastObj);
+        queriedValuesCache.put(fieldName, lastObj);
         return lastObj;
     }
 
@@ -345,7 +381,7 @@ public class JsonSnappyRetrieveDataSetsTask implements Callable<Integer> {
             }
             datasetLength++;
         }
-        if(!found) {
+        if (!found) {
             return -1;
         }
         return datasetLength;

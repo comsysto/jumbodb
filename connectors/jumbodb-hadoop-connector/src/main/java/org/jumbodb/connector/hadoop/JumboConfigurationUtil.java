@@ -13,7 +13,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.configuration.*;
-import org.jumbodb.connector.hadoop.index.map.*;
+import org.jumbodb.connector.hadoop.data.map.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -118,14 +118,14 @@ public class JumboConfigurationUtil {
         conf.getConfiguration().set(JumboConstants.JUMBO_COLLECTION_INFO, collectionInfo);
     }
 
-    public static void setSortDatePatternConfig(Job conf, String sort) throws IOException {
-        conf.getConfiguration().set(JumboConstants.JUMBO_SORT_DATEPATTERN_CONFIG, sort);
+    public static void setCollectionDateFormat(Job conf, String sort) throws IOException {
+        conf.getConfiguration().set(JumboConstants.JUMBO_COLLECTION_DATEFORMAT, sort);
     }
 
-    public static String loadSortDatePatternConfig(Configuration conf) throws IOException {
-        String importJson = conf.get(JumboConstants.JUMBO_SORT_DATEPATTERN_CONFIG);
+    public static String loadCollectionDateFormat(Configuration conf) throws IOException {
+        String importJson = conf.get(JumboConstants.JUMBO_COLLECTION_DATEFORMAT);
         if(StringUtils.isBlank(importJson)) {
-            throw new IllegalStateException(JumboConstants.JUMBO_SORT_DATEPATTERN_CONFIG + " is not set.");
+            throw new IllegalStateException(JumboConstants.JUMBO_COLLECTION_DATEFORMAT + " is not set.");
         }
         return importJson;
     }
@@ -170,7 +170,7 @@ public class JumboConfigurationUtil {
             job.setChecksumType(importDefinition.getChecksum());
             for (IndexField indexField : job.getIndexes()) {
                 if(indexField.getDatePattern() == null) {
-                    indexField.setDatePattern(importDefinition.getDatePattern());
+                    indexField.setDatePattern(importDefinition.getDateFormat());
                 }
             }
             String subPath = importDefinition.getDeliveryChunkKey() + "/" + generateVersion(conf) + "/" + importCollection.getCollectionName() + "/";
@@ -178,7 +178,7 @@ public class JumboConfigurationUtil {
             String outputIndex = outputWithDate + "/index/" + subPath;
             String outputLog = outputWithDate + "/log/" + subPath;
             job.setDataStrategy(importCollection.getDataStrategy());
-            job.setSortDatePattern(importCollection.getSortDatePattern() != null ? importCollection.getSortDatePattern() : importDefinition.getDatePattern());
+            job.setSortDatePattern(importCollection.getDateFormat() != null ? importCollection.getDateFormat() : importDefinition.getDateFormat());
             job.setSortType(importCollection.getSortType());
             job.setSort(importCollection.getSort());
             job.setInputPath(new Path(importCollection.getInput()));

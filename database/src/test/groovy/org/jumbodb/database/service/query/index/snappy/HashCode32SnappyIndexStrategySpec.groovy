@@ -40,7 +40,7 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
         when:
         def strategyName = strategy.getStrategyName()
         then:
-        strategyName == "HASHCODE32_SNAPPY_V1"
+        strategyName == "HASHCODE32_SNAPPY"
     }
 
     def "verify chunk size"() {
@@ -333,8 +333,8 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
     }
 
     def createCollectionDefinition(indexFolder) {
-        def index = new IndexDefinition("testIndex", indexFolder, "HASHCODE32_SNAPPY_V1")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "HASHCODE32_SNAPPY_V1")]]
+        def index = new IndexDefinition("testIndex", indexFolder, "HASHCODE32_SNAPPY")
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "HASHCODE32_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

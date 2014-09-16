@@ -1,13 +1,12 @@
 package org.jumbodb.connector.hadoop.index.strategy.snappy.geohash;
 
 import org.apache.hadoop.io.IntWritable;
-import org.jumbodb.connector.hadoop.index.output.index.AbstractSnappyIndexV1OutputFormat;
+import org.jumbodb.connector.hadoop.index.output.AbstractSnappyIndexOutputFormat;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-// CARSTEN remove version from name
-public class GeohashSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1OutputFormat<IntWritable, GeoFileOffsetWritable> {
+public class GeohashSnappyIndexOutputFormat extends AbstractSnappyIndexOutputFormat<IntWritable, GeoFileOffsetWritable> {
 
     @Override
     protected void write(IntWritable k, GeoFileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException {
@@ -25,6 +24,6 @@ public class GeohashSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1Outpu
 
     @Override
     protected String getStrategy() {
-        return AbstractGeohashIndexMapper.GEOHASH_SNAPPY_V1;
+        return AbstractGeohashIndexMapper.GEOHASH_SNAPPY;
     }
 }

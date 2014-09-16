@@ -41,7 +41,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         when:
         def strategyName = strategy.getStrategyName()
         then:
-        strategyName == "INTEGER_SNAPPY_V1"
+        strategyName == "INTEGER_SNAPPY"
     }
 
     def "verify chunk size"() {
@@ -333,8 +333,8 @@ class IntegerSnappyIndexStrategySpec extends Specification {
     }
 
     def createCollectionDefinition(indexFolder) {
-        def index = new IndexDefinition("testIndex", indexFolder, "INTEGER_SNAPPY_V1")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "INTEGER_SNAPPY_V1")]]
+        def index = new IndexDefinition("testIndex", indexFolder, "INTEGER_SNAPPY")
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "INTEGER_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

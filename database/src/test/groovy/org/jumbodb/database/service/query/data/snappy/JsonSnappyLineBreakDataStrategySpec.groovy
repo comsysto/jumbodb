@@ -2,7 +2,6 @@ package org.jumbodb.database.service.query.data.snappy
 
 import org.apache.commons.io.FileUtils
 import org.jumbodb.common.query.IndexQuery
-import org.jumbodb.common.query.JsonQuery
 import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.data.common.snappy.SnappyChunksUtil
@@ -21,8 +20,8 @@ import java.util.concurrent.Future
 /**
  * @author Carsten Hufe
  */
-class JsonSnappyDataStrategySpec extends Specification {
-    def strategy = new JsonSnappyDataStrategy()
+class JsonSnappyLineBreakDataStrategySpec extends Specification {
+    def strategy = new JsonSnappyLineBreakDataStrategy()
 
     @Unroll
     def "verify supported operations #operation"() {
@@ -35,7 +34,7 @@ class JsonSnappyDataStrategySpec extends Specification {
     def "should be responsible, because collection, chunk and strategy are matching"() {
         setup:
         def cd = Mock(CollectionDefinition)
-        def dcd = new DeliveryChunkDefinition("chunk", "collection", [], [:], "JSON_SNAPPY_V1")
+        def dcd = new DeliveryChunkDefinition("chunk", "collection", [], [:], "JSON_SNAPPY_LB")
         strategy.onInitialize(cd)
         cd.getChunk("collection", "chunk") >> dcd
         expect:
@@ -62,7 +61,7 @@ class JsonSnappyDataStrategySpec extends Specification {
 
     def "verify strategy name"() {
         expect:
-        strategy.getStrategyName() == "JSON_SNAPPY_V1"
+        strategy.getStrategyName() == "JSON_SNAPPY_LB"
     }
 
     def "matches should delegate to the appropriate operation"() {
@@ -70,7 +69,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         def eqOperation = Mock(DataOperationSearch)
         def gtOperation = Mock(DataOperationSearch)
         def ltOperation = Mock(DataOperationSearch)
-        def customStrategy = new JsonSnappyDataStrategy() {
+        def customStrategy = new JsonSnappyLineBreakDataStrategy() {
             @Override
             public Map<QueryOperation, DataOperationSearch> getOperations() {
                 def ops = new HashMap<QueryOperation, DataOperationSearch>()
@@ -81,19 +80,19 @@ class JsonSnappyDataStrategySpec extends Specification {
             }
         }
         when:
-        customStrategy.matches(new JsonQuery("testField", QueryOperation.EQ, "testValue"), "testValue")
+        customStrategy.matches(QueryOperation.EQ, "testValue", "testValue")
         then:
         1 * eqOperation.matches(_, "testValue")
         when:
-        customStrategy.matches(new JsonQuery("testField", QueryOperation.GT, "testValue"), "testValue")
+        customStrategy.matches(QueryOperation.GT, "testValue", "testValue")
         then:
         1 * gtOperation.matches(_, "testValue")
         when:
-        customStrategy.matches(new JsonQuery("testField", QueryOperation.LT, "testValue"), "testValue")
+        customStrategy.matches(QueryOperation.LT, "testValue", "testValue")
         then:
         1 * ltOperation.matches(_, "testValue")
         when:
-        customStrategy.matches(new JsonQuery("testField", QueryOperation.BETWEEN, "testValue"), "testValue")
+        customStrategy.matches(QueryOperation.BETWEEN, "testValue", "testValue")
         then:
         thrown UnsupportedOperationException
     }
@@ -118,15 +117,15 @@ class JsonSnappyDataStrategySpec extends Specification {
         setup:
         def futureMock = Mock(Future)
         def executorService = Mock(ExecutorService)
-        def customStrategy = new JsonSnappyDataStrategy()
+        def customStrategy = new JsonSnappyLineBreakDataStrategy()
         customStrategy.setRetrieveDataExecutor(executorService)
         File mockFile = Mock()
-        def indexes = [new IndexDefinition("myindex", mockFile, JsonSnappyDataStrategy.JSON_SNAPPY_V1)]
+        def indexes = [new IndexDefinition("myindex", mockFile, JsonSnappyLineBreakDataStrategy.JSON_SNAPPY_LB)]
         def dataFiles = new HashMap<Integer, File>();
         dataFiles.put(1, mockFile)
         dataFiles.put(2, mockFile)
         dataFiles.put(3, mockFile)
-        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", indexes, dataFiles, JsonSnappyDataStrategy.JSON_SNAPPY_V1)
+        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", indexes, dataFiles, JsonSnappyLineBreakDataStrategy.JSON_SNAPPY_LB)
         def fileOffsets = [
                 new FileOffset(1, 12, null),
                 new FileOffset(1, 13, null),
@@ -142,7 +141,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         def numberOfResults = customStrategy.findDataSetsByFileOffsets(deliveryChunkDefinition, fileOffsets, resultCallback, jumboQuery)
         then:
         numberOfResults == 6
-        2 * executorService.submit(_ as JsonSnappyRetrieveDataSetsTask) >> futureMock
+        2 * executorService.submit(_ as JsonSnappyLineBreakRetrieveDataSetsTask) >> futureMock
         2 * futureMock.get() >> 3
     }
 
@@ -150,21 +149,21 @@ class JsonSnappyDataStrategySpec extends Specification {
         setup:
         def futureMock = Mock(Future)
         def executorService = Mock(ExecutorService)
-        def customStrategy = new JsonSnappyDataStrategy()
+        def customStrategy = new JsonSnappyLineBreakDataStrategy()
         customStrategy.setRetrieveDataExecutor(executorService)
         File mockFile = Mock()
         def dataFiles = new HashMap<Integer, File>();
         dataFiles.put(1, mockFile)
         dataFiles.put(2, mockFile)
         dataFiles.put(3, mockFile)
-        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", [], dataFiles, JsonSnappyDataStrategy.JSON_SNAPPY_V1)
+        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", [], dataFiles, JsonSnappyLineBreakDataStrategy.JSON_SNAPPY_LB)
         def jumboQuery = new JumboQuery()
         def resultCallback = Mock(ResultCallback)
         when:
         def numberOfResults = customStrategy.findDataSetsByFileOffsets(deliveryChunkDefinition, [], resultCallback, jumboQuery)
         then:
         numberOfResults == 9
-        3 * executorService.submit(_ as JsonSnappyRetrieveDataSetsTask) >> futureMock
+        3 * executorService.submit(_ as JsonSnappyLineBreakRetrieveDataSetsTask) >> futureMock
         3 * futureMock.get() >> 3
     }
 
@@ -174,7 +173,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         def folder = new File(folderStr)
         FileUtils.forceMkdir(folder);
         new File(folderStr + "/testdata").text = "Hello World"
-        def strategy = new JsonSnappyDataStrategy()
+        def strategy = new JsonSnappyLineBreakDataStrategy()
         when:
         def size = strategy.getCompressedSize(folder)
         then:
@@ -191,8 +190,8 @@ class JsonSnappyDataStrategySpec extends Specification {
         FileUtils.forceMkdir(folder);
         def dataFile = new File(folderStr + "/testdata")
         def bytes = "Hello World".getBytes("UTF-8")
-        SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), dataFile, bytes.length, 32 * 1024)
-        def strategy = new JsonSnappyDataStrategy()
+        SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), dataFile, bytes.length, 100l, 32 * 1024)
+        def strategy = new JsonSnappyLineBreakDataStrategy()
         when:
         def size = strategy.getUncompressedSize(folder)
         then:

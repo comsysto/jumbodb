@@ -27,6 +27,12 @@ public class NotFoundDataStrategy implements DataStrategy {
         return "NOT_FOUND";
     }
 
+    // CARSTEN unit test
+    @Override
+    public boolean matches(QueryOperation operation, Object leftValue, Object rightValue) {
+        return false;
+    }
+
     @Override
     public int findDataSetsByFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery) {
         throw new IllegalStateException("No data strategy found for " + deliveryChunkDefinition.getCollection() + " " + deliveryChunkDefinition.getChunkKey());

@@ -5,7 +5,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.UnhandledException;
-import org.jumbodb.common.query.JsonQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.FileOffset;
@@ -14,10 +13,10 @@ import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.common.BetweenDataOperationSearch;
 import org.jumbodb.database.service.query.data.common.DataOperationSearch;
+import org.jumbodb.database.service.query.data.common.EqDataOperationSearch;
 import org.jumbodb.database.service.query.data.common.GeoBoundaryBoxDataOperationSearch;
 import org.jumbodb.database.service.query.data.common.GeoWithinRangeInMeterDataOperationSearch;
 import org.jumbodb.database.service.query.data.common.GtDataOperationSearch;
-import org.jumbodb.database.service.query.data.common.EqDataOperationSearch;
 import org.jumbodb.database.service.query.data.common.LtDataOperationSearch;
 import org.jumbodb.database.service.query.data.common.NeDataOperationSearch;
 import org.jumbodb.database.service.query.data.common.OrDataOperationSearch;
@@ -28,8 +27,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.cache.Cache;
 
-import java.io.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -37,10 +48,9 @@ import java.util.concurrent.Future;
 /**
  * @author Carsten Hufe
  */
-public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch {
-    // CARSTEN rename strategy to JSON_SNAPPY_LB
-    public static final String JSON_SNAPPY_V1 = "JSON_SNAPPY_V1";
-    private Logger log = LoggerFactory.getLogger(JsonSnappyDataStrategy.class);
+public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
+    public static final String JSON_SNAPPY_LB = "JSON_SNAPPY_LB";
+    private Logger log = LoggerFactory.getLogger(JsonSnappyLineBreakDataStrategy.class);
 
     private ExecutorService retrieveDataExecutor;
     private Cache dataSnappyChunksCache;
@@ -65,19 +75,20 @@ public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch
     @Override
     public boolean isResponsibleFor(String chunkKey, String collection) {
         DeliveryChunkDefinition chunk = collectionDefinition.getChunk(collection, chunkKey);
-        if(chunk == null) {
+        if (chunk == null) {
             return false;
         }
-        return JSON_SNAPPY_V1.equals(chunk.getDataStrategy());
+        return JSON_SNAPPY_LB.equals(chunk.getDataStrategy());
     }
 
     @Override
     public String getStrategyName() {
-        return JSON_SNAPPY_V1;
+        return JSON_SNAPPY_LB;
     }
 
     @Override
-    public int findDataSetsByFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery) {
+    public int findDataSetsByFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition,
+      Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery) {
         int numberOfResults = 0;
         long startTime = System.currentTimeMillis();
         HashMultimap<Integer, FileOffset> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
@@ -85,7 +96,9 @@ public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch
         if (searchQuery.getIndexQuery().size() == 0) {
             log.debug("Running scanned search");
             for (File file : deliveryChunkDefinition.getDataFiles().values()) {
-                Future<Integer> future = retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery, resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache));
+                Future<Integer> future = retrieveDataExecutor.submit(
+                  new JsonSnappyLineBreakRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery,
+                    resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache));
                 tasks.add(future);
                 resultCallback.collect(new FutureCancelableTask(future));
             }
@@ -98,7 +111,9 @@ public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch
                 }
                 Set<FileOffset> offsets = fileOffsetsMap.get(fileNameHash);
                 if (offsets.size() > 0) {
-                    Future<Integer> future = retrieveDataExecutor.submit(new JsonSnappyRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache));
+                    Future<Integer> future = retrieveDataExecutor.submit(
+                      new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this,
+                        datasetsByOffsetsCache, dataSnappyChunksCache));
                     tasks.add(future);
                     resultCallback.collect(new FutureCancelableTask(future));
                 }
@@ -110,13 +125,14 @@ public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch
                 Integer results = task.get();
                 numberOfResults += results;
             }
-            log.debug("Collecting " + numberOfResults + " datasets in " + (System.currentTimeMillis() - startTime) + "ms with " + tasks.size() + " threads");
+            log.debug("Collecting " + numberOfResults + " datasets in " + (System
+              .currentTimeMillis() - startTime) + "ms with " + tasks.size() + " threads");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            if(cause instanceof RuntimeException) {
-                throw (RuntimeException)cause;
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
             }
             throw new UnhandledException(cause);
         }
@@ -136,14 +152,12 @@ public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch
     }
 
     @Override
-    // CARSTEN change signature to     public boolean matches(QueryOperation queryOperation, Object leftValue, Object rightValue) {
-    public boolean matches(JsonQuery queryClause, Object value) {
-        DataOperationSearch jsonOperationSearch = getOperations().get(queryClause.getQueryOperation());
-        if(jsonOperationSearch == null) {
-            throw new UnsupportedOperationException("OperationSearch is not supported: " + queryClause.getQueryOperation());
+    public boolean matches(QueryOperation operation, Object leftValue, Object rightValue) {
+        DataOperationSearch jsonOperationSearch = getOperations().get(operation);
+        if (jsonOperationSearch == null) {
+            throw new UnsupportedOperationException("OperationSearch is not supported: " + operation);
         }
-        // CARSTEN pass left and rightValue
-        return jsonOperationSearch.matches(queryClause, value);
+        return jsonOperationSearch.matches(leftValue, rightValue);
     }
 
     @Override
@@ -173,8 +187,7 @@ public class JsonSnappyDataStrategy implements DataStrategy, DataOperationSearch
             throw new UnhandledException(e);
         } catch (IOException e) {
             throw new UnhandledException(e);
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(dis);
             IOUtils.closeQuietly(fis);
         }

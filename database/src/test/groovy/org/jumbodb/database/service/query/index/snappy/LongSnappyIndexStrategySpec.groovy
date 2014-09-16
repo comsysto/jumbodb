@@ -40,7 +40,7 @@ class LongSnappyIndexStrategySpec extends Specification {
         when:
         def strategyName = strategy.getStrategyName()
         then:
-        strategyName == "LONG_SNAPPY_V1"
+        strategyName == "LONG_SNAPPY"
     }
 
     def "verify chunk size"() {
@@ -332,8 +332,8 @@ class LongSnappyIndexStrategySpec extends Specification {
     }
 
     def createCollectionDefinition(indexFolder) {
-        def index = new IndexDefinition("testIndex", indexFolder, "LONG_SNAPPY_V1")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "LONG_SNAPPY_V1")]]
+        def index = new IndexDefinition("testIndex", indexFolder, "LONG_SNAPPY")
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "LONG_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

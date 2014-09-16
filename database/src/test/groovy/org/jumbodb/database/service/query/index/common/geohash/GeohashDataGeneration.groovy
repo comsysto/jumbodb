@@ -53,7 +53,7 @@ class GeohashDataGeneration {
     def static createIndexFile(file) {
         def chunkSize = 24 * 2048
         def umcompressedFileLength = 24 * 10 * 2048 // index entry length * 10 chunks * datasets per chunk
-        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
     }
 

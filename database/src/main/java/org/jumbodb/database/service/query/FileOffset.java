@@ -1,9 +1,6 @@
 package org.jumbodb.database.service.query;
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.JsonQuery;
-
-import java.util.List;
 
 public class FileOffset implements Comparable<FileOffset> {
     private int fileNameHash;

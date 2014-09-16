@@ -73,7 +73,8 @@ public class JumboMetaUtil {
     }
 
     public static void writeCollectionMetaData(Path collectionFolder, String strategy, JobContext jobContext) throws IOException {
-        FileSystem fs = collectionFolder.getFileSystem(jobContext.getConfiguration());
+        Configuration configuration = jobContext.getConfiguration();
+        FileSystem fs = collectionFolder.getFileSystem(configuration);
         Path suffix = collectionFolder.suffix("/collection.properties");
         if (!fs.exists(suffix)) {
             SimpleDateFormat sdf = new SimpleDateFormat(DeliveryProperties.DATE_PATTERN);
@@ -81,8 +82,9 @@ public class JumboMetaUtil {
             Properties collectionInfo = new Properties();
             collectionInfo.setProperty("sourcePath", getSourcePaths(jobContext));
             collectionInfo.setProperty("date", sdf.format(new Date()));
-            collectionInfo.setProperty("info", jobContext.getConfiguration().get(JumboConstants.JUMBO_COLLECTION_INFO));
+            collectionInfo.setProperty("info", configuration.get(JumboConstants.JUMBO_COLLECTION_INFO));
             collectionInfo.setProperty("strategy", strategy);
+            collectionInfo.setProperty("dateFormat", JumboConfigurationUtil.loadCollectionDateFormat(configuration));
             collectionInfo.store(fsDataOutputStream, "Delivery Information");
             IOUtils.closeStream(fsDataOutputStream);
         }

@@ -442,7 +442,7 @@ class StorageManagementSpec extends Specification {
         dataInfos[0].getCollection() == "test_collection3"
         dataInfos[0].getDeliveryKey() == "test_delivery3"
         dataInfos[0].getDeliveryVersion() == "version4"
-        dataInfos[0].getFileLength() == 143l
+        dataInfos[0].getFileLength() == 166l
         dataInfos[0].getChecksumType() == ChecksumType.NONE
         when:
         def fileNames = (dataInfos.collect{ it.getFileName() } as Set)
@@ -584,7 +584,7 @@ class StorageManagementSpec extends Specification {
         new File(path + "part0001").text = bytes
         new File(path + "part0002").text = bytes
         def propsFile = new File(path + CollectionProperties.DEFAULT_FILENAME)
-        def meta = new CollectionProperties.CollectionMeta(date, "source path", "test_data_strategy", "some info")
+        def meta = new CollectionProperties.CollectionMeta(date, "source path", "test_data_strategy", "some info", "yyyy-MM-dd")
         CollectionProperties.write(propsFile, meta)
     }
 

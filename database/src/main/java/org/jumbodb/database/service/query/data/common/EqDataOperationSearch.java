@@ -1,34 +1,34 @@
 package org.jumbodb.database.service.query.data.common;
 
-import org.jumbodb.common.query.JsonQuery;
+import org.jumbodb.common.query.DataQuery;
 
 /**
  * @author Carsten Hufe
  */
 public class EqDataOperationSearch implements DataOperationSearch {
     @Override
-    public boolean matches(JsonQuery jsonQuery, Object value) {
-        if(value instanceof Number) {
-            Number searchValue = (Number) jsonQuery.getValue();
-            if(value instanceof Double) {
-                Double dv = (Double) value;
-                return dv == searchValue.doubleValue();
+    public boolean matches(Object leftValue, Object rightValue) {
+        if(leftValue instanceof Number) {
+            Number rightNumber = (Number) rightValue;
+            if (leftValue instanceof Double) {
+                Double leftDouble = (Double) leftValue;
+                return leftDouble == rightNumber.doubleValue();
 
-            } else if(value instanceof Float) {
-                Float dv = (Float) value;
-                return dv == searchValue.floatValue();
+            } else if (leftValue instanceof Long) {
+                Long leftLong = (Long) leftValue;
+                return leftLong == rightNumber.longValue();
+            } else if (leftValue instanceof Float) {
+                Float leftFloat = (Float) leftValue;
+                return leftFloat == rightNumber.floatValue();
 
-            } else if(value instanceof Integer) {
-                Integer dv = (Integer) value;
-                return dv == searchValue.intValue();
-
-            } else if(value instanceof Long) {
-                Long dv = (Long) value;
-                return dv == searchValue.longValue();
-            } else {
-                throw new IllegalArgumentException(value.getClass().getSimpleName() + " is not supported for this search type.");
+            } else if (leftValue instanceof Integer) {
+                Integer leftInt = (Integer) leftValue;
+                return leftInt == rightNumber.intValue();
             }
         }
-        return jsonQuery.getValue().equals(value);
+        if(leftValue != null) {
+            return leftValue.equals(rightValue);
+        }
+        return rightValue == null;
     }
 }

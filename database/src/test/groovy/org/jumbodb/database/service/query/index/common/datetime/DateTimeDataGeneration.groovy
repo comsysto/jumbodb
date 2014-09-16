@@ -42,7 +42,7 @@ class DateTimeDataGeneration {
     def static createIndexFile(file) {
         def chunkSize = 32000
         def umcompressedFileLength = 20 * 12 * 1600 // index entry length * 12 months * datasets per month
-        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
     }
 

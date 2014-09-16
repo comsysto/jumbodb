@@ -1,7 +1,6 @@
 package org.jumbodb.connector.hadoop.configuration;
 
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
-import org.jumbodb.connector.hadoop.index.map.GenericJsonStringSortMapper;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +17,7 @@ public class ImportCollection {
     private String collectionName;
     private String dataStrategy;
     private List<String> sort = new LinkedList<String>();
-    private String sortDatePattern;
+    private String dateFormat;
     private String sortType = JumboConfigurationUtil.NO_SORT;
     private List<IndexField> indexes = new LinkedList<IndexField>();
     private Integer numberOfOutputFiles = null;
@@ -26,12 +25,12 @@ public class ImportCollection {
     public ImportCollection() {
     }
 
-    public String getSortDatePattern() {
-        return sortDatePattern;
+    public String getDateFormat() {
+        return dateFormat;
     }
 
-    public void setSortDatePattern(String sortDatePattern) {
-        this.sortDatePattern = sortDatePattern;
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
     public String getSortType() {

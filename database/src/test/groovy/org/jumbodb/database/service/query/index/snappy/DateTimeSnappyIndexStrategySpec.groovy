@@ -38,7 +38,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         when:
         def strategyName = strategy.getStrategyName()
         then:
-        strategyName == "DATETIME_SNAPPY_V1"
+        strategyName == "DATETIME_SNAPPY"
     }
 
     def "verify chunk size"() {
@@ -363,8 +363,8 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
     }
 
     def createCollectionDefinition(indexFolder) {
-        def index = new IndexDefinition("testIndex", indexFolder, "DATETIME_SNAPPY_V1")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "DATETIME_SNAPPY_V1")]]
+        def index = new IndexDefinition("testIndex", indexFolder, "DATETIME_SNAPPY")
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "DATETIME_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

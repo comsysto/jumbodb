@@ -15,8 +15,6 @@ import java.util.Map;
  * @author Carsten Hufe
  */
 public class HashCode32SnappyIndexStrategy extends IntegerSnappyIndexStrategy {
-
-
     private Logger log = LoggerFactory.getLogger(HashCode32SnappyIndexStrategy.class);
 
     @Override
@@ -28,7 +26,6 @@ public class HashCode32SnappyIndexStrategy extends IntegerSnappyIndexStrategy {
 
     @Override
     public String getStrategyName() {
-        // CARSTEN rename remove version everywhere
-        return "HASHCODE32_SNAPPY_V1";
+        return "HASHCODE32_SNAPPY";
     }
 }

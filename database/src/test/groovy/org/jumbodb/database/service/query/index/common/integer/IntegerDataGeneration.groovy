@@ -38,7 +38,7 @@ class IntegerDataGeneration {
     def static createIndexFile(file) {
         def chunkSize = 32768
         def umcompressedFileLength = 16 * 11 * 2048 // index entry length * 12 chunks * datasets per chunk
-        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, chunkSize)
+        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, chunkSize)
         SnappyChunksUtil.getSnappyChunksByFile(file)
     }
 

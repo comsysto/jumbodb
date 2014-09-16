@@ -1,8 +1,5 @@
 package org.jumbodb.database.service.query.data.common
 
-import org.jumbodb.common.query.JsonQuery
-import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.database.service.query.data.common.NeDataOperationSearch
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -15,8 +12,7 @@ class NeDataOperationSearchSpec extends Specification {
     @Unroll
     def "matches non equality #value ne #testValue == #isNotEquals"() {
         expect:
-        def query = new JsonQuery("field", QueryOperation.EQ, value)
-        operation.matches(query, testValue) == isNotEquals
+        operation.matches(testValue, value) == isNotEquals
         where:
         value     | testValue   | isNotEquals
         "testStr" | "testStr"   | false

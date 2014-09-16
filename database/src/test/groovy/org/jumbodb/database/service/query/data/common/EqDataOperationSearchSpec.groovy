@@ -1,8 +1,7 @@
 package org.jumbodb.database.service.query.data.common
 
-import org.jumbodb.common.query.JsonQuery
+import org.jumbodb.common.query.DataQuery
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.database.service.query.data.common.EqDataOperationSearch
 import spock.lang.Unroll
 
 /**
@@ -14,8 +13,7 @@ class EqDataOperationSearchSpec extends spock.lang.Specification {
     @Unroll
     def "matches equality #value eq #testValue == #isEquals"() {
         expect:
-        def jsonQuery = new JsonQuery("testField", QueryOperation.EQ, value)
-        operation.matches(jsonQuery, testValue) == isEquals
+        operation.matches(testValue, value) == isEquals
         where:
         value     | testValue   | isEquals
         "testStr" | "testStr"   | true

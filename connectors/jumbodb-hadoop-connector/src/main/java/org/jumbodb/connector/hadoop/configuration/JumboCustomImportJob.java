@@ -1,6 +1,6 @@
 package org.jumbodb.connector.hadoop.configuration;
 
-import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
 
 import java.util.LinkedList;
 import java.util.List;

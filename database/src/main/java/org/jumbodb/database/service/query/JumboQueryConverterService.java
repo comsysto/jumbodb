@@ -6,7 +6,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import org.jumbodb.common.query.JsonQuery;
+import org.jumbodb.common.query.DataQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.service.query.sql.WhereVisitor;
 
@@ -88,7 +88,7 @@ public class JumboQueryConverterService {
 //        System.out.println("from item alias  " + selectBody.getFromItem().getAlias().getName()); // wenn kein alias getAlias == null
         WhereVisitor expressionVisitor = new WhereVisitor();
         selectBody.getWhere().accept(expressionVisitor);
-        List<JsonQuery> jsonQueries = expressionVisitor.getOrs();
+        List<DataQuery> jsonQueries = expressionVisitor.getOrs();
         System.out.println(jsonQueries);
         System.out.println("time " + ( System.currentTimeMillis() - start));
     }

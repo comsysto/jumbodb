@@ -3,16 +3,12 @@ package org.jumbodb.importer.hadoop.json;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.partition.BinaryPartitioner;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
-import org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedPartitioner;
-import org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
@@ -58,7 +54,7 @@ public class JsonImporterJob extends Configured implements Tool {
         for (JumboGenericImportJob importJob : importJobs) {
             Job sortJob = Job.getInstance(conf, "Sort Job " + importJob.getCollectionName());
             JumboConfigurationUtil.setSortConfig(sortJob, importJob.getSort());
-            JumboConfigurationUtil.setSortDatePatternConfig(sortJob, importJob.getSortDatePattern());
+            JumboConfigurationUtil.setCollectionDateFormat(sortJob, importJob.getSortDatePattern());
             JumboConfigurationUtil.setCollectionInfo(sortJob, importJob.getDescription());
             JumboInputFormat.setChecksumType(sortJob, importDefinition.getChecksum());
             FileInputFormat.addInputPath(sortJob, importJob.getInputPath());

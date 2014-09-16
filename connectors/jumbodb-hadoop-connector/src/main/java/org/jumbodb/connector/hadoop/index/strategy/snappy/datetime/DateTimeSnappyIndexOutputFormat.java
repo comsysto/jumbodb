@@ -2,13 +2,12 @@ package org.jumbodb.connector.hadoop.index.strategy.snappy.datetime;
 
 import org.apache.hadoop.io.LongWritable;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
-import org.jumbodb.connector.hadoop.index.output.index.AbstractSnappyIndexV1OutputFormat;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.datetime.AbstractDateTimeIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.AbstractSnappyIndexOutputFormat;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class DateTimeSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1OutputFormat<LongWritable, FileOffsetWritable> {
+public class DateTimeSnappyIndexOutputFormat extends AbstractSnappyIndexOutputFormat<LongWritable, FileOffsetWritable> {
 
     @Override
     protected void write(LongWritable k, FileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException {
@@ -24,6 +23,6 @@ public class DateTimeSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1Outp
 
     @Override
     protected String getStrategy() {
-        return AbstractDateTimeIndexMapper.DATETIME_SNAPPY_V1;
+        return AbstractDateTimeIndexMapper.DATETIME_SNAPPY;
     }
 }

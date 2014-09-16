@@ -65,7 +65,6 @@ public class LongSnappyIndexStrategy extends NumberSnappyIndexStrategy<Long, Lon
 
     @Override
     public String getStrategyName() {
-        // CARSTEN rename remove version everywhere
-        return "LONG_SNAPPY_V1";
+        return "LONG_SNAPPY";
     }
 }

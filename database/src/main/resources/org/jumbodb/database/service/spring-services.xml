@@ -94,7 +94,7 @@
     <bean id="dataStrategyManager" class="org.jumbodb.database.service.query.data.DataStrategyManager">
         <property name="strategies">
             <list>
-                <bean class="org.jumbodb.database.service.query.data.snappy.JsonSnappyDataStrategy">
+                <bean class="org.jumbodb.database.service.query.data.snappy.JsonSnappyLineBreakDataStrategy">
                     <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
                     <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
                     <property name="dataSnappyChunksCache" ref="dataSnappyChunksCache"/>

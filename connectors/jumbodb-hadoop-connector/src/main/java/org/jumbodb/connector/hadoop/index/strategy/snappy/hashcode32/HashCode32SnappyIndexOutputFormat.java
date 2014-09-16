@@ -1,14 +1,13 @@
-package org.jumbodb.connector.hadoop.index.strategy.snappy.integer;
+package org.jumbodb.connector.hadoop.index.strategy.snappy.hashcode32;
 
-import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.jumbodb.connector.hadoop.index.output.index.AbstractSnappyIndexV1OutputFormat;
+import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
+import org.jumbodb.connector.hadoop.index.output.AbstractSnappyIndexOutputFormat;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-// CARSTEN remove version from name
-public class IntegerSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1OutputFormat<IntWritable, FileOffsetWritable> {
+public class HashCode32SnappyIndexOutputFormat extends AbstractSnappyIndexOutputFormat<IntWritable, FileOffsetWritable> {
 
     @Override
     protected void write(IntWritable k, FileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException {
@@ -24,6 +23,6 @@ public class IntegerSnappyIndexV1OutputFormat extends AbstractSnappyIndexV1Outpu
 
     @Override
     protected String getStrategy() {
-        return AbstractIntegerIndexMapper.INTEGER_SNAPPY_V1;
+        return AbstractHashCode32IndexMapper.HASHCODE32_SNAPPY;
     }
 }

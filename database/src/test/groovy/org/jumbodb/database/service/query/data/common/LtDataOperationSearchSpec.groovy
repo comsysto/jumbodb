@@ -1,8 +1,7 @@
 package org.jumbodb.database.service.query.data.common
 
-import org.jumbodb.common.query.JsonQuery
+import org.jumbodb.common.query.DataQuery
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.database.service.query.data.common.LtDataOperationSearch
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -15,8 +14,7 @@ class LtDataOperationSearchSpec extends Specification {
     @Unroll
     def "less than double match #testValue < #value == #isLessThan"() {
         expect:
-        def query = new JsonQuery("field", QueryOperation.LT, value)
-        operation.matches(query, testValue) == isLessThan
+        operation.matches(testValue, value) == isLessThan
         where:
         value | testValue | isLessThan
         2d    | 5d        | false
@@ -29,8 +27,7 @@ class LtDataOperationSearchSpec extends Specification {
     @Unroll
     def "less than float match #testValue < #value == #isLessThan"() {
         expect:
-        def query = new JsonQuery("field", QueryOperation.LT, value)
-        operation.matches(query, testValue) == isLessThan
+        operation.matches(testValue, value) == isLessThan
         where:
         value | testValue | isLessThan
         2f    | 5f        | false
@@ -43,8 +40,7 @@ class LtDataOperationSearchSpec extends Specification {
     @Unroll
     def "less than integer match #testValue < #value == #isLessThan"() {
         expect:
-        def query = new JsonQuery("field", QueryOperation.LT, value)
-        operation.matches(query, testValue) == isLessThan
+        operation.matches(testValue, value) == isLessThan
         where:
         value | testValue | isLessThan
         2     | 5         | false
@@ -57,8 +53,7 @@ class LtDataOperationSearchSpec extends Specification {
     @Unroll
     def "less than long match #testValue < #value == #isLessThan"() {
         expect:
-        def query = new JsonQuery("field", QueryOperation.LT, value)
-        operation.matches(query, testValue) == isLessThan
+        operation.matches(testValue, value) == isLessThan
         where:
         value | testValue | isLessThan
         2l    | 5l        | false
@@ -68,11 +63,8 @@ class LtDataOperationSearchSpec extends Specification {
         -2l   | -3l       | true
     }
 
-    def "illegal argument exception expected"() {
-        when:
-        def query = new JsonQuery("field", QueryOperation.LT, 4)
-        operation.matches(query, "illegal")
-        then:
-        thrown IllegalArgumentException
+    def "illegal argument false expected"() {
+        expect:
+        operation.matches(4, "illegal") == false
     }
 }

@@ -1,8 +1,7 @@
 package org.jumbodb.database.service.query.data.common
 
-import org.jumbodb.common.query.JsonQuery
+import org.jumbodb.common.query.DataQuery
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.database.service.query.data.common.GeoWithinRangeInMeterDataOperationSearch
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -16,8 +15,7 @@ class GeoWithinRangeInMeterDataOperationSearchSpec extends Specification {
     def "should match inside the range [#lat, #lon] and [#testLat, #testLon] with distance #distance meter == #isWithingRange"() {
         expect:
         List<Double> p1 = Arrays.asList(lat, lon)
-        def q = new JsonQuery("testField", QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(p1, distance));
-        operation.matches(q, Arrays.asList(testLat, testLon)) == isWithingRange
+        operation.matches(Arrays.asList(testLat, testLon), Arrays.asList(p1, distance)) == isWithingRange
         where:
         lat       | lon       | distance | testLat   | testLon   | isWithingRange
         48.229361 | 11.299782 | 7234     | 48.188407 | 11.375656 | true

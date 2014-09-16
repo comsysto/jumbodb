@@ -19,7 +19,7 @@ public class ImportDefinition {
     private List<HadoopConfig> hadoop = new LinkedList<HadoopConfig>();
     private String output;
     private Integer numberOfDataFiles = 32;
-    private String datePattern = "yyyy-MM-dd HH:mm:ss";
+    private String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     private ChecksumType checksum;
 
     public ChecksumType getChecksum() {
@@ -30,12 +30,12 @@ public class ImportDefinition {
         this.checksum = checksum;
     }
 
-    public String getDatePattern() {
-        return datePattern;
+    public String getDateFormat() {
+        return dateFormat;
     }
 
-    public void setDatePattern(String datePattern) {
-        this.datePattern = datePattern;
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
     public Integer getNumberOfDataFiles() {

@@ -7,7 +7,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
-import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
 import org.jumbodb.connector.importer.ImportInfo;
 import org.jumbodb.connector.importer.JumboImportConnection;
 import org.jumbodb.data.common.meta.DeliveryProperties;

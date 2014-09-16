@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.output.data;
+package org.jumbodb.connector.hadoop.data.output;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;

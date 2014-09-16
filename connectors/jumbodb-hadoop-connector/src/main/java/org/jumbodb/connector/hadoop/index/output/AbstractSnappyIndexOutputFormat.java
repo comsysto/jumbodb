@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.output.index;
+package org.jumbodb.connector.hadoop.index.output;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.output.CountingOutputStream;
@@ -26,8 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
-// CARSTEN remove version from name
-public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableComparable, OV> extends FileOutputFormat<T, OV> {
+public abstract class AbstractSnappyIndexOutputFormat<T extends WritableComparable, OV> extends FileOutputFormat<T, OV> {
 
     @Override
     public RecordWriter<T, OV> getRecordWriter(
@@ -47,7 +46,7 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
         private final MessageDigest fileMessageDigest;
         private List<Integer> chunkSizes = new LinkedList<Integer>();
         private final FSDataOutputStream fileOut;
-
+        private long datasets = 0l;
 
         public BinaryIndexRecordWriter(TaskAttemptContext context)
                 throws IOException {
@@ -71,7 +70,8 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
 
         @Override
         public synchronized void write(T k, OV v) throws IOException, InterruptedException {
-            AbstractSnappyIndexV1OutputFormat.this.write(k, v, dataOutputStream);
+            AbstractSnappyIndexOutputFormat.this.write(k, v, dataOutputStream);
+            datasets++;
         }
 
         @Override
@@ -96,6 +96,7 @@ public abstract class AbstractSnappyIndexV1OutputFormat<T extends WritableCompar
             OutputStream digestStream = getDigestOutputStream(fsDataOutputStream, messageDigest);
             DataOutputStream dos = new DataOutputStream(digestStream);
             dos.writeLong(countingOutputStream.getByteCount());
+            dos.writeLong(datasets);
             dos.writeInt(getSnappyBlockSize());
             for (Integer chunkSize : chunkSizes) {
                 dos.writeInt(chunkSize);

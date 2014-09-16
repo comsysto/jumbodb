@@ -15,7 +15,7 @@ import java.util.*;
 public class JumboQuery {
     private String collection;
     private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
-    private List<JsonQuery> jsonQuery = new LinkedList<JsonQuery>();
+    private List<DataQuery> jsonQuery = new LinkedList<DataQuery>();
     private int limit = -1;
     private boolean resultCacheEnabled = true;
 
@@ -51,7 +51,7 @@ public class JumboQuery {
 //        return addIndexQuery(new IndexQuery(indexName, indexValues));
 //    }
 
-    public boolean addJsonQuery(JsonQuery jsonQuery) {
+    public boolean addJsonQuery(DataQuery jsonQuery) {
         return this.jsonQuery.add(jsonQuery);
     }
 
@@ -67,11 +67,11 @@ public class JumboQuery {
         this.indexQuery = indexQuery;
     }
 
-    public List<JsonQuery> getJsonQuery() {
+    public List<DataQuery> getJsonQuery() {
         return jsonQuery;
     }
 
-    public void setJsonQuery(List<JsonQuery> jsonQuery) {
+    public void setJsonQuery(List<DataQuery> jsonQuery) {
         this.jsonQuery = jsonQuery;
     }
 

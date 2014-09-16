@@ -24,6 +24,7 @@ public interface DataStrategy {
     long getUncompressedSize(File dataFolder);
     boolean isResponsibleFor(String chunkKey, String collection);
     String getStrategyName();
+    boolean matches(QueryOperation operation, Object leftValue, Object rightValue);
     int findDataSetsByFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition, Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery);
     List<QueryOperation> getSupportedOperations();
     void onInitialize(CollectionDefinition collectionDefinition);

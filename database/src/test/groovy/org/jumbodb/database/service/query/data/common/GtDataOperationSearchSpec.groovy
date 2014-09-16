@@ -1,8 +1,5 @@
 package org.jumbodb.database.service.query.data.common
 
-import org.jumbodb.common.query.JsonQuery
-import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.database.service.query.data.common.GtDataOperationSearch
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -15,8 +12,7 @@ class GtDataOperationSearchSpec extends Specification {
     @Unroll
     def "greater than double match #testValue > #value == #isGreaterThan"() {
         expect:
-        def query = new JsonQuery("field", QueryOperation.GT, value)
-        operation.matches(query, testValue) == isGreaterThan
+        operation.matches(testValue, value) == isGreaterThan
         where:
         value | testValue | isGreaterThan
         2d    | 5d        | true
@@ -29,8 +25,7 @@ class GtDataOperationSearchSpec extends Specification {
     @Unroll
     def "greater than float match #testValue > #value== #isGreaterThan"() {
         expect:
-        def query = new JsonQuery("field", QueryOperation.GT, value)
-        operation.matches(query, testValue) == isGreaterThan
+        operation.matches(testValue, value) == isGreaterThan
         where:
         value | testValue | isGreaterThan
         2f    | 5f        | true
@@ -43,8 +38,7 @@ class GtDataOperationSearchSpec extends Specification {
     @Unroll
     def "greater than integer match #testValue > #value == #isGreaterThan"() {
         expect:
-        def query = new JsonQuery("field", QueryOperation.GT, value)
-        operation.matches(query, testValue) == isGreaterThan
+        operation.matches(testValue, value) == isGreaterThan
         where:
         value | testValue | isGreaterThan
         2     | 5         | true
@@ -57,8 +51,7 @@ class GtDataOperationSearchSpec extends Specification {
     @Unroll
     def "greater than long match #testValue > #value == #isGreaterThan"() {
         expect:
-        def query = new JsonQuery("field", QueryOperation.GT, value)
-        operation.matches(query, testValue) == isGreaterThan
+        operation.matches(testValue, value) == isGreaterThan
         where:
         value | testValue | isGreaterThan
         2l    | 5l        | true
@@ -68,11 +61,8 @@ class GtDataOperationSearchSpec extends Specification {
         -2l   | -3l       | false
     }
 
-    def "illegal argument exception expected"() {
-        when:
-        def query = new JsonQuery("field", QueryOperation.GT, 4)
-        operation.matches(query, "illegal")
-        then:
-        thrown IllegalArgumentException
+    def "illegal argument false expected"() {
+        expect:
+        operation.matches(4, "illegal") == false
     }
 }

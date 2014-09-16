@@ -10,13 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * User: carsten
- * Date: 3/25/13
- * Time: 3:16 PM
+ * @author Carsten Hufe
  */
 public class SnappyChunksUtil {
     private static Logger log = LoggerFactory.getLogger(SnappyChunksUtil.class);
-
+    private static final long CHUNK_HEADER_SIZE = 8 + 8 + 4 + 4;
     /**
      * Copies stream to file
      *
@@ -25,7 +23,8 @@ public class SnappyChunksUtil {
      * @param fileLength         length of data
      * @param chunkSize          snappy chunk size
      */
-    public static void copy(InputStream inputStream, File absoluteImportFile, long fileLength, int chunkSize) {
+    // CARSTEN move copy method is only for tests
+    public static void copy(InputStream inputStream, File absoluteImportFile, long fileLength, long datasets, int chunkSize) {
         OutputStream sos = null;
         DataOutputStream dos = null;
         FileOutputStream fos = null;
@@ -56,6 +55,7 @@ public class SnappyChunksUtil {
             final DataOutputStream finalSnappyChunksDos = snappyChunksDos;
 
             snappyChunksDos.writeLong(fileLength);
+            snappyChunksDos.writeLong(datasets);
             snappyChunksDos.writeInt(chunkSize);
             fos = new FileOutputStream(absoluteImportFile);
             bos = new BufferedOutputStream(fos) {
@@ -88,10 +88,11 @@ public class SnappyChunksUtil {
             chunksFis = new FileInputStream(chunkFileName);
             chunksDis = new DataInputStream(new BufferedInputStream(chunksFis));
             long length = chunksDis.readLong();
+            long datasets = chunksDis.readLong();
             int snappyChunkSize = chunksDis.readInt();
-            int numberOfChunks = (int) (chunkFile.length() - 8 - 4 - 4) / 4;
+            int numberOfChunks = (int) (chunkFile.length() - CHUNK_HEADER_SIZE) / 4;
             List<Integer> snappyChunks = buildSnappyChunks(chunksDis, numberOfChunks);
-            return new SnappyChunks(length, snappyChunkSize, numberOfChunks, snappyChunks);
+            return new SnappyChunks(length, datasets, snappyChunkSize, numberOfChunks, snappyChunks);
 
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

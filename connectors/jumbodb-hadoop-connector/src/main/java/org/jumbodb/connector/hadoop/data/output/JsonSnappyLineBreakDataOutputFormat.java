@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.output.data;
+package org.jumbodb.connector.hadoop.data.output;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.hadoop.conf.Configuration;
@@ -24,9 +24,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
-// CARSTEN remove version from name
-public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
-    public static final String STRATEGY_KEY = "JSON_SNAPPY_V1";
+public class JsonSnappyLineBreakDataOutputFormat<K, V, R> extends TextOutputFormat<K, V> {
+    public static final String STRATEGY_KEY = "JSON_SNAPPY_LB";
     public static final int SNAPPY_BLOCK_SIZE = 32768;
 
 
@@ -34,10 +33,10 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
     public RecordWriter<K, V> getRecordWriter(
             TaskAttemptContext context) throws IOException,
             InterruptedException {
-        return new SnappyDataV1Writer(context);
+        return new SnappyDataWriter(context);
     }
 
-    private class SnappyDataV1Writer extends RecordWriter<K, V> {
+    private class SnappyDataWriter extends RecordWriter<K, V> {
         private final byte[] lineBreak = "\n".getBytes("UTF-8");
 
         private final FSDataOutputStream fileOut;
@@ -50,8 +49,9 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
         private final FileSystem fs;
         private final MessageDigest fileMessageDigest;
         private long length = 0l;
+        private long datasets = 0l;
 
-        public SnappyDataV1Writer(TaskAttemptContext context)
+        public SnappyDataWriter(TaskAttemptContext context)
                 throws IOException {
             Configuration conf = context.getConfiguration();
             file = getDefaultWorkFile(context, ".snappy");
@@ -101,6 +101,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             dataOutputStream.write(bytes);
             dataOutputStream.write(lineBreak);
             length += bytes.length + lineBreak.length;
+            datasets++;
         }
 
         @Override
@@ -122,6 +123,7 @@ public class SnappyDataV1OutputFormat<K, V, R> extends TextOutputFormat<K, V> {
             OutputStream digestStream = getDigestOutputStream(fsDataOutputStream, messageDigest);
             DataOutputStream dos = new DataOutputStream(digestStream);
             dos.writeLong(length);
+            dos.writeLong(datasets);
             dos.writeInt(SNAPPY_BLOCK_SIZE);
             for (Integer chunkSize : chunkSizes) {
                 dos.writeInt(chunkSize);

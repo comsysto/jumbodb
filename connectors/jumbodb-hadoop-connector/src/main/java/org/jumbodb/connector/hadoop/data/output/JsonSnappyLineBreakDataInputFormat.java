@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.output.data;
+package org.jumbodb.connector.hadoop.data.output;
 
 import com.google.common.base.Charsets;
 import org.apache.hadoop.fs.FileStatus;
@@ -18,8 +18,7 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
-// CARSTEN remove version from name
-public class SnappyDataV1InputFormat extends FileInputFormat<LongWritable, Text> {
+public class JsonSnappyLineBreakDataInputFormat extends FileInputFormat<LongWritable, Text> {
 
     @Override
     protected List<FileStatus> listStatus(JobContext job) throws IOException {
@@ -48,6 +47,6 @@ public class SnappyDataV1InputFormat extends FileInputFormat<LongWritable, Text>
         if (null != delimiter) {
             recordDelimiterBytes = delimiter.getBytes(Charsets.UTF_8);
         }
-        return new SnappyDataV1LineRecordReader(recordDelimiterBytes);
+        return new JsonSnappyLineBreakDataLineRecordReader(recordDelimiterBytes);
     }
 }

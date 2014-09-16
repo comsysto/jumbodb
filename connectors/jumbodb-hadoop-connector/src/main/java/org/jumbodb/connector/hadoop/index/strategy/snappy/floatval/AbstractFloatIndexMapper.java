@@ -4,7 +4,7 @@ import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
-import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
 
 import java.io.IOException;
 
@@ -13,9 +13,8 @@ import java.io.IOException;
  * Date: 11/3/12
  * Time: 3:26 PM
  */
-// CARSTEN remove version from name
 public abstract class AbstractFloatIndexMapper<T> extends AbstractIndexMapper<T> {
-    public static final String FLOAT_SNAPPY_V_1 = "FLOAT_SNAPPY_V1";
+    public static final String FLOAT_SNAPPY = "FLOAT_SNAPPY";
 
     private FloatWritable keyW = new FloatWritable();
     private FileOffsetWritable valueW = new FileOffsetWritable();
@@ -33,7 +32,7 @@ public abstract class AbstractFloatIndexMapper<T> extends AbstractIndexMapper<T>
 
     @Override
     public String getStrategy() {
-        return FLOAT_SNAPPY_V_1;
+        return FLOAT_SNAPPY;
     }
 
 
@@ -49,7 +48,7 @@ public abstract class AbstractFloatIndexMapper<T> extends AbstractIndexMapper<T>
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return FloatSnappyIndexV1OutputFormat.class;
+        return FloatSnappyIndexOutputFormat.class;
     }
 
     public abstract Float getIndexableValue(T input);

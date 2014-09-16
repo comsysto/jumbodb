@@ -21,7 +21,6 @@ public class HashCode64SnappyIndexStrategy extends LongSnappyIndexStrategy {
 
     @Override
     public String getStrategyName() {
-        // CARSTEN rename remove version everywhere
-        return "HASHCODE64_SNAPPY_V1";
+        return "HASHCODE64_SNAPPY";
     }
 }

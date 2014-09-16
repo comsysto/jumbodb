@@ -13,7 +13,7 @@ class SnappyUtilSpec extends Specification {
         def string = RandomStringUtils.randomAlphanumeric(32 * 1024) + "This is my expected string"
         def byteStream = new ByteArrayInputStream(string.getBytes("UTF-8"))
         def testFile = File.createTempFile("test", "file")
-        SnappyChunksUtil.copy(byteStream, testFile, string.size(), 32 * 1024)
+        SnappyChunksUtil.copy(byteStream, testFile, string.size(), 100l, 32 * 1024)
         def chunks = SnappyChunksUtil.getSnappyChunksByFile(testFile)
         byteStream.close()
         def raf = new RandomAccessFile(testFile, "r")

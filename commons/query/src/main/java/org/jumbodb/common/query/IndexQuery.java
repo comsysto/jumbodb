@@ -2,15 +2,12 @@ package org.jumbodb.common.query;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-import java.util.LinkedList;
-import java.util.List;
-
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class IndexQuery {
     private String name;
     private QueryOperation queryOperation;
     private Object value;
-    private JsonQuery andJson;
+    private DataQuery andJson;
     private IndexQuery andIndex;
 
     public IndexQuery() {
@@ -46,11 +43,11 @@ public class IndexQuery {
         this.value = value;
     }
 
-    public JsonQuery getAndJson() {
+    public DataQuery getAndJson() {
         return andJson;
     }
 
-    public void setAndJson(JsonQuery andJson) {
+    public void setAndJson(DataQuery andJson) {
         this.andJson = andJson;
     }
 

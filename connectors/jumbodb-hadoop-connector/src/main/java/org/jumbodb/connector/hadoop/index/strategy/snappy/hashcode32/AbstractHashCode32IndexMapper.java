@@ -6,7 +6,7 @@ import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
 
 import java.io.IOException;
 
@@ -16,8 +16,7 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractHashCode32IndexMapper<T> extends AbstractIndexMapper<T> {
-// CARSTEN remove version from name
-    public static final String HASHCODE32_SNAPPY_V1 = "HASHCODE32_SNAPPY_V1";
+    public static final String HASHCODE32_SNAPPY = "HASHCODE32_SNAPPY";
 
     private IntWritable keyW = new IntWritable();
     private FileOffsetWritable valueW = new FileOffsetWritable();
@@ -36,7 +35,7 @@ public abstract class AbstractHashCode32IndexMapper<T> extends AbstractIndexMapp
 
     @Override
     public String getStrategy() {
-        return HASHCODE32_SNAPPY_V1;
+        return HASHCODE32_SNAPPY;
     }
 
     @Override
@@ -51,7 +50,7 @@ public abstract class AbstractHashCode32IndexMapper<T> extends AbstractIndexMapp
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return HashCode32SnappyIndexV1OutputFormat.class;
+        return HashCode32SnappyIndexOutputFormat.class;
     }
 
     public abstract String getIndexableValue(T input);

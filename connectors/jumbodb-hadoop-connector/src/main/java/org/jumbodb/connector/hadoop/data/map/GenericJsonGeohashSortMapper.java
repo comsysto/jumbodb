@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.map;
+package org.jumbodb.connector.hadoop.data.map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.IntWritable;
@@ -8,10 +8,11 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jumbodb.common.geo.geohash.GeoHash;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,8 +20,8 @@ import java.util.List;
  * Date: 4/17/13
  * Time: 4:52 PM
  */
-public class GenericJsonIntegerSortMapper extends Mapper<LongWritable, Text, IntWritable, Text> {
-    public static final String SORT_KEY = "INTEGER";
+public class GenericJsonGeohashSortMapper extends Mapper<LongWritable, Text, IntWritable, Text> {
+    public static final String SORT_KEY = "GEOHASH";
 
     private ObjectMapper jsonMapper;
     private IntWritable keyW = new IntWritable();
@@ -45,18 +46,25 @@ public class GenericJsonIntegerSortMapper extends Mapper<LongWritable, Text, Int
     }
 
     private Integer getSortKey(JsonNode jsonNode) {
-        return getValueFor(sortFields.get(0), jsonNode);
+        List<Double> valueFor = getValueFor(sortFields.get(0), jsonNode);
+        if(valueFor != null) {
+            return GeoHash.withBitPrecision(valueFor.get(0), valueFor.get(1), 32).intValue();
+        }
+        return 0;
     }
 
-    private Integer getValueFor(String key, JsonNode jsonNode) {
+    private List<Double> getValueFor(String key, JsonNode jsonNode) {
         String[] split = StringUtils.split(key, ".");
         for (String s : split) {
             jsonNode = jsonNode.path(s);
         }
-        if(jsonNode.isValueNode()) {
-            Integer s = jsonNode.getIntValue();
-            return s;
+        if(jsonNode.isArray()) {
+            List<Double> result = new ArrayList<Double>(2);
+            for (JsonNode node : jsonNode) {
+                result.add(node.getDoubleValue());
+            }
+            return result;
         }
-        return 0;
+        return null;
     }
 }

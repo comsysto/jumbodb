@@ -1,19 +1,17 @@
-package org.jumbodb.connector.hadoop.index.map;
+package org.jumbodb.connector.hadoop.data.map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,13 +19,12 @@ import java.util.List;
  * Date: 4/17/13
  * Time: 4:52 PM
  */
-public class GenericJsonDateTimeSortMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
-    public static final String SORT_KEY = "DATETIME";
+public class GenericJsonStringSortMapper extends Mapper<LongWritable, Text, Text, Text> {
+    public static final String SORT_KEY = "STRING";
 
     private ObjectMapper jsonMapper;
-    private LongWritable keyW = new LongWritable();
+    private Text keyW = new Text();
     private List<String> sortFields;
-    private SimpleDateFormat sdf;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -35,31 +32,32 @@ public class GenericJsonDateTimeSortMapper extends Mapper<LongWritable, Text, Lo
         jsonMapper = new ObjectMapper();
         jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         sortFields = JumboConfigurationUtil.loadSortConfig(context.getConfiguration());
-        String datePattern = JumboConfigurationUtil.loadSortDatePatternConfig(context.getConfiguration());
-        sdf = new SimpleDateFormat(datePattern);
-        if(sortFields.size() != 1) {
-            throw new IllegalArgumentException("Sort fields must be exactly one!");
-        }
     }
 
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-        JsonNode jsonNode = jsonMapper.readTree(value.toString());
-        keyW.set(getSortKey(jsonNode));
-        context.write(keyW, value);
+        try {
+            JsonNode jsonNode = jsonMapper.readTree(value.toString());
+            keyW.set(getSortKey(jsonNode));
+            context.write(keyW, value);
+        } catch(JsonParseException e) {
+            throw new RuntimeException(context.getInputSplit() + " +++ " + value.toString(), e);
+        }
     }
 
-    private Long getSortKey(JsonNode jsonNode) {
-        String valueFor = getValueFor(sortFields.get(0), jsonNode);
-        if(valueFor == null) {
-            return 0l;
+    private String getSortKey(JsonNode jsonNode) {
+        List<String> keys = new LinkedList<String>();
+        for (String sort : sortFields) {
+            String valueFor = getValueFor(sort, jsonNode);
+            if(valueFor != null) {
+                keys.add(valueFor);
+            }
         }
-        try {
-            Date parse = sdf.parse(valueFor);
-            return parse.getTime();
-        } catch (ParseException e) {
-            return 0l;
+
+        if(keys.size() > 0) {
+            return StringUtils.join(keys, "-");
         }
+        return "default";
     }
 
     private String getValueFor(String key, JsonNode jsonNode) {
@@ -68,9 +66,9 @@ public class GenericJsonDateTimeSortMapper extends Mapper<LongWritable, Text, Lo
             jsonNode = jsonNode.path(s);
         }
         if(jsonNode.isValueNode()) {
-            String s = jsonNode.getTextValue();
+            String s = jsonNode.getValueAsText();
             return s;
         }
-        return null;
+        return "null";
     }
 }

@@ -24,7 +24,7 @@ class CollectionDefinitionLoaderSpec extends Specification {
         new File(versionPath + "part0002.sha1").createNewFile()
         new File(versionPath + "part0002.md5").createNewFile()
         new File(versionPath + "part0002.snappy.chunks").createNewFile()
-        def metaData = new CollectionProperties.CollectionMeta(date, "Data imported from", "TEST_STRATEGY", "info")
+        def metaData = new CollectionProperties.CollectionMeta(date, "Data imported from", "TEST_STRATEGY", "info", "yyyy-MM-dd")
         CollectionProperties.write(new File(versionPath + "/" + CollectionProperties.DEFAULT_FILENAME), metaData)
     }
 

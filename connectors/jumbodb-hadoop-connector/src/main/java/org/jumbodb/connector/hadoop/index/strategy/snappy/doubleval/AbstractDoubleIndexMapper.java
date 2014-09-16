@@ -6,7 +6,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
-import org.jumbodb.connector.hadoop.index.map.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
 
 import java.io.IOException;
 
@@ -16,8 +16,7 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractDoubleIndexMapper<T> extends AbstractIndexMapper<T> {
-    // CARSTEN remove version from name
-    public static final String DOUBLE_SNAPPY_V_1 = "DOUBLE_SNAPPY_V1";
+    public static final String DOUBLE_SNAPPY = "DOUBLE_SNAPPY";
 
     private DoubleWritable keyW = new DoubleWritable();
     private FileOffsetWritable valueW = new FileOffsetWritable();
@@ -35,7 +34,7 @@ public abstract class AbstractDoubleIndexMapper<T> extends AbstractIndexMapper<T
 
     @Override
     public String getStrategy() {
-        return DOUBLE_SNAPPY_V_1;
+        return DOUBLE_SNAPPY;
     }
 
 

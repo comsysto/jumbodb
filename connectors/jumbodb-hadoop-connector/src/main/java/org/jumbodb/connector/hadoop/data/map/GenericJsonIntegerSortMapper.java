@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.map;
+package org.jumbodb.connector.hadoop.data.map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.IntWritable;
@@ -18,11 +18,11 @@ import java.util.List;
  * Date: 4/17/13
  * Time: 4:52 PM
  */
-public class GenericJsonLongSortMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
-    public static final String SORT_KEY = "LONG";
+public class GenericJsonIntegerSortMapper extends Mapper<LongWritable, Text, IntWritable, Text> {
+    public static final String SORT_KEY = "INTEGER";
 
     private ObjectMapper jsonMapper;
-    private LongWritable keyW = new LongWritable();
+    private IntWritable keyW = new IntWritable();
     private List<String> sortFields;
 
     @Override
@@ -43,19 +43,19 @@ public class GenericJsonLongSortMapper extends Mapper<LongWritable, Text, LongWr
         context.write(keyW, value);
     }
 
-    private Long getSortKey(JsonNode jsonNode) {
+    private Integer getSortKey(JsonNode jsonNode) {
         return getValueFor(sortFields.get(0), jsonNode);
     }
 
-    private Long getValueFor(String key, JsonNode jsonNode) {
+    private Integer getValueFor(String key, JsonNode jsonNode) {
         String[] split = StringUtils.split(key, ".");
         for (String s : split) {
             jsonNode = jsonNode.path(s);
         }
         if(jsonNode.isValueNode()) {
-            Long s = jsonNode.getLongValue();
+            Integer s = jsonNode.getIntValue();
             return s;
         }
-        return 0l;
+        return 0;
     }
 }

@@ -1,7 +1,6 @@
-package org.jumbodb.connector.hadoop.index.map;
+package org.jumbodb.connector.hadoop.data.map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;

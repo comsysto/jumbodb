@@ -9,12 +9,14 @@ import java.util.List;
  */
 public class SnappyChunks {
     private long length;
+    private long datasets;
     private int chunkSize;
     private int numberOfChunks;
     private List<Integer> chunks;
 
-    public SnappyChunks(long length, int chunkSize, int numberOfChunks, List<Integer> chunks) {
+    public SnappyChunks(long length, long datasets, int chunkSize, int numberOfChunks, List<Integer> chunks) {
         this.length = length;
+        this.datasets = datasets;
         this.chunkSize = chunkSize;
         this.numberOfChunks = numberOfChunks;
         this.chunks = chunks;
@@ -36,6 +38,11 @@ public class SnappyChunks {
         return chunks;
     }
 
+    // CARSTEN use in frontend
+    public long getDatasets() {
+        return datasets;
+    }
+
     public long getOffsetForChunk(long numberChunk) {
         long result = 16l; // snappy version
         for(int i = 0; i < numberChunk; i++) {
@@ -51,10 +58,11 @@ public class SnappyChunks {
     @Override
     public String toString() {
         return "SnappyChunks{" +
-                "chunks=" + chunks +
-                ", numberOfChunks=" + numberOfChunks +
-                ", chunkSize=" + chunkSize +
-                ", length=" + length +
-                '}';
+          "length=" + length +
+          ", datasets=" + datasets +
+          ", chunkSize=" + chunkSize +
+          ", numberOfChunks=" + numberOfChunks +
+          ", chunks=" + chunks +
+          '}';
     }
 }

@@ -12,11 +12,12 @@ import java.util.List;
 public class JumboCollection implements Comparable<JumboCollection> {
     private String collapseId;
     private String name;
-    private final List<String> infos;
+    private List<String> infos;
     private List<DeliveryChunk> chunks;
     private long compressedSize = -1;
     private long uncompressedSize = -1;
     private long indexSize = -1;
+    private long datasets = -1;
     private Boolean activeChunk;
     private Boolean activeVersion;
 
@@ -90,8 +91,24 @@ public class JumboCollection implements Comparable<JumboCollection> {
 
     private long calculateCompressedSize() {
         long result = 0l;
-        for (DeliveryChunk version : chunks) {
-            result += version.getCompressedSize();
+        for (DeliveryChunk chunk : chunks) {
+            result += chunk.getCompressedSize();
+        }
+        return result;
+    }
+
+
+    public long getDatasets() {
+        if(datasets == -1) {
+            datasets = calculateDatasets();
+        }
+        return datasets;
+    }
+
+    private long calculateDatasets() {
+        long result = 0l;
+        for (DeliveryChunk chunk : chunks) {
+            result += chunk.getDatasets();
         }
         return result;
     }

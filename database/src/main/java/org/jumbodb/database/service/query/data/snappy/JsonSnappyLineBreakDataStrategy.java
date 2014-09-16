@@ -10,6 +10,7 @@ import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.FutureCancelableTask;
 import org.jumbodb.database.service.query.ResultCallback;
+import org.jumbodb.database.service.query.data.CollectionDataSize;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.common.BetweenDataOperationSearch;
 import org.jumbodb.database.service.query.data.common.DataOperationSearch;
@@ -160,29 +161,37 @@ public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
         return jsonOperationSearch.matches(leftValue, rightValue);
     }
 
-    @Override
-    public long getCompressedSize(File dataFolder) {
-        return FileUtils.sizeOfDirectory(dataFolder);
-    }
 
     @Override
-    public long getUncompressedSize(File dataFolder) {
+    public CollectionDataSize getCollectionDataSize(File dataFolder) {
+        long compressedSize = FileUtils.sizeOfDirectory(dataFolder);
         long uncompressedSize = 0l;
+        long datasets = 0l;
         FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".chunks"));
         File[] snappyChunks = dataFolder.listFiles(metaFiler);
         for (File snappyChunk : snappyChunks) {
-            uncompressedSize += getSizeFromSnappyChunk(snappyChunk);
+            SnappyChunkSize sizeFromSnappyChunk = getSizeFromSnappyChunk(snappyChunk);
+            uncompressedSize += sizeFromSnappyChunk.uncompressed;
+            datasets += sizeFromSnappyChunk.datasets;
         }
-        return uncompressedSize;
+        return new CollectionDataSize(datasets, compressedSize, uncompressedSize);
     }
 
-    private long getSizeFromSnappyChunk(File snappyChunk) {
+    private static class SnappyChunkSize {
+        long uncompressed;
+        long datasets;
+    }
+
+    private SnappyChunkSize getSizeFromSnappyChunk(File snappyChunk) {
         FileInputStream fis = null;
         DataInputStream dis = null;
         try {
             fis = new FileInputStream(snappyChunk);
             dis = new DataInputStream(fis);
-            return dis.readLong();
+            SnappyChunkSize snappyChunkSize = new SnappyChunkSize();
+            snappyChunkSize.uncompressed = dis.readLong();
+            snappyChunkSize.datasets = dis.readLong();
+            return snappyChunkSize;
         } catch (FileNotFoundException e) {
             throw new UnhandledException(e);
         } catch (IOException e) {

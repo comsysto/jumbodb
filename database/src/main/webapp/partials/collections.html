@@ -28,7 +28,7 @@
                                 <span class="label label-default space-label" ng-show="!collection.activeVersion">Version inactive </span>
                             </div>
                         </div>
-                        <div style="font-size: smaller;">{{collection.formatedCompressedSize}} compressed data - {{collection.formatedUncompressedSize}} uncompressed data - {{collection.formatedIndexSize}} index</div>
+                        <div style="font-size: smaller;">{{collection.datasets}} datasets - {{collection.formatedCompressedSize}} compressed data - {{collection.formatedUncompressedSize}} uncompressed data - {{collection.formatedIndexSize}} index</div>
                     </div>
                 </div>
                 <div class="panel-collapse" id="{{collection.collapseId}}" style="height: 0px;">
@@ -44,6 +44,7 @@
                                 <tr>
                                     <th>Delivery / Version / Info</th>
                                     <th>Date</th>
+                                    <th>Datasets</th>
                                     <th>Compressed</th>
                                     <th>Uncompressed</th>
                                     <th>Index</th>
@@ -53,6 +54,7 @@
                                 <tbody ng-repeat="chunk in collection.chunks">
                                 <tr class="active">
                                     <th><strong><small>{{chunk.key}}</small></strong></th>
+                                    <th>&nbsp;</th>
                                     <th>&nbsp;</th>
                                     <th>&nbsp;</th>
                                     <th>&nbsp;</th>
@@ -68,6 +70,7 @@
                                         <p>{{version.info}}</p>
                                     </td>
                                     <td>{{version.date}}</td>
+                                    <td>{{version.datasets}}</td>
                                     <td>{{version.formatedCompressedSize}}</td>
                                     <td>{{version.formatedUncompressedSize}}</td>
                                     <td>{{version.formatedIndexSize}}</td>
@@ -80,6 +83,7 @@
                                 <tr>
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
+                                    <td><strong>{{chunk.datasets}}</strong></td>
                                     <td><strong>{{chunk.formatedCompressedSize}}</strong></td>
                                     <td><strong>{{chunk.formatedUncompressedSize}}</strong></td>
                                     <td><strong>{{chunk.formatedIndexSize}}</strong></td>

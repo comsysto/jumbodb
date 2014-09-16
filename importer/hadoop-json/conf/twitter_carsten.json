@@ -4,7 +4,7 @@
     "hosts": [
 
     ],
-    "datePattern": "EEE MMM dd HH:mm:ss Z yyyy",
+    "dateFormat": "EEE MMM dd HH:mm:ss Z yyyy",
     "output": "/Users/carsten/smhadoop/output/twitter",
     "numberOfOutputFiles": 5,
     "hadoop": [],
@@ -14,17 +14,17 @@
             "collectionName": "carsten.twitter",
             "sort": ["geo.coordinates"],
             "sortType": "GEOHASH",
-            "dataStrategy": "JSON_SNAPPY_V1",
+            "dataStrategy": "JSON_SNAPPY_LB",
             "indexes": [
                 {
                     "indexName": "screen_name",
                     "fields": ["user.screen_name"],
-                    "indexStrategy": "HASHCODE64_SNAPPY_V1"
+                    "indexStrategy": "HASHCODE64_SNAPPY"
                 },
                 {
                     "indexName": "created_at",
                     "fields": ["created_at"],
-                    "indexStrategy": "DATETIME_SNAPPY_V1"
+                    "indexStrategy": "DATETIME_SNAPPY"
                 }
             ]
         }

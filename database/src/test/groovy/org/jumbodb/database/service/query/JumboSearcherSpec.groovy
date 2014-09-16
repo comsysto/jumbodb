@@ -7,6 +7,7 @@ import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.data.common.meta.CollectionProperties
 import org.jumbodb.data.common.meta.IndexProperties
 import org.jumbodb.database.service.configuration.JumboConfiguration
+import org.jumbodb.database.service.query.data.CollectionDataSize
 import org.jumbodb.database.service.query.data.DataStrategy
 import org.jumbodb.database.service.query.data.DataStrategyManager
 import org.jumbodb.database.service.query.definition.CollectionDefinition
@@ -140,7 +141,7 @@ class JumboSearcherSpec extends Specification {
         thrown JumboCollectionMissingException
     }
 
-    def "getDataCompressedSize"() {
+    def "getCollectionDataSize"() {
         setup:
         def indexStrategyManagerMock = Mock(IndexStrategyManager)
         def dataStrategyManagerMock = Mock(DataStrategyManager)
@@ -160,38 +161,12 @@ class JumboSearcherSpec extends Specification {
         when:
         jumboConfigMock.getDataPath() >> dataPath
         1 * dataStrategyManagerMock.getStrategy("DATA_STRATEGY") >> dataStrategyMock
-        1 * dataStrategyMock.getCompressedSize(collectionFolder) >> 111l
-        def size = js.getDataCompressedSize("testChunkKey", "testVersion", "testCollection")
+        1 * dataStrategyMock.getCollectionDataSize(collectionFolder) >> new CollectionDataSize(100l, 222l, 300l)
+        def sizes = js.getCollectionDataSize("testChunkKey", "testVersion", "testCollection")
         then:
-        size == 111l
-        cleanup:
-        dataPath.deleteDir()
-    }
-
-    def "getDataUncompressedSize"() {
-        setup:
-        def indexStrategyManagerMock = Mock(IndexStrategyManager)
-        def dataStrategyManagerMock = Mock(DataStrategyManager)
-        def dataStrategyMock = Mock(DataStrategy)
-        def jumboConfigMock = Mock(JumboConfiguration)
-        def folder = FileUtils.getTempDirectoryPath() + "/" + UUID.randomUUID().toString() + "/"
-        def dataPath = new File(folder)
-        def collectionFolder = new File(folder + "testChunkKey/testVersion/testCollection/")
-        FileUtils.forceMkdir(collectionFolder)
-        def meta = new CollectionProperties.CollectionMeta("2012-12-12 12:12:12", "source path", "DATA_STRATEGY", "info", "yyyy-MM-dd")
-        def file = new File(collectionFolder.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME)
-        CollectionProperties.write(file, meta)
-        def js = createJumboSearcher()
-        js.setJumboConfiguration(jumboConfigMock)
-        js.setIndexStrategyManager(indexStrategyManagerMock)
-        js.setDataStrategyManager(dataStrategyManagerMock)
-        when:
-        jumboConfigMock.getDataPath() >> dataPath
-        1 * dataStrategyManagerMock.getStrategy("DATA_STRATEGY") >> dataStrategyMock
-        1 * dataStrategyMock.getUncompressedSize(collectionFolder) >> 111l
-        def size = js.getDataUncompressedSize("testChunkKey", "testVersion", "testCollection")
-        then:
-        size == 111l
+        sizes.getDatasets() == 100
+        sizes.getUncompressedSize() == 300
+        sizes.getCompressedSize() == 222
         cleanup:
         dataPath.deleteDir()
     }

@@ -6,6 +6,7 @@ import org.jumbodb.data.common.meta.CollectionProperties;
 import org.jumbodb.data.common.meta.IndexProperties;
 import org.jumbodb.database.service.configuration.JumboConfiguration;
 import org.jumbodb.database.service.management.storage.StorageManagement;
+import org.jumbodb.database.service.query.data.CollectionDataSize;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.DataStrategyManager;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
@@ -49,7 +50,7 @@ public class JumboSearcher {
 
     protected CollectionDefinition getCollectionDefinition() {
         return CollectionDefinitionLoader
-          .loadCollectionDefinition(jumboConfiguration.getDataPath(), jumboConfiguration.getIndexPath());
+                .loadCollectionDefinition(jumboConfiguration.getDataPath(), jumboConfiguration.getIndexPath());
     }
 
     public void onDataChanged() {
@@ -63,13 +64,13 @@ public class JumboSearcher {
     }
 
     public int findResultAndWriteIntoCallback(JumboQuery searchQuery,
-      ResultCallback resultCallback) {
+                                              ResultCallback resultCallback) {
         Collection<DeliveryChunkDefinition> deliveryChunks = collectionDefinition.getChunks(searchQuery.getCollection());
         if (deliveryChunks != null && deliveryChunks.size() > 0) {
             List<Future<Integer>> futures = new LinkedList<Future<Integer>>();
             for (DeliveryChunkDefinition deliveryChunk : deliveryChunks) {
                 Future<Integer> future = chunkExecutor
-                  .submit(new SearchDeliveryChunkTask(deliveryChunk, searchQuery, resultCallback));
+                        .submit(new SearchDeliveryChunkTask(deliveryChunk, searchQuery, resultCallback));
                 futures.add(future);
                 resultCallback.collect(new FutureCancelableTask(future));
             }
@@ -95,7 +96,7 @@ public class JumboSearcher {
     }
 
     private Collection<FileOffset> findFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition,
-      JumboQuery searchQuery, ResultCallback resultCallback) {
+                                                   JumboQuery searchQuery, ResultCallback resultCallback) {
         if (searchQuery.getIndexQuery().size() == 0) {
             return Collections.emptyList();
         }
@@ -149,7 +150,7 @@ public class JumboSearcher {
         IndexQuery andIndex = indexQuery.getAndIndex();
         List<FileOffset> fileOffset = groupByIndexQuery.get(indexQuery);
         result.addAll(fileOffset);
-        if(andIndex != null) {
+        if (andIndex != null) {
             result.retainAll(getIndexesApplyAndLogic(andIndex, groupByIndexQuery));
         }
         return result;
@@ -160,7 +161,7 @@ public class JumboSearcher {
         Map<IndexQuery, List<FileOffset>> result = new HashMap<IndexQuery, List<FileOffset>>();
         for (FileOffset fileOffset : fileOffsets) {
             List<FileOffset> tmpOffsets = result.get(fileOffset.getIndexQuery());
-            if(tmpOffsets == null) {
+            if (tmpOffsets == null) {
                 tmpOffsets = new LinkedList<FileOffset>();
                 result.put(fileOffset.getIndexQuery(), tmpOffsets);
             }
@@ -175,7 +176,7 @@ public class JumboSearcher {
         List<IndexQuery> allIndexQueries = getAllIndexQueries(searchQuery.getIndexQuery());
         for (IndexQuery indexQuery : allIndexQueries) {
             List<IndexQuery> indexQueries = result.get(indexQuery.getName());
-            if(indexQueries == null) {
+            if (indexQueries == null) {
                 indexQueries = new LinkedList<IndexQuery>();
                 result.put(indexQuery.getName(), indexQueries);
             }
@@ -196,7 +197,7 @@ public class JumboSearcher {
         List<IndexQuery> result = new LinkedList<IndexQuery>();
         result.add(query);
         IndexQuery andIndex = query.getAndIndex();
-        if(andIndex != null) {
+        if (andIndex != null) {
             result.addAll(getAllIndexQueries(andIndex));
         }
         return result;
@@ -208,7 +209,7 @@ public class JumboSearcher {
         private ResultCallback resultCallback;
 
         private SearchDeliveryChunkTask(DeliveryChunkDefinition deliveryChunk, JumboQuery searchQuery,
-          ResultCallback resultCallback) {
+                                        ResultCallback resultCallback) {
             this.deliveryChunk = deliveryChunk;
             this.searchQuery = searchQuery;
             this.resultCallback = resultCallback;
@@ -218,24 +219,18 @@ public class JumboSearcher {
         public Integer call() throws Exception {
             Collection<FileOffset> fileOffsets = findFileOffsets(deliveryChunk, searchQuery, resultCallback);
             DataStrategy strategy = dataStrategyManager
-              .getStrategy(deliveryChunk.getChunkKey(), deliveryChunk.getCollection());
+                    .getStrategy(deliveryChunk.getChunkKey(), deliveryChunk.getCollection());
             return strategy.findDataSetsByFileOffsets(deliveryChunk, fileOffsets, resultCallback, searchQuery);
         }
     }
 
-    public long getDataCompressedSize(String chunkKey, String version, String collection) {
+    public CollectionDataSize getCollectionDataSize(String chunkKey, String version, String collection) {
         File file = buildPathToData(chunkKey, version, collection);
         String strategyName = getDataStrategyName(file);
         DataStrategy dataStrategy = getDataStrategy(strategyName);
-        return dataStrategy.getCompressedSize(file);
+        return dataStrategy.getCollectionDataSize(file);
     }
 
-    public long getDataUncompressedSize(String chunkKey, String version, String collection) {
-        File file = buildPathToData(chunkKey, version, collection);
-        String strategyName = getDataStrategyName(file);
-        DataStrategy dataStrategy = getDataStrategy(strategyName);
-        return dataStrategy.getUncompressedSize(file);
-    }
 
     public long getIndexSize(String chunkKey, String version, String collection) {
         long result = 0l;
@@ -265,7 +260,7 @@ public class JumboSearcher {
 
     private File buildPathToData(String chunkKey, String version, String collection) {
         return new File(
-          jumboConfiguration.getDataPath().getAbsolutePath() + "/" + chunkKey + "/" + version + "/" + collection + "/");
+                jumboConfiguration.getDataPath().getAbsolutePath() + "/" + chunkKey + "/" + version + "/" + collection + "/");
     }
 
     private File buildPathToIndexRoot(String chunkKey, String version, String collection) {

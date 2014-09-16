@@ -23,6 +23,7 @@ import org.jumbodb.database.service.management.storage.dto.maintenance.Temporary
 import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilCollection;
 import org.jumbodb.database.service.management.storage.dto.queryutil.QueryUtilIndex;
 import org.jumbodb.database.service.query.JumboSearcher;
+import org.jumbodb.database.service.query.data.CollectionDataSize;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.index.IndexStrategy;
 import org.slf4j.Logger;
@@ -105,18 +106,18 @@ public class StorageManagement {
         String dataStrategyName = "none";
         Set<QueryOperation> supportedOperations = new HashSet<QueryOperation>();
         for (JumboCollection collection : jumboCollections) {
-            if(collection.hasAtLeastOneActiveChunk()) {
+            if (collection.hasAtLeastOneActiveChunk()) {
                 Set<QueryUtilIndex> resultIndexes = new HashSet<QueryUtilIndex>();
                 for (DeliveryChunk deliveryChunk : collection.getChunks()) {
                     for (DeliveryVersion deliveryVersion : deliveryChunk.getVersions()) {
-                        if(deliveryVersion.isActive() && deliveryChunk.isActive()) {
+                        if (deliveryVersion.isActive() && deliveryChunk.isActive()) {
                             List<CollectionIndex> collectionIndexes = getCollectionIndexes(deliveryChunk.getKey(), deliveryVersion.getVersion(), collection.getName());
                             for (CollectionIndex collectionIndex : collectionIndexes) {
                                 IndexStrategy indexStrategy = jumboSearcher.getIndexStrategy(collectionIndex.getStrategy());
                                 resultIndexes.add(new QueryUtilIndex(collectionIndex.getIndexName(), collectionIndex.getStrategy(), new ArrayList<QueryOperation>(indexStrategy.getSupportedOperations())));
                             }
                             DataStrategy dataStrategy = jumboSearcher.getDataStrategy(deliveryChunk.getKey(),
-                              collection.getName());
+                                    collection.getName());
                             dataStrategyName = dataStrategy.getStrategyName();
                             supportedOperations.addAll(dataStrategy.getSupportedOperations());
                         }
@@ -134,11 +135,10 @@ public class StorageManagement {
         log.info("deleteChunkedVersion (" + chunkedDeliveryKey + ", " + version + ")");
         try {
             File[] versionFolders = getDataChunkFolder(chunkedDeliveryKey).listFiles(FOLDER_FILTER);
-            if(versionFolders.length == 1) {
+            if (versionFolders.length == 1) {
                 FileUtils.deleteDirectory(getDataChunkFolder(chunkedDeliveryKey));
                 FileUtils.deleteDirectory(getIndexChunkFolder(chunkedDeliveryKey));
-            }
-            else {
+            } else {
                 FileUtils.deleteDirectory(getDataChunkedVersionFolder(chunkedDeliveryKey, version));
                 FileUtils.deleteDirectory(getIndexChunkedVersionFolder(chunkedDeliveryKey, version));
                 activateChunkedLatestVersion(chunkedDeliveryKey);
@@ -176,7 +176,7 @@ public class StorageManagement {
 
     protected String getLatestVersionInChunk(String chunkedDeliveryKey) {
         File[] versionFolders = getDataChunkFolder(chunkedDeliveryKey).listFiles(FOLDER_FILTER);
-        if(versionFolders == null || versionFolders.length == 0l) {
+        if (versionFolders == null || versionFolders.length == 0l) {
             throw new IllegalStateException("No available version in chunk folder! Chunk folder " + chunkedDeliveryKey + " must be deleted!");
         }
         try {
@@ -188,7 +188,7 @@ public class StorageManagement {
                 File deliveryProp = getDeliveryFile(versionFolder);
                 DeliveryProperties.DeliveryMeta deliveryMeta = DeliveryProperties.getDeliveryMeta(deliveryProp);
                 Date parse = sdf.parse(deliveryMeta.getDate());
-                if(parse.after(date)) {
+                if (parse.after(date)) {
                     date = parse;
                     version = versionFolder.getName();
                 }
@@ -283,14 +283,14 @@ public class StorageManagement {
                 boolean chunkActive = false;
                 for (VersionedJumboCollection version : versions) {
                     ChunkedDeliveryVersion chunkedDeliveryVersion = deliveries.get(version.getChunkKey() + "/" + version.getVersion());
-                    chunkVersions.add(new DeliveryVersion(version.getVersion(), chunkedDeliveryVersion.getInfo(), version.getDate(),
+                    chunkVersions.add(new DeliveryVersion(version.getVersion(), chunkedDeliveryVersion.getInfo(), version.getDate(), version.getDatasets(),
                             version.getCompressedSize(), version.getUncompressedSize(), version.getIndexSize(), chunkedDeliveryVersion.isActiveVersion()));
                     chunkActive = chunkedDeliveryVersion.isActiveChunk();
                 }
                 chunks.add(new DeliveryChunk(deliveryKey, chunkActive, chunkVersions));
             }
             result.add(new JumboCollection("col-" + collection.hashCode(), collection, getInfos(
-              versionedJumboCollections), chunks));
+                    versionedJumboCollections), chunks));
         }
         return result;
     }
@@ -322,14 +322,17 @@ public class StorageManagement {
                 for (File collectionPath : versionPath.listFiles(FOLDER_FILTER)) {
                     String collection = collectionPath.getName();
                     CollectionProperties.CollectionMeta collectionMeta = CollectionProperties.getCollectionMeta(
-                      new File(collectionPath.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME));
-                    long compressedSize = loadSizes ? jumboSearcher.getDataCompressedSize(deliveryKey, version,
-                      collection) : 0l;
-                    long uncompressedSize = loadSizes ? jumboSearcher.getDataUncompressedSize(deliveryKey, version,
-                      collection) : 0l;
-                    long indexSize = loadSizes ? jumboSearcher.getIndexSize(deliveryKey, version, collection) : 0l;
-                    collections.add(new VersionedJumboCollection(deliveryKey, version, collection, collectionMeta.getInfo(), collectionMeta.getDate(),
-                            collectionMeta.getSourcePath(), collectionMeta.getStrategy(), compressedSize, uncompressedSize, indexSize));
+                            new File(collectionPath.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME));
+                    if (loadSizes) {
+                        long indexSize = loadSizes ? jumboSearcher.getIndexSize(deliveryKey, version, collection) : 0l;
+                        CollectionDataSize collectionDataSize = jumboSearcher.getCollectionDataSize(deliveryKey, version, collection);
+                        collections.add(new VersionedJumboCollection(deliveryKey, version, collection, collectionMeta.getInfo(), collectionMeta.getDate(),
+                                collectionMeta.getSourcePath(), collectionMeta.getStrategy(), collectionDataSize.getDatasets(),
+                                collectionDataSize.getCompressedSize(), collectionDataSize.getUncompressedSize(), indexSize));
+                    } else {
+                        collections.add(new VersionedJumboCollection(deliveryKey, version, collection, collectionMeta.getInfo(), collectionMeta.getDate(),
+                                collectionMeta.getSourcePath(), collectionMeta.getStrategy(), 0l, 0l, 0l, 0l));
+                    }
 
                 }
                 String collapseId = "col" + (deliveryKey + "-" + version).hashCode();
@@ -377,7 +380,7 @@ public class StorageManagement {
                 String indexName = collectionIndex.getIndexName();
                 File indexFolder = getIndexChunkedVersionCollectionIndexFolder(deliveryChunkKey, deliveryVersion, collectionName, indexName);
                 File[] files = indexFolder.listFiles();
-                if(files == null) {
+                if (files == null) {
                     throw new IllegalStateException("Index folder does not exist for export: " + indexFolder.getAbsolutePath());
                 }
                 for (File indexFile : files) {
@@ -393,7 +396,7 @@ public class StorageManagement {
     }
 
     private String resolveChecksum(ChecksumType checksumType, File indexFile) {
-        if(checksumType == ChecksumType.NONE) {
+        if (checksumType == ChecksumType.NONE) {
             return null;
         }
         File checksumFile = new File(indexFile.getAbsolutePath() + checksumType.getFileSuffix());
@@ -405,13 +408,13 @@ public class StorageManagement {
     }
 
     private ChecksumType resolveChecksumType(File file) {
-        if(file.getName().startsWith(".") || file.getName().startsWith("_")) {
+        if (file.getName().startsWith(".") || file.getName().startsWith("_")) {
             return ChecksumType.NONE;
         }
         ChecksumType[] values = ChecksumType.values();
         for (ChecksumType checksum : values) {
             File checksumFile = new File(file.getAbsolutePath() + checksum.getFileSuffix());
-            if(checksumFile.exists()) {
+            if (checksumFile.exists()) {
                 return checksum;
             }
         }
@@ -422,7 +425,7 @@ public class StorageManagement {
         // could be more efficient, dont build full tree just the element itself
         List<ChunkedDeliveryVersion> chunkedDeliveryVersions = getChunkedDeliveryVersions(false);
         for (ChunkedDeliveryVersion chunkedDeliveryVersion : chunkedDeliveryVersions) {
-            if(chunkedDeliveryVersion.getChunkKey().equals(deliveryChunkKey) && chunkedDeliveryVersion.getVersion().equals(deliveryVersion)) {
+            if (chunkedDeliveryVersion.getChunkKey().equals(deliveryChunkKey) && chunkedDeliveryVersion.getVersion().equals(deliveryVersion)) {
                 return chunkedDeliveryVersion;
             }
         }
@@ -436,7 +439,7 @@ public class StorageManagement {
             String collectionName = versionedJumboCollection.getCollectionName();
             File dataFolder = getDataChunkedVersionCollectionFolder(deliveryChunkKey, deliveryVersion, collectionName);
             File[] files = dataFolder.listFiles();
-            if(files == null) {
+            if (files == null) {
                 throw new IllegalStateException("Data folder does not exist for export: " + dataFolder.getAbsolutePath());
             }
             for (File dataFile : files) {
@@ -458,7 +461,7 @@ public class StorageManagement {
 
     public InputStream getInputStream(DataInfo data) throws IOException {
         File dataFolder = getDataChunkedVersionCollectionFolder(data.getDeliveryKey(),
-          data.getDeliveryVersion(), data.getCollection());
+                data.getDeliveryVersion(), data.getCollection());
         File dataFile = new File(dataFolder.getAbsolutePath() + "/" + data.getFileName());
         return new BufferedInputStream(new FileInputStream(dataFile));
     }

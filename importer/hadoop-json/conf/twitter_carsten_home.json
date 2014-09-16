@@ -4,27 +4,27 @@
     "hosts": [
         {"host": "localhost", "port": 12001}
     ],
-    "datePattern": "EEE MMM dd HH:mm:ss Z yyyy",
+    "dateFormat": "EEE MMM dd HH:mm:ss Z yyyy",
     "output": "file:///C:/Development/data/twitter/output/",
     "numberOfDataFiles": 16,
     "hadoop": [],
-    "checksum": "NONE",
+    "checksum": "MD5",
     "importCollection": [
         {
-            "input": "file:///C:/Development/data/twitter/input/",
+            "input": "file:///C:/Development/data/twitter/input_big/",
             "description": "Twitter data",
             "collectionName": "carsten.twitter",
-            "dataStrategy": "JSON_SNAPPY_V1",
+            "dataStrategy": "JSON_SNAPPY_LB",
             "indexes": [
                 {
                     "indexName": "screen_name",
                     "fields": ["user.screen_name"],
-                    "indexStrategy": "HASHCODE64_SNAPPY_V1"
+                    "indexStrategy": "HASHCODE64_SNAPPY"
                 },
                 {
                     "indexName": "created_at",
                     "fields": ["created_at"],
-                    "indexStrategy": "DATETIME_SNAPPY_V1"
+                    "indexStrategy": "DATETIME_SNAPPY"
                 }
             ]
         }

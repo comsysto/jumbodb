@@ -15,6 +15,7 @@ public class DeliveryChunk implements Comparable<DeliveryChunk> {
     private long compressedSize = -1;
     private long uncompressedSize = -1;
     private long indexSize = -1;
+    private long datasets = -1;
     private boolean active = false;
 
     public DeliveryChunk(String key, boolean active, List<DeliveryVersion> versions) {
@@ -64,6 +65,22 @@ public class DeliveryChunk implements Comparable<DeliveryChunk> {
         }
         return result;
     }
+
+    public long getDatasets() {
+        if (datasets == -1) {
+            datasets = calculateDatasets();
+        }
+        return datasets;
+    }
+
+    private long calculateDatasets() {
+        long result = 0l;
+        for (DeliveryVersion version : versions) {
+            result += version.getDatasets();
+        }
+        return result;
+    }
+
 
     public long getIndexSize() {
         if(indexSize == -1) {

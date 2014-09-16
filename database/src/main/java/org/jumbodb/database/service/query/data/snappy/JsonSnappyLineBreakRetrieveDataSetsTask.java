@@ -318,7 +318,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
         }
         for (DataQuery jsonQuery : jsonQueries) {
             Object leftValue = findLeftValue(parsedJson, queriedValuesCache, jsonQuery);
-            Object rightValue = findLeftValue(parsedJson, queriedValuesCache, jsonQuery);
+            Object rightValue = findRightValue(parsedJson, queriedValuesCache, jsonQuery);
 
             if (leftValue != null) {
                 // CARSTEN handle EXISTS QueryOperation at this position

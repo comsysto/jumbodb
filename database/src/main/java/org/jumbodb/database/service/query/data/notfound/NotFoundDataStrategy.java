@@ -4,6 +4,7 @@ import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
+import org.jumbodb.database.service.query.data.CollectionDataSize;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
@@ -51,13 +52,9 @@ public class NotFoundDataStrategy implements DataStrategy {
     public void onDataChanged(CollectionDefinition collectionDefinition) {
     }
 
+    // CARSTEN test
     @Override
-    public long getCompressedSize(File dataFolder) {
-        return 0l;
-    }
-
-    @Override
-    public long getUncompressedSize(File dataFolder) {
-        return 0l;
+    public CollectionDataSize getCollectionDataSize(File dataFolder) {
+        return new CollectionDataSize(0l, 0l, 0l);
     }
 }

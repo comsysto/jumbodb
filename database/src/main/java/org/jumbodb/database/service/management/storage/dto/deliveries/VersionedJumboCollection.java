@@ -15,12 +15,13 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
     private String date;
     private String sourcePath;
     private String strategy;
+    private long datasets;
     private long compressedSize;
     private long uncompressedSize;
     private long indexSize;
 
     public VersionedJumboCollection(String chunkKey, String version, String collectionName, String info,
-      String date, String sourcePath, String strategy, long compressedSize, long uncompressedSize, long indexSize) {
+      String date, String sourcePath, String strategy, long datasets, long compressedSize, long uncompressedSize, long indexSize) {
         this.collectionName = collectionName;
         this.version = version;
         this.chunkKey = chunkKey;
@@ -28,6 +29,7 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
         this.date = date;
         this.sourcePath = sourcePath;
         this.strategy = strategy;
+        this.datasets = datasets;
         this.compressedSize = compressedSize;
         this.uncompressedSize = uncompressedSize;
         this.indexSize = indexSize;
@@ -71,6 +73,10 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
 
     public long getIndexSize() {
         return indexSize;
+    }
+
+    public long getDatasets() {
+        return datasets;
     }
 
     public String getFormatedCompressedSize() {

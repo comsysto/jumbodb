@@ -28,7 +28,7 @@
 
                         </div>
                         <div style="font-size: smaller;">{{delivery.info}}</div>
-                        <div style="font-size: smaller;">{{delivery.date}} - {{delivery.formatedCompressedSize}} compressed data - {{delivery.formatedUncompressedSize}} uncompressed data - {{delivery.formatedIndexSize}} index</div>
+                        <div style="font-size: smaller;">{{delivery.date}} - {{delivery.datasets}} datasets - {{delivery.formatedCompressedSize}} compressed data - {{delivery.formatedUncompressedSize}} uncompressed data - {{delivery.formatedIndexSize}} index</div>
                     </div>
                 </div>
                 <div class="panel-collapse" id="{{delivery.collapseId}}" style="height: 0px;">
@@ -39,6 +39,7 @@
                                 <tr>
                                     <th>Collection</th>
                                     <th>Info</th>
+                                    <th>Datasets</th>
                                     <th>Compressed</th>
                                     <th>Uncompressed</th>
                                     <th>Index</th>
@@ -48,6 +49,7 @@
                                 <tr ng-repeat="collection in delivery.collections">
                                     <td>{{collection.collectionName}}</td>
                                     <td><small>{{collection.info}}</small></td>
+                                    <td>{{collection.datasets}}</td>
                                     <td>{{collection.formatedCompressedSize}}</td>
                                     <td>{{collection.formatedUncompressedSize}}</td>
                                     <td>{{collection.formatedIndexSize}}</td>
@@ -56,6 +58,7 @@
                                 <tr>
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
+                                    <td><strong>{{delivery.datasets}}</strong></td>
                                     <td><strong>{{delivery.formatedCompressedSize}}</strong></td>
                                     <td><strong>{{delivery.formatedUncompressedSize}}</strong></td>
                                     <td><strong>{{delivery.formatedIndexSize}}</strong></td>

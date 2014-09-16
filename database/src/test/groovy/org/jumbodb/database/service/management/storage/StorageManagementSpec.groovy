@@ -13,6 +13,7 @@ import org.jumbodb.data.common.meta.IndexProperties
 import org.jumbodb.database.service.configuration.JumboConfiguration
 import org.jumbodb.database.service.importer.ImportServer
 import org.jumbodb.database.service.query.JumboSearcher
+import org.jumbodb.database.service.query.data.CollectionDataSize
 import org.jumbodb.database.service.query.data.DataStrategy
 import org.jumbodb.database.service.query.index.IndexStrategy
 import spock.lang.Specification
@@ -309,6 +310,7 @@ class StorageManagementSpec extends Specification {
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
+        jumboSearcherMock.getCollectionDataSize(_, _, _) >> new CollectionDataSize(100, 111, 222)
         def indexStrategyMock = Mock(IndexStrategy)
         indexStrategyMock.getStrategyName() >> "test_index_strategy"
         indexStrategyMock.getSupportedOperations() >> [QueryOperation.BETWEEN, QueryOperation.EQ]
@@ -325,10 +327,10 @@ class StorageManagementSpec extends Specification {
         collections.size() == 3
         // first collection
         collections[0].getName() == "test_collection1"
-        collections[0].getUncompressedSize() == 0l
+        collections[0].getUncompressedSize() == 666
         collections[0].getChunks().size() == 2
         collections[0].getChunks()[0].getKey() == "test_delivery1"
-        collections[0].getChunks()[0].getUncompressedSize() == 0l
+        collections[0].getChunks()[0].getUncompressedSize() == 444
         collections[0].getChunks()[0].getVersions().size() == 2
         collections[0].getChunks()[0].getVersions()[1].getVersion() == "version1"
         collections[0].getChunks()[0].getVersions()[1].getInfo() == "some info"
@@ -517,6 +519,7 @@ class StorageManagementSpec extends Specification {
         dataStrategyMock.getStrategyName() >> "test_data_strategy"
         dataStrategyMock.getSupportedOperations() >> [QueryOperation.EQ, QueryOperation.GT, QueryOperation.LT]
         jumboSearcherMock.getDataStrategy(_, _) >> dataStrategyMock
+        jumboSearcherMock.getCollectionDataSize(_, _, _) >> new CollectionDataSize(100, 111, 222)
         def indexStrategyMock = Mock(IndexStrategy)
         indexStrategyMock.getStrategyName() >> "test_index_strategy"
         indexStrategyMock.getSupportedOperations() >> [QueryOperation.BETWEEN, QueryOperation.EQ]

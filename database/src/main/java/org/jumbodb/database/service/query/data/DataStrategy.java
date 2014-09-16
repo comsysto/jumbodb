@@ -2,17 +2,14 @@ package org.jumbodb.database.service.query.data;
 
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.common.query.QueryOperation;
-import org.jumbodb.database.service.importer.ImportMetaFileInformation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * User: carsten
@@ -20,8 +17,7 @@ import java.util.Set;
  * Time: 1:07 PM
  */
 public interface DataStrategy {
-    long getCompressedSize(File dataFolder);
-    long getUncompressedSize(File dataFolder);
+    CollectionDataSize getCollectionDataSize(File dataFolder);
     boolean isResponsibleFor(String chunkKey, String collection);
     String getStrategyName();
     boolean matches(QueryOperation operation, Object leftValue, Object rightValue);

@@ -11,15 +11,17 @@ public class DeliveryVersion implements Comparable<DeliveryVersion> {
     private String version;
     private String info;
     private String date;
+    private long datasets;
     private long compressedSize;
     private long uncompressedSize;
     private long indexSize;
     private boolean active;
 
-    public DeliveryVersion(String version, String info, String date, long compressedSize, long uncompressedSize, long indexSize, boolean active) {
+    public DeliveryVersion(String version, String info, String date, long datasets, long compressedSize, long uncompressedSize, long indexSize, boolean active) {
         this.version = version;
         this.info = info;
         this.date = date;
+        this.datasets = datasets;
         this.compressedSize = compressedSize;
         this.uncompressedSize = uncompressedSize;
         this.indexSize = indexSize;
@@ -60,6 +62,10 @@ public class DeliveryVersion implements Comparable<DeliveryVersion> {
 
     public long getIndexSize() {
         return indexSize;
+    }
+
+    public long getDatasets() {
+        return datasets;
     }
 
     public boolean isActive() {

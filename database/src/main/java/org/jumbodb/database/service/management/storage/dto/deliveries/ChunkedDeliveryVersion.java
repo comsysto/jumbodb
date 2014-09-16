@@ -16,6 +16,7 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
     private String info;
     private String date;
     private List<VersionedJumboCollection> collections;
+    private long datasets = -1;
     private long compressedSize = -1;
     private long uncompressedSize = -1;
     private long indexSize = -1;
@@ -67,6 +68,21 @@ public class ChunkedDeliveryVersion implements Comparable<ChunkedDeliveryVersion
 
     public List<VersionedJumboCollection> getCollections() {
         return collections;
+    }
+
+    public long getDatasets() {
+        if(datasets == -1) {
+            datasets = calculateDatasets();
+        }
+        return datasets;
+    }
+
+    private long calculateDatasets() {
+        long result = 0l;
+        for (VersionedJumboCollection collection : collections) {
+            result += collection.getDatasets();
+        }
+        return result;
     }
 
     public long getCompressedSize() {

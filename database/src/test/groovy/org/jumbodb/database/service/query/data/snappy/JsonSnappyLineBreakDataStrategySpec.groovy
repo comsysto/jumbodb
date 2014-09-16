@@ -167,23 +167,7 @@ class JsonSnappyLineBreakDataStrategySpec extends Specification {
         3 * futureMock.get() >> 3
     }
 
-    def "getCompressedSize"() {
-        setup:
-        def folderStr = FileUtils.getTempDirectory().absolutePath + "/" + UUID.randomUUID().toString() + "/"
-        def folder = new File(folderStr)
-        FileUtils.forceMkdir(folder);
-        new File(folderStr + "/testdata").text = "Hello World"
-        def strategy = new JsonSnappyLineBreakDataStrategy()
-        when:
-        def size = strategy.getCompressedSize(folder)
-        then:
-        size == 11
-        cleanup:
-        folder.deleteDir()
-    }
-
-
-    def "getUncompressedSize"() {
+    def "getCollectionDataSize"() {
         setup:
         def folderStr = FileUtils.getTempDirectory().absolutePath + "/" + UUID.randomUUID().toString() + "/"
         def folder = new File(folderStr)
@@ -193,9 +177,11 @@ class JsonSnappyLineBreakDataStrategySpec extends Specification {
         SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), dataFile, bytes.length, 100l, 32 * 1024)
         def strategy = new JsonSnappyLineBreakDataStrategy()
         when:
-        def size = strategy.getUncompressedSize(folder)
+        def sizes = strategy.getCollectionDataSize(folder)
         then:
-        size == 11
+        sizes.getCompressedSize() == 61
+        sizes.getUncompressedSize() == 11
+        sizes.getDatasets() == 100
         cleanup:
         folder.deleteDir()
     }

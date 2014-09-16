@@ -41,13 +41,12 @@ class NotFoundDataStrategySpec extends Specification {
         strategy.getSupportedOperations().size() == 0
     }
 
-    def "compressed size is always zero"() {
-        expect:
-        strategy.getCompressedSize() == 0
-    }
-
-    def "uncompressed size is always zero"() {
-        expect:
-        strategy.getUncompressedSize() == 0
+    def "CollectionDataSize size has always zero"() {
+        when:
+        def sizes = strategy.getCollectionDataSize(Mock(File))
+        then:
+        sizes.getCompressedSize() == 0
+        sizes.getUncompressedSize() == 0
+        sizes.getDatasets() == 0
     }
 }

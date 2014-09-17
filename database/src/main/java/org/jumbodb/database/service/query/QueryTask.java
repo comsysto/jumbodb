@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -142,6 +143,7 @@ public class QueryTask implements Runnable {
 
     // CARSTEN static machen!
     private class QueryTimeoutTask implements Callable<Integer> {
+        private ObjectMapper mapper = new ObjectMapper();
         private JumboQuery query;
         private DatabaseQuerySession.ResultWriter resultWriter;
 
@@ -157,10 +159,18 @@ public class QueryTask implements Runnable {
             // CARSTEN implementierung für groovy auswertung.
             return jumboSearcher.findResultAndWriteIntoCallback(query, new ResultCallback() {
                 @Override
-                // CARSTEN anstelle von byte[] wird der komplett geparste Json Tree benötigt, da hier die selektion statt findet.
-                public void writeResult(byte[] result) throws IOException {
+                public void writeResult(Map<String, Object> parsedJson) throws IOException {
                     // CARSTEN hier in seperater implementierung group auswertung.
-                    resultWriter.writeResult(result);
+                    // CARSTEN only for test implemented
+                    // CARSTEN should be possible to use more and *
+                    if(query.getSelectedFields().contains("*")) {
+                        resultWriter.writeResult(mapper.writeValueAsBytes(parsedJson));
+                    } else {
+                        // CARSTEN when only one was selected don't write res0
+                        // CARSTEN should be possible to use more
+                        // CARSTEN find sub fields etc...
+                        resultWriter.writeResult(mapper.writeValueAsBytes(parsedJson.get(query.getSelectedFields().get(0))));
+                    }
                     numberOfResults.incrementAndGet();
                 }
 

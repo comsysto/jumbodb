@@ -24,8 +24,8 @@ class QueryUtilServiceSpec extends Specification {
         queryResult.getResults()[0] == [sample: "result", anumber: 4]
         queryResult.getResults()[1] == [sample: "another result", anumber: 6]
         1 * jumboSearcherMock.findResultAndWriteIntoCallback(_, _) >> { jumboQuery, resultWriter ->
-            resultWriter.writeResult("""{"sample": "result", "anumber": 4}""".getBytes("UTF-8"))
-            resultWriter.writeResult("""{"sample": "another result", "anumber": 6}""".getBytes("UTF-8"))
+            resultWriter.writeResult([sample: "result", anumber: 4])
+            resultWriter.writeResult([sample: "another result", anumber: 6])
             return 2
         }
     }

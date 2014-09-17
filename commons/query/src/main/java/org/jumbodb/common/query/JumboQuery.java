@@ -17,10 +17,19 @@ import java.util.List;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class JumboQuery {
     private String collection;
+    private List<String> selectedFields = new LinkedList<String>();
     private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
     private List<DataQuery> jsonQuery = new LinkedList<DataQuery>();
     private int limit = -1;
     private boolean resultCacheEnabled = true;
+
+    public List<String> getSelectedFields() {
+        return selectedFields;
+    }
+
+    public void setSelectedFields(List<String> selectedFields) {
+        this.selectedFields = selectedFields;
+    }
 
     public String getCollection() {
         return collection;

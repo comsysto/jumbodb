@@ -6,10 +6,12 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import org.jumbodb.common.query.DataQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.database.service.query.sql.WhereVisitor;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -35,7 +37,8 @@ public class JumboQueryConverterService {
 
     private JumboQuery buildJumboQuery(PlainSelect selectBody) {
         JumboQuery jumboQuery = new JumboQuery();
-        jumboQuery.setCollection(selectBody.getFromItem().toString());
+        jumboQuery.setCollection(getCollection(selectBody));
+        jumboQuery.setSelectedFields(getSelectedFields(selectBody));
         if(selectBody.getLimit() != null) {
             jumboQuery.setLimit((int)selectBody.getLimit().getRowCount());
         }
@@ -46,6 +49,20 @@ public class JumboQueryConverterService {
             jumboQuery.setJsonQuery(expressionVisitor.getOrs());
         }
         return jumboQuery;
+    }
+
+    private List<String> getSelectedFields(PlainSelect selectBody) {
+        List<SelectItem> selectItems = selectBody.getSelectItems();
+        List<String> result = new LinkedList<String>();
+        for (SelectItem selectItem : selectItems) {
+            result.add(selectItem.toString()); // CARSTEN should be safer does not handle functions like count, sum etc
+            // CARSTEN also handle AS otherwise give res0, res1, etc...
+        }
+        return result;
+    }
+
+    private static String getCollection(PlainSelect selectBody) {
+        return selectBody.getFromItem().toString();
     }
 
     private void assertSqlFeatures(PlainSelect selectBody) {
@@ -59,13 +76,13 @@ public class JumboQueryConverterService {
 
 
         // no cache hint ans ende
-        // CARSTEN column and column vergleich wär cool a = b
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where ((a = 'b' or z = 'z') and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'");
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'");
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h') and (g = 'g' or y = 'y' or o = 'o')) or x = 'x'");
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where exists(aaaa)");
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test where field in (aaaa, 'bbb', 'ccc')");
-        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test where field = {ts '2012-12-12 12:12:12'}");
+//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test where field = {ts '2012-12-12 12:12:12'}");
+        Select stmt = (Select) CCJSqlParserUtil.parse("select aaa, bbb, * from test");
         long start = System.currentTimeMillis();
 //        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where aaa = 'bb'");
 
@@ -84,7 +101,7 @@ public class JumboQueryConverterService {
         System.out.println("group " + selectBody.getGroupByColumnReferences()); // muss null, wird supported
         System.out.println("having " + selectBody.getHaving()); // muss null, da nicht supported
         System.out.println("selected items " + selectBody.getSelectItems());
-        System.out.println("from item " + selectBody.getFromItem().toString()); // muss null kein alias support
+        System.out.println("from item " + getCollection(selectBody)); // muss null kein alias support
 //        System.out.println("from item alias  " + selectBody.getFromItem().getAlias().getName()); // wenn kein alias getAlias == null
         WhereVisitor expressionVisitor = new WhereVisitor();
         selectBody.getWhere().accept(expressionVisitor);

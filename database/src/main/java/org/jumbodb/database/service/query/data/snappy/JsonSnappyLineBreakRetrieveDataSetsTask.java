@@ -151,16 +151,17 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
                 int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
                 byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset,
                   datasetLength);
+                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(dataSetFromOffsetsGroup);
+
                 if (resultCacheEnabled) {
-                    // CARSTEN cache only parsed data
-                    datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), dataSetFromOffsetsGroup);
+                    datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);
                 }
                 IndexQuery indexQuery = offset.getIndexQuery();
-                if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getAndJson())) {
+                if (matchingFilter(parsedJson, indexQuery.getAndJson())) {
                     if (!resultCallback.needsMore(searchQuery)) {
                         return;
                     }
-                    resultCallback.writeResult(dataSetFromOffsetsGroup);
+                    resultCallback.writeResult(parsedJson);
                     results++;
                 }
             }
@@ -189,8 +190,9 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
             String line;
             while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
                 // CARSTEN hier mit OR auch das FileOffset checken falls Index und Json Query am Root level abgefragt werden
-                if (matchingFilter(line, searchQuery.getJsonQuery())) {
-                    resultCallback.writeResult(line.getBytes("UTF-8"));
+                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(line);
+                if (matchingFilter(parsedJson, searchQuery.getJsonQuery())) {
+                    resultCallback.writeResult(parsedJson);
                     results++;
                 }
                 if (count % 100000 == 0) {
@@ -216,7 +218,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
             // CARSTEN cache only parsed data
             Cache.ValueWrapper valueWrapper = datasetsByOffsetsCache.get(new CacheFileOffset(file, offset.getOffset()));
             if (valueWrapper != null) {
-                byte[] dataSetFromOffsetsGroup = (byte[]) valueWrapper.get();
+                Map<String, Object> dataSetFromOffsetsGroup = (Map<String, Object>) valueWrapper.get();
                 IndexQuery indexQuery = offset.getIndexQuery();
                 if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getAndJson())) {
                     if (!resultCallback.needsMore(searchQuery)) {
@@ -288,26 +290,14 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
         return result + 16;
     }
 
-    private boolean matchingFilter(byte[] s, DataQuery jsonQuery) throws ParseException, IOException {
+    private boolean matchingFilter(Map<String, Object> parsedJson, DataQuery jsonQuery) throws ParseException, IOException {
         if (jsonQuery == null) {
             return true;
         }
-        return matchingFilter(s, Arrays.asList(jsonQuery));
+        return matchingFilter(parsedJson, Arrays.asList(jsonQuery));
     }
 
-    private boolean matchingFilter(byte[] s, List<DataQuery> jsonQueries) throws ParseException, IOException {
-        if (jsonQueries.size() == 0) {
-            return true;
-        }
-        String in = new String(s, "UTF-8");
-        return matchingFilter(in, jsonQueries);
-    }
-
-    private boolean matchingFilter(String s, List<DataQuery> jsonQueries) throws ParseException {
-        if (jsonQueries.size() == 0) {
-            return true;
-        }
-        Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(s);
+    private boolean matchingFilter(Map<String, Object> parsedJson, List<DataQuery> jsonQueries) throws ParseException {
         return matchingFilter(parsedJson, new HashMap<String, Object>(), jsonQueries);
     }
 
@@ -320,14 +310,12 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
             Object leftValue = findLeftValue(parsedJson, queriedValuesCache, jsonQuery);
             Object rightValue = findRightValue(parsedJson, queriedValuesCache, jsonQuery);
 
-            if (leftValue != null) {
-                // CARSTEN handle EXISTS QueryOperation at this position
-                if (strategy.matches(jsonQuery.getQueryOperation(), leftValue, rightValue)) {
-                    if (jsonQuery.getAnd() != null) {
-                        return matchingFilter(parsedJson, queriedValuesCache, Arrays.asList(jsonQuery.getAnd()));
-                    }
-                    return matchingFilter(parsedJson, queriedValuesCache, jsonQuery.getOrs());
+            // CARSTEN handle EXISTS QueryOperation at this position
+            if (strategy.matches(jsonQuery.getQueryOperation(), leftValue, rightValue)) {
+                if (jsonQuery.getAnd() != null) {
+                    return matchingFilter(parsedJson, queriedValuesCache, Arrays.asList(jsonQuery.getAnd()));
                 }
+                return matchingFilter(parsedJson, queriedValuesCache, jsonQuery.getOrs());
             }
         }
         return false;

@@ -37,11 +37,11 @@ class QueryTaskSpec extends Specification {
         }
         1 * jumboSearcherMock.findResultAndWriteIntoCallback( _, _) >> { query, resultWriter ->
             assert resultWriter.needsMore(jumboQuery) == true
-            resultWriter.writeResult("Result 1".getBytes("UTF-8"))
+            resultWriter.writeResult([sample: "json1"])
             assert resultWriter.needsMore(jumboQuery) == true
-            resultWriter.writeResult("Result 2".getBytes("UTF-8"))
+            resultWriter.writeResult([sample: "json2"])
             assert resultWriter.needsMore(jumboQuery) == true
-            resultWriter.writeResult("Result 3".getBytes("UTF-8"))
+            resultWriter.writeResult([sample: "json3"])
             assert resultWriter.needsMore(jumboQuery) == false
 
         }

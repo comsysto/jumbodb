@@ -67,8 +67,7 @@ public class QueryUtilService {
 
     }
 
-    private QueryResult findDocumentsByQuery(final JumboQuery jumboQuery) {
-        final ObjectMapper mapper = new ObjectMapper();
+    private QueryResult findDocumentsByQuery(final JumboQuery query) {
         long start = System.currentTimeMillis();
         final List<Map<String, Object>> result = new LinkedList<Map<String, Object>>();
         final List<CancelableTask> tasks = new LinkedList<CancelableTask>();
@@ -77,11 +76,19 @@ public class QueryUtilService {
             @Override
             public void run() {
                 // CARSTEN should try to reuse functions in frontend
-                    jumboSearcher.findResultAndWriteIntoCallback(jumboQuery, new ResultCallback() {
+                    jumboSearcher.findResultAndWriteIntoCallback(query, new ResultCallback() {
                         @Override
-                        public void writeResult(byte[] dataSet) throws IOException {
+                        public void writeResult(Map<String, Object> parsedJson) throws IOException {
                             synchronized (result) {
-                                result.add(mapper.readValue(dataSet, Map.class));
+                                // CARSTEN reuse logic from the other one ....
+                                if(query.getSelectedFields().contains("*")) {
+                                    result.add(parsedJson);
+                                } else {
+                                    // CARSTEN when only one was selected don't write res0
+                                    // CARSTEN should be possible to use more
+                                    Map<String, Object> o = (Map<String, Object>) parsedJson.get(query.getSelectedFields().get(0));
+                                    result.add(o);
+                                }
                             }
                         }
 

@@ -159,7 +159,12 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(Column column) {
-        expressions.add(column);
+        // workaround, true is a comparision and not a field!
+        if("true".equals(column.getFullyQualifiedName())) {
+            expressions.add(true);
+        } else {
+            expressions.add(column);
+        }
     }
 
     // CARSTEN implement ALL and ANY and SOME in where clause, SOME and ANY do the same http://www.oracle-base.com/articles/misc/all-any-some-comparison-conditions-in-sql.php

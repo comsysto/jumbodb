@@ -201,7 +201,7 @@ define(['angular' ], function (angular) {
 				$http.post('jumbodb/rest/query/json/defaultLimit', jsonQuery).success(function(data) {
 					$scope.results = data;
 					buildMessage(data);
-				});
+                });
 			}
 
             $scope.searchSqlQuery = function(sqlQuery) {
@@ -218,10 +218,12 @@ define(['angular' ], function (angular) {
                 });
             }
 
-			$scope.formatJson = function(json) {
-				delete json["$$hashKey"]
-				var jsonStr = JSON.stringify(json, undefined, 3);
-				return syntaxHighlight(jsonStr);
+			$scope.formatJson = function(elem, json) {
+				delete json["$$hashKey"];
+                $(elem).JSONView(json);
+//                console.log(elem);
+//				var jsonStr = JSON.stringify(json, undefined, 3);
+//				return syntaxHighlight(jsonStr);
 			}
 
 			function buildMessage(data) {
@@ -232,24 +234,6 @@ define(['angular' ], function (angular) {
 				}
 			}
 
-			function syntaxHighlight(json) {
-				json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-				return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-					var cls = 'number';
-					if (/^"/.test(match)) {
-						if (/:$/.test(match)) {
-							cls = 'key';
-						} else {
-							cls = 'string';
-						}
-					} else if (/true|false/.test(match)) {
-						cls = 'boolean';
-					} else if (/null/.test(match)) {
-						cls = 'null';
-					}
-					return '<span class="' + cls + '">' + match + '</span>';
-				});
-			}
 		}])
 		.controller("ReplicationCtrl",["$scope", "$http", "$timeout", function($scope, $http, $timeout) {
 			fetchData();

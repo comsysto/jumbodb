@@ -94,16 +94,8 @@ public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
         long startTime = System.currentTimeMillis();
         HashMultimap<Integer, FileOffset> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
         List<Future<Integer>> tasks = new LinkedList<Future<Integer>>();
-        if (searchQuery.getIndexQuery().size() == 0) {
-            log.debug("Running scanned search");
-            for (File file : deliveryChunkDefinition.getDataFiles().values()) {
-                Future<Integer> future = retrieveDataExecutor.submit(
-                  new JsonSnappyLineBreakRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery,
-                    resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache));
-                tasks.add(future);
-                resultCallback.collect(new FutureCancelableTask(future));
-            }
-        } else {
+        // CARSTEN hier auch noch mal checken ob worklich index search ist ... alte logik
+        if (searchQuery.getJsonQuery().isEmpty() && !searchQuery.getIndexQuery().isEmpty()) {
             log.debug("Running indexed search");
             for (Integer fileNameHash : fileOffsetsMap.keySet()) {
                 File file = deliveryChunkDefinition.getDataFiles().get(fileNameHash);
@@ -113,11 +105,20 @@ public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
                 Set<FileOffset> offsets = fileOffsetsMap.get(fileNameHash);
                 if (offsets.size() > 0) {
                     Future<Integer> future = retrieveDataExecutor.submit(
-                      new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this,
-                        datasetsByOffsetsCache, dataSnappyChunksCache));
+                            new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this,
+                                    datasetsByOffsetsCache, dataSnappyChunksCache));
                     tasks.add(future);
                     resultCallback.collect(new FutureCancelableTask(future));
                 }
+            }
+        } else {
+            log.debug("Running scanned search");
+            for (File file : deliveryChunkDefinition.getDataFiles().values()) {
+                Future<Integer> future = retrieveDataExecutor.submit(
+                        new JsonSnappyLineBreakRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery,
+                                resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache));
+                tasks.add(future);
+                resultCallback.collect(new FutureCancelableTask(future));
             }
         }
 

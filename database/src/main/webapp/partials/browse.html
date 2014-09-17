@@ -80,7 +80,8 @@
                         <tr ng-repeat="result in results.results">
                             <td>{{$index + 1}}</td>
                             <td>
-                                <pre ng-bind-html-unsafe="formatJson(result)"></pre>
+                                <json-explorer json-data="{{result}}"></json-explorer>
+                                <!--<pre ng-bind="formatJson(this, result)"></pre>-->
                             </td>
                         </tr>
                         </tbody>
@@ -153,7 +154,7 @@
                         <tbody>
                         <tr>
                             <td>
-                                <pre ng-bind-html-unsafe="formatJson(explainedSql)"></pre>
+                                <!--<pre>{{formatJson(this, explainedSql)}}</pre>-->
                             </td>
                         </tr>
                         </tbody>
@@ -228,7 +229,7 @@
                         <tr ng-repeat="result in results.results">
                             <td>{{$index + 1}}</td>
                             <td>
-                                <pre ng-bind-html-unsafe="formatJson(result)"></pre>
+                                <!--<pre ng-bind="formatJson(this, result)"></pre>-->
                             </td>
                         </tr>
                         </tbody>

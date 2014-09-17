@@ -3,18 +3,21 @@ require.config({
 	paths: {
 		angular: "../jumbodb/resources/angularjs/angular",
 		angularUiBootstrap: '../jumbodb/resources/angular-ui-bootstrap/ui-bootstrap',
-		angularUiBootstrapTpls: '../jumbodb/resources/angular-ui-bootstrap/ui-bootstrap-tpls'
+		angularUiBootstrapTpls: '../jumbodb/resources/angular-ui-bootstrap/ui-bootstrap-tpls',
+        jsonExplorer: '../extres/jsonexplorer/gd-ui-jsonexplorer'
 	},
 	shim: {
 		'angular' : {exports : 'angular'},
 		'angularUiBootstrap': {exports : 'angularUi',
 								deps: ['angular']},
-		'angularUiBootstrapTpls': {deps: ['angular', 'angularUiBootstrap']}
+		'angularUiBootstrapTpls': {deps: ['angular', 'angularUiBootstrap']},
+		'jsonExplorer': {deps: ['angular']}
 	},
 	priority: [
 		"angular",
 		"angularUiBootstrap",
-		"angularUiBootstrapTpls"
+		"angularUiBootstrapTpls",
+		"jsonExplorer"
 	]
 });
 

@@ -160,6 +160,8 @@ public class QueryTask implements Runnable {
             return jumboSearcher.findResultAndWriteIntoCallback(query, new ResultCallback() {
                 @Override
                 public void writeResult(Map<String, Object> parsedJson) throws IOException {
+                    // CARSTEN hier sollten wir die alte implementierung halten und nur ein delegate auf die neuen funktionen machen... sonst können wir gewisse funktionen nicht wieder nutzen..
+
                     // CARSTEN hier in seperater implementierung group auswertung.
                     // CARSTEN only for test implemented
                     // CARSTEN should be possible to use more and *

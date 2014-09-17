@@ -2,9 +2,10 @@ package org.jumbodb.common.query;
 
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * User: carsten
@@ -12,7 +13,7 @@ import java.util.*;
  * Time: 1:05 PM
  */
 
-@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class JumboQuery {
     private String collection;

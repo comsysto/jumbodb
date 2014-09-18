@@ -2,11 +2,7 @@ package org.jumbodb.database.service.query.index.snappy;
 
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch;
-import org.jumbodb.database.service.query.index.common.doubleval.DoubleBetweenOperationSearch;
-import org.jumbodb.database.service.query.index.common.doubleval.DoubleEqOperationSearch;
-import org.jumbodb.database.service.query.index.common.doubleval.DoubleGtOperationSearch;
-import org.jumbodb.database.service.query.index.common.doubleval.DoubleLtOperationSearch;
-import org.jumbodb.database.service.query.index.common.doubleval.DoubleNeOperationSearch;
+import org.jumbodb.database.service.query.index.common.doubleval.*;
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile;
 import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.slf4j.Logger;
@@ -33,7 +29,9 @@ public class DoubleSnappyIndexStrategy extends NumberSnappyIndexStrategy<Double,
         operations.put(QueryOperation.EQ, new DoubleEqOperationSearch());
         operations.put(QueryOperation.NE, new DoubleNeOperationSearch());
         operations.put(QueryOperation.GT, new DoubleGtOperationSearch());
+        operations.put(QueryOperation.GT_EQ, new DoubleGtEqOperationSearch());
         operations.put(QueryOperation.LT, new DoubleLtOperationSearch());
+        operations.put(QueryOperation.LT_EQ, new DoubleLtEqOperationSearch());
         operations.put(QueryOperation.BETWEEN, new DoubleBetweenOperationSearch());
         return operations;
     }

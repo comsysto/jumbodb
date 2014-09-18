@@ -31,7 +31,7 @@ public class NotFoundDataStrategy implements DataStrategy {
     // CARSTEN unit test
     @Override
     public boolean matches(QueryOperation operation, Object leftValue, Object rightValue) {
-        return false;
+        throw new IllegalStateException("Not data strategy found for " + operation.getOperation());
     }
 
     @Override

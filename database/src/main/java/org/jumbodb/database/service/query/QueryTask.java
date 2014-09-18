@@ -143,14 +143,12 @@ public class QueryTask implements Runnable {
 
 
     private class QueryTimeoutTask implements Callable<Integer> {
-        private final int limit;
         private JumboQuery query;
         private DatabaseQuerySession.ResultWriter resultWriter;
 
         private QueryTimeoutTask(JumboQuery query, DatabaseQuerySession.ResultWriter resultWriter) {
             this.query = query;
             this.resultWriter = resultWriter;
-            this.limit = query.getLimit();
         }
 
         @Override

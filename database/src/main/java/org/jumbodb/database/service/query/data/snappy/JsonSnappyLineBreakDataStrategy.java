@@ -12,15 +12,7 @@ import org.jumbodb.database.service.query.FutureCancelableTask;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.CollectionDataSize;
 import org.jumbodb.database.service.query.data.DataStrategy;
-import org.jumbodb.database.service.query.data.common.BetweenDataOperationSearch;
-import org.jumbodb.database.service.query.data.common.DataOperationSearch;
-import org.jumbodb.database.service.query.data.common.EqDataOperationSearch;
-import org.jumbodb.database.service.query.data.common.GeoBoundaryBoxDataOperationSearch;
-import org.jumbodb.database.service.query.data.common.GeoWithinRangeInMeterDataOperationSearch;
-import org.jumbodb.database.service.query.data.common.GtDataOperationSearch;
-import org.jumbodb.database.service.query.data.common.LtDataOperationSearch;
-import org.jumbodb.database.service.query.data.common.NeDataOperationSearch;
-import org.jumbodb.database.service.query.data.common.OrDataOperationSearch;
+import org.jumbodb.database.service.query.data.common.*;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.slf4j.Logger;
@@ -66,7 +58,9 @@ public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
         operations.put(QueryOperation.EQ, new EqDataOperationSearch());
         operations.put(QueryOperation.NE, new NeDataOperationSearch());
         operations.put(QueryOperation.GT, new GtDataOperationSearch());
+        operations.put(QueryOperation.GT_EQ, new GtEqDataOperationSearch());
         operations.put(QueryOperation.LT, new LtDataOperationSearch());
+        operations.put(QueryOperation.LT_EQ, new LtEqDataOperationSearch());
         operations.put(QueryOperation.BETWEEN, new BetweenDataOperationSearch());
         operations.put(QueryOperation.GEO_BOUNDARY_BOX, new GeoBoundaryBoxDataOperationSearch());
         operations.put(QueryOperation.GEO_WITHIN_RANGE_METER, new GeoWithinRangeInMeterDataOperationSearch());
@@ -157,7 +151,7 @@ public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
     public boolean matches(QueryOperation operation, Object leftValue, Object rightValue) {
         DataOperationSearch jsonOperationSearch = getOperations().get(operation);
         if (jsonOperationSearch == null) {
-            throw new UnsupportedOperationException("OperationSearch is not supported: " + operation);
+            throw new UnsupportedOperationException("OperationSearch is not supported: " + operation.getOperation());
         }
         return jsonOperationSearch.matches(leftValue, rightValue);
     }

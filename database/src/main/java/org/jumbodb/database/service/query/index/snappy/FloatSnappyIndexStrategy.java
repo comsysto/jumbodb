@@ -2,12 +2,8 @@ package org.jumbodb.database.service.query.index.snappy;
 
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch;
+import org.jumbodb.database.service.query.index.common.floatval.*;
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile;
-import org.jumbodb.database.service.query.index.common.floatval.FloatBetweenOperationSearch;
-import org.jumbodb.database.service.query.index.common.floatval.FloatEqOperationSearch;
-import org.jumbodb.database.service.query.index.common.floatval.FloatGtOperationSearch;
-import org.jumbodb.database.service.query.index.common.floatval.FloatLtOperationSearch;
-import org.jumbodb.database.service.query.index.common.floatval.FloatNeOperationSearch;
 import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +29,9 @@ public class FloatSnappyIndexStrategy extends NumberSnappyIndexStrategy<Float, F
         operations.put(QueryOperation.EQ, new FloatEqOperationSearch());
         operations.put(QueryOperation.NE, new FloatNeOperationSearch());
         operations.put(QueryOperation.GT, new FloatGtOperationSearch());
+        operations.put(QueryOperation.GT_EQ, new FloatGtEqOperationSearch());
         operations.put(QueryOperation.LT, new FloatLtOperationSearch());
+        operations.put(QueryOperation.LT_EQ, new FloatLtEqOperationSearch());
         operations.put(QueryOperation.BETWEEN, new FloatBetweenOperationSearch());
         return operations;
     }

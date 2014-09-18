@@ -2,12 +2,8 @@ package org.jumbodb.database.service.query.index.snappy;
 
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch;
+import org.jumbodb.database.service.query.index.common.longval.*;
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile;
-import org.jumbodb.database.service.query.index.common.longval.LongBetweenOperationSearch;
-import org.jumbodb.database.service.query.index.common.longval.LongEqOperationSearch;
-import org.jumbodb.database.service.query.index.common.longval.LongGtOperationSearch;
-import org.jumbodb.database.service.query.index.common.longval.LongLtOperationSearch;
-import org.jumbodb.database.service.query.index.common.longval.LongNeOperationSearch;
 import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +29,9 @@ public class LongSnappyIndexStrategy extends NumberSnappyIndexStrategy<Long, Lon
         operations.put(QueryOperation.EQ, new LongEqOperationSearch());
         operations.put(QueryOperation.NE, new LongNeOperationSearch());
         operations.put(QueryOperation.GT, new LongGtOperationSearch());
+        operations.put(QueryOperation.GT_EQ, new LongGtEqOperationSearch());
         operations.put(QueryOperation.LT, new LongLtOperationSearch());
+        operations.put(QueryOperation.LT_EQ, new LongLtEqOperationSearch());
         operations.put(QueryOperation.BETWEEN, new LongBetweenOperationSearch());
         return operations;
     }

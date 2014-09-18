@@ -190,7 +190,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(GreaterThanEquals expr) {
-        throw new IllegalArgumentException("not supported");
+        super.visit(expr);
+        boolEvaluation(QueryOperation.GT_EQ);
     }
 
     @Override
@@ -252,6 +253,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(MinorThanEquals expr) {
         super.visit(expr);
+        boolEvaluation(QueryOperation.LT_EQ);
     }
 
     @Override

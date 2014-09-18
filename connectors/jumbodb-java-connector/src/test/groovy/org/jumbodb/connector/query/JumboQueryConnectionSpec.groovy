@@ -15,6 +15,7 @@ import spock.lang.Specification
  */
 // CARSTEN test sql query
 class JumboQueryConnectionSpec extends Specification {
+    public static final int LENGTH = 178
     JumboQueryConnection jqc
     ServerSocket serverSocket
     Socket clientSocket
@@ -58,10 +59,10 @@ class JumboQueryConnectionSpec extends Specification {
             initiateConnection()
             assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:query:json"
-            assert dis.readInt() == 189
-            def bytes = IOUtils.toByteArray(dis, 189)
+            assert dis.readInt() == LENGTH
+            def bytes = IOUtils.toByteArray(dis, LENGTH)
             def expectedQuery = """
-                {"collection":"my_collection","indexQuery":[{"name":"my_index","queryOperation":"EQ","value":"my_value","andJson":null,"andIndex":null}],"jsonQuery":[],"limit":-1,"resultCacheEnabled":true}
+                {"collection":"my_collection","selectedFields":[],"indexQuery":[{"name":"my_index","queryOperation":"EQ","value":"my_value"}],"jsonQuery":[],"limit":-1,"resultCacheEnabled":true}
             """
             assert IOUtils.toString(bytes, "UTF-8") == expectedQuery.trim()
             def result = """
@@ -84,10 +85,10 @@ class JumboQueryConnectionSpec extends Specification {
             initiateConnection()
             assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:query:json"
-            assert dis.readInt() == 189
-            def bytes = IOUtils.toByteArray(dis, 189)
+            assert dis.readInt() == LENGTH
+            def bytes = IOUtils.toByteArray(dis, LENGTH)
             def expectedQuery = """
-                {"collection":"my_collection","indexQuery":[{"name":"my_index","queryOperation":"EQ","value":"my_value","andJson":null,"andIndex":null}],"jsonQuery":[],"limit":-1,"resultCacheEnabled":true}
+                {"collection":"my_collection","selectedFields":[],"indexQuery":[{"name":"my_index","queryOperation":"EQ","value":"my_value"}],"jsonQuery":[],"limit":-1,"resultCacheEnabled":true}
             """
             assert IOUtils.toString(bytes, "UTF-8") == expectedQuery.trim()
             def result = """
@@ -122,8 +123,8 @@ class JumboQueryConnectionSpec extends Specification {
         initiateConnection()
         assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
         assert dis.readUTF() == ":cmd:query:json"
-        assert dis.readInt() == 189
-        IOUtils.toByteArray(dis, 189)
+        assert dis.readInt() == LENGTH
+        IOUtils.toByteArray(dis, LENGTH)
         dos.writeInt(-1)
         dos.writeUTF(error)
         dos.writeUTF(message)
@@ -190,8 +191,8 @@ class JumboQueryConnectionSpec extends Specification {
             initiateConnection()
             assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:query:json"
-            assert dis.readInt() == 189
-            IOUtils.toByteArray(dis, 189)
+            assert dis.readInt() == LENGTH
+            IOUtils.toByteArray(dis, LENGTH)
             dos.writeInt(-1)
             dos.writeUTF("invalid command")
             dos.flush()

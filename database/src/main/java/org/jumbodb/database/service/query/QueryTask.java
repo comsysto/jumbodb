@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -141,15 +142,15 @@ public class QueryTask implements Runnable {
     }
 
 
-    // CARSTEN static machen!
     private class QueryTimeoutTask implements Callable<Integer> {
-        private ObjectMapper mapper = new ObjectMapper();
+        private final int limit;
         private JumboQuery query;
         private DatabaseQuerySession.ResultWriter resultWriter;
 
         private QueryTimeoutTask(JumboQuery query, DatabaseQuerySession.ResultWriter resultWriter) {
             this.query = query;
             this.resultWriter = resultWriter;
+            this.limit = query.getLimit();
         }
 
         @Override
@@ -157,39 +158,54 @@ public class QueryTask implements Runnable {
             // CARSTEN mehrere Implementierungen von ResultCallback machen und anhang von query die richtige auswaehlen
             // CARSTEN eine impl. für group by mit entsprechnder synchronisierung, möglicherweise Multimaps.synchronized nutzen
             // CARSTEN implementierung für groovy auswertung.
-            return jumboSearcher.findResultAndWriteIntoCallback(query, new ResultCallback() {
-                @Override
-                public void writeResult(Map<String, Object> parsedJson) throws IOException {
-                    // CARSTEN hier sollten wir die alte implementierung halten und nur ein delegate auf die neuen funktionen machen... sonst können wir gewisse funktionen nicht wieder nutzen..
+            return jumboSearcher.findResultAndWriteIntoCallback(query, new StreamingResultCallback(query, resultWriter, cancelableTasks, numberOfResults));
+        }
+    }
 
-                    // CARSTEN hier in seperater implementierung group auswertung.
-                    // CARSTEN only for test implemented
-                    // CARSTEN should be possible to use more and *
-                    if(query.getSelectedFields().contains("*")) {
-                        resultWriter.writeResult(mapper.writeValueAsBytes(parsedJson));
-                    } else {
-                        // CARSTEN when only one was selected don't write res0
-                        // CARSTEN should be possible to use more
-                        // CARSTEN find sub fields etc...
-                        resultWriter.writeResult(mapper.writeValueAsBytes(parsedJson.get(query.getSelectedFields().get(0))));
-                    }
-                    numberOfResults.incrementAndGet();
-                }
+    private static class StreamingResultCallback implements ResultCallback {
+        private ObjectMapper mapper = new ObjectMapper();
+        private int limit;
+        private JumboQuery query;
+        private DatabaseQuerySession.ResultWriter resultWriter;
+        private LinkedBlockingQueue<CancelableTask> cancelableTasks;
+        private AtomicInteger numberOfResults;
 
-                @Override
-                public boolean needsMore(JumboQuery jumboQuery) throws IOException {
-                    final int limit = jumboQuery.getLimit();
-                    if (limit == -1) {
-                        return true;
-                    }
-                    return numberOfResults.get() < limit;
-                }
+        private StreamingResultCallback(JumboQuery query, DatabaseQuerySession.ResultWriter resultWriter,
+                                        LinkedBlockingQueue<CancelableTask> cancelableTasks, AtomicInteger numberOfResults) {
+            this.query = query;
+            this.resultWriter = resultWriter;
+            this.cancelableTasks = cancelableTasks;
+            this.numberOfResults = numberOfResults;
+            this.limit = query.getLimit();
+        }
 
-                @Override
-                public void collect(CancelableTask cancelableTask) {
-                    cancelableTasks.add(cancelableTask);
-                }
-            });
+        @Override
+        public void writeResult(Map<String, Object> parsedJson) throws IOException {
+            // CARSTEN hier sollten wir die alte implementierung halten und nur ein delegate auf die neuen funktionen machen... sonst können wir gewisse funktionen nicht wieder nutzen..
+
+            // CARSTEN hier in seperater implementierung group auswertung.
+            // CARSTEN only for test implemented
+            // CARSTEN should be possible to use more and *
+            // CARSTEN when only one was selected don't write res0
+            // CARSTEN should be possible to use more
+            // CARSTEN find sub fields etc...
+            final int limit = query.getLimit();
+            if(numberOfResults.getAndIncrement() < limit) {
+                resultWriter.writeResult(mapper.writeValueAsBytes(parsedJson));
+            }
+        }
+
+        @Override
+        public boolean needsMore(JumboQuery jumboQuery) throws IOException {
+            if (limit == -1) {
+                return true;
+            }
+            return numberOfResults.get() < limit;
+        }
+
+        @Override
+        public void collect(CancelableTask cancelableTask) {
+            cancelableTasks.add(cancelableTask);
         }
     }
 

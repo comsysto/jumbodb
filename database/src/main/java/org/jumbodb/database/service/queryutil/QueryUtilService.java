@@ -1,9 +1,11 @@
 package org.jumbodb.database.service.queryutil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.JumboQuery;
-import org.jumbodb.database.service.query.*;
+import org.jumbodb.database.service.query.CancelableTask;
+import org.jumbodb.database.service.query.JumboQueryConverterService;
+import org.jumbodb.database.service.query.JumboSearcher;
+import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.queryutil.dto.ExplainResult;
 import org.jumbodb.database.service.queryutil.dto.QueryResult;
 import org.springframework.beans.factory.annotation.Required;
@@ -33,7 +35,7 @@ public class QueryUtilService {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JumboQuery jumboQuery = mapper.readValue(query, JumboQuery.class);
-            if(jumboQuery.getLimit() == -1) {
+            if (jumboQuery.getLimit() == -1) {
                 jumboQuery.setLimit(defaultLimit);
             }
             return findDocumentsByQuery(jumboQuery);
@@ -50,7 +52,7 @@ public class QueryUtilService {
                 jumboQuery.setLimit(defaultLimit);
             }
             return findDocumentsByQuery(jumboQuery);
-        } catch(Exception e) {
+        } catch (Exception e) {
             return new QueryResult(e.getMessage());
         }
 
@@ -61,7 +63,7 @@ public class QueryUtilService {
         try {
             JumboQuery jumboQuery = jumboQueryConverterService.convertSqlToJumboQuery(sql);
             return new ExplainResult(jumboQuery, Arrays.asList("add the executions")); // CARSTEN implement add the executions with chunk, version and size
-        } catch(Exception e) {
+        } catch (Exception e) {
             return new ExplainResult(e.getMessage());
         }
 
@@ -75,34 +77,7 @@ public class QueryUtilService {
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                // CARSTEN should try to reuse functions in frontend
-                    jumboSearcher.findResultAndWriteIntoCallback(query, new ResultCallback() {
-                        @Override
-                        public void writeResult(Map<String, Object> parsedJson) throws IOException {
-                            synchronized (result) {
-                                // CARSTEN reuse logic from the other one ....
-                                if(query.getSelectedFields().contains("*")) {
-                                    result.add(parsedJson);
-                                } else {
-                                    // CARSTEN when only one was selected don't write res0
-                                    // CARSTEN should be possible to use more
-                                    Map<String, Object> o = (Map<String, Object>) parsedJson.get(query.getSelectedFields().get(0));
-                                    result.add(o);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void collect(CancelableTask cancelableTask) {
-                            tasks.add(cancelableTask);
-                        }
-
-                        @Override
-                        public boolean needsMore(JumboQuery jumboQuery) throws IOException {
-                            return result.size() < jumboQuery.getLimit();
-                        }
-                    });
-
+                jumboSearcher.findResultAndWriteIntoCallback(query, new QueryResultCallback(result, query, tasks));
             }
         };
         Future<?> submit = executorService.submit(runnable);
@@ -136,5 +111,46 @@ public class QueryUtilService {
     @Required
     public void setJumboQueryConverterService(JumboQueryConverterService jumboQueryConverterService) {
         this.jumboQueryConverterService = jumboQueryConverterService;
+    }
+
+    private static class QueryResultCallback implements ResultCallback {
+        private final List<Map<String, Object>> result;
+        private final JumboQuery query;
+        private final List<CancelableTask> tasks;
+
+        public QueryResultCallback(List<Map<String, Object>> result, JumboQuery query, List<CancelableTask> tasks) {
+            this.result = result;
+            this.query = query;
+            this.tasks = tasks;
+        }
+
+        @Override
+        public void writeResult(Map<String, Object> parsedJson) throws IOException {
+            synchronized (result) {
+                if (result.size() < query.getLimit()) {
+                    result.add(parsedJson);
+                }
+
+//                                // CARSTEN reuse logic from the other one ....
+//                                if(query.getSelectedFields().contains("*")) {
+//                                    result.add(parsedJson);
+//                                } else {
+//                                    // CARSTEN when only one was selected don't write res0
+//                                    // CARSTEN should be possible to use more
+//                                    Map<String, Object> o = (Map<String, Object>) parsedJson.get(query.getSelectedFields().get(0));
+//                                    result.add(o);
+//                                }
+            }
+        }
+
+        @Override
+        public void collect(CancelableTask cancelableTask) {
+            tasks.add(cancelableTask);
+        }
+
+        @Override
+        public boolean needsMore(JumboQuery jumboQuery) throws IOException {
+            return result.size() < jumboQuery.getLimit();
+        }
     }
 }

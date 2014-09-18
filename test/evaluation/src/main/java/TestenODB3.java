@@ -36,7 +36,7 @@ public class TestenODB3 {
         //        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(-51.577070d, 0.027180d), 30000))));
 
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM carsten.twitter where id = 327770995446403073");
+        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM carsten.twitter limit 1");
         System.out.println(daily);
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }

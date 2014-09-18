@@ -13,7 +13,7 @@ class LongBetweenOperationSearchSpec extends Specification {
     def operation = new LongBetweenOperationSearch()
 
     @Unroll
-    def "between match #from < #testValue > #to == #isBetween"() {
+    def "between match #from <= #testValue >= #to == #isBetween"() {
         expect:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.BETWEEN, Arrays.asList(from, to))
 
@@ -22,8 +22,8 @@ class LongBetweenOperationSearchSpec extends Specification {
         from | to | testValue | isBetween
         1l   | 5l | 2l        | true
         1l   | 5l | 0l        | false
-        1l   | 5l | 1l        | false
-        1l   | 5l | 5l        | false
+        1l   | 5l | 1l        | true
+        1l   | 5l | 5l        | true
         1l   | 5l | 4l        | true
         1l   | 5l | 6l        | false
     }
@@ -63,10 +63,13 @@ class LongBetweenOperationSearchSpec extends Specification {
         where:
         queryFrom | queryTo | indexFileFrom | indexFileTo | accept
         1l        | 10l     | 2l            | 9l          | true
-        1l        | 10l     | 1l            | 10l         | false
+        1l        | 10l     | 1l            | 10l         | true
         1l        | 10l     | 2l            | 10l         | true
-        1l        | 10l     | 1l            | 9l          | false
+        1l        | 10l     | 1l            | 9l          | true
         1l        | 10l     | 0l            | 11l         | true
+        1l        | 5l      | 5l            | 11l         | true
+        1l        | 4l      | 5l            | 11l         | false
+        12l       | 13l     | 5l            | 11l         | false
     }
 
     def "getQueryValueRetriever"() {

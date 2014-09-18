@@ -13,7 +13,7 @@ class DoubleBetweenOperationSearchSpec extends Specification {
     def operation = new DoubleBetweenOperationSearch()
 
     @Unroll
-    def "between match #from < #testValue > #to == #isBetween"() {
+    def "between match #from <= #testValue >= #to == #isBetween"() {
         expect:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.BETWEEN, Arrays.asList(from, to))
 
@@ -22,8 +22,8 @@ class DoubleBetweenOperationSearchSpec extends Specification {
         from | to | testValue | isBetween
         1d   | 5d | 2d        | true
         1d   | 5d | 0.99d     | false
-        1d   | 5d | 1d        | false
-        1d   | 5d | 5d        | false
+        1d   | 5d | 1d        | true
+        1d   | 5d | 5d        | true
         1d   | 5d | 1.01d     | true
         1d   | 5d | 4.99d     | true
         1d   | 5d | 5.01d     | false
@@ -64,10 +64,12 @@ class DoubleBetweenOperationSearchSpec extends Specification {
         where:
         queryFrom | queryTo | indexFileFrom | indexFileTo | accept
         1d        | 10d     | 1.01d         | 9.99d       | true
-        1d        | 10d     | 1d            | 10d         | false
+        1d        | 10d     | 1d            | 10d         | true
         1d        | 10d     | 1.01d         | 10d         | true
-        1d        | 10d     | 1d            | 9.99d       | false
+        1d        | 10d     | 1d            | 9.99d       | true
         1d        | 10d     | 0.99d         | 10.01d      | true
+        1l        | 4l      | 5l            | 11l         | false
+        12l       | 13l     | 5l            | 11l         | false
     }
 
     def "getQueryValueRetriever"() {

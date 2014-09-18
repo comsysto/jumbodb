@@ -13,7 +13,7 @@ class FloatBetweenOperationSearchSpec extends Specification {
     def operation = new FloatBetweenOperationSearch()
 
     @Unroll
-    def "between match #from < #testValue > #to == #isBetween"() {
+    def "between match #from <= #testValue >= #to == #isBetween"() {
         expect:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.BETWEEN, Arrays.asList(from, to))
 
@@ -22,8 +22,8 @@ class FloatBetweenOperationSearchSpec extends Specification {
         from | to | testValue | isBetween
         1f   | 5f | 2f        | true
         1f   | 5f | 0.99f     | false
-        1f   | 5f | 1f        | false
-        1f   | 5f | 5f        | false
+        1f   | 5f | 1f        | true
+        1f   | 5f | 5f        | true
         1f   | 5f | 1.01f     | true
         1f   | 5f | 4.99f     | true
         1f   | 5f | 5.01f     | false
@@ -64,10 +64,12 @@ class FloatBetweenOperationSearchSpec extends Specification {
         where:
         queryFrom | queryTo | indexFileFrom | indexFileTo | accept
         1f        | 10f     | 1.01f         | 9.99f       | true
-        1f        | 10f     | 1f            | 10f         | false
+        1f        | 10f     | 1f            | 10f         | true
         1f        | 10f     | 1.01f         | 10f         | true
-        1f        | 10f     | 1f            | 9.99f       | false
+        1f        | 10f     | 1f            | 9.99f       | true
         1f        | 10f     | 0.99f         | 10.01f      | true
+        1f        | 4.99f   | 5f            | 11f         | false
+        11.99f    | 13f     | 5f            | 11f         | false
     }
 
     def "getQueryValueRetriever"() {

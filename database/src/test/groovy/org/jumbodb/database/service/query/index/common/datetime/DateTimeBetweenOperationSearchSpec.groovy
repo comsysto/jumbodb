@@ -15,7 +15,7 @@ class DateTimeBetweenOperationSearchSpec extends Specification {
     def operation = new DateTimeBetweenOperationSearch()
 
     @Unroll
-    def "between match #from < #testValue > #to == #isBetween"() {
+    def "between match #from <= #testValue >= #to == #isBetween"() {
         expect:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.BETWEEN, Arrays.asList(from, to))
         def sdf = new SimpleDateFormat(DateTimeQueryValueRetriever.DATE_SEARCH_PATTERN)
@@ -25,8 +25,8 @@ class DateTimeBetweenOperationSearchSpec extends Specification {
         from                  | to                    | testValue             | isBetween
         "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-11-01 12:00:00" | true
         "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-09-30 12:00:00" | false
-        "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-10-01 12:00:00" | false
-        "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2013-10-01 12:00:00" | false
+        "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-10-01 12:00:00" | true
+        "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2013-10-01 12:00:00" | true
         "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2013-10-01 11:59:59" | true
         "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-10-01 12:00:01" | true
     }
@@ -65,9 +65,11 @@ class DateTimeBetweenOperationSearchSpec extends Specification {
         where:
         queryFrom             | queryTo               | indexFileFrom         | indexFileTo           | accept
         "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-11-01 12:00:01" | "2013-10-01 11:59:59" | true
-        "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | false
+        "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | true
         "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-10-01 12:00:01" | "2013-10-01 12:00:00" | true
-        "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-10-01 12:00:00" | "2013-10-01 11:59:59" | false
+        "2012-10-01 12:00:00" | "2013-10-01 12:00:00" | "2012-10-01 12:00:00" | "2013-10-01 11:59:59" | true
+        "2011-10-01 12:00:00" | "2012-09-30 12:00:00" | "2012-10-01 12:00:00" | "2013-10-01 11:59:59" | false
+        "2013-10-02 12:00:00" | "2014-09-30 12:00:00" | "2012-10-01 12:00:00" | "2013-10-01 11:59:59" | false
     }
 
     def "getQueryValueRetriever"() {

@@ -15,7 +15,7 @@ class IntegerBetweenOperationSearchSpec extends Specification {
     def operation = new IntegerBetweenOperationSearch()
 
     @Unroll
-    def "between match #from < #testValue > #to == #isBetween"() {
+    def "between match #from <= #testValue >= #to == #isBetween"() {
         expect:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.BETWEEN, Arrays.asList(from, to))
 
@@ -24,8 +24,8 @@ class IntegerBetweenOperationSearchSpec extends Specification {
         from | to | testValue | isBetween
         1    | 5  | 2         | true
         1    | 5  | 0         | false
-        1    | 5  | 1         | false
-        1    | 5  | 5         | false
+        1    | 5  | 1         | true
+        1    | 5  | 5         | true
         1    | 5  | 4         | true
         1    | 5  | 6         | false
     }
@@ -65,10 +65,12 @@ class IntegerBetweenOperationSearchSpec extends Specification {
         where:
         queryFrom | queryTo | indexFileFrom | indexFileTo | accept
         1         | 10      | 2             | 9           | true
-        1         | 10      | 1             | 10          | false
+        1         | 10      | 1             | 10          | true
         1         | 10      | 2             | 10          | true
-        1         | 10      | 1             | 9           | false
+        1         | 10      | 1             | 9           | true
         1         | 10      | 0             | 11          | true
+        1         | 4       | 5             | 11          | false
+        12        | 13      | 5             | 11          | false
     }
 
     def "getQueryValueRetriever"() {

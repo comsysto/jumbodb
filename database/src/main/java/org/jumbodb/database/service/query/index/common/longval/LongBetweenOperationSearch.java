@@ -27,7 +27,7 @@ public class LongBetweenOperationSearch extends LongEqOperationSearch {
         List<Long> value = queryValueRetriever.getValue();
         Long from = value.get(0);
         Long to = value.get(1);
-        return from < currentValue && to > currentValue;
+        return from <= currentValue && to >= currentValue;
     }
 
     @Override
@@ -35,11 +35,14 @@ public class LongBetweenOperationSearch extends LongEqOperationSearch {
       NumberIndexFile<Long> snappyIndexFile) {
         List<Long> value = queryValueRetriever.getValue();
         Long from = value.get(0);
-        Long to = value.get(0);
-        if (from < snappyIndexFile.getFrom() && from < snappyIndexFile.getTo()) {
+        Long to = value.get(1);
+        if (from >= snappyIndexFile.getFrom() && from <= snappyIndexFile.getTo()) {
             return true;
         }
-        return from < snappyIndexFile.getTo() && to > snappyIndexFile.getFrom();
+        else if(to >= snappyIndexFile.getFrom() && to <= snappyIndexFile.getTo()) {
+            return true;
+        }
+        return from < snappyIndexFile.getFrom() && to > snappyIndexFile.getTo();
     }
 
     @Override

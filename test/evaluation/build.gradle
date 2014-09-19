@@ -41,7 +41,7 @@ dependencies {
     compile "org.apache.hadoop:hadoop-client:$hadoopVersion"
     compile 'com.google.guava:guava:r09'
     compile 'commons-io:commons-io:2.3'
-    compile 'commons-lang:commons-lang:3.3'
+    compile 'commons-lang:commons-lang:2.6'
     compile 'commons-collections:commons-collections:3.2.1'
     compile 'com.google.guava:guava:13.0'
     compile 'org.xerial.snappy:snappy-java:$snappyVersion'

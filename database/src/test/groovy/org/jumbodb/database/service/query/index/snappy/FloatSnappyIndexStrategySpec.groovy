@@ -334,7 +334,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
 
     def createCollectionDefinition(indexFolder) {
         def index = new IndexDefinition("testIndex", indexFolder, "FLOAT_SNAPPY")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "FLOAT_SNAPPY")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [index], [:], "FLOAT_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

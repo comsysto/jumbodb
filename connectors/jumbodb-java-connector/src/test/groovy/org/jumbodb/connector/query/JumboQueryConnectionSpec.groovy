@@ -15,7 +15,10 @@ import spock.lang.Specification
  */
 // CARSTEN test sql query
 class JumboQueryConnectionSpec extends Specification {
-    public static final int LENGTH = 178
+    public static final int LENGTH = 210
+    public static final String EXPECTED_QUERY = """
+                {"collection":"my_collection","selectedFields":[],"indexQuery":[{"name":"my_index","queryOperation":"EQ","value":"my_value"}],"dataQuery":[],"groupByFields":[],"orderBy":[],"limit":-1,"resultCacheEnabled":true}
+            """
     JumboQueryConnection jqc
     ServerSocket serverSocket
     Socket clientSocket
@@ -61,10 +64,7 @@ class JumboQueryConnectionSpec extends Specification {
             assert dis.readUTF() == ":cmd:query:json"
             assert dis.readInt() == LENGTH
             def bytes = IOUtils.toByteArray(dis, LENGTH)
-            def expectedQuery = """
-                {"collection":"my_collection","selectedFields":[],"indexQuery":[{"name":"my_index","queryOperation":"EQ","value":"my_value"}],"jsonQuery":[],"limit":-1,"resultCacheEnabled":true}
-            """
-            assert IOUtils.toString(bytes, "UTF-8") == expectedQuery.trim()
+            assert IOUtils.toString(bytes, "UTF-8") == EXPECTED_QUERY.trim()
             def result = """
                 {"json_key": "json_value"}
             """.trim().getBytes("UTF-8")
@@ -87,9 +87,7 @@ class JumboQueryConnectionSpec extends Specification {
             assert dis.readUTF() == ":cmd:query:json"
             assert dis.readInt() == LENGTH
             def bytes = IOUtils.toByteArray(dis, LENGTH)
-            def expectedQuery = """
-                {"collection":"my_collection","selectedFields":[],"indexQuery":[{"name":"my_index","queryOperation":"EQ","value":"my_value"}],"jsonQuery":[],"limit":-1,"resultCacheEnabled":true}
-            """
+            def expectedQuery = EXPECTED_QUERY
             assert IOUtils.toString(bytes, "UTF-8") == expectedQuery.trim()
             def result = """
                 {"json_key": "json_value"}

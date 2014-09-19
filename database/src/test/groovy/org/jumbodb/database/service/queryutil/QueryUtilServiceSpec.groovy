@@ -1,5 +1,7 @@
 package org.jumbodb.database.service.queryutil
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.database.service.query.JumboSearcher
 import spock.lang.Specification
 
@@ -11,12 +13,11 @@ class QueryUtilServiceSpec extends Specification {
 
     def "findDocumentsByJsonQuery"() {
         setup:
+        def objectMapper = new ObjectMapper()
         def jumboSearcherMock = Mock(JumboSearcher)
         def queryUtilService = new QueryUtilService()
         queryUtilService.setJumboSearcher(jumboSearcherMock)
-        def query = """
-        { "indexQuery": [], "jsonQuery": [], "limit": 10}
-        """
+        def query = objectMapper.writeValueAsString(new JumboQuery())
         when:
         def queryResult = queryUtilService.findDocumentsByJsonQuery(query, 20)
         then:
@@ -32,12 +33,11 @@ class QueryUtilServiceSpec extends Specification {
 
     def "on RuntimeException"() {
         setup:
+        def objectMapper = new ObjectMapper()
         def jumboSearcherMock = Mock(JumboSearcher)
         def queryUtilService = new QueryUtilService()
         queryUtilService.setJumboSearcher(jumboSearcherMock)
-        def query = """
-        { "indexQuery": [], "jsonQuery": [], "limit": 10}
-        """
+        def query = objectMapper.writeValueAsString(new JumboQuery())
         when:
         def queryResult = queryUtilService.findDocumentsByJsonQuery(query, 20)
         then:

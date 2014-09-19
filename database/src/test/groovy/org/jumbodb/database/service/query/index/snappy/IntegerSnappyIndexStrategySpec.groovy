@@ -334,7 +334,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
 
     def createCollectionDefinition(indexFolder) {
         def index = new IndexDefinition("testIndex", indexFolder, "INTEGER_SNAPPY")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "INTEGER_SNAPPY")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [index], [:], "INTEGER_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

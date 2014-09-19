@@ -336,7 +336,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def createCollectionDefinition(indexFolder) {
         def index = new IndexDefinition("testIndex", indexFolder, "DOUBLE_SNAPPY")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "DOUBLE_SNAPPY")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [index], [:], "DOUBLE_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

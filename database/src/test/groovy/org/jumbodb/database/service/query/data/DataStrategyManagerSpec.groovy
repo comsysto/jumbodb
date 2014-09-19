@@ -27,7 +27,7 @@ class DataStrategyManagerSpec extends Specification {
         def dataStrategyManager = new DataStrategyManager()
         def strategyMock = Mock(DataStrategy)
         dataStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
         dataStrategyManager.onInitialize(cd)
@@ -42,7 +42,7 @@ class DataStrategyManagerSpec extends Specification {
         def dataStrategyManager = new DataStrategyManager()
         def strategyMock = Mock(DataStrategy)
         dataStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
         strategyMock.getStrategyName() >> "testStrategy"
@@ -59,7 +59,7 @@ class DataStrategyManagerSpec extends Specification {
         def strategyMock = Mock(DataStrategy)
         strategyMock.isResponsibleFor("testChunkKey", "testCollection") >> true
         dataStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd",  [], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         when:
         def result = dataStrategyManager.buildDataStrategies(cd)
@@ -85,7 +85,7 @@ class DataStrategyManagerSpec extends Specification {
         def dataStrategyManager = new DataStrategyManager()
         def strategyMock = Mock(DataStrategy)
         dataStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         when:
         dataStrategyManager.onInitialize(cd)
@@ -99,7 +99,7 @@ class DataStrategyManagerSpec extends Specification {
         def dataStrategyManager = new DataStrategyManager()
         def strategyMock = Mock(DataStrategy)
         dataStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         when:
         dataStrategyManager.onInitialize(cd)
@@ -113,7 +113,7 @@ class DataStrategyManagerSpec extends Specification {
         def dataStrategyManager = new DataStrategyManager()
         def strategyMock = Mock(DataStrategy)
         dataStrategyManager.setStrategies([strategyMock])
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [], [:], "testStrategy")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [], [:], "testStrategy")]]
         def cd = new CollectionDefinition(cdMap)
         when:
         dataStrategyManager.onDataChanged(cd)

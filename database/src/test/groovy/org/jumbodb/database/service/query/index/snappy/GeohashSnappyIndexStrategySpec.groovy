@@ -342,7 +342,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
 
     def createCollectionDefinition(indexFolder) {
         def index = new IndexDefinition("testIndex", indexFolder, "GEOHASH_SNAPPY")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "GEOHASH_SNAPPY")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [index], [:], "GEOHASH_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

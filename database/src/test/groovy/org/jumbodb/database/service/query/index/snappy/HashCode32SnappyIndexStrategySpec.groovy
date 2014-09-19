@@ -334,7 +334,7 @@ class HashCode32SnappyIndexStrategySpec extends Specification {
 
     def createCollectionDefinition(indexFolder) {
         def index = new IndexDefinition("testIndex", indexFolder, "HASHCODE32_SNAPPY")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [index], [:], "HASHCODE32_SNAPPY")]]
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [index], [:], "HASHCODE32_SNAPPY")]]
         new CollectionDefinition(cdMap)
     }
 

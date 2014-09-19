@@ -68,8 +68,8 @@ class DoubleBetweenOperationSearchSpec extends Specification {
         1d        | 10d     | 1.01d         | 10d         | true
         1d        | 10d     | 1d            | 9.99d       | true
         1d        | 10d     | 0.99d         | 10.01d      | true
-        1l        | 4l      | 5l            | 11l         | false
-        12l       | 13l     | 5l            | 11l         | false
+        1d        | 4d      | 5d            | 11d         | false
+        12d       | 13d     | 5d            | 11d         | false
     }
 
     def "getQueryValueRetriever"() {

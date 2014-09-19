@@ -203,7 +203,7 @@ class JumboSearcherSpec extends Specification {
        new JumboSearcher() {
            @Override
            protected CollectionDefinition getCollectionDefinition() {
-               def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", [new IndexDefinition("testIndex", new File("."), "INDEX_STRATEGY")], [:], "DATA_STRATEGY")]]
+               def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [new IndexDefinition("testIndex", new File("."), "INDEX_STRATEGY")], [:], "DATA_STRATEGY")]]
                return new CollectionDefinition(cdMap)
            }
        }

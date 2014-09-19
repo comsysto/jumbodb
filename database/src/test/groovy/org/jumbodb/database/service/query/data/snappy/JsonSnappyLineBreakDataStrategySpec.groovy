@@ -34,7 +34,7 @@ class JsonSnappyLineBreakDataStrategySpec extends Specification {
     def "should be responsible, because collection, chunk and strategy are matching"() {
         setup:
         def cd = Mock(CollectionDefinition)
-        def dcd = new DeliveryChunkDefinition("chunk", "collection", [], [:], "JSON_SNAPPY_LB")
+        def dcd = new DeliveryChunkDefinition("chunk", "collection", "yyyy-MM-dd", [], [:], "JSON_SNAPPY_LB")
         strategy.onInitialize(cd)
         cd.getChunk("collection", "chunk") >> dcd
         expect:
@@ -44,7 +44,7 @@ class JsonSnappyLineBreakDataStrategySpec extends Specification {
     def "should not responsible, because different strategy name"() {
         setup:
         def cd = Mock(CollectionDefinition)
-        def dcd = new DeliveryChunkDefinition("chunk", "collection", [], [:], "WHATEVER_STRATEGY")
+        def dcd = new DeliveryChunkDefinition("chunk", "collection", "yyyy-MM-dd", [], [:], "WHATEVER_STRATEGY")
         strategy.onInitialize(cd)
         cd.getChunk("collection", "chunk") >> dcd
         expect:
@@ -125,7 +125,7 @@ class JsonSnappyLineBreakDataStrategySpec extends Specification {
         dataFiles.put(1, mockFile)
         dataFiles.put(2, mockFile)
         dataFiles.put(3, mockFile)
-        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", indexes, dataFiles, JsonSnappyLineBreakDataStrategy.JSON_SNAPPY_LB)
+        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", "yyyy-MM-dd", indexes, dataFiles, JsonSnappyLineBreakDataStrategy.JSON_SNAPPY_LB)
         def fileOffsets = [
                 new FileOffset(1, 12, null),
                 new FileOffset(1, 13, null),
@@ -156,7 +156,7 @@ class JsonSnappyLineBreakDataStrategySpec extends Specification {
         dataFiles.put(1, mockFile)
         dataFiles.put(2, mockFile)
         dataFiles.put(3, mockFile)
-        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", [], dataFiles, JsonSnappyLineBreakDataStrategy.JSON_SNAPPY_LB)
+        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", "yyyy-MM-dd", [], dataFiles, JsonSnappyLineBreakDataStrategy.JSON_SNAPPY_LB)
         def jumboQuery = new JumboQuery()
         def resultCallback = Mock(ResultCallback)
         when:

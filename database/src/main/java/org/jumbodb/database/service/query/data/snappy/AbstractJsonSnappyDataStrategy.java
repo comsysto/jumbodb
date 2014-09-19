@@ -5,6 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.database.service.query.data.CollectionDataSize;
+import org.jumbodb.database.service.query.data.common.DefaultDataStrategy;
 
 import java.io.*;
 

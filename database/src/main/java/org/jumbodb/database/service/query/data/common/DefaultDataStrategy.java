@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.data.snappy;
+package org.jumbodb.database.service.query.data.common;
 
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.JumboQuery;
@@ -7,6 +7,7 @@ import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.common.*;
+import org.jumbodb.database.service.query.data.snappy.JsonSnappyLineBreakDataStrategy;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.slf4j.Logger;

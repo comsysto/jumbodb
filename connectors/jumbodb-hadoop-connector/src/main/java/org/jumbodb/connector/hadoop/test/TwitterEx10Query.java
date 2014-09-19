@@ -31,8 +31,8 @@ public class TwitterEx10Query {
         //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.NE, "2013-04-17 22:13:59")));
         //        query.addIndexQuery("created_at",  Arrays.asList(new QueryClause(QueryOperation.BETWEEN, Arrays.asList("2013-05-02 22:13:00", "2013-05-02 22:15:00"))));
 
-        //        query.addJsonQuery("geo.coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.140, 11.562), 100000))));
-        //        query.addJsonQuery("geo.coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.140, 11.562), 100000)), new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(26.29859, 44.79119), 100000))));
+        //        query.addDataQuery("geo.coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.140, 11.562), 100000))));
+        //        query.addDataQuery("geo.coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.140, 11.562), 100000)), new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(26.29859, 44.79119), 100000))));
         // result 223
         //        query.addIndexQuery("coordinates", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(48.140, 11.562), 5000))));
 
@@ -50,7 +50,7 @@ public class TwitterEx10Query {
         //        query.addIndexQuery("user_followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 1000)));
         //        query.addIndexQuery("followers_count", Arrays.asList(new QueryClause(QueryOperation.LT, 10)));
 
-        //        query.addJsonQuery("user.followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 10000)));
+        //        query.addDataQuery("user.followers_count", Arrays.asList(new QueryClause(QueryOperation.GT, 10000)));
 
         ObjectMapper om = new ObjectMapper();
         System.out.println(om.writeValueAsString(query));

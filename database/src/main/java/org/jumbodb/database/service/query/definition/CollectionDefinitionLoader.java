@@ -45,7 +45,7 @@ public class CollectionDefinitionLoader {
                         for (File collectionFolder : collectionFolders) {
                             String collectionName = collectionFolder.getName();
                             File indexDeliveryVersionFolder = new File(indexPath.getAbsolutePath() + "/" + deliveryKey + "/" + activeVersion + "/" + collectionName + "/");
-                            DeliveryChunkDefinition dataDataDeliveryChunk = createDeliveryChunk(collectionName, deliveryKey, indexDeliveryVersionFolder, collectionFolder);
+                            DeliveryChunkDefinition dataDataDeliveryChunk = createDeliveryChunk(deliveryKey, collectionName, indexDeliveryVersionFolder, collectionFolder);
                             deliveryChunkDefinitions.add(collectionName, dataDataDeliveryChunk);
                         }
                     }
@@ -58,7 +58,8 @@ public class CollectionDefinitionLoader {
         return new CollectionDefinition(deliveryChunkDefinitions);
     }
 
-    private static DeliveryChunkDefinition createDeliveryChunk(String collectionName, String chunkKey, File collectionIndexFolder, File collectionDataFolder) {
+    private static DeliveryChunkDefinition createDeliveryChunk(String chunkKey, String collectionName, File collectionIndexFolder, File collectionDataFolder) {
+        CollectionProperties.CollectionMeta collectionMeta = CollectionProperties.getCollectionMeta(new File(collectionDataFolder.getAbsolutePath() + "/" + CollectionProperties.DEFAULT_FILENAME));
         File[] indexFolders = collectionIndexFolder.listFiles(FOLDER_INSTANCE);
         List<IndexDefinition> resIndexFiles = new LinkedList<IndexDefinition>();
         Map<Integer, File> resDataFiles = new HashMap<Integer, File>();
@@ -73,7 +74,7 @@ public class CollectionDefinitionLoader {
             resDataFiles.put(dataFile.getName().hashCode(), dataFile);
         }
         Collections.sort(resIndexFiles);
-        return new DeliveryChunkDefinition(chunkKey, collectionName, resIndexFiles, resDataFiles, getDataStrategy(collectionDataFolder));
+        return new DeliveryChunkDefinition(chunkKey, collectionName, collectionMeta.getDateFormat(), resIndexFiles, resDataFiles, getDataStrategy(collectionDataFolder));
     }
 
     private static String getIndexStrategy(File indexFolder) {

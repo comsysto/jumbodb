@@ -2,6 +2,8 @@ package org.jumbodb.database.service.query.data.common;
 
 import org.jumbodb.common.query.DataQuery;
 
+import java.util.Date;
+
 /**
  * @author Carsten Hufe
  */

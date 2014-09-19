@@ -7,16 +7,22 @@ import java.util.Map;
 public class DeliveryChunkDefinition {
     private String collection;
     private String chunkKey;
+    private String dateFormat;
     private List<IndexDefinition> indexes;
     private Map<Integer, File> dataFiles;
     private String dataStrategy;
 
-    public DeliveryChunkDefinition(String chunkKey, String collection, List<IndexDefinition> indexes, Map<Integer, File> dataFiles, String dataStrategy) {
+    public DeliveryChunkDefinition(String chunkKey, String collection, String dateFormat, List<IndexDefinition> indexes, Map<Integer, File> dataFiles, String dataStrategy) {
         this.collection = collection;
         this.chunkKey = chunkKey;
+        this.dateFormat = dateFormat;
         this.indexes = indexes;
         this.dataFiles = dataFiles;
         this.dataStrategy = dataStrategy;
+    }
+
+    public String getDateFormat() {
+        return dateFormat;
     }
 
     public List<IndexDefinition> getIndexes() {

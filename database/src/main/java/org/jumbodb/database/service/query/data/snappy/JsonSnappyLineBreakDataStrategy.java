@@ -1,6 +1,5 @@
 package org.jumbodb.database.service.query.data.snappy;
 
-import com.google.common.collect.HashMultimap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -86,10 +86,14 @@ public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
       Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery) {
         int numberOfResults = 0;
         long startTime = System.currentTimeMillis();
-        HashMultimap<Integer, FileOffset> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
+        Map<Integer, Set<FileOffset>> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
         List<Future<Integer>> tasks = new LinkedList<Future<Integer>>();
-        // CARSTEN hier auch noch mal checken ob worklich index search ist ... alte logik
-        if (searchQuery.getJsonQuery().isEmpty() && !searchQuery.getIndexQuery().isEmpty()) {
+        boolean dataQueriesAvailable = !searchQuery.getDataQuery().isEmpty();
+        boolean indexQueriesAvailable = !searchQuery.getIndexQuery().isEmpty();
+        if(dataQueriesAvailable && indexQueriesAvailable) {
+            throw new IllegalArgumentException("Top level data queries with combined OR top level index queries are not allowed! It's to inefficient, it results in a full scan, so just use data queries!");
+        }
+        else if (!dataQueriesAvailable && indexQueriesAvailable) {
             log.debug("Running indexed search");
             for (Integer fileNameHash : fileOffsetsMap.keySet()) {
                 File file = deliveryChunkDefinition.getDataFiles().get(fileNameHash);
@@ -98,21 +102,14 @@ public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
                 }
                 Set<FileOffset> offsets = fileOffsetsMap.get(fileNameHash);
                 if (offsets.size() > 0) {
-                    Future<Integer> future = retrieveDataExecutor.submit(
-                            new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, searchQuery, resultCallback, this,
-                                    datasetsByOffsetsCache, dataSnappyChunksCache));
-                    tasks.add(future);
-                    resultCallback.collect(new FutureCancelableTask(future));
+                    submitFileSearchTask(resultCallback, searchQuery, tasks, file, offsets, deliveryChunkDefinition, false);
                 }
             }
         } else {
             log.debug("Running scanned search");
             for (File file : deliveryChunkDefinition.getDataFiles().values()) {
-                Future<Integer> future = retrieveDataExecutor.submit(
-                        new JsonSnappyLineBreakRetrieveDataSetsTask(file, Collections.<FileOffset>emptySet(), searchQuery,
-                                resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache));
-                tasks.add(future);
-                resultCallback.collect(new FutureCancelableTask(future));
+                Set<FileOffset> offsets = Collections.emptySet();
+                submitFileSearchTask(resultCallback, searchQuery, tasks, file, offsets, deliveryChunkDefinition, true);
             }
         }
 
@@ -135,10 +132,26 @@ public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
         return numberOfResults;
     }
 
-    private HashMultimap<Integer, FileOffset> buildFileOffsetsMap(Collection<FileOffset> fileOffsets) {
-        HashMultimap<Integer, FileOffset> result = HashMultimap.create();
+    // CARSTEN abstract method
+    private void submitFileSearchTask(ResultCallback resultCallback, JumboQuery searchQuery,
+                                      List<Future<Integer>> tasks, File file, Set<FileOffset> offsets, DeliveryChunkDefinition deliveryChunkDefinition, boolean scannedSearch) {
+        Future<Integer> future = retrieveDataExecutor.submit(
+                new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, searchQuery,
+                        resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache, deliveryChunkDefinition.getDateFormat(), scannedSearch));
+        tasks.add(future);
+        resultCallback.collect(new FutureCancelableTask(future));
+    }
+
+    private Map<Integer, Set<FileOffset>> buildFileOffsetsMap(Collection<FileOffset> fileOffsets) {
+        Map<Integer, Set<FileOffset>> result = new HashMap<Integer, Set<FileOffset>>();
         for (FileOffset fileOffset : fileOffsets) {
-            result.put(fileOffset.getFileNameHash(), fileOffset);
+            int fileNameHash = fileOffset.getFileNameHash();
+            Set<FileOffset> offsets = result.get(fileNameHash);
+            if(offsets == null) {
+                offsets = new HashSet<FileOffset>();
+                result.put(fileNameHash, offsets);
+            }
+            offsets.add(fileOffset);
         }
         return result;
     }
@@ -156,7 +169,7 @@ public class JsonSnappyLineBreakDataStrategy implements DataStrategy {
         return jsonOperationSearch.matches(leftValue, rightValue);
     }
 
-
+    // CARSTEN abstract method
     @Override
     public CollectionDataSize getCollectionDataSize(File dataFolder) {
         long compressedSize = FileUtils.sizeOfDirectory(dataFolder);

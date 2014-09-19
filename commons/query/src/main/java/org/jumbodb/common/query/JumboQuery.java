@@ -17,18 +17,37 @@ import java.util.List;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class JumboQuery {
     private String collection;
-    private List<String> selectedFields = new LinkedList<String>();
+
+    private List<SelectField> selectedFields = new LinkedList<SelectField>();
     private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
-    private List<DataQuery> jsonQuery = new LinkedList<DataQuery>();
+    private List<DataQuery> dataQuery = new LinkedList<DataQuery>();
+    private List<String> groupByFields = new LinkedList<String>();
+    private List<String> orderBy = new LinkedList<String>();
     private int limit = -1;
     private boolean resultCacheEnabled = true;
 
-    public List<String> getSelectedFields() {
+    public List<SelectField> getSelectedFields() {
         return selectedFields;
     }
 
-    public void setSelectedFields(List<String> selectedFields) {
+    public void setSelectedFields(List<SelectField> selectedFields) {
         this.selectedFields = selectedFields;
+    }
+
+    public List<String> getGroupByFields() {
+        return groupByFields;
+    }
+
+    public void setGroupByFields(List<String> groupByFields) {
+        this.groupByFields = groupByFields;
+    }
+
+    public List<String> getOrderBy() {
+        return orderBy;
+    }
+
+    public void setOrderBy(List<String> orderBy) {
+        this.orderBy = orderBy;
     }
 
     public String getCollection() {
@@ -59,17 +78,9 @@ public class JumboQuery {
         return this.indexQuery.add(indexComparision);
     }
 
-//    public boolean addIndexQuery(String indexName, List<QueryClause> indexValues) {
-//        return addIndexQuery(new IndexQuery(indexName, indexValues));
-//    }
-
-    public boolean addJsonQuery(DataQuery jsonQuery) {
-        return this.jsonQuery.add(jsonQuery);
+    public boolean addDataQuery(DataQuery dataQuery) {
+        return this.dataQuery.add(dataQuery);
     }
-
-//    public boolean addJsonQuery(String fieldName, List<QueryClause> indexValues) {
-//        return addJsonQuery(new JsonQuery(fieldName, indexValues));
-//    }
 
     public List<IndexQuery> getIndexQuery() {
         return indexQuery;
@@ -79,19 +90,19 @@ public class JumboQuery {
         this.indexQuery = indexQuery;
     }
 
-    public List<DataQuery> getJsonQuery() {
-        return jsonQuery;
+    public List<DataQuery> getDataQuery() {
+        return dataQuery;
     }
 
-    public void setJsonQuery(List<DataQuery> jsonQuery) {
-        this.jsonQuery = jsonQuery;
+    public void setDataQuery(List<DataQuery> dataQuery) {
+        this.dataQuery = dataQuery;
     }
 
     @Override
     public String toString() {
         return "JumboQuery{" +
                 "indexQuery=" + indexQuery +
-                ", jsonQuery=" + jsonQuery +
+                ", jsonQuery=" + dataQuery +
                 ", limit=" + limit +
                 ", resultCacheEnabled=" + resultCacheEnabled +
                 '}';

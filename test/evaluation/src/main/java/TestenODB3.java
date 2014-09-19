@@ -24,15 +24,15 @@ public class TestenODB3 {
         query.setCollection("carsten.twitter");
         //        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, -0.027180d)))));
         //        query.addIndexQuery("screen_name", Arrays.asList(new QueryClause(QueryOperation.EQ, "AluRockyMnml")));
-        //        query.addJsonQuery("user.screen_name", Arrays.asList(new QueryClause(QueryOperation.EQ, "Saiya32")));
-        //        query.addJsonQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(50.542278d, -1.119877d), Arrays.asList(51.577070d, -0.027180d)))));
+        //        query.addDataQuery("user.screen_name", Arrays.asList(new QueryClause(QueryOperation.EQ, "Saiya32")));
+        //        query.addDataQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(50.542278d, -1.119877d), Arrays.asList(51.577070d, -0.027180d)))));
         //        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(50.542278d, -1.119877d), Arrays.asList(51.577070d, 0.027180d)))));
-        //        query.addJsonQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, 0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
+        //        query.addDataQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, 0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
 
         //        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
-        //        query.addJsonQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
+        //        query.addDataQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_BOUNDARY_BOX, Arrays.asList(Arrays.asList(51.542278d, -0.119877d), Arrays.asList(51.577070d, 0.027180d)))));
 
-        //        query.addJsonQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(51.577070d, 0.027180d), 30000))));
+        //        query.addDataQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(51.577070d, 0.027180d), 30000))));
         //        query.addIndexQuery("centerLatLon", Arrays.asList(new QueryClause(QueryOperation.GEO_WITHIN_RANGE_METER, Arrays.asList(Arrays.asList(-51.577070d, 0.027180d), 30000))));
 
         long start = System.currentTimeMillis();

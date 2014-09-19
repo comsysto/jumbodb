@@ -4,10 +4,7 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jumbodb.common.query.DataQuery;
-import org.jumbodb.common.query.FieldType;
-import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.common.query.*;
 import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.data.common.snappy.SnappyChunks;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
@@ -26,23 +23,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer> {
     private Logger log = LoggerFactory.getLogger(JsonSnappyLineBreakRetrieveDataSetsTask.class);
-
+    private final SimpleDateFormat simpleDateFormat;
     private final boolean resultCacheEnabled;
     private final File file;
     private final Cache datasetsByOffsetsCache;
     private final Cache dataSnappyChunksCache;
+    private final boolean scannedSearch;
     private final long fileLength;
     private final JumboQuery searchQuery;
     private final ResultCallback resultCallback;
@@ -55,21 +47,25 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
 
     public JsonSnappyLineBreakRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
       ResultCallback resultCallback, JsonSnappyLineBreakDataStrategy strategy, Cache datasetsByOffsetsCache,
-      Cache dataSnappyChunksCache) {
+      Cache dataSnappyChunksCache, String dateFormat, boolean scannedSearch) {
         this.file = file;
         this.datasetsByOffsetsCache = datasetsByOffsetsCache;
         this.dataSnappyChunksCache = dataSnappyChunksCache;
+        this.scannedSearch = scannedSearch;
         this.fileLength = file.length();
         this.searchQuery = searchQuery;
         this.resultCacheEnabled = searchQuery.isResultCacheEnabled();
         this.resultCallback = resultCallback;
         this.strategy = strategy;
         this.offsets = new LinkedList<FileOffset>(offsets);
+        this.simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
     }
 
     @Override
     public Integer call() throws Exception {
-        if (searchQuery.getJsonQuery().isEmpty() && !searchQuery.getIndexQuery().isEmpty()) {
+        if (scannedSearch) {
+            fullScanData();
+        } else {
             long start = System.currentTimeMillis();
             if (resultCacheEnabled) {
                 List<FileOffset> leftOffsets = extractOffsetsFromCacheAndWriteResultForExisting();
@@ -88,12 +84,11 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
                 log.trace("Time for retrieving " + results + " (caching disabled) datasets from " + file
                   .getName() + " in " + (System.currentTimeMillis() - start) + "ms");
             }
-        } else {
-            fullScanData();
         }
         return results;
     }
 
+    // CARSTEN abstract
     private void findLeftDatasetsAndWriteResults(List<FileOffset> leftOffsets) throws ParseException {
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -189,9 +184,8 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
             long count = 0;
             String line;
             while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
-                // CARSTEN hier mit OR auch das FileOffset checken falls Index und Json Query am Root level abgefragt werden
                 Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(line);
-                if (matchingFilter(parsedJson, searchQuery.getJsonQuery())) {
+                if (matchingFilter(parsedJson, searchQuery.getDataQuery())) {
                     resultCallback.writeResult(parsedJson);
                     results++;
                 }
@@ -215,7 +209,6 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
     private List<FileOffset> extractOffsetsFromCacheAndWriteResultForExisting() throws IOException, ParseException {
         List<FileOffset> notFoundOffsets = new ArrayList<FileOffset>(offsets.size());
         for (FileOffset offset : offsets) {
-            // CARSTEN cache only parsed data
             Cache.ValueWrapper valueWrapper = datasetsByOffsetsCache.get(new CacheFileOffset(file, offset.getOffset()));
             if (valueWrapper != null) {
                 Map<String, Object> dataSetFromOffsetsGroup = (Map<String, Object>) valueWrapper.get();
@@ -289,7 +282,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
         }
         return result + 16;
     }
-
+// CARSTEN das ganze matching in abstracte klasse
     private boolean matchingFilter(Map<String, Object> parsedJson, DataQuery jsonQuery) throws ParseException, IOException {
         if (jsonQuery == null) {
             return true;
@@ -310,6 +303,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
             Object leftValue = findLeftValue(parsedJson, queriedValuesCache, jsonQuery);
             Object rightValue = findRightValue(parsedJson, queriedValuesCache, jsonQuery);
 
+
             // CARSTEN handle EXISTS QueryOperation at this position
             if (strategy.matches(jsonQuery.getQueryOperation(), leftValue, rightValue)) {
                 if (jsonQuery.getAnd() != null) {
@@ -320,19 +314,18 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
         }
         return false;
     }
-
+// CARSTEN unit test
     private Object findLeftValue(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache,
       DataQuery jsonQuery) {
-        return retrieveValue(parsedJson, queriedValuesCache, jsonQuery.getLeftType(), jsonQuery.getLeft());
+        return retrieveValue(parsedJson, queriedValuesCache, jsonQuery.getLeftType(), jsonQuery.getLeft(), jsonQuery.getHintType());
     }
 
     private Object findRightValue(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache,
       DataQuery jsonQuery) {
-        return retrieveValue(parsedJson, queriedValuesCache, jsonQuery.getRightType(), jsonQuery.getRight());
+        return retrieveValue(parsedJson, queriedValuesCache, jsonQuery.getRightType(), jsonQuery.getRight(), jsonQuery.getHintType());
     }
 
-    private Object retrieveValue(final Map<String, Object> parsedJson, final Map<String, Object> queriedValuesCache,
-      final FieldType type, final Object value) {
+    private Object retrieveValue(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache, FieldType type, Object value, HintType hintType) {
         if (type == FieldType.VALUE) {
             return value;
         }
@@ -346,6 +339,17 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask implements Callable<Integer
             if (lastObj != null) {
                 Map<String, Object> map = (Map<String, Object>) lastObj;
                 lastObj = map.get(key);
+            }
+        }
+        if(hintType == HintType.DATE) {
+            if (lastObj instanceof String) {
+                try {
+                    lastObj = simpleDateFormat.parse((String) lastObj).getTime();
+                } catch (java.text.ParseException e) {
+                    throw new IllegalArgumentException("Date format does not match the field. ", e);
+                }
+            } else if (lastObj instanceof Date) {
+                lastObj = ((Date) lastObj).getTime();
             }
         }
         queriedValuesCache.put(fieldName, lastObj);

@@ -50,7 +50,7 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
         jumboQuery.addIndexQuery(new IndexQuery("testIndex", QueryOperation.EQ, "somevalue"))
         when:
         def offsets = [500l, 1000l, 1500l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
-        def task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        def task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
         def numberOfResults = task.call()
         then: "verify some grouped block loading"
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 100010])
@@ -60,7 +60,7 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
 
         when:
         offsets = [0l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
-        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
         numberOfResults = task.call()
         then: "verify loading of the first data set"
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 100000])
@@ -68,7 +68,7 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
 
         when:
         offsets = [50000l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
-        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
         numberOfResults = task.call()
         then: "verify loading of the last data set"
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 101000])
@@ -76,7 +76,7 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
 
         when:
         offsets = [32750l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
-        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
         numberOfResults = task.call()
         then: "verify loading of a data set overlapping the snappy chunk (32768 byte)"
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 100655])
@@ -94,11 +94,11 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
         def dataStrategy = Mock(JsonSnappyLineBreakDataStrategy)
         resultCallback.needsMore(_) >> true
         def jumboQuery = new JumboQuery()
-        jumboQuery.addJsonQuery(new DataQuery("number", FieldType.FIELD, QueryOperation.EQ, 100010, FieldType.VALUE))
-        jumboQuery.addJsonQuery(new DataQuery("number", FieldType.FIELD, QueryOperation.EQ, 100020, FieldType.VALUE))
-        jumboQuery.addJsonQuery(new DataQuery("number", FieldType.FIELD, QueryOperation.EQ, 100030, FieldType.VALUE))
+        jumboQuery.addDataQuery(new DataQuery("number", FieldType.FIELD, QueryOperation.EQ, 100010, FieldType.VALUE))
+        jumboQuery.addDataQuery(new DataQuery("number", FieldType.FIELD, QueryOperation.EQ, 100020, FieldType.VALUE))
+        jumboQuery.addDataQuery(new DataQuery("number", FieldType.FIELD, QueryOperation.EQ, 100030, FieldType.VALUE))
         when:
-        def task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        def task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
         def numberOfResults = task.call()
         then: "verify matching datasets "
         1 * dataStrategy.matches(QueryOperation.EQ, 100010, 100010) >> true
@@ -120,7 +120,7 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
         def resultCallback = Mock(ResultCallback)
         def dataStrategy = Mock(JsonSnappyLineBreakDataStrategy)
         def jumboQuery = new JumboQuery()
-        new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
     }
 
     @Unroll
@@ -204,18 +204,18 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
         def dataStrategy = Mock(JsonSnappyLineBreakDataStrategy)
         when:
         def jumboQuery = new JumboQuery()
-        def task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
+        def task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
         then: "should always be true and no match call because no criteria is given"
         0 * dataStrategy.matches(_, _, _)
-        task.matchingFilter([sample: "json"], jumboQuery.getJsonQuery())
+        task.matchingFilter([sample: "json"], jumboQuery.getDataQuery())
 
         when:
         jumboQuery = new JumboQuery()
 
         def andQuery = new DataQuery("otherfield", FieldType.FIELD, QueryOperation.EQ, "othervalue", FieldType.VALUE)
-        jumboQuery.addJsonQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'json', FieldType.VALUE, andQuery))
-        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
-        def matching = task.matchingFilter([sample: "json", "otherfield": "othervalue"], jumboQuery.getJsonQuery())
+        jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'json', FieldType.VALUE, andQuery))
+        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
+        def matching = task.matchingFilter([sample: "json", "otherfield": "othervalue"], jumboQuery.getDataQuery())
         then: "if both criterias matches matching must be true"
         matching
         1 * dataStrategy.matches(QueryOperation.EQ, 'json', 'json') >> true
@@ -224,9 +224,9 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
         when:
         jumboQuery = new JumboQuery()
         andQuery = new DataQuery("otherfield", FieldType.FIELD, QueryOperation.EQ, "othervalue", FieldType.VALUE)
-        jumboQuery.addJsonQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'json', FieldType.VALUE, andQuery))
-        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
-        def notMatching = !task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getJsonQuery())
+        jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'json', FieldType.VALUE, andQuery))
+        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
+        def notMatching = !task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getDataQuery())
         then: "if one criteria does not match matching must be false"
         notMatching
         1 * dataStrategy.matches(QueryOperation.EQ, 'json', 'json') >> true
@@ -234,10 +234,10 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
 
         when:
         jumboQuery = new JumboQuery()
-        jumboQuery.addJsonQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'json', FieldType.VALUE))
-        jumboQuery.addJsonQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'jsonother', FieldType.VALUE))
-        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
-        matching = task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getJsonQuery())
+        jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'json', FieldType.VALUE))
+        jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'jsonother', FieldType.VALUE))
+        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
+        matching = task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getDataQuery())
         then: "if one criteria in the same clause matches it must be true"
         matching
         1 * dataStrategy.matches(QueryOperation.EQ, 'json', 'json') >> true
@@ -245,9 +245,9 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
 
         when:
         jumboQuery = new JumboQuery()
-        jumboQuery.addJsonQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'jsonother', FieldType.VALUE))
-        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock)
-        notMatching = !task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getJsonQuery())
+        jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'jsonother', FieldType.VALUE))
+        task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, scannedSearch)
+        notMatching = !task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getDataQuery())
         then: "if no criteria matches it must be false"
         notMatching
         1 * dataStrategy.matches(QueryOperation.EQ, 'json', 'jsonother') >> false

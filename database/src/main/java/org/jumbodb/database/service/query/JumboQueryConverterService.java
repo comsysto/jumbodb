@@ -38,7 +38,7 @@ public class JumboQueryConverterService {
     private JumboQuery buildJumboQuery(PlainSelect selectBody) {
         JumboQuery jumboQuery = new JumboQuery();
         jumboQuery.setCollection(getCollection(selectBody));
-        jumboQuery.setSelectedFields(getSelectedFields(selectBody));
+//        jumboQuery.setSelectedFields(getSelectedFields(selectBody));
         if(selectBody.getLimit() != null) {
             jumboQuery.setLimit((int)selectBody.getLimit().getRowCount());
         }
@@ -46,7 +46,7 @@ public class JumboQueryConverterService {
         Expression where = selectBody.getWhere();
         if(where != null) {
             where.accept(expressionVisitor);
-            jumboQuery.setJsonQuery(expressionVisitor.getOrs());
+            jumboQuery.setDataQuery(expressionVisitor.getOrs());
         }
         return jumboQuery;
     }

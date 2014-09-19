@@ -17,6 +17,7 @@ public class DataQuery {
     private QueryOperation queryOperation;
     private Object right;
     private FieldType rightType;
+    private HintType hintType;
     private DataQuery and;
     private List<DataQuery> ors = new LinkedList<DataQuery>();
 
@@ -43,6 +44,33 @@ public class DataQuery {
         this.right = right;
         this.rightType = rightType;
         this.and = and;
+    }
+
+    public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation, Object right, FieldType rightType, HintType hintType) {
+        this.left = left;
+        this.leftType = leftType;
+        this.queryOperation = queryOperation;
+        this.right = right;
+        this.rightType = rightType;
+        this.hintType = hintType;
+    }
+
+    public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation, Object right, FieldType rightType, HintType hintType, DataQuery and) {
+        this.left = left;
+        this.leftType = leftType;
+        this.queryOperation = queryOperation;
+        this.right = right;
+        this.rightType = rightType;
+        this.hintType = hintType;
+        this.and = and;
+    }
+
+    public void setHintType(HintType hintType) {
+        this.hintType = hintType;
+    }
+
+    public HintType getHintType() {
+        return hintType;
     }
 
     public Object getLeft() {

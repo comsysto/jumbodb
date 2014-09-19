@@ -1,32 +1,21 @@
+import org.apache.commons.collections.FastHashMap;
+import org.apache.commons.lang.time.FastDateFormat;
+
 import java.text.SimpleDateFormat;
 import java.util.BitSet;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class Testen {
     public static void main(String[] args) throws Exception {
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
-//        System.out.println(simpleDateFormat.parse("Thu Apr 18 01:12:17 +0000 2013"));
-
-        int a = 0;
-        long b = 1;
-        if(a > b) {
-
-        }
-
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US);
+        System.out.println(simpleDateFormat.parse("Thu Apr 18 01:12:17 +0000 2013"));
 
 //        int v1 = Integer.MAX_VALUE - 8437589;
 //        int v2 = Integer.MAX_VALUE - 7894375;
 //        int v3 = 252;
 //
-////        BitSet b1 = convert(v1);
-////        System.out.println(Integer.toBinaryString(convert(b1)));
-//        System.out.println(Integer.toBinaryString(v1));
-////        BitSet b2 = convert(v2);
-////        System.out.println(Integer.toBinaryString(convert(b2)));
-//        System.out.println(Integer.toBinaryString(v2));
-//        System.out.println(getBitsToShift(v1, v2));
-//
-//        System.out.println(Integer.toBinaryString(v1 >>> 24));
-////        System.out.println(Integer.toBinaryString(convert(b1.intersects(b2)));
+//        }
     }
 
 

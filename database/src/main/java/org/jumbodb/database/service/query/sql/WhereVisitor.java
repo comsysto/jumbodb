@@ -8,6 +8,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import org.jumbodb.common.query.DataQuery;
 import org.jumbodb.common.query.FieldType;
+import org.jumbodb.common.query.HintType;
 import org.jumbodb.common.query.QueryOperation;
 
 import java.util.ArrayList;
@@ -16,13 +17,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by Carsten on 12.09.2014.
+ * @author Carsten Hufe
  */
 public class WhereVisitor extends ExpressionVisitorAdapter {
     private List<Object> expressions = new ArrayList<Object>();
     private List<DataQuery> ors = new LinkedList<DataQuery>();
     private List<DataQuery> ands = new LinkedList<DataQuery>();
     private DataQuery current;
+    private HintType hintType = HintType.NONE;
 
 
     public List<DataQuery> getOrs() {
@@ -121,7 +123,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         FieldType rightType = getFieldTypeRight();
         Object left = leftType == FieldType.FIELD ? getColumnLeft() : getValueLeft();
         Object right = rightType == FieldType.FIELD ? getColumnRight() : getValueRight();
-        return new DataQuery(left, leftType, operation, right, rightType);
+        return new DataQuery(left, leftType, operation, right, rightType, hintType);
     }
 
     private String getColumnRight() {
@@ -208,8 +210,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(DateValue value) {
-        expressions.add(value.getValue());
-        // CARSTEN date sauber implementieren
+        hintType = HintType.DATE;
+        expressions.add(value.getValue().getTime());
     }
 
     @Override
@@ -265,8 +267,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(TimestampValue value) {
-        super.visit(value);
-        throw new IllegalArgumentException("not supported");
+        hintType = HintType.DATE;
+        expressions.add(value.getValue().getTime());
     }
 
     @Override
@@ -277,6 +279,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(Function function) {
+        // CARSTEN function to_date
         // CARSTEN implement geo spatial functions
         // CARSTEN implement idx functions idx('fieldName') or idx(fieldName)
         // CARSTEN implement restriced names functions field('delete') or field(delete)

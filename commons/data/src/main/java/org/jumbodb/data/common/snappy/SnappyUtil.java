@@ -8,6 +8,9 @@ import org.xerial.snappy.Snappy;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by Carsten on 20.09.2014.
@@ -15,8 +18,8 @@ import java.io.*;
 public class SnappyUtil {
     private static Logger log = LoggerFactory.getLogger(SnappyUtil.class);
 
-    public static byte[] getUncompressed(RandomAccessFile indexRaf, Blocks blocks, long searchChunk) throws IOException {
-        long offsetForChunk = blocks.getOffsetForBlock(searchChunk);
+    public static byte[] getUncompressed(RandomAccessFile indexRaf, Blocks blocks, long blockIndex) throws IOException {
+        long offsetForChunk = blocks.getOffsetForBlock(blockIndex);
         indexRaf.seek(offsetForChunk);
         int snappyBlockLength = indexRaf.readInt();
         byte[] compressed = new byte[snappyBlockLength];
@@ -30,10 +33,9 @@ public class SnappyUtil {
      * @param inputStream        input stream write to disk
      * @param absoluteImportFile path where to write
      * @param fileLength         length of data
-     * @param chunkSize          snappy chunk size
+     * @param blockSize          snappy chunk size
      */
-    // CARSTEN move copy method is only for tests
-    public static void copy(InputStream inputStream, File absoluteImportFile, long fileLength, long datasets, int chunkSize) {
+    public static void copy(InputStream inputStream, File absoluteImportFile, long fileLength, long datasets, int blockSize) {
         OutputStream sos = null;
         DataOutputStream dos = null;
         FileOutputStream fos = null;
@@ -62,20 +64,26 @@ public class SnappyUtil {
             snappyChunksFos = new FileOutputStream(filePlaceChunksFile);
             snappyChunksDos = new DataOutputStream(snappyChunksFos);
             final DataOutputStream finalSnappyChunksDos = snappyChunksDos;
-
-            snappyChunksDos.writeLong(fileLength);
-            snappyChunksDos.writeLong(datasets);
-            snappyChunksDos.writeInt(chunkSize);
+            final List<Integer> blocks = new ArrayList<Integer>();
             fos = new FileOutputStream(absoluteImportFile);
             bos = new BufferedOutputStream(fos) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
-                    finalSnappyChunksDos.writeInt(i2);
+                    blocks.add(i2);
                     super.write(bytes, i, i2);
                 }
             };
-            sos = new SnappyOutputStream(bos, chunkSize);
+            sos = new SnappyOutputStream(bos, blockSize);
             IOUtils.copyLarge(inputStream, sos, 0l, fileLength);
+            snappyChunksDos.writeLong(fileLength);
+            snappyChunksDos.writeLong(datasets);
+            snappyChunksDos.writeInt(blockSize);
+            snappyChunksDos.writeInt(blocks.size() - 1);
+            // remove magic header, so start at 1
+            for(int i = 1; i < blocks.size(); i++) {
+                finalSnappyChunksDos.writeInt(blocks.get(i));
+            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {

@@ -222,7 +222,7 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
         return jsonDataset;
     }
 
-    protected Blocks getCompressionBlocksPyFile() {
+    protected Blocks getCompressionBlocksByFile() {
         Cache.ValueWrapper valueWrapper = dataCompressionBlocksCache.get(file);
         if (valueWrapper != null) {
             return (Blocks) valueWrapper.get();
@@ -232,15 +232,19 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
         return blocksByFile;
     }
 
-    protected long calculateBlockOffsetUncompressed(long chunkIndex, int compressionBlockSize) {
-        return chunkIndex * compressionBlockSize;
+    protected long calculateBlockOffsetUncompressed(long blockIndex, int compressionBlockSize) {
+        return blockIndex * compressionBlockSize;
     }
 
     protected long calculateBlockOffsetCompressed(long blockIndex, List<Integer> compressionBlocks) {
         long result = 0l;
         for (int i = 0; i < blockIndex; i++) {
-            result += compressionBlocks.get(i) + 4; // 4 byte for length of chunk
+            result += compressionBlocks.get(i) + getBlockOverhead(); // 4 byte for length of chunk
         }
-        return result + 16;
+        return result + getMagicHeaderSize();
     }
+
+    protected abstract int getBlockOverhead();
+
+    protected abstract int getMagicHeaderSize();
 }

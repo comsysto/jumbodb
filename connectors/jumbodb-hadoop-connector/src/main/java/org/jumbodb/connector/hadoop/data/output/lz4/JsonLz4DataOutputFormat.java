@@ -123,6 +123,7 @@ public class JsonLz4DataOutputFormat<K, V> extends TextOutputFormat<K, V> {
             dos.writeLong(length);
             dos.writeLong(datasets);
             dos.writeInt(LZ4_BLOCK_SIZE);
+            dos.writeInt(blockSizes.size());
             for (Integer blockSize : blockSizes) {
                 dos.writeInt(blockSize);
             }

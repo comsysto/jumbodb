@@ -180,7 +180,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         when:
         def sizes = strategy.getCollectionDataSize(folder)
         then:
-        sizes.getCompressedSize() == 61
+        sizes.getCompressedSize() == 57
         sizes.getUncompressedSize() == 11
         sizes.getDatasets() == 100
         cleanup:

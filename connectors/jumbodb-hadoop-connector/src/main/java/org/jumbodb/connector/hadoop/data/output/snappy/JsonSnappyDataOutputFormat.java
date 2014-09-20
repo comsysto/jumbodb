@@ -124,8 +124,9 @@ public class JsonSnappyDataOutputFormat<K, V> extends TextOutputFormat<K, V> {
             dos.writeLong(length);
             dos.writeLong(datasets);
             dos.writeInt(SNAPPY_BLOCK_SIZE);
-            for (Integer blockSize : blockSizes) {
-                dos.writeInt(blockSize);
+            dos.writeInt(blockSizes.size() - 1);
+            for(int i = 1; i < blockSizes.size(); i++) {
+                dos.writeInt(blockSizes.get(i));
             }
             IOUtils.closeStream(dos);
             IOUtils.closeStream(digestStream);

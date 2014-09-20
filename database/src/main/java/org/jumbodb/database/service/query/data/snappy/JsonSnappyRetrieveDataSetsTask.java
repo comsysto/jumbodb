@@ -36,7 +36,7 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
         BufferedInputStream bis = null;
         try {
             fis = new FileInputStream(file);
-            Blocks blocks = getCompressionBlocksPyFile();
+            Blocks blocks = getCompressionBlocksByFile();
             Collections.sort(leftOffsets);
             bis = new BufferedInputStream(fis);
             byte[] readBufferCompressed = new byte[blocks.getBlockSize() * 2];
@@ -160,5 +160,15 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
             IOUtils.closeQuietly(bis);
             IOUtils.closeQuietly(sis);
         }
+    }
+
+    @Override
+    protected int getMagicHeaderSize() {
+        return 16;
+    }
+
+    @Override
+    protected int getBlockOverhead() {
+        return 4;
     }
 }

@@ -44,7 +44,7 @@ public class JsonSnappyLineBreakDataOutputFormat<K, V> extends TextOutputFormat<
         private final BufferedOutputStream bufferedOutputStream;
         private final SnappyOutputStream snappyOutputStream;
         private final DataOutputStream dataOutputStream;
-        private final List<Integer> chunkSizes = new LinkedList<Integer>();
+        private final List<Integer> blockSizes = new LinkedList<Integer>();
         private final Path file;
         private final FileSystem fs;
         private final MessageDigest fileMessageDigest;
@@ -62,7 +62,7 @@ public class JsonSnappyLineBreakDataOutputFormat<K, V> extends TextOutputFormat<
             bufferedOutputStream = new BufferedOutputStream(digestOutputStream) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
-                    chunkSizes.add(i2);
+                    blockSizes.add(i2);
                     super.write(bytes, i, i2);
                 }
             };
@@ -125,8 +125,9 @@ public class JsonSnappyLineBreakDataOutputFormat<K, V> extends TextOutputFormat<
             dos.writeLong(length);
             dos.writeLong(datasets);
             dos.writeInt(SNAPPY_BLOCK_SIZE);
-            for (Integer chunkSize : chunkSizes) {
-                dos.writeInt(chunkSize);
+            dos.writeInt(blockSizes.size() - 1);
+            for(int i = 1; i < blockSizes.size(); i++) {
+                dos.writeInt(blockSizes.get(i));
             }
             IOUtils.closeStream(dos);
             IOUtils.closeStream(digestStream);

@@ -172,6 +172,7 @@ define(['angular' ], function (angular) {
 			$scope.sqlQuery = "";
 			$scope.jsonQuery = "";
 			$scope.explainedSql = {};
+            $scope.loading = false;
 
 			$http.get('jumbodb/rest/query/collections').success(function(data) {
 				$scope.collections = data;
@@ -198,22 +199,31 @@ define(['angular' ], function (angular) {
 			}
 
 			$scope.searchJsonQuery = function(jsonQuery) {
-				$http.post('jumbodb/rest/query/json/defaultLimit', jsonQuery).success(function(data) {
+                $scope.loading = true;
+                $scope.results = {};
+                $http.post('jumbodb/rest/query/json/defaultLimit', jsonQuery).success(function(data) {
 					$scope.results = data;
+                    $scope.loading = false;
 					buildMessage(data);
                 });
 			}
 
             $scope.searchSqlQuery = function(sqlQuery) {
+                $scope.loading = true;
+                $scope.results = {};
                 $http.post('jumbodb/rest/query/sql/defaultLimit', sqlQuery).success(function(data) {
                     $scope.results = data;
+                    $scope.loading = false;
                     buildMessage(data);
                 });
             }
 
             $scope.explainSqlQuery = function(sqlQuery) {
+                $scope.loading = true;
+                $scope.results = {};
                 $http.post('jumbodb/rest/query/sql/explain', sqlQuery).success(function(data) {
                     $scope.explainedSql = data;
+                    $scope.loading = false;
                     buildMessage(data);
                 });
             }

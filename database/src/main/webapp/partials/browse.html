@@ -35,9 +35,10 @@
                         </div>
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">
-                                <button type="submit" class="btn btn-default"
+                                <button type="submit" class="btn btn-default" ng-disabled="loading"
                                         ng-click="searchSqlQuery(sqlQuery)">Search
                                 </button>
+                                <span ng-show="loading"><img src="img/ajax-loader.gif"> Loading ....</span>
                             </div>
                         </div>
 
@@ -111,8 +112,9 @@
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">
                                 <button type="submit" class="btn btn-default"
-                                        ng-click="explainSqlQuery(sqlQuery)">Explain
+                                        ng-click="explainSqlQuery(sqlQuery)" ng-disabled="loading">Explain
                                 </button>
+                                <span ng-show="loading"><img src="img/ajax-loader.gif"> Loading ....</span>
                             </div>
                         </div>
 
@@ -185,8 +187,9 @@
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">
                                 <button type="submit" class="btn btn-default"
-                                        ng-click="searchJsonQuery(jsonQuery)">Search
+                                        ng-click="searchJsonQuery(jsonQuery)" ng-disabled="loading">Search
                                 </button>
+                                <span ng-show="loading"><img src="img/ajax-loader.gif"> Loading ....</span>
                             </div>
                         </div>
 

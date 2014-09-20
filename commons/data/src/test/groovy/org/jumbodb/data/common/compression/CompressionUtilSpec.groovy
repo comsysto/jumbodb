@@ -1,6 +1,7 @@
 package org.jumbodb.data.common.compression
 
 import org.apache.commons.lang.RandomStringUtils
+import org.jumbodb.data.common.snappy.SnappyUtil
 import spock.lang.Specification
 
 /**
@@ -12,12 +13,12 @@ class CompressionUtilSpec extends Specification {
         def string = RandomStringUtils.randomAlphanumeric(32 * 1024) + "This is my expected string"
         def byteStream = new ByteArrayInputStream(string.getBytes("UTF-8"))
         def testFile = File.createTempFile("test", "file")
-        CompressionBlocksUtil.copy(byteStream, testFile, string.size(), 100l, 32 * 1024)
+        SnappyUtil.copy(byteStream, testFile, string.size(), 100l, 32 * 1024)
         def chunks = CompressionBlocksUtil.getBlocksByFile(testFile)
         byteStream.close()
         def raf = new RandomAccessFile(testFile, "r")
         when:
-        def result = CompressionUtil.getUncompressed(raf, chunks, 1)
+        def result = SnappyUtil.getUncompressed(raf, chunks, 1)
         then:
         new String(result, "UTF-8") == "This is my expected string"
         cleanup:

@@ -1,35 +1,30 @@
 package org.jumbodb.database.service.query.data.snappy;
 
-import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.io.IOUtils;
-import org.jumbodb.common.query.*;
+import org.jumbodb.common.query.IndexQuery;
+import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.data.common.snappy.SnappyChunks;
-import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
-import org.jumbodb.database.service.query.data.common.DefaultRetrieveDataSetsTask;
 import org.springframework.cache.Cache;
 import org.xerial.snappy.Snappy;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.*;
+import java.io.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDataSetsTask {
+public class JsonSnappyRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDataSetsTask {
 
 
-    public JsonSnappyLineBreakRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
-      ResultCallback resultCallback, DataStrategy strategy, Cache datasetsByOffsetsCache,
-      Cache dataSnappyChunksCache, String dateFormat, boolean scannedSearch) {
+    public JsonSnappyRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
+                                          ResultCallback resultCallback, DataStrategy strategy, Cache datasetsByOffsetsCache,
+                                          Cache dataSnappyChunksCache, String dateFormat, boolean scannedSearch) {
         super(datasetsByOffsetsCache, resultCallback, strategy, dateFormat, offsets, searchQuery, file, scannedSearch, dataSnappyChunksCache);
     }
 
@@ -67,11 +62,14 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyR
                     resultBufferEndOffset = uncompressedFileStreamPosition;
                 }
 
-                // load to result buffer till line break
                 int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
-                int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer,
-                  datasetStartOffset);
-                while ((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
+                int datasetLength = Integer.MIN_VALUE;
+                if(resultBuffer.length > 0) {
+                    datasetLength = SnappyUtil.readInt(resultBuffer, datasetStartOffset);
+                    datasetStartOffset += 4; // int length
+                }
+                while ((resultBuffer.length == 0 || datasetLength > (resultBuffer.length - datasetStartOffset))
+                        && datasetLength != -1) {
                     compressedFileStreamPosition += bis.read(compressedLengthBuffer);
                     int compressedLength = SnappyUtil.readInt(compressedLengthBuffer, 0);
                     int read = bis.read(readBufferCompressed, 0, compressedLength);
@@ -81,13 +79,20 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyR
                     uncompressedFileStreamPosition += uncompressLength;
                     datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
                     resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
-                    resultBufferEndOffset = uncompressedFileStreamPosition - 1;
+                    resultBufferEndOffset = uncompressedFileStreamPosition; // warum war hier + 1?
                     resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
                     datasetStartOffset = 0;
-                    lineBreakOffset = findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
+                    if(resultBuffer.length > 0) {
+                        datasetLength = SnappyUtil.readInt(resultBuffer, datasetStartOffset);
+                        datasetStartOffset += 4; // int length
+                    }
+                    else {
+                        datasetLength = Integer.MIN_VALUE;
+                    }
                 }
+                // end load result buffer til line break
 
-                int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
+//                int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
                 byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset,
                   datasetLength);
                 Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(dataSetFromOffsetsGroup);
@@ -119,17 +124,22 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyR
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         ChunkSkipableSnappyInputStream sis = null;
-        BufferedReader br = null;
+        DataInputStream dis = null;
         try {
             fis = new FileInputStream(file);
             bis = new BufferedInputStream(fis);
             sis = new ChunkSkipableSnappyInputStream(bis);
-            br = new BufferedReader(new InputStreamReader(sis, "UTF-8"));
+            dis = new DataInputStream(sis);
             log.info("Full scan");
             long count = 0;
-            String line;
-            while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
-                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(line);
+            int length;
+            byte[] data = new byte[0];
+            while ((length = dis.readInt()) != -1 && resultCallback.needsMore(searchQuery)) {
+                if(data.length < length) {
+                    data = new byte[length];
+                }
+                dis.read(data, 0, length);
+                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(new String(data, 0, length, "UTF-8"));
                 if (matchingFilter(parsedJson, searchQuery.getDataQuery())) {
                     resultCallback.writeResult(parsedJson);
                     results++;
@@ -145,26 +155,9 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyR
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(fis);
+            IOUtils.closeQuietly(dis);
             IOUtils.closeQuietly(bis);
             IOUtils.closeQuietly(sis);
-            IOUtils.closeQuietly(br);
         }
-    }
-
-    private int findDatasetLengthByLineBreak(byte[] buffer, int fromOffset) {
-        int datasetLength = 0;
-        boolean found = false;
-        for (int i = fromOffset; i < buffer.length; i++) {
-            byte aByte = buffer[i];
-            if (aByte == 13 || aByte == 10) {
-                found = true;
-                break;
-            }
-            datasetLength++;
-        }
-        if (!found) {
-            return -1;
-        }
-        return datasetLength;
     }
 }

@@ -1,6 +1,8 @@
 package org.jumbodb.connector.hadoop.configuration;
 
 import org.apache.hadoop.io.Text;
+import org.jumbodb.connector.hadoop.data.output.JsonSnappyDataInputFormat;
+import org.jumbodb.connector.hadoop.data.output.JsonSnappyDataOutputFormat;
 import org.jumbodb.connector.hadoop.data.output.JsonSnappyLineBreakDataInputFormat;
 import org.jumbodb.connector.hadoop.data.output.JsonSnappyLineBreakDataOutputFormat;
 
@@ -17,7 +19,13 @@ public class DataStrategies {
     private static Map<String, ? extends DataStrategy> createDataStrategies() {
         Map<String, DataStrategy> indexMapper = new HashMap<String, DataStrategy>();
         indexMapper.put(
-          JsonSnappyLineBreakDataOutputFormat.STRATEGY_KEY, new JsonDataStrategy(JsonSnappyLineBreakDataInputFormat.class, JsonSnappyLineBreakDataOutputFormat.class,  Text.class));
+          JsonSnappyLineBreakDataOutputFormat.STRATEGY_KEY,
+                new JsonDataStrategy(JsonSnappyLineBreakDataInputFormat.class, JsonSnappyLineBreakDataOutputFormat.class,  Text.class)
+        );
+        indexMapper.put(
+                JsonSnappyDataOutputFormat.STRATEGY_KEY,
+                new JsonDataStrategy(JsonSnappyDataInputFormat.class, JsonSnappyDataOutputFormat.class,  Text.class)
+        );
         return Collections.unmodifiableMap(indexMapper);
     }
 

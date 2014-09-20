@@ -1,6 +1,6 @@
 {
     "description": "Carstens Twitter Test Import",
-    "deliveryChunkKey": "first_delivery",
+    "deliveryChunkKey": "first_delivery2",
     "hosts": [
         {"host": "localhost", "port": 12001}
     ],
@@ -13,7 +13,25 @@
         {
             "input": "file:///C:/Development/data/twitter/input_big/",
             "description": "Twitter data",
-            "collectionName": "carsten.twitter",
+            "collectionName": "twitter",
+            "dataStrategy": "JSON_SNAPPY",
+            "indexes": [
+                {
+                    "indexName": "screen_name",
+                    "fields": ["user.screen_name"],
+                    "indexStrategy": "HASHCODE64_SNAPPY"
+                },
+                {
+                    "indexName": "created_at",
+                    "fields": ["created_at"],
+                    "indexStrategy": "DATETIME_SNAPPY"
+                }
+            ]
+        },
+        {
+            "input": "file:///C:/Development/data/twitter/input_big/",
+            "description": "Twitter data",
+            "collectionName": "twitter_lb",
             "dataStrategy": "JSON_SNAPPY_LB",
             "indexes": [
                 {

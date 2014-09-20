@@ -99,6 +99,11 @@
                     <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
                     <property name="dataSnappyChunksCache" ref="dataSnappyChunksCache"/>
                 </bean>
+                <bean class="org.jumbodb.database.service.query.data.snappy.JsonSnappyDataStrategy">
+                    <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
+                    <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
+                    <property name="dataSnappyChunksCache" ref="dataSnappyChunksCache"/>
+                </bean>
                 <bean class="org.jumbodb.database.service.query.data.notfound.NotFoundDataStrategy"/>
             </list>
         </property>

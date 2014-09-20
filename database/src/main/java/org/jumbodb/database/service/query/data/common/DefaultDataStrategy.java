@@ -42,6 +42,15 @@ public abstract class DefaultDataStrategy implements DataStrategy {
     }
 
     @Override
+    public boolean isResponsibleFor(String chunkKey, String collection) {
+        DeliveryChunkDefinition chunk = collectionDefinition.getChunk(collection, chunkKey);
+        if (chunk == null) {
+            return false;
+        }
+        return getStrategyName().equals(chunk.getDataStrategy());
+    }
+
+    @Override
     public int findDataSetsByFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition,
       Collection<FileOffset> fileOffsets, ResultCallback resultCallback, JumboQuery searchQuery) {
         int numberOfResults = 0;

@@ -24,8 +24,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class JsonSnappyLineBreakDataOutputFormat<K, V> extends TextOutputFormat<K, V> {
-    public static final String STRATEGY_KEY = "JSON_SNAPPY_LB";
+public class JsonSnappyDataOutputFormat<K, V> extends TextOutputFormat<K, V> {
+    public static final String STRATEGY_KEY = "JSON_SNAPPY";
     public static final int SNAPPY_BLOCK_SIZE = 32768;
 
 
@@ -37,8 +37,6 @@ public class JsonSnappyLineBreakDataOutputFormat<K, V> extends TextOutputFormat<
     }
 
     private class SnappyDataWriter extends RecordWriter<K, V> {
-        private final byte[] lineBreak = "\n".getBytes("UTF-8");
-
         private final FSDataOutputStream fileOut;
         private final OutputStream digestOutputStream;
         private final BufferedOutputStream bufferedOutputStream;
@@ -98,14 +96,15 @@ public class JsonSnappyLineBreakDataOutputFormat<K, V> extends TextOutputFormat<
         public synchronized void write(K key, V value)
                 throws IOException {
             byte[] bytes = value.toString().getBytes("UTF-8");
+            dataOutputStream.writeInt(bytes.length);
             dataOutputStream.write(bytes);
-            dataOutputStream.write(lineBreak);
-            length += bytes.length + lineBreak.length;
+            length += bytes.length + 4; // 4 int length
             datasets++;
         }
 
         @Override
         public synchronized void close(TaskAttemptContext context) throws IOException {
+            dataOutputStream.writeInt(-1);
             IOUtils.closeStream(dataOutputStream);
             IOUtils.closeStream(snappyOutputStream);
             IOUtils.closeStream(bufferedOutputStream);

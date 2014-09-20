@@ -188,7 +188,7 @@ public class QueryTask implements Runnable {
             // CARSTEN should be possible to use more
             // CARSTEN find sub fields etc...
             final int limit = query.getLimit();
-            if(numberOfResults.getAndIncrement() < limit) {
+            if(limit == -1 || numberOfResults.getAndIncrement() < limit) {
                 resultWriter.writeResult(mapper.writeValueAsBytes(parsedJson));
             }
         }

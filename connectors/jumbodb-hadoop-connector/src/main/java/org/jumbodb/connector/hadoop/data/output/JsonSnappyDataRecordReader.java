@@ -18,8 +18,8 @@
 
 package org.jumbodb.connector.hadoop.data.output;
 
-import java.io.IOException;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
@@ -33,33 +33,32 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.LineReader;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 import org.xerial.snappy.SnappyInputStream;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 /**
  * Treats keys as offset in file and value as line.
  */
 @InterfaceAudience.LimitedPrivate({"MapReduce", "Pig"})
 @InterfaceStability.Evolving
-public class JsonSnappyLineBreakDataLineRecordReader extends RecordReader<LongWritable, Text> {
-    private static final Log LOG = LogFactory.getLog(JsonSnappyLineBreakDataLineRecordReader.class);
+public class JsonSnappyDataRecordReader extends RecordReader<LongWritable, Text> {
+    private static final Log LOG = LogFactory.getLog(JsonSnappyDataRecordReader.class);
     public static final String MAX_LINE_LENGTH =
             "mapreduce.input.linerecordreader.line.maxlength";
 
     private long start;
     private long uncompressedPos;
     private long end;
-    private LineReader in;
-    private int maxLineLength;
     private LongWritable key;
     private Text value;
-    private byte[] recordDelimiterBytes;
-    private FSDataInputStream fileIn;
     private SnappyInputStream snappyInputStream;
+    private DataInputStream dataInputStream;
+    private FSDataInputStream fileIn;
+    private byte[] data = new byte[0];
 
-    public JsonSnappyLineBreakDataLineRecordReader(byte[] recordDelimiter) {
-        this.recordDelimiterBytes = recordDelimiter;
+    public JsonSnappyDataRecordReader() {
     }
 
     @Override
@@ -67,7 +66,6 @@ public class JsonSnappyLineBreakDataLineRecordReader extends RecordReader<LongWr
                            TaskAttemptContext context) throws IOException {
         FileSplit split = (FileSplit) genericSplit;
         Configuration job = context.getConfiguration();
-        this.maxLineLength = job.getInt(MAX_LINE_LENGTH, Integer.MAX_VALUE);
         start = split.getStart();
         end = start + split.getLength();
         final Path file = split.getPath();
@@ -76,22 +74,7 @@ public class JsonSnappyLineBreakDataLineRecordReader extends RecordReader<LongWr
         final FileSystem fs = file.getFileSystem(job);
         fileIn = fs.open(file);
         snappyInputStream = new SnappyInputStream(fileIn);
-
-        if (null == this.recordDelimiterBytes) {
-            in = new LineReader(snappyInputStream, job);
-        } else {
-            in = new LineReader(snappyInputStream, job, this.recordDelimiterBytes);
-        }
-
-        if (start != 0) {
-            start += in.readLine(new Text(), 0, maxBytesToConsume(start));
-        }
-        this.uncompressedPos = start;
-    }
-
-
-    private int maxBytesToConsume(long pos) {
-        return (int) (end - pos);
+        dataInputStream = new DataInputStream(snappyInputStream);
     }
 
     private long getFilePosition() throws IOException {
@@ -106,26 +89,16 @@ public class JsonSnappyLineBreakDataLineRecordReader extends RecordReader<LongWr
         if (value == null) {
             value = new Text();
         }
-        int newSize = 0;
-        // We always read one extra line, which lies outside the upper
-        // split limit i.e. (end - 1)
-        while (getFilePosition() <= end) {
-            newSize = in.readLine(value, maxLineLength,
-                    Math.max(maxBytesToConsume(uncompressedPos), maxLineLength));
-            uncompressedPos += newSize;
-            if (newSize < maxLineLength) {
-                break;
-            }
-
-            // line too long. try again
-            LOG.info("Skipped line of size " + newSize + " at uncompressedPos " +
-                    (uncompressedPos - newSize));
+        int length = dataInputStream.readInt();
+        if(length == -1) {
+            return false; // end reached
         }
-        if (newSize == 0) {
-            key = null;
-            value = null;
-            return false;
+        if(data.length < length) {
+            data = new byte[length];
         }
+        dataInputStream.read(data, 0, length);
+        uncompressedPos += length + 4;
+        value.set(data, 0, length);
         return true;
     }
 
@@ -151,8 +124,8 @@ public class JsonSnappyLineBreakDataLineRecordReader extends RecordReader<LongWr
     }
 
     public synchronized void close() throws IOException {
-        if (in != null) {
-            in.close();
+        if (dataInputStream != null) {
+            dataInputStream.close();
         }
         if (snappyInputStream != null) {
             snappyInputStream.close();

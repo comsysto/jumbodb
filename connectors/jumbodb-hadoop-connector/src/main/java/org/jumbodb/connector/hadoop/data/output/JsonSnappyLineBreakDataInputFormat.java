@@ -18,35 +18,15 @@ import java.util.List;
 /**
  * @author Carsten Hufe
  */
-public class JsonSnappyLineBreakDataInputFormat extends FileInputFormat<LongWritable, Text> {
+public class JsonSnappyLineBreakDataInputFormat extends AbstractJumboDataInputFormat {
 
     @Override
-    protected List<FileStatus> listStatus(JobContext job) throws IOException {
-        List<FileStatus> fileStatuses = super.listStatus(job);
-        List<FileStatus> result = new LinkedList<FileStatus>();
-        JumboMetaPathFilter filter = new JumboMetaPathFilter();
-        for (FileStatus fileStatuse : fileStatuses) {
-            Path path = fileStatuse.getPath();
-            if(filter.accept(path)) {
-                result.add(fileStatuse);
-            }
-        }
-        return result;
+    protected RecordReader getRecordReader(byte[] recordDelimiterBytes) {
+        return new JsonSnappyLineBreakDataLineRecordReader(recordDelimiterBytes);
     }
 
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
         return false;
-    }
-
-    @Override
-    public RecordReader<LongWritable, Text> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
-        String delimiter = context.getConfiguration().get(
-                "textinputformat.record.delimiter");
-        byte[] recordDelimiterBytes = null;
-        if (null != delimiter) {
-            recordDelimiterBytes = delimiter.getBytes(Charsets.UTF_8);
-        }
-        return new JsonSnappyLineBreakDataLineRecordReader(recordDelimiterBytes);
     }
 }

@@ -1,10 +1,10 @@
 package org.jumbodb.database.service.query.index.snappy;
 
 import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.data.common.compression.CompressionUtil;
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch;
 import org.jumbodb.database.service.query.index.common.floatval.*;
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile;
-import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +48,12 @@ public class FloatSnappyIndexStrategy extends NumberSnappyIndexStrategy<Float, F
 
     @Override
     public Float readLastValue(byte[] uncompressed) {
-        return SnappyUtil.readFloat(uncompressed, uncompressed.length - 16);
+        return CompressionUtil.readFloat(uncompressed, uncompressed.length - 16);
     }
 
     @Override
     public Float readFirstValue(byte[] uncompressed) {
-        return SnappyUtil.readFloat(uncompressed, 0);
+        return CompressionUtil.readFloat(uncompressed, 0);
     }
 
     @Override

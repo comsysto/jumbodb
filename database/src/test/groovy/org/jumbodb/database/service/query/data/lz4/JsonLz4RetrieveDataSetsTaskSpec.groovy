@@ -3,7 +3,6 @@ package org.jumbodb.database.service.query.data.lz4
 import net.jpountz.lz4.LZ4BlockOutputStream
 import org.apache.commons.io.IOUtils
 import org.jumbodb.common.query.*
-import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
 import org.jumbodb.database.service.query.data.snappy.JsonSnappyDataStrategy
@@ -89,7 +88,7 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         offsets = [65493l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
         task = new JsonLz4RetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, "yyyy-MM-dd", false)
         numberOfResults = task.call()
-        then: "verify loading of a data set overlapping the snappy chunk (32768 byte)"
+        then: "verify loading of a data set overlapping the snappy block (32768 byte)"
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 101149])
         numberOfResults == 1
         cleanup:
@@ -102,20 +101,20 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
         def resultCallback = Mock(ResultCallback)
-        def dataStrategy = Mock(JsonSnappyLineBreakDataStrategy)
+        def dataStrategy = Mock(JsonLz4DataStrategy)
         resultCallback.needsMore(_) >> true
         def jumboQuery = new JumboQuery()
         jumboQuery.addDataQuery(new DataQuery("number", FieldType.FIELD, QueryOperation.EQ, 100010, FieldType.VALUE))
         jumboQuery.addDataQuery(new DataQuery("number", FieldType.FIELD, QueryOperation.EQ, 100020, FieldType.VALUE))
         jumboQuery.addDataQuery(new DataQuery("number", FieldType.FIELD, QueryOperation.EQ, 100030, FieldType.VALUE))
         when:
-        def task = new JsonSnappyRetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", true)
+        def task = new JsonLz4RetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, "yyyy-MM-dd", true)
         def numberOfResults = task.call()
         then: "verify matching datasets "
         1 * dataStrategy.matches(QueryOperation.EQ, 100010, 100010) >> true
         1 * dataStrategy.matches(QueryOperation.EQ, 100020, 100020) >> true
         1 * dataStrategy.matches(QueryOperation.EQ, 100030, 100030) >> true
-        2997 * dataStrategy.matches(_, _, _) >> false // 1000 datasets and 3 values to check
+        5997 * dataStrategy.matches(_, _, _) >> false // 1000 datasets and 3 values to check
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 100010])
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 100020])
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 100030])
@@ -177,27 +176,27 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
     }
 
     @Unroll
-    def "calculateChunkOffsetUncompressed chunkIndex=#chunkIndex chunkSize=#chunkSize == #uncompressedOffset"() {
+    def "calculateBlockOffsetUncompressed blockIndex=#blockIndex blockSize=#blockSize == #uncompressedOffset"() {
         setup:
         def task = createDefaultTask()
         expect:
-        task.calculateChunkOffsetUncompressed(chunkIndex, chunkSize) == uncompressedOffset
+        task.calculateBlockOffsetUncompressed(blockIndex, blockSize) == uncompressedOffset
         where:
-        chunkIndex | chunkSize | uncompressedOffset
+        blockIndex | blockSize | uncompressedOffset
         1          | 32000     | 32000
         2          | 32000     | 64000
         3          | 32768     | 98304
     }
 
     @Unroll
-    def "calculateChunkOffsetCompressed chunkIndex=#chunkIndex == #compressedOffset"() {
+    def "calculateBlockOffsetCompressed blockIndex=#blockIndex == #compressedOffset"() {
         setup:
         def task = createDefaultTask()
         expect:
         def compressedChunkSizes = [12000, 13000, 10000, 15000]
-        task.calculateChunkOffsetCompressed(chunkIndex, compressedChunkSizes) == compressedOffset
+        task.calculateBlockOffsetCompressed(blockIndex, compressedChunkSizes) == compressedOffset
         where:
-        chunkIndex | compressedOffset
+        blockIndex | compressedOffset
         0          | 16
         1          | 12020
         2          | 25024

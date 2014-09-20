@@ -2,7 +2,7 @@ package org.jumbodb.data.common.snappy
 
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.RandomStringUtils
-import org.apache.commons.lang.math.RandomUtils
+import org.jumbodb.data.common.compression.CompressionUtil
 import org.xerial.snappy.SnappyOutputStream
 import spock.lang.Specification
 
@@ -22,8 +22,8 @@ class ChunkSkipableSnappyInputStreamSpec extends Specification {
         sos.close()
         bos.close()
         def compressedData = bos.toByteArray()
-        def compressedBlockSize1 = SnappyUtil.readInt(compressedData, 16) + 4
-        def compressedBlockSize2 = SnappyUtil.readInt(compressedData, compressedBlockSize1 + 16) + 4
+        def compressedBlockSize1 = CompressionUtil.readInt(compressedData, 16) + 4
+        def compressedBlockSize2 = CompressionUtil.readInt(compressedData, compressedBlockSize1 + 16) + 4
         when:
         def skipableStream = new ChunkSkipableSnappyInputStream(new ByteArrayInputStream(compressedData))
         then:

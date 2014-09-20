@@ -117,7 +117,7 @@ public class JsonSnappyLineBreakDataOutputFormat<K, V> extends TextOutputFormat<
         }
 
         private void writeSnappyChunks(Configuration configuration) throws IOException {
-            Path path = file.suffix(".chunks");
+            Path path = file.suffix(".blocks");
             FSDataOutputStream fsDataOutputStream = fs.create(path, false);
             MessageDigest messageDigest = getMessageDigest(configuration);
             OutputStream digestStream = getDigestOutputStream(fsDataOutputStream, messageDigest);

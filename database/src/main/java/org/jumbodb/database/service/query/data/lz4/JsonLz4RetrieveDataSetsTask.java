@@ -2,12 +2,10 @@ package org.jumbodb.database.service.query.data.lz4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jpountz.lz4.LZ4BlockInputStream;
-import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FastDecompressor;
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
-import org.jumbodb.data.common.snappy.SnappyUtil;
+import org.jumbodb.data.common.compression.CompressionUtil;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
@@ -54,7 +52,7 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
                 }
                 dis.readFully(lengthBuffer);
                 currentOffset += 4;
-                int length = SnappyUtil.readInt(lengthBuffer, 0);
+                int length = CompressionUtil.readInt(lengthBuffer, 0);
                 if (data.length < length) {
                     data = new byte[length];
                 }

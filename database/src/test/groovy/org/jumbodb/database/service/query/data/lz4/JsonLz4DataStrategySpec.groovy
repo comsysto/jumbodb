@@ -172,7 +172,7 @@ class JsonLz4DataStrategySpec extends Specification {
         def folder = new File(folderStr)
         FileUtils.forceMkdir(folder);
         new File(folderStr + "/testdata").text = "Hello World"
-        def out = new DataOutputStream(new FileOutputStream(new File(folderStr + "/testdata.chunks")))
+        def out = new DataOutputStream(new FileOutputStream(new File(folderStr + "/testdata.blocks")))
         out.writeLong(1000l)
         out.writeLong(2000l)
         out.close()

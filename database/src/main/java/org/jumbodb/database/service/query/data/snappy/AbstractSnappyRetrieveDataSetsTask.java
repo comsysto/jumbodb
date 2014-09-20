@@ -1,8 +1,8 @@
 package org.jumbodb.database.service.query.data.snappy;
 
 import org.jumbodb.common.query.JumboQuery;
-import org.jumbodb.data.common.snappy.SnappyChunks;
-import org.jumbodb.data.common.snappy.SnappyChunksUtil;
+import org.jumbodb.data.common.compression.Blocks;
+import org.jumbodb.data.common.compression.CompressionBlocksUtil;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
@@ -25,24 +25,24 @@ public abstract class AbstractSnappyRetrieveDataSetsTask extends DefaultRetrieve
         this.dataSnappyChunksCache = dataSnappyChunksCache;
     }
 
-    protected SnappyChunks getSnappyChunksByFile() {
+    protected Blocks getSnappyChunksByFile() {
         Cache.ValueWrapper valueWrapper = dataSnappyChunksCache.get(file);
         if (valueWrapper != null) {
-            return (SnappyChunks) valueWrapper.get();
+            return (Blocks) valueWrapper.get();
         }
-        SnappyChunks snappyChunksByFile = SnappyChunksUtil.getSnappyChunksByFile(file);
-        dataSnappyChunksCache.put(file, snappyChunksByFile);
-        return snappyChunksByFile;
+        Blocks blocksByFile = CompressionBlocksUtil.getBlocksByFile(file);
+        dataSnappyChunksCache.put(file, blocksByFile);
+        return blocksByFile;
     }
 
-    protected long calculateChunkOffsetUncompressed(long chunkIndex, int snappyChunkSize) {
-        return chunkIndex * snappyChunkSize;
+    protected long calculateBlockOffsetUncompressed(long chunkIndex, int compressionBlockSize) {
+        return chunkIndex * compressionBlockSize;
     }
 
-    protected long calculateChunkOffsetCompressed(long chunkIndex, List<Integer> snappyChunks) {
+    protected long calculateBlockOffsetCompressed(long blockIndex, List<Integer> compressionBlocks) {
         long result = 0l;
-        for (int i = 0; i < chunkIndex; i++) {
-            result += snappyChunks.get(i) + 4; // 4 byte for length of chunk
+        for (int i = 0; i < blockIndex; i++) {
+            result += compressionBlocks.get(i) + 4; // 4 byte for length of chunk
         }
         return result + 16;
     }

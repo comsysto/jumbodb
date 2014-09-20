@@ -22,7 +22,7 @@ public class CollectionDefinitionLoader {
         FILE_FILTER.addFileFilter(new NotFileFilter(new PrefixFileFilter("_")));
         FILE_FILTER.addFileFilter(new NotFileFilter(new PrefixFileFilter(".")));
         FILE_FILTER.addFileFilter(new NotFileFilter(new SuffixFileFilter(".properties")));
-        FILE_FILTER.addFileFilter(new NotFileFilter(new SuffixFileFilter(".chunks")));
+        FILE_FILTER.addFileFilter(new NotFileFilter(new SuffixFileFilter(".blocks")));
         FILE_FILTER.addFileFilter(new NotFileFilter(new SuffixFileFilter(".sha1")));
         FILE_FILTER.addFileFilter(new NotFileFilter(new SuffixFileFilter(".md5")));
     }

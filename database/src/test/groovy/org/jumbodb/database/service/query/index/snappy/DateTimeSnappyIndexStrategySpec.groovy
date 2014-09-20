@@ -12,7 +12,6 @@ import org.jumbodb.database.service.query.index.common.datetime.DateTimeEqOperat
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
-import org.jumbodb.database.service.query.index.snappy.DateTimeSnappyIndexStrategy
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -29,7 +28,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
     def setup() {
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.setIndexQueryCache(cacheMock)
     }
@@ -118,7 +117,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.onInitialize(cd)
         def query = new IndexQuery("testIndex", QueryOperation.EQ, "2012-06-29 11:34:48")
@@ -153,7 +152,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.setIndexFileExecutor(executorMock)
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.onInitialize(cd)
         def query = new IndexQuery("testIndex", QueryOperation.EQ, "2012-06-29 11:34:48")
@@ -183,7 +182,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         DateTimeDataGeneration.createIndexFile(indexFile)
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.setIndexQueryCache(cacheMock)
         def query1 = new IndexQuery("testIndex", QueryOperation.EQ, "2012-01-01 12:00:00")
@@ -208,7 +207,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def ramFile = new RandomAccessFile(indexFile, "r")
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.setIndexQueryCache(cacheMock)
         when:
@@ -235,7 +234,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.onInitialize(cd)
         when:
@@ -259,7 +258,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         when:
@@ -314,7 +313,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         def cd = createCollectionDefinition(indexFolder)
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -340,7 +339,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         when:

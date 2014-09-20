@@ -1,24 +1,23 @@
-package org.jumbodb.data.common.snappy
+package org.jumbodb.data.common.compression
 
 import org.apache.commons.lang.RandomStringUtils
-import org.xerial.snappy.SnappyOutputStream
 import spock.lang.Specification
 
 /**
  * @author Carsten Hufe
  */
-class SnappyUtilSpec extends Specification {
+class CompressionUtilSpec extends Specification {
     def "test getUncompressed"() {
         setup:
         def string = RandomStringUtils.randomAlphanumeric(32 * 1024) + "This is my expected string"
         def byteStream = new ByteArrayInputStream(string.getBytes("UTF-8"))
         def testFile = File.createTempFile("test", "file")
-        SnappyChunksUtil.copy(byteStream, testFile, string.size(), 100l, 32 * 1024)
-        def chunks = SnappyChunksUtil.getSnappyChunksByFile(testFile)
+        CompressionBlocksUtil.copy(byteStream, testFile, string.size(), 100l, 32 * 1024)
+        def chunks = CompressionBlocksUtil.getBlocksByFile(testFile)
         byteStream.close()
         def raf = new RandomAccessFile(testFile, "r")
         when:
-        def result = SnappyUtil.getUncompressed(raf, chunks, 1)
+        def result = CompressionUtil.getUncompressed(raf, chunks, 1)
         then:
         new String(result, "UTF-8") == "This is my expected string"
         cleanup:
@@ -39,7 +38,7 @@ class SnappyUtilSpec extends Specification {
         byteStream.close()
         def bytes = byteStream.toByteArray()
         when:
-        def readValue = SnappyUtil.readInt(bytes, 8)
+        def readValue = CompressionUtil.readInt(bytes, 8)
         then:
         readValue == 333333
     }
@@ -57,7 +56,7 @@ class SnappyUtilSpec extends Specification {
         byteStream.close()
         def bytes = byteStream.toByteArray()
         when:
-        def readValue = SnappyUtil.readLong(bytes, 24)
+        def readValue = CompressionUtil.readLong(bytes, 24)
         then:
         readValue == 444444l
     }
@@ -75,7 +74,7 @@ class SnappyUtilSpec extends Specification {
         byteStream.close()
         def bytes = byteStream.toByteArray()
         when:
-        def readValue = SnappyUtil.readDouble(bytes, 24)
+        def readValue = CompressionUtil.readDouble(bytes, 24)
         then:
         readValue == 444444.4d
     }
@@ -93,7 +92,7 @@ class SnappyUtilSpec extends Specification {
         byteStream.close()
         def bytes = byteStream.toByteArray()
         when:
-        def readValue = SnappyUtil.readFloat(bytes, 16)
+        def readValue = CompressionUtil.readFloat(bytes, 16)
         then:
         readValue == 555555.5f
     }

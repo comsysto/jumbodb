@@ -6,15 +6,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryOperation;
-import org.jumbodb.data.common.snappy.SnappyChunksUtil;
+import org.jumbodb.data.common.compression.CompressionBlocksUtil;
+import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.definition.IndexDefinition;
 import org.jumbodb.database.service.query.index.IndexKey;
 import org.jumbodb.database.service.query.index.IndexStrategy;
-import org.jumbodb.data.common.snappy.SnappyChunks;
-import org.jumbodb.data.common.snappy.SnappyUtil;
+import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.database.service.query.index.common.BlockRange;
 import org.jumbodb.database.service.query.index.common.CacheIndexClause;
 import org.jumbodb.database.service.query.index.common.ChunkRangeKey;
@@ -47,7 +47,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
     private ExecutorService indexFileExecutor;
     private CollectionDefinition collectionDefinition;
     private Map<IndexKey, List<IF>> indexFiles;
-    private Cache indexSnappyChunksCache;
+    private Cache indexCompressionBlocksCache;
     private Cache indexBlockRangesCache;
     private Cache indexQueryCache;
 
@@ -57,14 +57,14 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         return getQueryOperationsStrategies();
     }
 
-    private SnappyChunks getSnappyChunksByFile(File file) {
-        Cache.ValueWrapper valueWrapper = indexSnappyChunksCache.get(file);
+    private Blocks getSnappyChunksByFile(File file) {
+        Cache.ValueWrapper valueWrapper = indexCompressionBlocksCache.get(file);
         if(valueWrapper != null) {
-            return (SnappyChunks) valueWrapper.get();
+            return (Blocks) valueWrapper.get();
         }
-        SnappyChunks snappyChunksByFile = SnappyChunksUtil.getSnappyChunksByFile(file);
-        indexSnappyChunksCache.put(file, snappyChunksByFile);
-        return snappyChunksByFile;
+        Blocks blocksByFile = CompressionBlocksUtil.getBlocksByFile(file);
+        indexCompressionBlocksCache.put(file, blocksByFile);
+        return blocksByFile;
     }
 
     public Set<FileOffset> searchOffsetsByIndexQueries(File indexFile, Set<IndexQuery> indexQueries, int queryLimit, boolean resultCacheEnabled) throws IOException {
@@ -72,12 +72,12 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         RandomAccessFile raf = null;
         List<FileOffset> result = new LinkedList<FileOffset>();
         try {
-            SnappyChunks snappyChunks = getSnappyChunksByFile(indexFile);
+            Blocks blocks = getSnappyChunksByFile(indexFile);
             raf = new RandomAccessFile(indexFile, "r");
 
             for (IndexQuery indexQuery : indexQueries) {
                 if(queryLimit == -1 || queryLimit > result.size()) {
-                    result.addAll(findOffsetForIndexQuery(indexFile, raf, indexQuery, snappyChunks, queryLimit, resultCacheEnabled));
+                    result.addAll(findOffsetForIndexQuery(indexFile, raf, indexQuery, blocks, queryLimit, resultCacheEnabled));
                 }
             }
 
@@ -116,21 +116,21 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         List<IF> result = new LinkedList<IF>();
         File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".idx"));
         for (File indexFile : indexFiles) {
-            SnappyChunks snappyChunks = getSnappyChunksByFile(indexFile);
-            if(snappyChunks.getNumberOfChunks() > 0) {
-                result.add(createIndexFileDescription(indexFile, snappyChunks));
+            Blocks blocks = getSnappyChunksByFile(indexFile);
+            if(blocks.getNumberOfBlocks() > 0) {
+                result.add(createIndexFileDescription(indexFile, blocks));
             }
         }
         return result;
     }
 
-    protected IF createIndexFileDescription(File indexFile, SnappyChunks snappyChunks) {
+    protected IF createIndexFileDescription(File indexFile, Blocks blocks) {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(indexFile, "r");
-            byte[] uncompressed = SnappyUtil.getUncompressed(raf, snappyChunks, 0);
+            byte[] uncompressed = SnappyUtil.getUncompressed(raf, blocks, 0);
             T from = readFirstValue(uncompressed);
-            uncompressed = SnappyUtil.getUncompressed(raf, snappyChunks, snappyChunks.getNumberOfChunks() - 1);
+            uncompressed = SnappyUtil.getUncompressed(raf, blocks, blocks.getNumberOfBlocks() - 1);
             T to = readLastValue(uncompressed);
             return createIndexFile(from, to, indexFile);
         } catch (FileNotFoundException e) {
@@ -193,23 +193,23 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
 
 
     protected Set<FileOffset> findOffsetForIndexQuery(File indexFile, RandomAccessFile indexRaf, IndexQuery indexQuery,
-                                                      SnappyChunks snappyChunks, int queryLimit, boolean resultCacheEnabled) throws IOException {
+                                                      Blocks blocks, int queryLimit, boolean resultCacheEnabled) throws IOException {
         if(resultCacheEnabled) {
             CacheIndexClause key = new CacheIndexClause(indexFile, indexQuery.getQueryOperation(), indexQuery.getValue());
             Cache.ValueWrapper valueWrapper = indexQueryCache.get(key);
             if(valueWrapper != null) {
                 return (Set<FileOffset>) valueWrapper.get();
             }
-            Set<FileOffset> fileOffsets = getFileOffsets(indexFile, indexRaf, indexQuery, snappyChunks, queryLimit);
+            Set<FileOffset> fileOffsets = getFileOffsets(indexFile, indexRaf, indexQuery, blocks, queryLimit);
             indexQueryCache.put(key, fileOffsets);
             return fileOffsets;
 
         } else {
-            return getFileOffsets(indexFile, indexRaf, indexQuery, snappyChunks, queryLimit);
+            return getFileOffsets(indexFile, indexRaf, indexQuery, blocks, queryLimit);
         }
     }
 
-    private Set<FileOffset> getFileOffsets(final File indexFile, final RandomAccessFile indexRaf, IndexQuery indexQuery, final SnappyChunks snappyChunks, int queryLimit) throws IOException {
+    private Set<FileOffset> getFileOffsets(final File indexFile, final RandomAccessFile indexRaf, IndexQuery indexQuery, final Blocks blocks, int queryLimit) throws IOException {
         IndexOperationSearch<T, IFV, IF> integerOperationSearch = OPERATIONS.get(indexQuery.getQueryOperation());
         if(integerOperationSearch == null) {
             throw new UnsupportedOperationException("QueryOperation is not supported: " + indexQuery.getQueryOperation());
@@ -218,7 +218,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         FileDataRetriever fileDataRetriever = new FileDataRetriever() {
 
             public byte[] getUncompressedBlock(long searchChunk) throws IOException {
-                return SnappyUtil.getUncompressed(indexRaf, snappyChunks, searchChunk);
+                return SnappyUtil.getUncompressed(indexRaf, blocks, searchChunk);
             }
 
             @Override
@@ -239,8 +239,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
             }
         };
 //        long start = System.currentTimeMillis();
-        long currentChunk = integerOperationSearch.findFirstMatchingChunk(fileDataRetriever, queryValueRetriever, snappyChunks);
-        long numberOfChunks = snappyChunks.getNumberOfChunks();
+        long currentChunk = integerOperationSearch.findFirstMatchingChunk(fileDataRetriever, queryValueRetriever, blocks);
+        long numberOfChunks = blocks.getNumberOfBlocks();
 //        log.trace("findFirstMatchingChunk currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");
 
         int checkedChunks = 0;
@@ -253,7 +253,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
                 fis = new FileInputStream(indexFile);
                 bis = new BufferedInputStream(fis);
                 dis = new DataInputStream(bis);
-                dis.skip(snappyChunks.getOffsetForChunk(currentChunk));
+                dis.skip(blocks.getOffsetForBlock(currentChunk));
                 Set<FileOffset> result = new HashSet<FileOffset>();
                 while(currentChunk < numberOfChunks) {
                     int compressedSize = dis.readInt();
@@ -346,8 +346,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
     }
 
     @Required
-    public void setIndexSnappyChunksCache(Cache indexSnappyChunksCache) {
-        this.indexSnappyChunksCache = indexSnappyChunksCache;
+    public void setIndexCompressionBlocksCache(Cache indexCompressionBlocksCache) {
+        this.indexCompressionBlocksCache = indexCompressionBlocksCache;
     }
 
     @Required

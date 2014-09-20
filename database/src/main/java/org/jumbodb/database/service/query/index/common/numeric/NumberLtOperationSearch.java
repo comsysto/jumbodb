@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.common.numeric;
 
-import org.jumbodb.data.common.snappy.SnappyChunks;
+import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever;
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch;
 
@@ -13,7 +13,7 @@ public abstract class NumberLtOperationSearch<T, IFV, IF extends NumberIndexFile
 
     // CARSTEN move to NumberSnappyIndexFile and call by delegate
     @Override
-    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, Blocks blocks) throws IOException {
         // wow that was easy .... file has already matched, everything from beginning must be smaller
         return 0;
     }

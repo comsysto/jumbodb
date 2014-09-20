@@ -33,7 +33,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
     def setupCache(strategy) {
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
-        strategy.setIndexSnappyChunksCache(cacheMock)
+        strategy.setIndexCompressionBlocksCache(cacheMock)
         strategy.setIndexBlockRangesCache(cacheMock)
         strategy.setIndexQueryCache(cacheMock)
     }

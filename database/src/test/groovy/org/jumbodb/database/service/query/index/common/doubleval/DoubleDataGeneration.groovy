@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.index.common.doubleval
 
-import org.jumbodb.data.common.snappy.SnappyChunksUtil
+import org.jumbodb.data.common.compression.CompressionBlocksUtil
+import org.jumbodb.data.common.compression.CompressionUtil
 import org.jumbodb.data.common.snappy.SnappyUtil
 import org.jumbodb.database.service.query.index.common.BlockRange
 import org.jumbodb.database.service.query.index.common.numeric.FileDataRetriever
@@ -17,7 +18,7 @@ class DoubleDataGeneration {
         def fos = new ByteArrayOutputStream()
         def dos = new DataOutputStream(fos)
 
-        // write 11 chunks
+        // write 11 blocks
 
         def fileHash = 50000
         def offsetBase = 100000
@@ -37,9 +38,9 @@ class DoubleDataGeneration {
 
     def static createIndexFile(file) {
         def chunkSize = 32000
-        def umcompressedFileLength = 20 * 11 * 1600 // index entry length * 11 chunks * datasets per chunk
-        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, chunkSize)
-        SnappyChunksUtil.getSnappyChunksByFile(file)
+        def umcompressedFileLength = 20 * 11 * 1600 // index entry length * 11 blocks * datasets per chunk
+        SnappyUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, chunkSize)
+        CompressionBlocksUtil.getBlocksByFile(file)
     }
 
     def static createFileDataRetriever(file, snappyChunks) {
@@ -49,8 +50,8 @@ class DoubleDataGeneration {
             BlockRange<Double> getBlockRange(long searchChunk) throws IOException {
                 def ramFile = new RandomAccessFile(file, "r")
                 byte[] uncompressedBlock = SnappyUtil.getUncompressed(ramFile, snappyChunks, searchChunk)
-                Double firstInt = SnappyUtil.readDouble(uncompressedBlock, 0);
-                Double lastInt = SnappyUtil.readDouble(uncompressedBlock, uncompressedBlock.length - 20);
+                Double firstInt = CompressionUtil.readDouble(uncompressedBlock, 0);
+                Double lastInt = CompressionUtil.readDouble(uncompressedBlock, uncompressedBlock.length - 20);
                 ramFile.close()
                 return new BlockRange<Double>(firstInt, lastInt);
 

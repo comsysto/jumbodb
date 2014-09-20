@@ -1,12 +1,12 @@
 package org.jumbodb.database.service.query.index.snappy;
 
 import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.data.common.compression.CompressionUtil;
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch;
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile;
 import org.jumbodb.database.service.query.index.common.geohash.GeohashBoundaryBoxOperationSearch;
 import org.jumbodb.database.service.query.index.common.geohash.GeohashCoords;
 import org.jumbodb.database.service.query.index.common.geohash.GeohashWithinRangeMeterBoxOperationSearch;
-import org.jumbodb.data.common.snappy.SnappyUtil;
 
 import java.io.DataInput;
 import java.io.File;
@@ -41,17 +41,17 @@ public class GeohashSnappyIndexStrategy extends NumberSnappyIndexStrategy<Geohas
 
     @Override
     public GeohashCoords readLastValue(byte[] uncompressed) {
-        int geohash = SnappyUtil.readInt(uncompressed, uncompressed.length - 24);
-        float latitude = SnappyUtil.readFloat(uncompressed, uncompressed.length - 20);
-        float longitude = SnappyUtil.readFloat(uncompressed, uncompressed.length - 16);
+        int geohash = CompressionUtil.readInt(uncompressed, uncompressed.length - 24);
+        float latitude = CompressionUtil.readFloat(uncompressed, uncompressed.length - 20);
+        float longitude = CompressionUtil.readFloat(uncompressed, uncompressed.length - 16);
         return new GeohashCoords(geohash, latitude, longitude);
     }
 
     @Override
     public GeohashCoords readFirstValue(byte[] uncompressed) {
-        int geohash = SnappyUtil.readInt(uncompressed, 0);
-        float latitude = SnappyUtil.readFloat(uncompressed, 4);
-        float longitude = SnappyUtil.readFloat(uncompressed, 8);
+        int geohash = CompressionUtil.readInt(uncompressed, 0);
+        float latitude = CompressionUtil.readFloat(uncompressed, 4);
+        float longitude = CompressionUtil.readFloat(uncompressed, 8);
         return new GeohashCoords(geohash, latitude, longitude);
 //        return SnappyUtil.readInt(uncompressed, 0);
     }

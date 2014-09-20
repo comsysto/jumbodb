@@ -1,7 +1,8 @@
 package org.jumbodb.database.service.query.index.common.datetime
 
 import org.apache.commons.lang.time.DateUtils
-import org.jumbodb.data.common.snappy.SnappyChunksUtil
+import org.jumbodb.data.common.compression.CompressionBlocksUtil
+import org.jumbodb.data.common.compression.CompressionUtil
 import org.jumbodb.data.common.snappy.SnappyUtil
 import org.jumbodb.database.service.query.index.common.BlockRange
 import org.jumbodb.database.service.query.index.common.numeric.FileDataRetriever
@@ -42,8 +43,8 @@ class DateTimeDataGeneration {
     def static createIndexFile(file) {
         def chunkSize = 32000
         def umcompressedFileLength = 20 * 12 * 1600 // index entry length * 12 months * datasets per month
-        SnappyChunksUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, chunkSize)
-        SnappyChunksUtil.getSnappyChunksByFile(file)
+        SnappyUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, chunkSize)
+        CompressionBlocksUtil.getBlocksByFile(file)
     }
 
     def static createFileDataRetriever(file, snappyChunks) {
@@ -53,8 +54,8 @@ class DateTimeDataGeneration {
             BlockRange<Long> getBlockRange(long searchChunk) throws IOException {
                 def ramFile = new RandomAccessFile(file, "r")
                 byte[] uncompressedBlock = SnappyUtil.getUncompressed(ramFile, snappyChunks, searchChunk)
-                Long firstInt = SnappyUtil.readLong(uncompressedBlock, 0);
-                Long lastInt = SnappyUtil.readLong(uncompressedBlock, uncompressedBlock.length - 20);
+                Long firstInt = CompressionUtil.readLong(uncompressedBlock, 0);
+                Long lastInt = CompressionUtil.readLong(uncompressedBlock, uncompressedBlock.length - 20);
                 ramFile.close()
                 return new BlockRange<Long>(firstInt, lastInt);
 

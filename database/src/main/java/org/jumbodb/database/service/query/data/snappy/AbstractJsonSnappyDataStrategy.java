@@ -18,7 +18,7 @@ public abstract class AbstractJsonSnappyDataStrategy extends DefaultDataStrategy
         long compressedSize = FileUtils.sizeOfDirectory(dataFolder);
         long uncompressedSize = 0l;
         long datasets = 0l;
-        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".chunks"));
+        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".blocks"));
         File[] snappyChunks = dataFolder.listFiles(metaFiler);
         for (File snappyChunk : snappyChunks) {
             SnappyChunkSize sizeFromSnappyChunk = getSizeFromSnappyChunk(snappyChunk);

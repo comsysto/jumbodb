@@ -18,7 +18,7 @@ public abstract class AbstractJsonLz4DataStrategy extends DefaultDataStrategy {
         long compressedSize = FileUtils.sizeOfDirectory(dataFolder);
         long uncompressedSize = 0l;
         long datasets = 0l;
-        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".chunks"));
+        FileFilter metaFiler = FileFilterUtils.makeFileOnly(FileFilterUtils.suffixFileFilter(".blocks"));
         File[] lz4Chunks = dataFolder.listFiles(metaFiler);
         for (File lz4Chunk : lz4Chunks) {
             Lz4ChunkSize sizeFromLz4Chunk = getSizeFromLz4Chunk(lz4Chunk);

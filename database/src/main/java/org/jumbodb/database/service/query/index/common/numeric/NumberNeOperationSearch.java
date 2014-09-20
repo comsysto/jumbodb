@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.common.numeric;
 
-import org.jumbodb.data.common.snappy.SnappyChunks;
+import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.database.service.query.index.common.BlockRange;
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever;
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch;
@@ -14,9 +14,9 @@ public abstract class NumberNeOperationSearch<T, IFV, IF extends NumberIndexFile
 
     // CARSTEN move to NumberSnappyIndexFile and call by delegate
     @Override
-    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, Blocks blocks) throws IOException {
         T searchValue = (T)queryClause.getValue();
-        int numberOfChunks = snappyChunks.getNumberOfChunks();
+        int numberOfChunks = blocks.getNumberOfBlocks();
         int fromChunk = 0;
         int toChunk = numberOfChunks;
         // TODO verify snappy version

@@ -1,7 +1,7 @@
 package org.jumbodb.database.service.query.index.common;
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.data.common.snappy.SnappyChunks;
+import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.database.service.query.index.common.numeric.FileDataRetriever;
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile;
 
@@ -14,7 +14,7 @@ public interface IndexOperationSearch<T, IFV, IF extends NumberIndexFile<IFV>> {
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, IF snappyIndexFile);
 
     long findFirstMatchingChunk(FileDataRetriever<T> indexRaf, QueryValueRetriever queryValueRetriever,
-      SnappyChunks snappyChunks) throws IOException;
+      Blocks blocks) throws IOException;
 
     boolean matching(T currentValue, QueryValueRetriever queryValueRetriever);
 

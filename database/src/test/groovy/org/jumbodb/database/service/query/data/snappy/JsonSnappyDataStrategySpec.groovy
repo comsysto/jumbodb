@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.data.common.snappy.SnappyChunksUtil
+import org.jumbodb.data.common.compression.CompressionBlocksUtil
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
 import org.jumbodb.database.service.query.data.common.DataOperationSearch
@@ -174,7 +174,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         FileUtils.forceMkdir(folder);
         def dataFile = new File(folderStr + "/testdata")
         def bytes = "Hello World".getBytes("UTF-8")
-        SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), dataFile, bytes.length, 100l, 32 * 1024)
+        CompressionBlocksUtil.copy(new ByteArrayInputStream(bytes), dataFile, bytes.length, 100l, 32 * 1024)
         def strategy = new JsonSnappyDataStrategy()
         when:
         def sizes = strategy.getCollectionDataSize(folder)

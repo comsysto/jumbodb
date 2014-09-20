@@ -1,7 +1,7 @@
 package org.jumbodb.database.service.query.index.common.doubleval;
 
 import org.jumbodb.common.query.IndexQuery;
-import org.jumbodb.data.common.snappy.SnappyChunks;
+import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.database.service.query.index.common.numeric.FileDataRetriever;
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile;
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever;
@@ -16,10 +16,10 @@ public class DoubleBetweenOperationSearch extends DoubleEqOperationSearch {
 
     @Override
     public long findFirstMatchingChunk(FileDataRetriever<Double> fileDataRetriever,
-      QueryValueRetriever queryValueRetriever, SnappyChunks snappyChunks) throws IOException {
+      QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
         List<Double> value = queryValueRetriever.getValue();
         Double from = value.get(0);
-        return super.findFirstMatchingChunk(fileDataRetriever, snappyChunks, from);
+        return super.findFirstMatchingChunk(fileDataRetriever, blocks, from);
     }
 
     @Override

@@ -46,7 +46,7 @@
     <bean id="baseNumberIndexStrategy" abstract="true" class="org.jumbodb.database.service.query.index.snappy.NumberSnappyIndexStrategy">
         <property name="indexFileExecutor" ref="indexFileExecutor"/>
         <property name="indexBlockRangesCache" ref="indexBlockRangesCache"/>
-        <property name="indexSnappyChunksCache" ref="indexSnappyChunksCache"/>
+        <property name="indexCompressionBlocksCache" ref="indexCompressionBlocksCache"/>
         <property name="indexQueryCache" ref="indexQueryCache"/>
     </bean>
 
@@ -75,12 +75,12 @@
         <constructor-arg value="data.datasets.byoffsets"/>
     </bean>
 
-    <bean factory-bean="cacheManager" factory-method="getCache" id="dataSnappyChunksCache">
-        <constructor-arg value="data.snappy.chunks"/>
+    <bean factory-bean="cacheManager" factory-method="getCache" id="dataCompressionBlocksCache">
+        <constructor-arg value="data.compression.blocks"/>
     </bean>
 
-    <bean factory-bean="cacheManager" factory-method="getCache" id="indexSnappyChunksCache">
-        <constructor-arg value="index.snappy.chunks"/>
+    <bean factory-bean="cacheManager" factory-method="getCache" id="indexCompressionBlocksCache">
+        <constructor-arg value="index.compression.blocks"/>
     </bean>
 
     <bean factory-bean="cacheManager" factory-method="getCache" id="indexBlockRangesCache">
@@ -97,17 +97,17 @@
                 <bean class="org.jumbodb.database.service.query.data.snappy.JsonSnappyLineBreakDataStrategy">
                     <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
                     <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
-                    <property name="dataSnappyChunksCache" ref="dataSnappyChunksCache"/>
+                    <property name="dataCompressionBlocksCache" ref="dataCompressionBlocksCache"/>
                 </bean>
                 <bean class="org.jumbodb.database.service.query.data.snappy.JsonSnappyDataStrategy">
                     <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
                     <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
-                    <property name="dataSnappyChunksCache" ref="dataSnappyChunksCache"/>
+                    <property name="dataCompressionBlocksCache" ref="dataCompressionBlocksCache"/>
                 </bean>
                 <bean class="org.jumbodb.database.service.query.data.lz4.JsonLz4DataStrategy">
                     <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
                     <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
-                    <property name="dataSnappyChunksCache" ref="dataSnappyChunksCache"/>
+                    <property name="dataCompressionBlocksCache" ref="dataCompressionBlocksCache"/>
                 </bean>
                 <bean class="org.jumbodb.database.service.query.data.notfound.NotFoundDataStrategy"/>
             </list>

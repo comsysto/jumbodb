@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.index.common.numeric;
 
-import org.jumbodb.data.common.snappy.SnappyChunks;
+import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.database.service.query.index.common.BlockRange;
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever;
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch;
@@ -12,9 +12,9 @@ import java.io.IOException;
  */
 public abstract class NumberEqOperationSearch<T, S, IFV, IF extends NumberIndexFile<IFV>> implements IndexOperationSearch<T, IFV, IF> {
     @Override
-    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, SnappyChunks snappyChunks) throws IOException {
+    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, Blocks blocks) throws IOException {
         S searchValue = queryClause.getValue();
-        return findFirstMatchingChunk(fileDataRetriever, snappyChunks, searchValue);
+        return findFirstMatchingChunk(fileDataRetriever, blocks, searchValue);
     }
 
     @Override
@@ -28,8 +28,8 @@ public abstract class NumberEqOperationSearch<T, S, IFV, IF extends NumberIndexF
     }
 
     // CARSTEN move to NumberSnappyIndexFile and call by delegate
-    protected long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, SnappyChunks snappyChunks, S searchValue) throws IOException {
-        int numberOfChunks = snappyChunks.getNumberOfChunks();
+    protected long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, Blocks blocks, S searchValue) throws IOException {
+        int numberOfChunks = blocks.getNumberOfBlocks();
         int fromChunk = 0;
         int toChunk = numberOfChunks;
 //        int maxChunk = numberOfChunks - 1;

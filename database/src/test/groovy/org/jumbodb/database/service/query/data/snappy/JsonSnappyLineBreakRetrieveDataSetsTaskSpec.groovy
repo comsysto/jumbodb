@@ -5,7 +5,8 @@ import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.DataQuery
 import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.data.common.snappy.SnappyChunksUtil
+import org.jumbodb.data.common.compression.CompressionBlocksUtil
+import org.jumbodb.data.common.snappy.SnappyUtil
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
 import org.springframework.cache.Cache
@@ -20,7 +21,7 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
     def createTestData() {
         def data = ""
         for (i in 100000..101000) {
-            data += '{msg: "This is a sample dataset", number: ' + i + '}\n'  // 50 chars long
+            data += '{"msg": "This is a sample dataset", "number": ' + i + '}\n'  // 54 chars long
         }
         data.getBytes("UTF-8")
     }
@@ -28,12 +29,12 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
     def createTestFile() {
         def tmpFile = File.createTempFile("data", "file")
         def data = createTestData()
-        SnappyChunksUtil.copy(new ByteArrayInputStream(data), tmpFile, data.length, 100l, 32 * 1024)
+        SnappyUtil.copy(new ByteArrayInputStream(data), tmpFile, data.length, 100l, 32 * 1024)
         tmpFile
     }
 
     def cleanupTestFiles(file) {
-        new File(file.getAbsolutePath() + ".snappy.chunks").delete()
+        new File(file.getAbsolutePath() + ".snappy.blocks").delete()
         file.delete()
     }
 
@@ -49,7 +50,7 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
         def jumboQuery = new JumboQuery()
         jumboQuery.addIndexQuery(new IndexQuery("testIndex", QueryOperation.EQ, "somevalue"))
         when:
-        def offsets = [500l, 1000l, 1500l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
+        def offsets = [540l, 1080l, 1620l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
         def task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", false)
         def numberOfResults = task.call()
         then: "verify some grouped block loading"
@@ -67,7 +68,7 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
         numberOfResults == 1
 
         when:
-        offsets = [50000l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
+        offsets = [54000l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
         task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", false)
         numberOfResults = task.call()
         then: "verify loading of the last data set"
@@ -75,11 +76,11 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
         numberOfResults == 1
 
         when:
-        offsets = [32750l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
+        offsets = [32724l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
         task = new JsonSnappyLineBreakRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", false)
         numberOfResults = task.call()
-        then: "verify loading of a data set overlapping the snappy chunk (32768 byte)"
-        1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 100655])
+        then: "verify loading of a data set overlapping the snappy block (32768 byte)"
+        1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 100606])
         numberOfResults == 1
         cleanup:
         cleanupTestFiles(file)
@@ -166,27 +167,27 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
     }
 
     @Unroll
-    def "calculateChunkOffsetUncompressed chunkIndex=#chunkIndex chunkSize=#chunkSize == #uncompressedOffset"() {
+    def "calculateBlockOffsetUncompressed blockIndex=#blockIndex blockSize=#blockSize == #uncompressedOffset"() {
         setup:
         def task = createDefaultTask()
         expect:
-        task.calculateChunkOffsetUncompressed(chunkIndex, chunkSize) == uncompressedOffset
+        task.calculateBlockOffsetUncompressed(blockIndex, blockSize) == uncompressedOffset
         where:
-        chunkIndex | chunkSize | uncompressedOffset
+        blockIndex | blockSize | uncompressedOffset
         1          | 32000     | 32000
         2          | 32000     | 64000
         3          | 32768     | 98304
     }
 
     @Unroll
-    def "calculateChunkOffsetCompressed chunkIndex=#chunkIndex == #compressedOffset"() {
+    def "calculateBlockOffsetCompressed blockIndex=#blockIndex == #compressedOffset"() {
         setup:
         def task = createDefaultTask()
         expect:
-        def compressedChunkSizes = [12000, 13000, 10000, 15000]
-        task.calculateChunkOffsetCompressed(chunkIndex, compressedChunkSizes) == compressedOffset
+        def compressedBlockSizes = [12000, 13000, 10000, 15000]
+        task.calculateBlockOffsetCompressed(blockIndex, compressedBlockSizes) == compressedOffset
         where:
-        chunkIndex | compressedOffset
+        blockIndex | compressedOffset
         0          | 16
         1          | 12020
         2          | 25024

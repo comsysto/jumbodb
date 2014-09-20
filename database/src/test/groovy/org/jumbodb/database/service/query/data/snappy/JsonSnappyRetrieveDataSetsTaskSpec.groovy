@@ -1,7 +1,7 @@
 package org.jumbodb.database.service.query.data.snappy
 
 import org.jumbodb.common.query.*
-import org.jumbodb.data.common.snappy.SnappyChunksUtil
+import org.jumbodb.data.common.snappy.SnappyUtil
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
 import org.springframework.cache.Cache
@@ -29,12 +29,12 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
     def createTestFile() {
         def tmpFile = File.createTempFile("data", "file")
         def data = createTestData()
-        SnappyChunksUtil.copy(new ByteArrayInputStream(data), tmpFile, data.length, 100l, 32 * 1024)
+        SnappyUtil.copy(new ByteArrayInputStream(data), tmpFile, data.length, 100l, 32 * 1024)
         tmpFile
     }
 
     def cleanupTestFiles(file) {
-        new File(file.getAbsolutePath() + ".snappy.chunks").delete()
+        new File(file.getAbsolutePath() + ".snappy.blocks").delete()
         file.delete()
     }
 
@@ -79,7 +79,7 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
         offsets = [32718l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
         task = new JsonSnappyRetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", false)
         numberOfResults = task.call()
-        then: "verify loading of a data set overlapping the snappy chunk (32768 byte)"
+        then: "verify loading of a data set overlapping the snappy block (32768 byte)"
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 100574])
         numberOfResults == 1
         cleanup:
@@ -167,27 +167,27 @@ class JsonSnappyRetrieveDataSetsTaskSpec extends Specification {
     }
 
     @Unroll
-    def "calculateChunkOffsetUncompressed chunkIndex=#chunkIndex chunkSize=#chunkSize == #uncompressedOffset"() {
+    def "calculateBlockOffsetUncompressed blockIndex=#blockIndex blockSize=#blockSize == #uncompressedOffset"() {
         setup:
         def task = createDefaultTask()
         expect:
-        task.calculateChunkOffsetUncompressed(chunkIndex, chunkSize) == uncompressedOffset
+        task.calculateBlockOffsetUncompressed(blockIndex, blockSize) == uncompressedOffset
         where:
-        chunkIndex | chunkSize | uncompressedOffset
+        blockIndex | blockSize | uncompressedOffset
         1          | 32000     | 32000
         2          | 32000     | 64000
         3          | 32768     | 98304
     }
 
     @Unroll
-    def "calculateChunkOffsetCompressed chunkIndex=#chunkIndex == #compressedOffset"() {
+    def "calculateBlockOffsetCompressed blockIndex=#blockIndex == #compressedOffset"() {
         setup:
         def task = createDefaultTask()
         expect:
-        def compressedChunkSizes = [12000, 13000, 10000, 15000]
-        task.calculateChunkOffsetCompressed(chunkIndex, compressedChunkSizes) == compressedOffset
+        def compressedBlockSizes = [12000, 13000, 10000, 15000]
+        task.calculateBlockOffsetCompressed(blockIndex, compressedBlockSizes) == compressedOffset
         where:
-        chunkIndex | compressedOffset
+        blockIndex | compressedOffset
         0          | 16
         1          | 12020
         2          | 25024

@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
+import org.jumbodb.data.common.compression.CompressionUtil;
 import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
-import org.jumbodb.data.common.snappy.SnappyChunks;
-import org.jumbodb.data.common.snappy.SnappyUtil;
+import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
@@ -35,11 +35,11 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractSnappyRetrieveDataSe
         BufferedInputStream bis = null;
         try {
             fis = new FileInputStream(file);
-            SnappyChunks snappyChunks = getSnappyChunksByFile();
+            Blocks blocks = getSnappyChunksByFile();
             Collections.sort(leftOffsets);
             bis = new BufferedInputStream(fis);
-            byte[] readBufferCompressed = new byte[snappyChunks.getChunkSize() * 2];
-            byte[] readBufferUncompressed = new byte[snappyChunks.getChunkSize() * 2];
+            byte[] readBufferCompressed = new byte[blocks.getBlockSize() * 2];
+            byte[] readBufferUncompressed = new byte[blocks.getBlockSize() * 2];
             byte[] resultBuffer = EMPTY_BUFFER;
             long resultBufferStartOffset = 0l;
             long resultBufferEndOffset = 0l;
@@ -50,10 +50,10 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractSnappyRetrieveDataSe
                 long searchOffset = offset.getOffset();
                 // delete buffer when offset is not inside range and skip
                 if (resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
-                    long chunkIndex = (searchOffset / snappyChunks.getChunkSize());
-                    long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
-                    long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex,
-                            snappyChunks.getChunkSize());
+                    long chunkIndex = (searchOffset / blocks.getBlockSize());
+                    long chunkOffsetCompressed = calculateBlockOffsetCompressed(chunkIndex, blocks.getBlocks());
+                    long chunkOffsetUncompressed = calculateBlockOffsetUncompressed(chunkIndex,
+                            blocks.getBlockSize());
                     long chunkOffsetToSkip = chunkOffsetCompressed - compressedFileStreamPosition;
                     long skip = skipToOffset(bis, chunkOffsetToSkip);
                     compressedFileStreamPosition += skip;
@@ -66,13 +66,13 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractSnappyRetrieveDataSe
                 int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
                 int datasetLength = Integer.MIN_VALUE;
                 if (resultBuffer.length > 0) {
-                    datasetLength = SnappyUtil.readInt(resultBuffer, datasetStartOffset);
+                    datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
                     datasetStartOffset += 4; // int length
                 }
                 while ((resultBuffer.length == 0 || datasetLength > (resultBuffer.length - datasetStartOffset))
                         && datasetLength != -1) {
                     compressedFileStreamPosition += bis.read(compressedLengthBuffer);
-                    int compressedLength = SnappyUtil.readInt(compressedLengthBuffer, 0);
+                    int compressedLength = CompressionUtil.readInt(compressedLengthBuffer, 0);
                     int read = bis.read(readBufferCompressed, 0, compressedLength);
                     compressedFileStreamPosition += read;
                     int uncompressLength = Snappy
@@ -84,7 +84,7 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractSnappyRetrieveDataSe
                     resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
                     datasetStartOffset = 0;
                     if (resultBuffer.length > 0) {
-                        datasetLength = SnappyUtil.readInt(resultBuffer, datasetStartOffset);
+                        datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
                         datasetStartOffset += 4; // int length
                     } else {
                         datasetLength = Integer.MIN_VALUE;

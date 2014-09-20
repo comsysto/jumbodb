@@ -1,17 +1,14 @@
 package org.jumbodb.database.service.query.data.snappy;
 
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.common.query.*;
 import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.data.common.snappy.SnappyChunks;
-import org.jumbodb.data.common.snappy.SnappyChunksUtil;
 import org.jumbodb.data.common.snappy.SnappyUtil;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
-import org.jumbodb.database.service.query.data.common.DefaultRetrieveDataSetsTask;
 import org.springframework.cache.Cache;
 import org.xerial.snappy.Snappy;
 
@@ -24,8 +21,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDataSetsTask {
-
+public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractSnappyRetrieveDataSetsTask {
+    private ObjectMapper jsonParser = new ObjectMapper();
 
     public JsonSnappyLineBreakRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
       ResultCallback resultCallback, DataStrategy strategy, Cache datasetsByOffsetsCache,
@@ -34,7 +31,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyR
     }
 
     @Override
-    protected void findLeftDatasetsAndWriteResults(List<FileOffset> leftOffsets) throws ParseException {
+    protected void findLeftDatasetsAndWriteResults(List<FileOffset> leftOffsets) {
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         try {
@@ -90,7 +87,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyR
                 int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
                 byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset,
                   datasetLength);
-                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(dataSetFromOffsetsGroup);
+                Map<String, Object> parsedJson = jsonParser.readValue(dataSetFromOffsetsGroup, Map.class);
 
                 if (resultCacheEnabled) {
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);
@@ -115,7 +112,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyR
     }
 
     @Override
-    protected void fullScanData() throws ParseException {
+    protected void fullScanData() {
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         ChunkSkipableSnappyInputStream sis = null;
@@ -129,7 +126,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractJsonSnappyR
             long count = 0;
             String line;
             while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
-                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(line);
+                Map<String, Object> parsedJson = jsonParser.readValue(line, Map.class);
                 if (matchingFilter(parsedJson, searchQuery.getDataQuery())) {
                     resultCallback.writeResult(parsedJson);
                     results++;

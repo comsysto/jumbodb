@@ -1,6 +1,5 @@
 package org.jumbodb.database.service.query.data.common;
 
-import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.*;
 import org.jumbodb.database.service.query.FileOffset;
@@ -61,28 +60,28 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
                 List<FileOffset> leftOffsets = extractOffsetsFromCacheAndWriteResultForExisting();
                 if (leftOffsets.isEmpty()) {
                     log.trace("Time for retrieving " + results + " only from cache " + file.getName() + " in " + (System
-                      .currentTimeMillis() - start) + "ms");
+                            .currentTimeMillis() - start) + "ms");
                     return results;
                 }
                 int cacheResult = results;
                 findLeftDatasetsAndWriteResults(leftOffsets);
                 log.trace("Time for retrieving " + results + " (" + cacheResult + " from cache) datasets from " + file
-                  .getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+                        .getName() + " in " + (System.currentTimeMillis() - start) + "ms");
 
             } else {
                 findLeftDatasetsAndWriteResults(offsets);
                 log.trace("Time for retrieving " + results + " (caching disabled) datasets from " + file
-                  .getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+                        .getName() + " in " + (System.currentTimeMillis() - start) + "ms");
             }
         }
         return results;
     }
 
-    protected abstract void findLeftDatasetsAndWriteResults(List<FileOffset> leftOffsets) throws ParseException;
+    protected abstract void findLeftDatasetsAndWriteResults(List<FileOffset> leftOffsets);
 
-    protected abstract void fullScanData() throws ParseException;
+    protected abstract void fullScanData();
 
-    protected List<FileOffset> extractOffsetsFromCacheAndWriteResultForExisting() throws IOException, ParseException {
+    protected List<FileOffset> extractOffsetsFromCacheAndWriteResultForExisting() throws IOException {
         List<FileOffset> notFoundOffsets = new ArrayList<FileOffset>(offsets.size());
         for (FileOffset offset : offsets) {
             Cache.ValueWrapper valueWrapper = datasetsByOffsetsCache.get(new CacheFileOffset(file, offset.getOffset()));
@@ -137,21 +136,20 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
         return tmp;
     }
 
-    // CARSTEN das ganze matching in abstracte klasse
-        protected boolean matchingFilter(Map<String, Object> parsedJson, DataQuery jsonQuery) throws ParseException, IOException {
-            if (jsonQuery == null) {
-                return true;
-            }
-            return matchingFilter(parsedJson, Arrays.asList(jsonQuery));
+    protected boolean matchingFilter(Map<String, Object> parsedJson, DataQuery jsonQuery) throws IOException {
+        if (jsonQuery == null) {
+            return true;
         }
+        return matchingFilter(parsedJson, Arrays.asList(jsonQuery));
+    }
 
-    protected boolean matchingFilter(Map<String, Object> parsedJson, List<DataQuery> jsonQueries) throws ParseException {
+    protected boolean matchingFilter(Map<String, Object> parsedJson, List<DataQuery> jsonQueries) {
         return matchingFilter(parsedJson, new HashMap<String, Object>(), jsonQueries);
     }
 
     // CARSTEN unit test
     protected boolean matchingFilter(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache,
-      List<DataQuery> jsonQueries) throws ParseException {
+                                     List<DataQuery> jsonQueries) {
         if (jsonQueries.size() == 0) {
             return true;
         }
@@ -172,13 +170,13 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
     }
 
     protected Object findLeftValue(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache,
-      DataQuery jsonQuery) {
+                                   DataQuery jsonQuery) {
         // CARSTEN unit test
         return retrieveValue(parsedJson, queriedValuesCache, jsonQuery.getLeftType(), jsonQuery.getLeft(), jsonQuery.getHintType());
     }
 
     protected Object findRightValue(Map<String, Object> parsedJson, Map<String, Object> queriedValuesCache,
-      DataQuery jsonQuery) {
+                                    DataQuery jsonQuery) {
         return retrieveValue(parsedJson, queriedValuesCache, jsonQuery.getRightType(), jsonQuery.getRight(), jsonQuery.getHintType());
     }
 
@@ -198,7 +196,7 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
                 lastObj = map.get(key);
             }
         }
-        if(hintType == HintType.DATE) {
+        if (hintType == HintType.DATE) {
             if (lastObj instanceof String) {
                 try {
                     lastObj = simpleDateFormat.parse((String) lastObj).getTime();

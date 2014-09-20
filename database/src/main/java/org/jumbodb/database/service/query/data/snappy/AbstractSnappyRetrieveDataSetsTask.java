@@ -1,6 +1,5 @@
 package org.jumbodb.database.service.query.data.snappy;
 
-import net.minidev.json.parser.JSONParser;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.data.common.snappy.SnappyChunks;
 import org.jumbodb.data.common.snappy.SnappyChunksUtil;
@@ -17,11 +16,11 @@ import java.util.Set;
 /**
  * Created by Carsten on 19.09.2014.
  */
-public abstract class AbstractJsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
+public abstract class AbstractSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
     protected final Cache dataSnappyChunksCache;
-    protected JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+//    protected JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
 
-    public AbstractJsonSnappyRetrieveDataSetsTask(Cache datasetsByOffsetsCache, ResultCallback resultCallback, DataStrategy strategy, String dateFormat, Set<FileOffset> offsets, JumboQuery searchQuery, File file, boolean scannedSearch, Cache dataSnappyChunksCache) {
+    public AbstractSnappyRetrieveDataSetsTask(Cache datasetsByOffsetsCache, ResultCallback resultCallback, DataStrategy strategy, String dateFormat, Set<FileOffset> offsets, JumboQuery searchQuery, File file, boolean scannedSearch, Cache dataSnappyChunksCache) {
         super(datasetsByOffsetsCache, resultCallback, strategy, dateFormat, offsets, searchQuery, file, scannedSearch);
         this.dataSnappyChunksCache = dataSnappyChunksCache;
     }

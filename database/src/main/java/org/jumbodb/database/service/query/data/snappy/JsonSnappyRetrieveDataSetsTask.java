@@ -1,6 +1,6 @@
 package org.jumbodb.database.service.query.data.snappy;
 
-import net.minidev.json.parser.ParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
@@ -19,8 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class JsonSnappyRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDataSetsTask {
+public class JsonSnappyRetrieveDataSetsTask extends AbstractSnappyRetrieveDataSetsTask {
 
+    private ObjectMapper jsonParser = new ObjectMapper();
 
     public JsonSnappyRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
                                           ResultCallback resultCallback, DataStrategy strategy, Cache datasetsByOffsetsCache,
@@ -29,7 +30,7 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDa
     }
 
     @Override
-    protected void findLeftDatasetsAndWriteResults(List<FileOffset> leftOffsets) throws ParseException {
+    protected void findLeftDatasetsAndWriteResults(List<FileOffset> leftOffsets) {
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         try {
@@ -52,7 +53,7 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDa
                     long chunkIndex = (searchOffset / snappyChunks.getChunkSize());
                     long chunkOffsetCompressed = calculateChunkOffsetCompressed(chunkIndex, snappyChunks.getChunks());
                     long chunkOffsetUncompressed = calculateChunkOffsetUncompressed(chunkIndex,
-                      snappyChunks.getChunkSize());
+                            snappyChunks.getChunkSize());
                     long chunkOffsetToSkip = chunkOffsetCompressed - compressedFileStreamPosition;
                     long skip = skipToOffset(bis, chunkOffsetToSkip);
                     compressedFileStreamPosition += skip;
@@ -64,7 +65,7 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDa
 
                 int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
                 int datasetLength = Integer.MIN_VALUE;
-                if(resultBuffer.length > 0) {
+                if (resultBuffer.length > 0) {
                     datasetLength = SnappyUtil.readInt(resultBuffer, datasetStartOffset);
                     datasetStartOffset += 4; // int length
                 }
@@ -75,18 +76,17 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDa
                     int read = bis.read(readBufferCompressed, 0, compressedLength);
                     compressedFileStreamPosition += read;
                     int uncompressLength = Snappy
-                      .uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
+                            .uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
                     uncompressedFileStreamPosition += uncompressLength;
                     datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
                     resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
                     resultBufferEndOffset = uncompressedFileStreamPosition; // warum war hier + 1?
                     resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
                     datasetStartOffset = 0;
-                    if(resultBuffer.length > 0) {
+                    if (resultBuffer.length > 0) {
                         datasetLength = SnappyUtil.readInt(resultBuffer, datasetStartOffset);
                         datasetStartOffset += 4; // int length
-                    }
-                    else {
+                    } else {
                         datasetLength = Integer.MIN_VALUE;
                     }
                 }
@@ -94,8 +94,8 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDa
 
 //                int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
                 byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset,
-                  datasetLength);
-                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(dataSetFromOffsetsGroup);
+                        datasetLength);
+                Map<String, Object> parsedJson = jsonParser.readValue(dataSetFromOffsetsGroup, Map.class);
 
                 if (resultCacheEnabled) {
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);
@@ -120,7 +120,7 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDa
     }
 
     @Override
-    protected void fullScanData() throws ParseException {
+    protected void fullScanData() {
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         ChunkSkipableSnappyInputStream sis = null;
@@ -135,11 +135,11 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractJsonSnappyRetrieveDa
             int length;
             byte[] data = new byte[0];
             while ((length = dis.readInt()) != -1 && resultCallback.needsMore(searchQuery)) {
-                if(data.length < length) {
+                if (data.length < length) {
                     data = new byte[length];
                 }
                 dis.read(data, 0, length);
-                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.parse(new String(data, 0, length, "UTF-8"));
+                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.readValue(data, 0, length, Map.class);
                 if (matchingFilter(parsedJson, searchQuery.getDataQuery())) {
                     resultCallback.writeResult(parsedJson);
                     results++;

@@ -54,7 +54,7 @@ dependencies {
     compile ('net.sf.ehcache:ehcache:2.7.2') {
         exclude module: 'ehcache-terracotta'
     }
-
+    compile 'net.jpountz.lz4:lz4:1.2.0'
     compile 'commons-io:commons-io:2.4'
 //    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.4.2'
@@ -65,7 +65,6 @@ dependencies {
     compile 'org.freemarker:freemarker:2.3.19'
     compile 'commons-lang:commons-lang:2.6'
     compile "org.xerial.snappy:snappy-java:$snappyVersion"
-    compile "net.minidev:json-smart:2.0-RC2"
     compile 'org.slf4j:slf4j-api:1.7.5'
     compile 'org.slf4j:jcl-over-slf4j:1.7.5'
     compile 'org.slf4j:log4j-over-slf4j:1.7.5'

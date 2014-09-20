@@ -45,8 +45,6 @@ import java.io.IOException;
 @InterfaceStability.Evolving
 public class JsonSnappyDataRecordReader extends RecordReader<LongWritable, Text> {
     private static final Log LOG = LogFactory.getLog(JsonSnappyDataRecordReader.class);
-    public static final String MAX_LINE_LENGTH =
-            "mapreduce.input.linerecordreader.line.maxlength";
 
     private long start;
     private long uncompressedPos;

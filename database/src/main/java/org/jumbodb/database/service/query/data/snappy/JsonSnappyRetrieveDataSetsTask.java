@@ -138,7 +138,7 @@ public class JsonSnappyRetrieveDataSetsTask extends AbstractSnappyRetrieveDataSe
                 if (data.length < length) {
                     data = new byte[length];
                 }
-                dis.read(data, 0, length);
+                dis.readFully(data, 0, length);
                 Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.readValue(data, 0, length, Map.class);
                 if (matchingFilter(parsedJson, searchQuery.getDataQuery())) {
                     resultCallback.writeResult(parsedJson);

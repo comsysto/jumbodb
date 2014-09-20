@@ -13,8 +13,8 @@
         {
             "input": "file:///C:/Development/data/twitter/input_big/",
             "description": "Twitter data",
-            "collectionName": "twitter_kryo",
-            "dataStrategy": "KRYO_SNAPPY"
+            "collectionName": "twitter_lz4",
+            "dataStrategy": "JSON_LZ4"
         }
     ]
 }

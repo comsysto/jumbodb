@@ -38,7 +38,6 @@ public class SnappyChunks {
         return chunks;
     }
 
-    // CARSTEN use in frontend
     public long getDatasets() {
         return datasets;
     }

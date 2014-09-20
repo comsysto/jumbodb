@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.data.output;
+package org.jumbodb.connector.hadoop.data.output.snappy;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.hadoop.conf.Configuration;

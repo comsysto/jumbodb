@@ -1,17 +1,18 @@
-package org.jumbodb.connector.hadoop.data.output;
+package org.jumbodb.connector.hadoop.data.output.snappy;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
+import org.jumbodb.connector.hadoop.data.output.AbstractJumboDataInputFormat;
 
 /**
  * @author Carsten Hufe
  */
-public class JsonSnappyDataInputFormat extends AbstractJumboDataInputFormat {
+public class JsonSnappyLineBreakDataInputFormat extends AbstractJumboDataInputFormat {
 
     @Override
     protected RecordReader getRecordReader(byte[] recordDelimiterBytes) {
-        return new JsonSnappyDataRecordReader();
+        return new JsonSnappyLineBreakDataLineRecordReader(recordDelimiterBytes);
     }
 
     @Override

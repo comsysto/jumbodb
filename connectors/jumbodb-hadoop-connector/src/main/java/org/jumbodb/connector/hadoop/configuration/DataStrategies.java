@@ -1,10 +1,12 @@
 package org.jumbodb.connector.hadoop.configuration;
 
 import org.apache.hadoop.io.Text;
-import org.jumbodb.connector.hadoop.data.output.JsonSnappyDataInputFormat;
-import org.jumbodb.connector.hadoop.data.output.JsonSnappyDataOutputFormat;
-import org.jumbodb.connector.hadoop.data.output.JsonSnappyLineBreakDataInputFormat;
-import org.jumbodb.connector.hadoop.data.output.JsonSnappyLineBreakDataOutputFormat;
+import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4DataInputFormat;
+import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4DataOutputFormat;
+import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyDataInputFormat;
+import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyDataOutputFormat;
+import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyLineBreakDataInputFormat;
+import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyLineBreakDataOutputFormat;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +27,10 @@ public class DataStrategies {
         indexMapper.put(
                 JsonSnappyDataOutputFormat.STRATEGY_KEY,
                 new JsonDataStrategy(JsonSnappyDataInputFormat.class, JsonSnappyDataOutputFormat.class, Text.class)
+        );
+        indexMapper.put(
+                JsonLz4DataOutputFormat.STRATEGY_KEY,
+                new JsonDataStrategy(JsonLz4DataInputFormat.class, JsonLz4DataOutputFormat.class, Text.class)
         );
         return Collections.unmodifiableMap(indexMapper);
     }

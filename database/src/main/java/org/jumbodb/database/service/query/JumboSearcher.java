@@ -149,7 +149,9 @@ public class JumboSearcher {
         Set<FileOffset> result = new HashSet<FileOffset>();
         IndexQuery andIndex = indexQuery.getAndIndex();
         List<FileOffset> fileOffset = groupByIndexQuery.get(indexQuery);
-        result.addAll(fileOffset);
+        if(fileOffset != null) {
+            result.addAll(fileOffset);
+        }
         if (andIndex != null) {
             result.retainAll(getIndexesApplyAndLogic(andIndex, groupByIndexQuery));
         }
@@ -236,6 +238,9 @@ public class JumboSearcher {
         long result = 0l;
         File indexRoot = buildPathToIndexRoot(chunkKey, version, collection);
         File[] indexFolders = indexRoot.listFiles(StorageManagement.FOLDER_FILTER);
+        if(indexFolders == null) {
+            return 0l;
+        }
         for (File indexFolder : indexFolders) {
             result += getIndexSize(indexFolder);
         }

@@ -1,10 +1,9 @@
-package org.jumbodb.database.service.query.data.snappy
+package org.jumbodb.database.service.query.data.lz4
 
 import org.apache.commons.io.FileUtils
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.JumboQuery
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.data.common.snappy.SnappyChunksUtil
 import org.jumbodb.database.service.query.FileOffset
 import org.jumbodb.database.service.query.ResultCallback
 import org.jumbodb.database.service.query.data.common.DataOperationSearch
@@ -20,8 +19,8 @@ import java.util.concurrent.Future
 /**
  * @author Carsten Hufe
  */
-class JsonSnappyDataStrategySpec extends Specification {
-    def strategy = new JsonSnappyDataStrategy()
+class JsonLz4DataStrategySpec extends Specification {
+    def strategy = new JsonLz4DataStrategy()
 
     @Unroll
     def "verify supported operations #operation"() {
@@ -34,7 +33,7 @@ class JsonSnappyDataStrategySpec extends Specification {
     def "should be responsible, because collection, chunk and strategy are matching"() {
         setup:
         def cd = Mock(CollectionDefinition)
-        def dcd = new DeliveryChunkDefinition("chunk", "collection", "yyyy-MM-dd", [], [:], "JSON_SNAPPY")
+        def dcd = new DeliveryChunkDefinition("chunk", "collection", "yyyy-MM-dd", [], [:], "JSON_LZ4")
         strategy.onInitialize(cd)
         cd.getChunk("collection", "chunk") >> dcd
         expect:
@@ -61,7 +60,7 @@ class JsonSnappyDataStrategySpec extends Specification {
 
     def "verify strategy name"() {
         expect:
-        strategy.getStrategyName() == "JSON_SNAPPY"
+        strategy.getStrategyName() == "JSON_LZ4"
     }
 
     def "matches should delegate to the appropriate operation"() {
@@ -69,7 +68,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         def eqOperation = Mock(DataOperationSearch)
         def gtOperation = Mock(DataOperationSearch)
         def ltOperation = Mock(DataOperationSearch)
-        def customStrategy = new JsonSnappyDataStrategy() {
+        def customStrategy = new JsonLz4DataStrategy() {
             @Override
             public Map<QueryOperation, DataOperationSearch> getOperations() {
                 def ops = new HashMap<QueryOperation, DataOperationSearch>()
@@ -117,15 +116,15 @@ class JsonSnappyDataStrategySpec extends Specification {
         setup:
         def futureMock = Mock(Future)
         def executorService = Mock(ExecutorService)
-        def customStrategy = new JsonSnappyDataStrategy()
+        def customStrategy = new JsonLz4DataStrategy()
         customStrategy.setRetrieveDataExecutor(executorService)
         File mockFile = Mock()
-        def indexes = [new IndexDefinition("myindex", mockFile, JsonSnappyDataStrategy.JSON_SNAPPY)]
+        def indexes = [new IndexDefinition("myindex", mockFile, JsonLz4DataStrategy.JSON_LZ4)]
         def dataFiles = new HashMap<Integer, File>();
         dataFiles.put(1, mockFile)
         dataFiles.put(2, mockFile)
         dataFiles.put(3, mockFile)
-        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", "yyyy-MM-dd", indexes, dataFiles, JsonSnappyDataStrategy.JSON_SNAPPY)
+        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", "yyyy-MM-dd", indexes, dataFiles, JsonLz4DataStrategy.JSON_LZ4)
         def fileOffsets = [
                 new FileOffset(1, 12, null),
                 new FileOffset(1, 13, null),
@@ -141,7 +140,7 @@ class JsonSnappyDataStrategySpec extends Specification {
         def numberOfResults = customStrategy.findDataSetsByFileOffsets(deliveryChunkDefinition, fileOffsets, resultCallback, jumboQuery)
         then:
         numberOfResults == 6
-        2 * executorService.submit(_ as JsonSnappyRetrieveDataSetsTask) >> futureMock
+        2 * executorService.submit(_ as JsonLz4RetrieveDataSetsTask) >> futureMock
         2 * futureMock.get() >> 3
     }
 
@@ -149,21 +148,21 @@ class JsonSnappyDataStrategySpec extends Specification {
         setup:
         def futureMock = Mock(Future)
         def executorService = Mock(ExecutorService)
-        def customStrategy = new JsonSnappyDataStrategy()
+        def customStrategy = new JsonLz4DataStrategy()
         customStrategy.setRetrieveDataExecutor(executorService)
         File mockFile = Mock()
         def dataFiles = new HashMap<Integer, File>();
         dataFiles.put(1, mockFile)
         dataFiles.put(2, mockFile)
         dataFiles.put(3, mockFile)
-        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", "yyyy-MM-dd", [], dataFiles, JsonSnappyDataStrategy.JSON_SNAPPY)
+        def deliveryChunkDefinition = new DeliveryChunkDefinition("testchunkkey", "testcollection", "yyyy-MM-dd", [], dataFiles, JsonLz4DataStrategy.JSON_LZ4)
         def jumboQuery = new JumboQuery()
         def resultCallback = Mock(ResultCallback)
         when:
         def numberOfResults = customStrategy.findDataSetsByFileOffsets(deliveryChunkDefinition, [], resultCallback, jumboQuery)
         then:
         numberOfResults == 9
-        3 * executorService.submit(_ as JsonSnappyRetrieveDataSetsTask) >> futureMock
+        3 * executorService.submit(_ as JsonLz4RetrieveDataSetsTask) >> futureMock
         3 * futureMock.get() >> 3
     }
 
@@ -172,16 +171,18 @@ class JsonSnappyDataStrategySpec extends Specification {
         def folderStr = FileUtils.getTempDirectory().absolutePath + "/" + UUID.randomUUID().toString() + "/"
         def folder = new File(folderStr)
         FileUtils.forceMkdir(folder);
-        def dataFile = new File(folderStr + "/testdata")
-        def bytes = "Hello World".getBytes("UTF-8")
-        SnappyChunksUtil.copy(new ByteArrayInputStream(bytes), dataFile, bytes.length, 100l, 32 * 1024)
-        def strategy = new JsonSnappyDataStrategy()
+        new File(folderStr + "/testdata").text = "Hello World"
+        def out = new DataOutputStream(new FileOutputStream(new File(folderStr + "/testdata.chunks")))
+        out.writeLong(1000l)
+        out.writeLong(2000l)
+        out.close()
+        def strategy = new JsonLz4DataStrategy()
         when:
         def sizes = strategy.getCollectionDataSize(folder)
         then:
-        sizes.getCompressedSize() == 61
-        sizes.getUncompressedSize() == 11
-        sizes.getDatasets() == 100
+        sizes.getCompressedSize() == 27
+        sizes.getUncompressedSize() == 1000l
+        sizes.getDatasets() == 2000l
         cleanup:
         folder.deleteDir()
     }

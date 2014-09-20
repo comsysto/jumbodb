@@ -1,6 +1,6 @@
 {
     "description": "Carstens Twitter Test Import",
-    "deliveryChunkKey": "first_delivery",
+    "deliveryChunkKey": "first_delivery3",
     "hosts": [
         {"host": "localhost", "port": 12001}
     ],
@@ -11,10 +11,10 @@
     "checksum": "MD5",
     "importCollection": [
         {
-            "input": "file:///C:/Development/data/twitter/input_big/",
+            "input": "file:///C:/Development/data/twitter/input/",
             "description": "Twitter data",
-            "collectionName": "twitter_kryo",
-            "dataStrategy": "KRYO_SNAPPY",
+            "collectionName": "twitter_lz4",
+            "dataStrategy": "JSON_LZ4",
             "indexes": [
                 {
                     "indexName": "screen_name",

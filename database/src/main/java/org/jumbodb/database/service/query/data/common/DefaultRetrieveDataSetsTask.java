@@ -2,6 +2,8 @@ package org.jumbodb.database.service.query.data.common;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.*;
+import org.jumbodb.data.common.compression.Blocks;
+import org.jumbodb.data.common.compression.CompressionBlocksUtil;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
@@ -32,13 +34,16 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
     protected final JumboQuery searchQuery;
     protected final ResultCallback resultCallback;
     protected final List<FileOffset> offsets;
+    protected final Cache dataCompressionBlocksCache;
     protected Logger log = LoggerFactory.getLogger(JsonSnappyLineBreakRetrieveDataSetsTask.class);
     protected int results = 0;
     protected DataStrategy strategy;
 
 
-    public DefaultRetrieveDataSetsTask(Cache datasetsByOffsetsCache, ResultCallback resultCallback, DataStrategy strategy, String dateFormat, Set<FileOffset> offsets, JumboQuery searchQuery, File file, boolean scannedSearch) {
+
+    public DefaultRetrieveDataSetsTask(Cache datasetsByOffsetsCache, Cache dataCompressionBlocksCache,  ResultCallback resultCallback, DataStrategy strategy, String dateFormat, Set<FileOffset> offsets, JumboQuery searchQuery, File file, boolean scannedSearch) {
         this.datasetsByOffsetsCache = datasetsByOffsetsCache;
+        this.dataCompressionBlocksCache = dataCompressionBlocksCache;
         this.resultCallback = resultCallback;
         this.resultCacheEnabled = searchQuery.isResultCacheEnabled();
         this.simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
@@ -215,5 +220,27 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
         byte[] jsonDataset = new byte[datasetLength];
         System.arraycopy(buffer, fromOffset, jsonDataset, 0, datasetLength);
         return jsonDataset;
+    }
+
+    protected Blocks getCompressionBlocksPyFile() {
+        Cache.ValueWrapper valueWrapper = dataCompressionBlocksCache.get(file);
+        if (valueWrapper != null) {
+            return (Blocks) valueWrapper.get();
+        }
+        Blocks blocksByFile = CompressionBlocksUtil.getBlocksByFile(file);
+        dataCompressionBlocksCache.put(file, blocksByFile);
+        return blocksByFile;
+    }
+
+    protected long calculateBlockOffsetUncompressed(long chunkIndex, int compressionBlockSize) {
+        return chunkIndex * compressionBlockSize;
+    }
+
+    protected long calculateBlockOffsetCompressed(long blockIndex, List<Integer> compressionBlocks) {
+        long result = 0l;
+        for (int i = 0; i < blockIndex; i++) {
+            result += compressionBlocks.get(i) + 4; // 4 byte for length of chunk
+        }
+        return result + 16;
     }
 }

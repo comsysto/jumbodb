@@ -42,7 +42,7 @@ public class JsonSnappyDataOutputFormat<K, V> extends TextOutputFormat<K, V> {
         private final BufferedOutputStream bufferedOutputStream;
         private final SnappyOutputStream snappyOutputStream;
         private final DataOutputStream dataOutputStream;
-        private final List<Integer> chunkSizes = new LinkedList<Integer>();
+        private final List<Integer> blockSizes = new LinkedList<Integer>();
         private final Path file;
         private final FileSystem fs;
         private final MessageDigest fileMessageDigest;
@@ -60,7 +60,7 @@ public class JsonSnappyDataOutputFormat<K, V> extends TextOutputFormat<K, V> {
             bufferedOutputStream = new BufferedOutputStream(digestOutputStream) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
-                    chunkSizes.add(i2);
+                    blockSizes.add(i2);
                     super.write(bytes, i, i2);
                 }
             };
@@ -124,8 +124,8 @@ public class JsonSnappyDataOutputFormat<K, V> extends TextOutputFormat<K, V> {
             dos.writeLong(length);
             dos.writeLong(datasets);
             dos.writeInt(SNAPPY_BLOCK_SIZE);
-            for (Integer chunkSize : chunkSizes) {
-                dos.writeInt(chunkSize);
+            for (Integer blockSize : blockSizes) {
+                dos.writeInt(blockSize);
             }
             IOUtils.closeStream(dos);
             IOUtils.closeStream(digestStream);

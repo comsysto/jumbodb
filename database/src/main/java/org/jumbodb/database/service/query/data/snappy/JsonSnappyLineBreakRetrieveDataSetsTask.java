@@ -9,6 +9,8 @@ import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
+import org.jumbodb.database.service.query.data.common.DefaultDataStrategy;
+import org.jumbodb.database.service.query.data.common.DefaultRetrieveDataSetsTask;
 import org.springframework.cache.Cache;
 import org.xerial.snappy.Snappy;
 
@@ -21,13 +23,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractSnappyRetrieveDataSetsTask {
+public class JsonSnappyLineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
     private ObjectMapper jsonParser = new ObjectMapper();
 
     public JsonSnappyLineBreakRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
       ResultCallback resultCallback, DataStrategy strategy, Cache datasetsByOffsetsCache,
-      Cache dataSnappyChunksCache, String dateFormat, boolean scannedSearch) {
-        super(datasetsByOffsetsCache, resultCallback, strategy, dateFormat, offsets, searchQuery, file, scannedSearch, dataSnappyChunksCache);
+      Cache dataCompressionBlocksCache, String dateFormat, boolean scannedSearch) {
+        super(datasetsByOffsetsCache, dataCompressionBlocksCache, resultCallback, strategy, dateFormat, offsets, searchQuery, file, scannedSearch);
     }
 
     @Override
@@ -36,7 +38,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends AbstractSnappyRetri
         BufferedInputStream bis = null;
         try {
             fis = new FileInputStream(file);
-            Blocks blocks = getSnappyChunksByFile();
+            Blocks blocks = getCompressionBlocksPyFile();
             Collections.sort(leftOffsets);
             bis = new BufferedInputStream(fis);
             byte[] readBufferCompressed = new byte[blocks.getBlockSize() * 2];

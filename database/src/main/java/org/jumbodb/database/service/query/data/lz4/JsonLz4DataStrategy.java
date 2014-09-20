@@ -21,7 +21,7 @@ public class JsonLz4DataStrategy extends AbstractJsonLz4DataStrategy {
     public static final String JSON_LZ4 = "JSON_LZ4";
 
     private ExecutorService retrieveDataExecutor;
-    private Cache dataSnappyChunksCache;
+    private Cache dataCompressionBlocksCache;
     private Cache datasetsByOffsetsCache;
 
     @Override
@@ -34,7 +34,7 @@ public class JsonLz4DataStrategy extends AbstractJsonLz4DataStrategy {
                                         List<Future<Integer>> tasks, File file, Set<FileOffset> offsets, DeliveryChunkDefinition deliveryChunkDefinition, boolean scannedSearch) {
         Future<Integer> future = retrieveDataExecutor.submit(
                 new JsonLz4RetrieveDataSetsTask(file, offsets, searchQuery,
-                        resultCallback, this, datasetsByOffsetsCache, deliveryChunkDefinition.getDateFormat(), scannedSearch));
+                        resultCallback, this, datasetsByOffsetsCache, dataCompressionBlocksCache, deliveryChunkDefinition.getDateFormat(), scannedSearch));
         tasks.add(future);
         resultCallback.collect(new FutureCancelableTask(future));
     }
@@ -45,8 +45,8 @@ public class JsonLz4DataStrategy extends AbstractJsonLz4DataStrategy {
     }
 
     @Required
-    public void setDataSnappyChunksCache(Cache dataSnappyChunksCache) {
-        this.dataSnappyChunksCache = dataSnappyChunksCache;
+    public void setDataCompressionBlocksCache(Cache dataCompressionBlocksCache) {
+        this.dataCompressionBlocksCache = dataCompressionBlocksCache;
     }
 
     @Required

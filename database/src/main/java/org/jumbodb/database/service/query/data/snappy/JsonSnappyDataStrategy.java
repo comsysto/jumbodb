@@ -21,7 +21,7 @@ public class JsonSnappyDataStrategy extends AbstractJsonSnappyDataStrategy {
     public static final String JSON_SNAPPY = "JSON_SNAPPY";
 
     private ExecutorService retrieveDataExecutor;
-    private Cache dataSnappyChunksCache;
+    private Cache dataCompressionBlocksCache;
     private Cache datasetsByOffsetsCache;
 
     @Override
@@ -34,7 +34,7 @@ public class JsonSnappyDataStrategy extends AbstractJsonSnappyDataStrategy {
                                       List<Future<Integer>> tasks, File file, Set<FileOffset> offsets, DeliveryChunkDefinition deliveryChunkDefinition, boolean scannedSearch) {
         Future<Integer> future = retrieveDataExecutor.submit(
                 new JsonSnappyRetrieveDataSetsTask(file, offsets, searchQuery,
-                        resultCallback, this, datasetsByOffsetsCache, dataSnappyChunksCache, deliveryChunkDefinition.getDateFormat(), scannedSearch));
+                        resultCallback, this, datasetsByOffsetsCache, dataCompressionBlocksCache, deliveryChunkDefinition.getDateFormat(), scannedSearch));
         tasks.add(future);
         resultCallback.collect(new FutureCancelableTask(future));
     }
@@ -45,8 +45,8 @@ public class JsonSnappyDataStrategy extends AbstractJsonSnappyDataStrategy {
     }
 
     @Required
-    public void setDataSnappyChunksCache(Cache dataSnappyChunksCache) {
-        this.dataSnappyChunksCache = dataSnappyChunksCache;
+    public void setDataCompressionBlocksCache(Cache dataCompressionBlocksCache) {
+        this.dataCompressionBlocksCache = dataCompressionBlocksCache;
     }
 
     @Required

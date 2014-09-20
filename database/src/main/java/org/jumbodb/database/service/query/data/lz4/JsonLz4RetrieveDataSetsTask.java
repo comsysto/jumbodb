@@ -25,8 +25,8 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
 
     public JsonLz4RetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
                                        ResultCallback resultCallback, DataStrategy strategy, Cache datasetsByOffsetsCache,
-                                       String dateFormat, boolean scannedSearch) {
-        super(datasetsByOffsetsCache, resultCallback, strategy, dateFormat, offsets, searchQuery, file, scannedSearch);
+                                       Cache dataCompressionBlocksCache, String dateFormat, boolean scannedSearch) {
+        super(datasetsByOffsetsCache, dataCompressionBlocksCache, resultCallback, strategy, dateFormat, offsets, searchQuery, file, scannedSearch);
     }
 
     @Override

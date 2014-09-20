@@ -1,6 +1,5 @@
 package org.jumbodb.connector.hadoop.data.output.lz4;
 
-import net.jpountz.lz4.LZ4BlockOutputStream;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -13,6 +12,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.jumbodb.common.query.ChecksumType;
 import org.jumbodb.connector.hadoop.JumboMetaUtil;
 import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
+import org.jumbodb.data.common.lz4.LZ4BlockOutputStream;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -42,6 +42,7 @@ public class JsonLz4DataOutputFormat<K, V> extends TextOutputFormat<K, V> {
         private final BufferedOutputStream bufferedOutputStream;
         private final LZ4BlockOutputStream lz4OutputStream;
         private final DataOutputStream dataOutputStream;
+        private final List<Integer> blockSizes = new LinkedList<Integer>();
         private final Path file;
         private final FileSystem fs;
         private final MessageDigest fileMessageDigest;
@@ -57,7 +58,12 @@ public class JsonLz4DataOutputFormat<K, V> extends TextOutputFormat<K, V> {
             fileMessageDigest = getMessageDigest(conf);
             digestOutputStream = getDigestOutputStream(fileOut, fileMessageDigest);
             bufferedOutputStream = new BufferedOutputStream(digestOutputStream);
-            lz4OutputStream = new LZ4BlockOutputStream(bufferedOutputStream, LZ4_BLOCK_SIZE);
+            lz4OutputStream = new LZ4BlockOutputStream(bufferedOutputStream, LZ4_BLOCK_SIZE) {
+                @Override
+                protected void onCompressedLength(int compressedLength) {
+                    blockSizes.add(compressedLength);
+                }
+            };
             dataOutputStream = new DataOutputStream(lz4OutputStream);
         }
 
@@ -117,6 +123,9 @@ public class JsonLz4DataOutputFormat<K, V> extends TextOutputFormat<K, V> {
             dos.writeLong(length);
             dos.writeLong(datasets);
             dos.writeInt(LZ4_BLOCK_SIZE);
+            for (Integer blockSize : blockSizes) {
+                dos.writeInt(blockSize);
+            }
             IOUtils.closeStream(dos);
             IOUtils.closeStream(digestStream);
             IOUtils.closeStream(fsDataOutputStream);

@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public abstract class AbstractSnappyIndexOutputFormat<T extends WritableComparab
         private final CountingOutputStream countingOutputStream;
         private final OutputStream digestStream;
         private final MessageDigest fileMessageDigest;
-        private List<Integer> chunkSizes = new LinkedList<Integer>();
+        private List<Integer> blockSizes = new ArrayList<Integer>();
         private final FSDataOutputStream fileOut;
         private long datasets = 0l;
 
@@ -59,7 +60,7 @@ public abstract class AbstractSnappyIndexOutputFormat<T extends WritableComparab
             bufferedOutputStream = new BufferedOutputStream(digestStream) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
-                    chunkSizes.add(i2);
+                    blockSizes.add(i2);
                     super.write(bytes, i, i2);
                 }
             };
@@ -83,13 +84,13 @@ public abstract class AbstractSnappyIndexOutputFormat<T extends WritableComparab
             IOUtils.closeStream(digestStream);
             IOUtils.closeStream(fileOut);
             Configuration conf = taskAttemptContext.getConfiguration();
-            writeSnappyChunks(conf);
+            writeSnappyBlocks(conf);
             writeMd5Digest(file, fileMessageDigest, taskAttemptContext.getConfiguration());
             JumboMetaUtil.writeIndexMetaData(file.getParent(), getStrategy(), taskAttemptContext);
 
         }
 
-        private void writeSnappyChunks(Configuration configuration) throws IOException {
+        private void writeSnappyBlocks(Configuration configuration) throws IOException {
             Path path = file.suffix(".blocks");
             FSDataOutputStream fsDataOutputStream = fs.create(path, false);
             MessageDigest messageDigest = getMessageDigest(configuration);
@@ -98,8 +99,9 @@ public abstract class AbstractSnappyIndexOutputFormat<T extends WritableComparab
             dos.writeLong(countingOutputStream.getByteCount());
             dos.writeLong(datasets);
             dos.writeInt(getSnappyBlockSize());
-            for (Integer chunkSize : chunkSizes) {
-                dos.writeInt(chunkSize);
+            dos.writeInt(blockSizes.size() - 1);
+            for(int i = 1; i < blockSizes.size(); i++) {
+                dos.writeInt(blockSizes.get(i));
             }
             IOUtils.closeStream(dos);
             IOUtils.closeStream(digestStream);

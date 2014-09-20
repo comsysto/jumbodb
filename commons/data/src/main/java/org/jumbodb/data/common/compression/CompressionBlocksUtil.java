@@ -1,6 +1,7 @@
 package org.jumbodb.data.common.compression;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.UnhandledException;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -27,9 +28,9 @@ public class CompressionBlocksUtil {
             return new Blocks(length, datasets, compressionBlockSize, numberOfBlocks, snappyChunks);
 
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new UnhandledException(e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UnhandledException(e);
         } finally {
             IOUtils.closeQuietly(blocksDis);
             IOUtils.closeQuietly(blocksFis);

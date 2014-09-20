@@ -40,8 +40,8 @@ public class TestenODB3 {
         query.setCollection("twitter_lz4");
         query.setResultCacheEnabled(false);
         long start = System.currentTimeMillis();
-        List<Map> daily = jumboDriver.find(Map.class, query);
-//        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM twitter_lz4 where user.screen_name = 'Mahahathali'");
+//        List<Map> daily = jumboDriver.find(Map.class, query);
+        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM twitter_snappy where user.screen_name = 'EsAdolescencia'");
         System.out.println(daily);
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }

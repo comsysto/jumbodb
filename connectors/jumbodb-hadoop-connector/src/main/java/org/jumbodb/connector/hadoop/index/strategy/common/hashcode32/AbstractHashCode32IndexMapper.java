@@ -17,7 +17,6 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractHashCode32IndexMapper<T> extends AbstractIndexMapper<T> {
-    public static final String HASHCODE32_SNAPPY = "HASHCODE32_SNAPPY";
 
     private IntWritable keyW = new IntWritable();
     private FileOffsetWritable valueW = new FileOffsetWritable();
@@ -35,11 +34,6 @@ public abstract class AbstractHashCode32IndexMapper<T> extends AbstractIndexMapp
     }
 
     @Override
-    public String getStrategy() {
-        return HASHCODE32_SNAPPY;
-    }
-
-    @Override
     public Class<? extends Partitioner> getPartitioner() {
         return HashCode32RangePartitioner.class;
     }
@@ -47,11 +41,6 @@ public abstract class AbstractHashCode32IndexMapper<T> extends AbstractIndexMapp
     @Override
     public Class<? extends WritableComparable> getOutputKeyClass() {
         return IntWritable.class;
-    }
-
-    @Override
-    public Class<? extends OutputFormat> getOutputFormat() {
-        return HashCode32SnappyIndexOutputFormat.class;
     }
 
     public abstract String getIndexableValue(T input);

@@ -83,11 +83,9 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
 
     public abstract Class<? extends Partitioner> getPartitioner();
     public abstract Class<? extends WritableComparable> getOutputKeyClass();
-    public abstract Class<? extends OutputFormat> getOutputFormat();
 
     public abstract void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException;
     public abstract String getIndexName();
-    public abstract String getStrategy();
     public abstract Class<T> getJsonClass();
 
     public int getNumberOfOutputFiles() {

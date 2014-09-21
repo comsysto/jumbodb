@@ -15,8 +15,6 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractFloatIndexMapper<T> extends AbstractIndexMapper<T> {
-    public static final String FLOAT_SNAPPY = "FLOAT_SNAPPY";
-
     private FloatWritable keyW = new FloatWritable();
     private FileOffsetWritable valueW = new FileOffsetWritable();
 
@@ -32,12 +30,6 @@ public abstract class AbstractFloatIndexMapper<T> extends AbstractIndexMapper<T>
     }
 
     @Override
-    public String getStrategy() {
-        return FLOAT_SNAPPY;
-    }
-
-
-    @Override
     public Class<? extends Partitioner> getPartitioner() {
         return FloatRangePartitioner.class;
     }
@@ -45,11 +37,6 @@ public abstract class AbstractFloatIndexMapper<T> extends AbstractIndexMapper<T>
     @Override
     public Class<? extends WritableComparable> getOutputKeyClass() {
         return FloatWritable.class;
-    }
-
-    @Override
-    public Class<? extends OutputFormat> getOutputFormat() {
-        return FloatSnappyIndexOutputFormat.class;
     }
 
     public abstract Float getIndexableValue(T input);

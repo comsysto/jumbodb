@@ -17,7 +17,6 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractIntegerIndexMapper<T> extends AbstractIndexMapper<T> {
-    public static final String INTEGER_SNAPPY = "INTEGER_SNAPPY";
     private IntWritable keyW = new IntWritable();
     private FileOffsetWritable valueW = new FileOffsetWritable();
 
@@ -33,12 +32,6 @@ public abstract class AbstractIntegerIndexMapper<T> extends AbstractIndexMapper<
     }
 
     @Override
-    public String getStrategy() {
-        return INTEGER_SNAPPY;
-    }
-
-
-    @Override
     public Class<? extends Partitioner> getPartitioner() {
         return IntegerRangePartitioner.class;
     }
@@ -46,11 +39,6 @@ public abstract class AbstractIntegerIndexMapper<T> extends AbstractIndexMapper<
     @Override
     public Class<? extends WritableComparable> getOutputKeyClass() {
         return IntWritable.class;
-    }
-
-    @Override
-    public Class<? extends OutputFormat> getOutputFormat() {
-        return IntegerSnappyIndexOutputFormat.class;
     }
 
     public abstract Integer getIndexableValue(T input);

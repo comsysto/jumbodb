@@ -71,14 +71,14 @@ public class JumboJobCreator {
         List<ControlledJob> dataImportJob = ImportJobCreator.createDataImportJobs(conf, jumboCustomImportJob);
         controlledJobs.addAll(dataImportJob);
 
-        for (Class<? extends AbstractIndexMapper> map : jumboCustomImportJob.getMapper()) {
-            IndexJobCreator.IndexControlledJob indexJob = IndexJobCreator.createCustomIndexJob(conf, jumboCustomImportJob, map);
+        for (JumboCustomIndexJob customIndexJob : jumboCustomImportJob.getIndexJobs()) {
+            IndexJobCreator.IndexControlledJob indexJob = IndexJobCreator.createCustomIndexJob(conf, jumboCustomImportJob, customIndexJob.getMapper(), customIndexJob.getOutputFormat());
             ControlledJob controlledIndexJob = indexJob.getControlledJob();
             controlledJobs.add(controlledIndexJob);
             if (conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
 
 
-                IndexField indexInformation = IndexJobCreator.getIndexInformation(map);
+                IndexField indexInformation = IndexJobCreator.getIndexInformation(customIndexJob.getMapper(), customIndexJob.getStrategy());
                 List<ControlledJob> indexImportJob = ImportJobCreator.createIndexImportJobs(conf, jumboCustomImportJob, indexInformation);
                 for (ControlledJob controlledJob : indexImportJob) {
                     controlledJob.addDependingJob(controlledIndexJob);

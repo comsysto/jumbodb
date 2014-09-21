@@ -9,6 +9,7 @@ import org.jumbodb.connector.hadoop.index.strategy.common.hashcode32.GenericJson
 import org.jumbodb.connector.hadoop.index.strategy.common.hashcode64.GenericJsonHashCode64IndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.common.integer.GenericJsonIntegerIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.common.longval.GenericJsonLongIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.snappy.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,23 +19,23 @@ import java.util.Map;
  * @author Carsten Hufe
  */
 public class IndexStrategies {
-    private static final Map<String, Class<? extends AbstractIndexMapper>> INDEX_STRATEGIES = createIndexMapper();
+    private static final Map<String, IndexStrategy> INDEX_STRATEGIES = createIndexMapper();
 
-    private static Map<String, Class<? extends AbstractIndexMapper>> createIndexMapper() {
-        Map<String, Class<? extends AbstractIndexMapper>> indexMapper = new HashMap<String, Class<? extends AbstractIndexMapper>>();
-        indexMapper.put(GenericJsonHashCode32IndexMapper.HASHCODE32_SNAPPY, GenericJsonHashCode32IndexMapper.class);
-        indexMapper.put(GenericJsonHashCode64IndexMapper.HASHCODE64_SNAPPY, GenericJsonHashCode64IndexMapper.class);
-        indexMapper.put(GenericJsonIntegerIndexMapper.INTEGER_SNAPPY, GenericJsonIntegerIndexMapper.class);
-        indexMapper.put(GenericJsonLongIndexMapper.LONG_SNAPPY, GenericJsonLongIndexMapper.class);
-        indexMapper.put(GenericJsonFloatIndexMapper.FLOAT_SNAPPY, GenericJsonFloatIndexMapper.class);
-        indexMapper.put(GenericJsonDoubleIndexMapper.DOUBLE_SNAPPY, GenericJsonDoubleIndexMapper.class);
-        indexMapper.put(GenericJsonGeohashIndexMapper.GEOHASH_SNAPPY, GenericJsonGeohashIndexMapper.class);
-        indexMapper.put(GenericJsonDateTimeIndexMapper.DATETIME_SNAPPY, GenericJsonDateTimeIndexMapper.class);
+    private static Map<String, IndexStrategy> createIndexMapper() {
+        Map<String, IndexStrategy> indexMapper = new HashMap<String, IndexStrategy>();
+        indexMapper.put(HashCode32SnappyIndexOutputFormat.HASHCODE32_SNAPPY, new IndexStrategy(GenericJsonHashCode32IndexMapper.class, HashCode32SnappyIndexOutputFormat.class, 64));
+        indexMapper.put(HashCode64SnappyIndexOutputFormat.HASHCODE64_SNAPPY, new IndexStrategy(GenericJsonHashCode64IndexMapper.class, HashCode64SnappyIndexOutputFormat.class, 64));
+        indexMapper.put(IntegerSnappyIndexOutputFormat.INTEGER_SNAPPY, new IndexStrategy(GenericJsonIntegerIndexMapper.class, IntegerSnappyIndexOutputFormat.class, 64));
+        indexMapper.put(LongSnappyIndexOutputFormat.LONG_SNAPPY, new IndexStrategy(GenericJsonLongIndexMapper.class, LongSnappyIndexOutputFormat.class, 64));
+        indexMapper.put(FloatSnappyIndexOutputFormat.FLOAT_SNAPPY, new IndexStrategy(GenericJsonFloatIndexMapper.class, FloatSnappyIndexOutputFormat.class, 64));
+        indexMapper.put(DoubleSnappyIndexOutputFormat.DOUBLE_SNAPPY, new IndexStrategy(GenericJsonDoubleIndexMapper.class, DoubleSnappyIndexOutputFormat.class, 64));
+        indexMapper.put(GeohashSnappyIndexOutputFormat.GEOHASH_SNAPPY, new IndexStrategy(GenericJsonGeohashIndexMapper.class, GeohashSnappyIndexOutputFormat.class, 64));
+        indexMapper.put(DateTimeSnappyIndexOutputFormat.DATETIME_SNAPPY, new IndexStrategy(GenericJsonDateTimeIndexMapper.class, DateTimeSnappyIndexOutputFormat.class, 64));
         return Collections.unmodifiableMap(indexMapper);
     }
 
-    public static Class<? extends AbstractIndexMapper> getIndexStrategy(String strategyKey) {
-        final Class<? extends AbstractIndexMapper> strategy = INDEX_STRATEGIES.get(strategyKey);
+    public static IndexStrategy getIndexStrategy(String strategyKey) {
+        final IndexStrategy strategy = INDEX_STRATEGIES.get(strategyKey);
         if(strategy == null) {
             throw new IllegalStateException("Index strategy is not available " + strategyKey);
         }

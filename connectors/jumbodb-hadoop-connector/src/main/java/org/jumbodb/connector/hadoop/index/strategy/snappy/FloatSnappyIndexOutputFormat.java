@@ -3,12 +3,12 @@ package org.jumbodb.connector.hadoop.index.strategy.snappy;
 import org.apache.hadoop.io.FloatWritable;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.index.output.AbstractSnappyIndexOutputFormat;
-import org.jumbodb.connector.hadoop.index.strategy.common.floatval.AbstractFloatIndexMapper;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class FloatSnappyIndexOutputFormat extends AbstractSnappyIndexOutputFormat<FloatWritable, FileOffsetWritable> {
+    public static final String FLOAT_SNAPPY = "FLOAT_SNAPPY";
 
     @Override
     protected void write(FloatWritable k, FileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException {
@@ -24,6 +24,6 @@ public class FloatSnappyIndexOutputFormat extends AbstractSnappyIndexOutputForma
 
     @Override
     protected String getStrategy() {
-        return AbstractFloatIndexMapper.FLOAT_SNAPPY;
+        return FLOAT_SNAPPY;
     }
 }

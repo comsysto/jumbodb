@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class HashCode32SnappyIndexOutputFormat extends AbstractSnappyIndexOutputFormat<IntWritable, FileOffsetWritable> {
+    public static final String HASHCODE32_SNAPPY = "HASHCODE32_SNAPPY";
 
     @Override
     protected void write(IntWritable k, FileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException {
@@ -24,6 +25,6 @@ public class HashCode32SnappyIndexOutputFormat extends AbstractSnappyIndexOutput
 
     @Override
     protected String getStrategy() {
-        return AbstractHashCode32IndexMapper.HASHCODE32_SNAPPY;
+        return HASHCODE32_SNAPPY;
     }
 }

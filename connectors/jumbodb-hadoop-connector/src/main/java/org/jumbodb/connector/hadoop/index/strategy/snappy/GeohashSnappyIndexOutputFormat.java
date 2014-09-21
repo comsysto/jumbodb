@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class GeohashSnappyIndexOutputFormat extends AbstractSnappyIndexOutputFormat<IntWritable, GeoFileOffsetWritable> {
+    public static final String GEOHASH_SNAPPY = "GEOHASH_SNAPPY";
 
     @Override
     protected void write(IntWritable k, GeoFileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException {
@@ -26,6 +27,6 @@ public class GeohashSnappyIndexOutputFormat extends AbstractSnappyIndexOutputFor
 
     @Override
     protected String getStrategy() {
-        return AbstractGeohashIndexMapper.GEOHASH_SNAPPY;
+        return GEOHASH_SNAPPY;
     }
 }

@@ -18,7 +18,6 @@ import java.util.List;
  * Time: 3:26 PM
  */
 public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<T> {
-    public static final String GEOHASH_SNAPPY = "GEOHASH_SNAPPY";
     private IntWritable keyW = new IntWritable();
     private GeoFileOffsetWritable valueW = new GeoFileOffsetWritable();
 
@@ -39,12 +38,6 @@ public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<
     }
 
     @Override
-    public String getStrategy() {
-        return GEOHASH_SNAPPY;
-    }
-
-
-    @Override
     public Class<? extends Partitioner> getPartitioner() {
         return GeohashRangePartitioner.class;
     }
@@ -57,11 +50,6 @@ public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<
     @Override
     public Class<?> getOutputValueClass() {
         return GeoFileOffsetWritable.class;
-    }
-
-    @Override
-    public Class<? extends OutputFormat> getOutputFormat() {
-        return GeohashSnappyIndexOutputFormat.class;
     }
 
     public abstract List<Double> getIndexableValue(T input);

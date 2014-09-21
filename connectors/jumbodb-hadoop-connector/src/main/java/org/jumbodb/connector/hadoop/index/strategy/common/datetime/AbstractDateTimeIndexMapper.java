@@ -17,8 +17,6 @@ import java.util.Date;
  * Time: 3:26 PM
  */
 public abstract class AbstractDateTimeIndexMapper<T> extends AbstractIndexMapper<T> {
-    public static final String DATETIME_SNAPPY = "DATETIME_SNAPPY";
-
     private LongWritable keyW = new LongWritable();
     private FileOffsetWritable valueW = new FileOffsetWritable();
 
@@ -34,12 +32,6 @@ public abstract class AbstractDateTimeIndexMapper<T> extends AbstractIndexMapper
     }
 
     @Override
-    public String getStrategy() {
-        return DATETIME_SNAPPY;
-    }
-
-
-    @Override
     public Class<? extends Partitioner> getPartitioner() {
         return DateTimeRangePartitioner.class;
     }
@@ -47,11 +39,6 @@ public abstract class AbstractDateTimeIndexMapper<T> extends AbstractIndexMapper
     @Override
     public Class<? extends WritableComparable> getOutputKeyClass() {
         return LongWritable.class;
-    }
-
-    @Override
-    public Class<? extends OutputFormat> getOutputFormat() {
-        return DateTimeSnappyIndexOutputFormat.class;
     }
 
     public abstract Date getIndexableValue(T input);

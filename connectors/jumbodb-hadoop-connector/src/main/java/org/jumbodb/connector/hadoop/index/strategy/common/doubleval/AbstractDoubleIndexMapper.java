@@ -17,8 +17,6 @@ import java.io.IOException;
  * Time: 3:26 PM
  */
 public abstract class AbstractDoubleIndexMapper<T> extends AbstractIndexMapper<T> {
-    public static final String DOUBLE_SNAPPY = "DOUBLE_SNAPPY";
-
     private DoubleWritable keyW = new DoubleWritable();
     private FileOffsetWritable valueW = new FileOffsetWritable();
 
@@ -34,12 +32,6 @@ public abstract class AbstractDoubleIndexMapper<T> extends AbstractIndexMapper<T
     }
 
     @Override
-    public String getStrategy() {
-        return DOUBLE_SNAPPY;
-    }
-
-
-    @Override
     public Class<? extends Partitioner> getPartitioner() {
         return DoubleRangePartitioner.class;
     }
@@ -47,11 +39,6 @@ public abstract class AbstractDoubleIndexMapper<T> extends AbstractIndexMapper<T
     @Override
     public Class<? extends WritableComparable> getOutputKeyClass() {
         return DoubleWritable.class;
-    }
-
-    @Override
-    public Class<? extends OutputFormat> getOutputFormat() {
-        return DoubleSnappyIndexOutputFormat.class;
     }
 
     public abstract Double getIndexableValue(T input);

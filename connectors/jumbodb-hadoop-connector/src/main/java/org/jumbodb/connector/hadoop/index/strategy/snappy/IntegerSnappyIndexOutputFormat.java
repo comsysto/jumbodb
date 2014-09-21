@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class IntegerSnappyIndexOutputFormat extends AbstractSnappyIndexOutputFormat<IntWritable, FileOffsetWritable> {
+    public static final String INTEGER_SNAPPY = "INTEGER_SNAPPY";
 
     @Override
     protected void write(IntWritable k, FileOffsetWritable v, DataOutputStream out) throws IOException, InterruptedException {
@@ -24,6 +25,6 @@ public class IntegerSnappyIndexOutputFormat extends AbstractSnappyIndexOutputFor
 
     @Override
     protected String getStrategy() {
-        return AbstractIntegerIndexMapper.INTEGER_SNAPPY;
+        return INTEGER_SNAPPY;
     }
 }

@@ -12,7 +12,6 @@ import org.jumbodb.database.service.query.index.common.doubleval.DoubleEqOperati
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
-import org.jumbodb.database.service.query.index.snappy.DoubleSnappyIndexStrategy
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -48,7 +47,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "verify chunk size"() {
         when:
-        def snappyChunkSize = strategy.getSnappyChunkSize()
+        def snappyChunkSize = strategy.getCompressionBlockSize()
         then:
         snappyChunkSize == 32640
     }

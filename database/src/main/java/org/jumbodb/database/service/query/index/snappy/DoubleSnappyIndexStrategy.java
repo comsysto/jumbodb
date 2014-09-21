@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class DoubleSnappyIndexStrategy extends NumberSnappyIndexStrategy<Double, Double, NumberIndexFile<Double>> {
 
-    public static final int SNAPPY_INDEX_CHUNK_SIZE = 32 * 1020; // must be a multiple of 20! (8 byte double data, 4 byte file name hash, 8 byte offset)
+    public static final int SNAPPY_INDEX_BLOCK_SIZE = 32 * 1020; // must be a multiple of 20! (8 byte double data, 4 byte file name hash, 8 byte offset)
 
     private Logger log = LoggerFactory.getLogger(DoubleSnappyIndexStrategy.class);
 
@@ -37,8 +37,8 @@ public class DoubleSnappyIndexStrategy extends NumberSnappyIndexStrategy<Double,
     }
 
     @Override
-    public int getSnappyChunkSize() {
-        return SNAPPY_INDEX_CHUNK_SIZE;
+    public int getCompressionBlockSize() {
+        return SNAPPY_INDEX_BLOCK_SIZE;
     }
 
     @Override

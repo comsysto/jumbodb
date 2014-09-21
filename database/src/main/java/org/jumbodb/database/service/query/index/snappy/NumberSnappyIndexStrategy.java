@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.data.common.compression.CompressionBlocksUtil;
@@ -39,7 +40,6 @@ import java.util.concurrent.Future;
 /**
  * @author Carsten Hufe
  */
-// CARSTEN noch von NumberIndexStrategy ableiten für delegate call findFirstMatchingChunk
 public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFile<IFV>> implements IndexStrategy {
 
     private Logger log = LoggerFactory.getLogger(NumberSnappyIndexStrategy.class);
@@ -160,7 +160,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         } catch(ExecutionException e) {
             throw (RuntimeException)e.getCause();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new UnhandledException(e);
         }
     }
 
@@ -178,11 +178,6 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
                     groupByIndexFile.add(indexFile.getIndexFile(), indexQuery);
                 }
             }
-//            for (QueryClause queryClause : indexQueries.getClauses()) {
-//                if(acceptIndexFile(queryClause, indexFile)) {
-//                    groupByIndexFile.add(indexFile.getIndexFile(), queryClause);
-//                }
-//            }
         }
         return groupByIndexFile;
     }
@@ -253,6 +248,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
                 fis = new FileInputStream(indexFile);
                 bis = new BufferedInputStream(fis);
                 dis = new DataInputStream(bis);
+                // CARSTEN attention getOffsetfor is snappy specific +4
                 dis.skip(blocks.getOffsetForBlock(currentChunk));
                 Set<FileOffset> result = new HashSet<FileOffset>();
                 while(currentChunk < numberOfChunks) {
@@ -328,7 +324,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
     }
 
     public abstract Map<QueryOperation, IndexOperationSearch<T, IFV, IF>> getQueryOperationsStrategies();
-    public abstract int getSnappyChunkSize();
+    public abstract int getCompressionBlockSize();
     public abstract T readValueFromDataInput(DataInput dis) throws IOException;
     public abstract T readLastValue(byte[] uncompressed);
     public abstract T readFirstValue(byte[] uncompressed);

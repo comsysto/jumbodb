@@ -46,7 +46,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
 
     def "verify chunk size"() {
         when:
-        def snappyChunkSize = strategy.getSnappyChunkSize()
+        def snappyChunkSize = strategy.getCompressionBlockSize()
         then:
         snappyChunkSize == 48 * 1024
     }

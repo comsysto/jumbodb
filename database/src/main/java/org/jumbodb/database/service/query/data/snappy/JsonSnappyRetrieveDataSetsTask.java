@@ -2,6 +2,7 @@ package org.jumbodb.database.service.query.data.snappy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.data.common.compression.CompressionUtil;
@@ -55,7 +56,7 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
                 long searchOffset = offset.getOffset();
                 // delete buffer when offset is not inside range and skip
                 // load when <= 5 because 4 byte for length and 1 starting for dataset
-                if (resultBuffer.length <= 5 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
+                if (resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
                     long chunkIndex = (searchOffset / blocks.getBlockSize());
                     long chunkOffsetCompressed = calculateBlockOffsetCompressed(chunkIndex, blocks.getBlocks());
                     long chunkOffsetUncompressed = calculateBlockOffsetUncompressed(chunkIndex,
@@ -70,12 +71,12 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
                 }
 
                 int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
-                int datasetLength = Integer.MIN_VALUE;
-                if (resultBuffer.length >= 4) {
+                int datasetLength = Integer.MAX_VALUE;
+                if ((resultBuffer.length - datasetStartOffset) >= 4) {
                     datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
                     datasetStartOffset += 4; // int length
                 }
-                while ((resultBuffer.length <= 4 || datasetLength > (resultBuffer.length - datasetStartOffset))
+                while ((datasetLength > (resultBuffer.length - datasetStartOffset))
                         && datasetLength != -1) {
                     compressedFileStreamPosition += bis.read(compressedLengthBuffer);
                     int compressedLength = CompressionUtil.readInt(compressedLengthBuffer, 0);
@@ -92,8 +93,6 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
                     if (resultBuffer.length >= 4) {
                         datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
                         datasetStartOffset += 4; // int length
-                    } else {
-                        datasetLength = Integer.MIN_VALUE;
                     }
                 }
                 // end load result buffer til line break
@@ -117,13 +116,13 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
             }
         } catch (FileNotFoundException e) {
             log.error("Error", e);
-            throw new RuntimeException(e);
+            throw new UnhandledException(e);
         } catch (IOException e) {
             log.error("Error", e);
-            throw new RuntimeException(e);
+            throw new UnhandledException(e);
         } catch (RuntimeException e) {
             log.error("Error", e);
-            throw new RuntimeException(e);
+            throw new UnhandledException(e);
         }
         finally {
             IOUtils.closeQuietly(fis);

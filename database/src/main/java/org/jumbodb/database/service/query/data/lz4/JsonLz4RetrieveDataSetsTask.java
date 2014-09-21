@@ -58,7 +58,7 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
                 long searchOffset = offset.getOffset();
                 // delete buffer when offset is not inside range and skip
                 // load when <= 5 because 4 byte for length and 1 starting for dataset
-                if (resultBuffer.length <= 5 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
+                if (resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
                     long blockIndex = (searchOffset / blocks.getBlockSize());
                     long blockOffsetCompressed = calculateBlockOffsetCompressed(blockIndex, blocks.getBlocks());
                     long blockOffsetUncompressed = calculateBlockOffsetUncompressed(blockIndex,
@@ -73,12 +73,12 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
                 }
 
                 int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
-                int datasetLength = Integer.MIN_VALUE;
-                if (resultBuffer.length >= 4) {
+                int datasetLength = Integer.MAX_VALUE;
+                if ((resultBuffer.length - datasetStartOffset) >= 4) {
                     datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
                     datasetStartOffset += 4; // int length
                 }
-                while ((resultBuffer.length <= 0 || datasetLength > (resultBuffer.length - datasetStartOffset))
+                while ((datasetLength > (resultBuffer.length - datasetStartOffset))
                         && datasetLength != -1) {
                     compressedFileStreamPosition += bis.read(compressedLengthBuffer);
                     compressedFileStreamPosition += bis.read(uncompressedLengthBuffer);
@@ -100,8 +100,6 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
                     if (resultBuffer.length >= 4) {
                         datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
                         datasetStartOffset += 4; // int length
-                    } else {
-                        datasetLength = Integer.MIN_VALUE;
                     }
                 }
                 // end load result buffer til line break

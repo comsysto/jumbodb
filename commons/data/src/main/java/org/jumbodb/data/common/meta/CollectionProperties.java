@@ -83,7 +83,6 @@ public class CollectionProperties {
             return info;
         }
 
-        // CARSTEN wire date to collection info
         public String getDateFormat() {
             return dateFormat;
         }

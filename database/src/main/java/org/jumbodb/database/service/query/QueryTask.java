@@ -153,9 +153,6 @@ public class QueryTask implements Runnable {
 
         @Override
         public Integer call() {
-            // CARSTEN mehrere Implementierungen von ResultCallback machen und anhang von query die richtige auswaehlen
-            // CARSTEN eine impl. für group by mit entsprechnder synchronisierung, möglicherweise Multimaps.synchronized nutzen
-            // CARSTEN implementierung für groovy auswertung.
             return jumboSearcher.findResultAndWriteIntoCallback(query, new StreamingResultCallback(query, resultWriter, cancelableTasks, numberOfResults));
         }
     }

@@ -50,7 +50,7 @@ public abstract class AbstractDoubleIndexMapper<T> extends AbstractIndexMapper<T
 
     @Override
     public Class<? extends OutputFormat> getOutputFormat() {
-        return DoubleSnappyIndexV1OutputFormat.class;
+        return DoubleSnappyIndexOutputFormat.class;
     }
 
     public abstract Double getIndexableValue(T input);

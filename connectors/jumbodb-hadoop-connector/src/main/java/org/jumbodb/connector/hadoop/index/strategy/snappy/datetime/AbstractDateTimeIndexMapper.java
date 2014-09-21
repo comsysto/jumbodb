@@ -34,7 +34,6 @@ public abstract class AbstractDateTimeIndexMapper<T> extends AbstractIndexMapper
 
     @Override
     public String getStrategy() {
-        // CARSTEN remove version from name
         return DATETIME_SNAPPY;
     }
 

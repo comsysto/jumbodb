@@ -39,7 +39,6 @@ public abstract class AbstractGeohashIndexMapper<T> extends AbstractIndexMapper<
 
     @Override
     public String getStrategy() {
-        // CARSTEN remove version from name
         return GEOHASH_SNAPPY;
     }
 

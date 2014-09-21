@@ -183,10 +183,10 @@ class JsonLz4LineBreakRetrieveDataSetsTaskSpec extends Specification {
         task.calculateBlockOffsetCompressed(blockIndex, compressedBlockSizes) == compressedOffset
         where:
         blockIndex | compressedOffset
-        0          | 16
-        1          | 12020
-        2          | 25024
-        3          | 35028
+        0          | 0
+        1          | 12008
+        2          | 25016
+        3          | 35024
         4          | 50032
     }
 

@@ -94,17 +94,22 @@
     <bean id="dataStrategyManager" class="org.jumbodb.database.service.query.data.DataStrategyManager">
         <property name="strategies">
             <list>
-                <bean class="org.jumbodb.database.service.query.data.snappy.JsonSnappyLineBreakDataStrategy">
-                    <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
-                    <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
-                    <property name="dataCompressionBlocksCache" ref="dataCompressionBlocksCache"/>
-                </bean>
                 <bean class="org.jumbodb.database.service.query.data.snappy.JsonSnappyDataStrategy">
                     <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
                     <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
                     <property name="dataCompressionBlocksCache" ref="dataCompressionBlocksCache"/>
                 </bean>
                 <bean class="org.jumbodb.database.service.query.data.lz4.JsonLz4DataStrategy">
+                    <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
+                    <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
+                    <property name="dataCompressionBlocksCache" ref="dataCompressionBlocksCache"/>
+                </bean>
+                <bean class="org.jumbodb.database.service.query.data.snappy.JsonSnappyLineBreakDataStrategy">
+                    <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
+                    <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
+                    <property name="dataCompressionBlocksCache" ref="dataCompressionBlocksCache"/>
+                </bean>
+                <bean class="org.jumbodb.database.service.query.data.lz4.JsonLz4LineBreakDataStrategy">
                     <property name="retrieveDataExecutor" ref="retrieveDataExecutor"/>
                     <property name="datasetsByOffsetsCache" ref="datasetsByOffsetsCache"/>
                     <property name="dataCompressionBlocksCache" ref="dataCompressionBlocksCache"/>

@@ -3,6 +3,8 @@ package org.jumbodb.connector.hadoop.configuration;
 import org.apache.hadoop.io.Text;
 import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4DataInputFormat;
 import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4DataOutputFormat;
+import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4LineBreakDataInputFormat;
+import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4LineBreakDataOutputFormat;
 import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyDataInputFormat;
 import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyDataOutputFormat;
 import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyLineBreakDataInputFormat;
@@ -31,6 +33,10 @@ public class DataStrategies {
         indexMapper.put(
                 JsonLz4DataOutputFormat.STRATEGY_KEY,
                 new JsonDataStrategy(JsonLz4DataInputFormat.class, JsonLz4DataOutputFormat.class, Text.class)
+        );
+        indexMapper.put(
+                JsonLz4LineBreakDataOutputFormat.STRATEGY_KEY,
+                new JsonDataStrategy(JsonLz4LineBreakDataInputFormat.class, JsonLz4LineBreakDataOutputFormat.class, Text.class)
         );
         return Collections.unmodifiableMap(indexMapper);
     }

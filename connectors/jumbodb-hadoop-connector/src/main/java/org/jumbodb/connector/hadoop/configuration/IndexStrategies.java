@@ -1,14 +1,14 @@
 package org.jumbodb.connector.hadoop.configuration;
 
 import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.datetime.GenericJsonDateTimeIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.doubleval.GenericJsonDoubleIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.floatval.GenericJsonFloatIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.geohash.GenericJsonGeohashIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.hashcode32.GenericJsonHashCode32IndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.hashcode64.GenericJsonHashCode64IndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.integer.GenericJsonIntegerIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.longval.GenericJsonLongIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.datetime.GenericJsonDateTimeIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.doubleval.GenericJsonDoubleIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.floatval.GenericJsonFloatIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.geohash.GenericJsonGeohashIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.hashcode32.GenericJsonHashCode32IndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.hashcode64.GenericJsonHashCode64IndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.integer.GenericJsonIntegerIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.longval.GenericJsonLongIndexMapper;
 
 import java.util.Collections;
 import java.util.HashMap;

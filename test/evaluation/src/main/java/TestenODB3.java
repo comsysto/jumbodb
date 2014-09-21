@@ -36,13 +36,14 @@ public class TestenODB3 {
 
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
         JumboQuery query = new JumboQuery();
-        query.addIndexQuery(new IndexQuery("screen_name", QueryOperation.EQ, "EsAdolescencia"));
-        query.setCollection("twitter_lz4");
-        query.setResultCacheEnabled(true);
+//        query.addIndexQuery(new IndexQuery("screen_name", QueryOperation.EQ, "EsAdolescencia"));
+        query.addIndexQuery(new IndexQuery("followers_count", QueryOperation.GT, 10000));
+        query.setCollection("twitter_snappy");
+        query.setResultCacheEnabled(false);
         long start = System.currentTimeMillis();
-//        List<Map> daily = jumboDriver.find(Map.class, query);
-        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM twitter_lz4 where user.screen_name = 'EsAdolescencia'");
-        System.out.println(daily);
+        List<Map> daily = jumboDriver.find(Map.class, query);
+//        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM twitter_snappy where user.screen_name = 'EsAdolescencia'");
+//        System.out.println(daily);
         System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
     }
 }

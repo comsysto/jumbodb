@@ -11,6 +11,8 @@ import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.common.DefaultRetrieveDataSetsTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.xerial.snappy.Snappy;
 
@@ -21,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
+    private static Logger log = LoggerFactory.getLogger(JsonSnappyRetrieveDataSetsTask.class);
+
 
     private ObjectMapper jsonParser = new ObjectMapper();
 
@@ -111,8 +115,10 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
                 }
             }
         } catch (FileNotFoundException e) {
+            log.error("Error", e);
             throw new RuntimeException(e);
         } catch (IOException e) {
+            log.error("Error", e);
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(fis);
@@ -151,8 +157,10 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
                 count++;
             }
         } catch (FileNotFoundException e) {
+            log.error("Error", e);
             throw new RuntimeException(e);
         } catch (IOException e) {
+            log.error("Error", e);
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(fis);

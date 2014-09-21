@@ -24,7 +24,7 @@
                 {
                     "indexName": "followers_count",
                     "fields": ["user.followers_count"],
-                    "indexStrategy": "INTEGER"
+                    "indexStrategy": "INTEGER_SNAPPY"
                 }
             ]
         },
@@ -42,7 +42,7 @@
                 {
                     "indexName": "followers_count",
                     "fields": ["user.followers_count"],
-                    "indexStrategy": "INTEGER"
+                    "indexStrategy": "INTEGER_SNAPPY"
                 }
             ]
         }

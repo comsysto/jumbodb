@@ -22,9 +22,9 @@
                     "indexStrategy": "HASHCODE64_SNAPPY"
                 },
                 {
-                    "indexName": "created_at",
-                    "fields": ["created_at"],
-                    "indexStrategy": "DATETIME_SNAPPY"
+                    "indexName": "followers_count",
+                    "fields": ["user.followers_count"],
+                    "indexStrategy": "INTEGER"
                 }
             ]
         },
@@ -40,9 +40,9 @@
                     "indexStrategy": "HASHCODE64_SNAPPY"
                 },
                 {
-                    "indexName": "created_at",
-                    "fields": ["created_at"],
-                    "indexStrategy": "DATETIME_SNAPPY"
+                    "indexName": "followers_count",
+                    "fields": ["user.followers_count"],
+                    "indexStrategy": "INTEGER"
                 }
             ]
         }

@@ -18,7 +18,6 @@
 
 package org.jumbodb.connector.hadoop.data.output.lz4;
 
-import net.jpountz.lz4.LZ4BlockInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -33,6 +32,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.jumbodb.data.common.lz4.LZ4BlockInputStream;
 
 import java.io.DataInputStream;
 import java.io.IOException;

@@ -32,43 +32,22 @@ import net.jpountz.xxhash.XXHashFactory;
  */
 public class LZ4BlockOutputStream extends FilterOutputStream {
 
-  static final byte[] MAGIC = new byte[] { 'L', 'Z', '4', 'B', 'l', 'o', 'c', 'k' };
-  static final int MAGIC_LENGTH = MAGIC.length;
+//  static final byte[] MAGIC = new byte[] { 'L', 'Z', '4', 'B', 'l', 'o', 'c', 'k' };
+//  static final int MAGIC_LENGTH = MAGIC.length;
 
-  static final int HEADER_LENGTH =
-      MAGIC_LENGTH // magic bytes
-      + 1          // token
+  public static final int HEADER_LENGTH =
+//      MAGIC_LENGTH // magic bytes
+//      + 1          // token
       + 4          // compressed length
-      + 4          // decompressed length
-      + 4;         // checksum
+      + 4 ;         // decompressed length
+//      + 4;         // checksum
 
   static final int COMPRESSION_LEVEL_BASE = 10;
-  static final int MIN_BLOCK_SIZE = 64;
-  static final int MAX_BLOCK_SIZE = 1 << (COMPRESSION_LEVEL_BASE + 0x0F);
 
-  static final int COMPRESSION_METHOD_RAW = 0x10;
-  static final int COMPRESSION_METHOD_LZ4 = 0x20;
-
-  static final int DEFAULT_SEED = 0x9747b28c;
-
-  private static int compressionLevel(int blockSize) {
-    if (blockSize < MIN_BLOCK_SIZE) {
-      throw new IllegalArgumentException("blockSize must be >= " + MIN_BLOCK_SIZE + ", got " + blockSize);
-    } else if (blockSize > MAX_BLOCK_SIZE) {
-      throw new IllegalArgumentException("blockSize must be <= " + MAX_BLOCK_SIZE + ", got " + blockSize);
-    }
-    int compressionLevel = 32 - Integer.numberOfLeadingZeros(blockSize - 1); // ceil of log2
-    assert (1 << compressionLevel) >= blockSize;
-    assert blockSize * 2 > (1 << compressionLevel);
-    compressionLevel = Math.max(0, compressionLevel - COMPRESSION_LEVEL_BASE);
-    assert compressionLevel >= 0 && compressionLevel <= 0x0F;
-    return compressionLevel;
-  }
 
   private final int blockSize;
-  private final int compressionLevel;
   private final LZ4Compressor compressor;
-  private final Checksum checksum;
+//  private final Checksum checksum;
   private final byte[] buffer;
   private final byte[] compressedBuffer;
   private final boolean syncFlush;
@@ -85,33 +64,29 @@ public class LZ4BlockOutputStream extends FilterOutputStream {
    *                    must be >= 64 and <= 32 M
    * @param compressor  the {@link LZ4Compressor} instance to use to compress
    *                    data
-   * @param checksum    the {@link Checksum} instance to use to check data for
-   *                    integrity.
    * @param syncFlush   true if pending data should also be flushed on {@link #flush()}
    */
-  public LZ4BlockOutputStream(OutputStream out, int blockSize, LZ4Compressor compressor, Checksum checksum, boolean syncFlush) {
+  public LZ4BlockOutputStream(OutputStream out, int blockSize, LZ4Compressor compressor, boolean syncFlush) {
     super(out);
     this.blockSize = blockSize;
     this.compressor = compressor;
-    this.checksum = checksum;
-    this.compressionLevel = compressionLevel(blockSize);
     this.buffer = new byte[blockSize];
     final int compressedBlockSize = HEADER_LENGTH + compressor.maxCompressedLength(blockSize);
     this.compressedBuffer = new byte[compressedBlockSize];
     this.syncFlush = syncFlush;
     o = 0;
     finished = false;
-    System.arraycopy(MAGIC, 0, compressedBuffer, 0, MAGIC_LENGTH);
+//    System.arraycopy(MAGIC, 0, compressedBuffer, 0, MAGIC_LENGTH);
   }
 
   /**
    * Create a new instance which checks stream integrity using
    * {@link StreamingXXHash32} and doesn't sync flush.
-   * @see #LZ4BlockOutputStream(OutputStream, int, LZ4Compressor, Checksum, boolean)
+   * @see #LZ4BlockOutputStream(OutputStream, int, LZ4Compressor, boolean)
    * @see StreamingXXHash32#asChecksum()
    */
   public LZ4BlockOutputStream(OutputStream out, int blockSize, LZ4Compressor compressor) {
-    this(out, blockSize, compressor, XXHashFactory.fastestInstance().newStreamingHash32(DEFAULT_SEED).asChecksum(), false);
+    this(out, blockSize, compressor, false);
   }
 
   /**
@@ -185,25 +160,10 @@ public class LZ4BlockOutputStream extends FilterOutputStream {
     if (o == 0) {
       return;
     }
-    checksum.reset();
-    checksum.update(buffer, 0, o);
-    final int check = (int) checksum.getValue();
     int compressedLength = compressor.compress(buffer, 0, o, compressedBuffer, HEADER_LENGTH);
     onCompressedLength(compressedLength);
-    final int compressMethod;
-    if (compressedLength >= o) {
-      compressMethod = COMPRESSION_METHOD_RAW;
-      compressedLength = o;
-      System.arraycopy(buffer, 0, compressedBuffer, HEADER_LENGTH, o);
-    } else {
-      compressMethod = COMPRESSION_METHOD_LZ4;
-    }
-
-    compressedBuffer[MAGIC_LENGTH] = (byte) (compressMethod | compressionLevel);
-    writeIntLE(compressedLength, compressedBuffer, MAGIC_LENGTH + 1);
-    writeIntLE(o, compressedBuffer, MAGIC_LENGTH + 5);
-    writeIntLE(check, compressedBuffer, MAGIC_LENGTH + 9);
-    assert MAGIC_LENGTH + 13 == HEADER_LENGTH;
+    writeIntLE(compressedLength, compressedBuffer, 0);
+    writeIntLE(o, compressedBuffer, 4);
     out.write(compressedBuffer, 0, HEADER_LENGTH + compressedLength);
     o = 0;
   }
@@ -237,11 +197,8 @@ public class LZ4BlockOutputStream extends FilterOutputStream {
   public void finish() throws IOException {
     ensureNotFinished();
     flushBufferedData();
-    compressedBuffer[MAGIC_LENGTH] = (byte) (COMPRESSION_METHOD_RAW | compressionLevel);
-    writeIntLE(0, compressedBuffer, MAGIC_LENGTH + 1);
-    writeIntLE(0, compressedBuffer, MAGIC_LENGTH + 5);
-    writeIntLE(0, compressedBuffer, MAGIC_LENGTH + 9);
-    assert MAGIC_LENGTH + 13 == HEADER_LENGTH;
+    writeIntLE(0, compressedBuffer, 0);
+    writeIntLE(0, compressedBuffer, 4);
     out.write(compressedBuffer, 0, HEADER_LENGTH);
     finished = true;
     out.flush();
@@ -257,7 +214,7 @@ public class LZ4BlockOutputStream extends FilterOutputStream {
   @Override
   public String toString() {
     return getClass().getSimpleName() + "(out=" + out + ", blockSize=" + blockSize
-        + ", compressor=" + compressor + ", checksum=" + checksum + ")";
+        + ", compressor=" + compressor + ")";
   }
 
 }

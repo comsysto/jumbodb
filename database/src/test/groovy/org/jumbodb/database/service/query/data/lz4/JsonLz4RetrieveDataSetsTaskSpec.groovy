@@ -198,10 +198,10 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         where:
         blockIndex | compressedOffset
         0          | 0
-        1          | 12021
-        2          | 25042
-        3          | 35063
-        4          | 50084
+        1          | 12008
+        2          | 25016
+        3          | 35024
+        4          | 50032
     }
 
     @Unroll

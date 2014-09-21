@@ -1,4 +1,9 @@
+import net.jpountz.xxhash.StreamingXXHash32;
+import net.jpountz.xxhash.XXHashFactory;
+import org.apache.commons.lang.RandomStringUtils;
 import org.xerial.snappy.Snappy;
+
+import java.util.zip.Checksum;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,6 +14,13 @@ import org.xerial.snappy.Snappy;
  */
 public class Other {
     public static void main(String[] args) {
-        System.out.println(Snappy.maxCompressedLength(512 * 1024 * 1024));
+        StreamingXXHash32 streamingXXHash32 = XXHashFactory.fastestInstance().newStreamingHash32(0x9747b28c);
+        Checksum checksum = streamingXXHash32.asChecksum();
+        byte[] s = RandomStringUtils.randomAlphanumeric(1024 * 1024).getBytes();
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < (100 * 1024); i++) {
+//            checksum.update(s, 0, s.length);
+        }
+        System.out.println(System.currentTimeMillis() - start);
     }
 }

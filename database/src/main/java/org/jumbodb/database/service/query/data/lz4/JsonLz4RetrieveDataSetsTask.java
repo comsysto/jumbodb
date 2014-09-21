@@ -1,16 +1,15 @@
 package org.jumbodb.database.service.query.data.lz4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.jpountz.lz4.LZ4BlockInputStream;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import net.jpountz.util.Utils;
-import net.jpountz.xxhash.XXHashFactory;
 import org.apache.commons.io.IOUtils;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.data.common.compression.CompressionUtil;
+import org.jumbodb.data.common.lz4.LZ4BlockInputStream;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
@@ -23,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.Checksum;
 
 
 public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
@@ -52,10 +50,9 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
             long resultBufferEndOffset = 0l;
             byte[] compressedLengthBuffer = new byte[4];
             byte[] uncompressedLengthBuffer = new byte[4];
-            byte[] checksumBuffer = new byte[4];
             long uncompressedFileStreamPosition = 0l;
             long compressedFileStreamPosition = 0l;
-            final Checksum checksum = XXHashFactory.fastestInstance().newStreamingHash32(0x9747b28c).asChecksum();
+//            final Checksum checksum = XXHashFactory.fastestInstance().newStreamingHash32(0x9747b28c).asChecksum();
             LZ4Factory factory = LZ4Factory.fastestInstance();
             LZ4FastDecompressor decompressor = factory.fastDecompressor();
             for (FileOffset offset : leftOffsets) {
@@ -87,27 +84,24 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
 //                    compressedFileStreamPosition += bis.read(magic); // magic header and token
 //                    String x = new String(magic);
 //                    System.out.println(x);
-                    compressedFileStreamPosition += bis.skip(9); // magic header and token
+//                    compressedFileStreamPosition += bis.skip(9); // magic header and token
                     compressedFileStreamPosition += bis.read(compressedLengthBuffer);
                     compressedFileStreamPosition += bis.read(uncompressedLengthBuffer);
-                    compressedFileStreamPosition += bis.read(checksumBuffer);
 
                     int compressedLength = Utils.readIntLE(compressedLengthBuffer, 0);
                     int uncompressedLength = Utils.readIntLE(uncompressedLengthBuffer, 0);
-                    int checksumBlock = Utils.readIntLE(checksumBuffer, 0);
+//                    int checksumBlock = Utils.readIntLE(checksumBuffer, 0);
 
                     byte[] readBufferCompressed = new byte[compressedLength];
                     byte[] readBufferUncompressed = new byte[uncompressedLength];
                     int read = bis.read(readBufferCompressed, 0, compressedLength);
                     compressedFileStreamPosition += read;
                     decompressor.decompress(readBufferCompressed, readBufferUncompressed);
-                    checksum.reset();
-                    checksum.update(readBufferUncompressed, 0, uncompressedLength);
-                    if ((int) checksum.getValue() != checksumBlock) {
-                        throw new IOException("Stream is corrupted");
-                    }
-//                    int uncompressLength = Snappy
-//                            .uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
+//                    checksum.reset();
+//                    checksum.update(readBufferUncompressed, 0, uncompressedLength);
+//                    if ((int) checksum.getValue() != checksumBlock) {
+//                        throw new IOException("Stream is corrupted");
+//                    }
                     uncompressedFileStreamPosition += uncompressedLength;
                     datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
                     resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressedLength);
@@ -200,6 +194,6 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
 
     @Override
     protected int getBlockOverhead() {
-        return 21;
+        return 8;
     }
 }

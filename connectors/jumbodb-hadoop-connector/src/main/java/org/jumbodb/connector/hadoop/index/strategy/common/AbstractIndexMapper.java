@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.output;
+package org.jumbodb.connector.hadoop.index.strategy.common;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.LongWritable;

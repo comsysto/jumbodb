@@ -4,7 +4,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
-import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.AbstractIndexMapper;
 
 import java.io.IOException;
 

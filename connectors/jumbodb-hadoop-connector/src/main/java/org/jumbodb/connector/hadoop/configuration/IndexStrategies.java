@@ -1,6 +1,5 @@
 package org.jumbodb.connector.hadoop.configuration;
 
-import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.common.datetime.GenericJsonDateTimeIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.common.doubleval.GenericJsonDoubleIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.common.floatval.GenericJsonFloatIndexMapper;

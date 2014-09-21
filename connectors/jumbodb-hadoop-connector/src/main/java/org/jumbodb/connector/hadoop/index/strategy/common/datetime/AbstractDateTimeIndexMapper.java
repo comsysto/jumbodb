@@ -2,11 +2,9 @@ package org.jumbodb.connector.hadoop.index.strategy.common.datetime;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
-import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.DateTimeSnappyIndexOutputFormat;
+import org.jumbodb.connector.hadoop.index.strategy.common.AbstractIndexMapper;
 
 import java.io.IOException;
 import java.util.Date;

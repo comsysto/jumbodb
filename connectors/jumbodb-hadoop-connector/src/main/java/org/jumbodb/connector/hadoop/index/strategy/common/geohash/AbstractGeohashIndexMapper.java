@@ -3,11 +3,9 @@ package org.jumbodb.connector.hadoop.index.strategy.common.geohash;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.common.geo.geohash.GeoHash;
-import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.GeohashSnappyIndexOutputFormat;
+import org.jumbodb.connector.hadoop.index.strategy.common.AbstractIndexMapper;
 
 import java.io.IOException;
 import java.util.List;

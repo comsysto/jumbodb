@@ -1,7 +1,7 @@
 package org.jumbodb.connector.hadoop.configuration;
 
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.AbstractIndexMapper;
 
 /**
  * Created by Carsten on 21.09.2014.

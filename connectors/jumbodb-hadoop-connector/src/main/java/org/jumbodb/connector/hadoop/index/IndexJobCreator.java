@@ -11,7 +11,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.common.AbstractIndexMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;

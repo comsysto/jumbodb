@@ -1,13 +1,11 @@
 package org.jumbodb.connector.hadoop.index.strategy.common.hashcode32;
 
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.jumbodb.connector.hadoop.index.output.AbstractIndexMapper;
-import org.jumbodb.connector.hadoop.index.strategy.snappy.HashCode32SnappyIndexOutputFormat;
+import org.jumbodb.connector.hadoop.index.strategy.common.AbstractIndexMapper;
 
 import java.io.IOException;
 

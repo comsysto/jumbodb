@@ -38,7 +38,7 @@ public class TestenODB3 {
         JumboQuery query = new JumboQuery();
 //        query.addIndexQuery(new IndexQuery("screen_name", QueryOperation.EQ, "EsAdolescencia"));
         query.addIndexQuery(new IndexQuery("followers_count", QueryOperation.GT, 10000));
-        query.setCollection("twitter_snappy");
+        query.setCollection("twitter_lz4");
         query.setResultCacheEnabled(false);
         long start = System.currentTimeMillis();
         List<Map> daily = jumboDriver.find(Map.class, query);

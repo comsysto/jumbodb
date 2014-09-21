@@ -54,7 +54,8 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
             for (FileOffset offset : leftOffsets) {
                 long searchOffset = offset.getOffset();
                 // delete buffer when offset is not inside range and skip
-                if (resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
+                // load when <= 5 because 4 byte for length and 1 starting for dataset
+                if (resultBuffer.length <= 5 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
                     long chunkIndex = (searchOffset / blocks.getBlockSize());
                     long chunkOffsetCompressed = calculateBlockOffsetCompressed(chunkIndex, blocks.getBlocks());
                     long chunkOffsetUncompressed = calculateBlockOffsetUncompressed(chunkIndex,
@@ -70,11 +71,11 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
 
                 int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
                 int datasetLength = Integer.MIN_VALUE;
-                if (resultBuffer.length > 0) {
+                if (resultBuffer.length >= 4) {
                     datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
                     datasetStartOffset += 4; // int length
                 }
-                while ((resultBuffer.length == 0 || datasetLength > (resultBuffer.length - datasetStartOffset))
+                while ((resultBuffer.length <= 4 || datasetLength > (resultBuffer.length - datasetStartOffset))
                         && datasetLength != -1) {
                     compressedFileStreamPosition += bis.read(compressedLengthBuffer);
                     int compressedLength = CompressionUtil.readInt(compressedLengthBuffer, 0);
@@ -88,7 +89,7 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
                     resultBufferEndOffset = uncompressedFileStreamPosition; // warum war hier + 1?
                     resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
                     datasetStartOffset = 0;
-                    if (resultBuffer.length > 0) {
+                    if (resultBuffer.length >= 4) {
                         datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
                         datasetStartOffset += 4; // int length
                     } else {
@@ -120,7 +121,11 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
         } catch (IOException e) {
             log.error("Error", e);
             throw new RuntimeException(e);
-        } finally {
+        } catch (RuntimeException e) {
+            log.error("Error", e);
+            throw new RuntimeException(e);
+        }
+        finally {
             IOUtils.closeQuietly(fis);
             IOUtils.closeQuietly(bis);
         }

@@ -97,6 +97,10 @@ public class DeliveryChunk implements Comparable<DeliveryChunk> {
         return result;
     }
 
+    public String getFormatedAvgDatasetSize() {
+        return (getUncompressedSize() / getDatasets()) + " bytes";
+    }
+
     public String getFormatedCompressedSize() {
         return FileUtils.byteCountToDisplaySize(getCompressedSize());
     }

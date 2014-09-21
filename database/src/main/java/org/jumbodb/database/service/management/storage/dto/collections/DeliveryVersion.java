@@ -28,6 +28,10 @@ public class DeliveryVersion implements Comparable<DeliveryVersion> {
         this.active = active;
     }
 
+    public String getFormatedAvgDatasetSize() {
+        return (getUncompressedSize() / getDatasets()) + " bytes";
+    }
+
     public String getFormatedCompressedSize() {
         return FileUtils.byteCountToDisplaySize(getCompressedSize());
     }

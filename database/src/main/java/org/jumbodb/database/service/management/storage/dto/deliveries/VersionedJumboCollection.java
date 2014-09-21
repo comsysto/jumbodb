@@ -79,6 +79,10 @@ public class VersionedJumboCollection implements Comparable<VersionedJumboCollec
         return datasets;
     }
 
+    public String getFormatedAvgDatasetSize() {
+        return (getUncompressedSize() / getDatasets()) + " bytes";
+    }
+
     public String getFormatedCompressedSize() {
         return FileUtils.byteCountToDisplaySize(getCompressedSize());
     }

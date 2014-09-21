@@ -204,7 +204,7 @@ define(['angular' ], function (angular) {
                 $http.post('jumbodb/rest/query/json/defaultLimit', jsonQuery).success(function(data) {
 					$scope.results = data;
                     $scope.loading = false;
-					buildMessage(data);
+                    buildMessage(data);
                 });
 			}
 
@@ -213,7 +213,7 @@ define(['angular' ], function (angular) {
                 $scope.results = {};
                 $http.post('jumbodb/rest/query/sql/defaultLimit', sqlQuery).success(function(data) {
                     $scope.results = data;
-                    $scope.loading = false;
+                    $scope.loading = false
                     buildMessage(data);
                 });
             }

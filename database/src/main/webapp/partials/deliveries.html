@@ -40,6 +40,7 @@
                                     <th>Collection</th>
                                     <th>Info</th>
                                     <th>Datasets</th>
+                                    <th>Avg. Dataset Size</th>
                                     <th>Compressed</th>
                                     <th>Uncompressed</th>
                                     <th>Index</th>
@@ -50,15 +51,16 @@
                                     <td>{{collection.collectionName}}</td>
                                     <td><small>{{collection.info}}</small></td>
                                     <td>{{collection.datasets}}</td>
+                                    <td>{{collection.formatedAvgDatasetSize}}</td>
                                     <td>{{collection.formatedCompressedSize}}</td>
                                     <td>{{collection.formatedUncompressedSize}}</td>
                                     <td>{{collection.formatedIndexSize}}</td>
-
                                 </tr>
                                 <tr>
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
                                     <td><strong>{{delivery.datasets}}</strong></td>
+                                    <td>&nbsp;</td>
                                     <td><strong>{{delivery.formatedCompressedSize}}</strong></td>
                                     <td><strong>{{delivery.formatedUncompressedSize}}</strong></td>
                                     <td><strong>{{delivery.formatedIndexSize}}</strong></td>

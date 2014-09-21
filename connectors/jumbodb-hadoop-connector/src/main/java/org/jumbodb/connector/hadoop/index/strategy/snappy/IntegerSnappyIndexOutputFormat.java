@@ -2,8 +2,6 @@ package org.jumbodb.connector.hadoop.index.strategy.snappy;
 
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.jumbodb.connector.hadoop.index.output.AbstractSnappyIndexOutputFormat;
-import org.jumbodb.connector.hadoop.index.strategy.common.integer.AbstractIntegerIndexMapper;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

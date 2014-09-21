@@ -1,8 +1,6 @@
 package org.jumbodb.connector.hadoop.index.strategy.snappy;
 
 import org.apache.hadoop.io.IntWritable;
-import org.jumbodb.connector.hadoop.index.output.AbstractSnappyIndexOutputFormat;
-import org.jumbodb.connector.hadoop.index.strategy.common.geohash.AbstractGeohashIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.common.geohash.GeoFileOffsetWritable;
 
 import java.io.DataOutputStream;

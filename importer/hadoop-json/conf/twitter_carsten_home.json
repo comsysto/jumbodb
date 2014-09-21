@@ -31,26 +31,8 @@
         {
             "input": "file:///C:/Development/data/twitter/input_big/",
             "description": "Twitter data",
-            "collectionName": "twitter_snappy",
-            "dataStrategy": "JSON_SNAPPY",
-            "indexes": [
-                {
-                    "indexName": "screen_name",
-                    "fields": ["user.screen_name"],
-                    "indexStrategy": "HASHCODE64_SNAPPY"
-                },
-                {
-                    "indexName": "followers_count",
-                    "fields": ["user.followers_count"],
-                    "indexStrategy": "INTEGER_SNAPPY"
-                }
-            ]
-        },
-        {
-            "input": "file:///C:/Development/data/twitter/input_big/",
-            "description": "Twitter data",
-            "collectionName": "twitter_snappy_lb",
-            "dataStrategy": "JSON_SNAPPY_LB",
+            "collectionName": "twitter_l4_lb",
+            "dataStrategy": "JSON_LZ4_LB",
             "indexes": [
                 {
                     "indexName": "screen_name",

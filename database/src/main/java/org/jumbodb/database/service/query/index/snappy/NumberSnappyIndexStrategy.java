@@ -57,7 +57,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         return getQueryOperationsStrategies();
     }
 
-    private Blocks getSnappyChunksByFile(File file) {
+    private Blocks getCompressionBlocksByFile(File file) {
         Cache.ValueWrapper valueWrapper = indexCompressionBlocksCache.get(file);
         if(valueWrapper != null) {
             return (Blocks) valueWrapper.get();
@@ -72,7 +72,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         RandomAccessFile raf = null;
         List<FileOffset> result = new LinkedList<FileOffset>();
         try {
-            Blocks blocks = getSnappyChunksByFile(indexFile);
+            Blocks blocks = getCompressionBlocksByFile(indexFile);
             raf = new RandomAccessFile(indexFile, "r");
 
             for (IndexQuery indexQuery : indexQueries) {
@@ -116,7 +116,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         List<IF> result = new LinkedList<IF>();
         File[] indexFiles = indexFolder.listFiles((FilenameFilter) new SuffixFileFilter(".idx"));
         for (File indexFile : indexFiles) {
-            Blocks blocks = getSnappyChunksByFile(indexFile);
+            Blocks blocks = getCompressionBlocksByFile(indexFile);
             if(blocks.getNumberOfBlocks() > 0) {
                 result.add(createIndexFileDescription(indexFile, blocks));
             }

@@ -36,6 +36,7 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
     }
 
     def cleanupTestFiles(file) {
+        new File(file.getAbsolutePath() + ".blocks").delete()
         file.delete()
     }
 
@@ -88,7 +89,7 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         offsets = [65493l].collect { new FileOffset(123, it, new IndexQuery()) } as Set
         task = new JsonLz4RetrieveDataSetsTask(file, offsets, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", false)
         numberOfResults = task.call()
-        then: "verify loading of a data set overlapping the snappy block (32768 byte)"
+        then: "verify loading of a data set overlapping the lz4 block (32768 byte)"
         1 * resultCallback.writeResult([msg: "This is a sample dataset", number: 101149])
         numberOfResults == 1
         cleanup:

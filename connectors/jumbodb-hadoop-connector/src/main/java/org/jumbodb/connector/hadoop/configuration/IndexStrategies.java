@@ -8,6 +8,7 @@ import org.jumbodb.connector.hadoop.index.strategy.common.hashcode32.GenericJson
 import org.jumbodb.connector.hadoop.index.strategy.common.hashcode64.GenericJsonHashCode64IndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.common.integer.GenericJsonIntegerIndexMapper;
 import org.jumbodb.connector.hadoop.index.strategy.common.longval.GenericJsonLongIndexMapper;
+import org.jumbodb.connector.hadoop.index.strategy.lz4.*;
 import org.jumbodb.connector.hadoop.index.strategy.snappy.*;
 
 import java.util.Collections;
@@ -30,6 +31,15 @@ public class IndexStrategies {
         indexMapper.put(DoubleSnappyIndexOutputFormat.DOUBLE_SNAPPY, new IndexStrategy(GenericJsonDoubleIndexMapper.class, DoubleSnappyIndexOutputFormat.class, 64));
         indexMapper.put(GeohashSnappyIndexOutputFormat.GEOHASH_SNAPPY, new IndexStrategy(GenericJsonGeohashIndexMapper.class, GeohashSnappyIndexOutputFormat.class, 64));
         indexMapper.put(DateTimeSnappyIndexOutputFormat.DATETIME_SNAPPY, new IndexStrategy(GenericJsonDateTimeIndexMapper.class, DateTimeSnappyIndexOutputFormat.class, 64));
+
+        indexMapper.put(HashCode32Lz4IndexOutputFormat.HASHCODE32_LZ4, new IndexStrategy(GenericJsonHashCode32IndexMapper.class, HashCode32Lz4IndexOutputFormat.class, 64));
+        indexMapper.put(HashCode64Lz4IndexOutputFormat.HASHCODE64_LZ4, new IndexStrategy(GenericJsonHashCode64IndexMapper.class, HashCode64Lz4IndexOutputFormat.class, 64));
+        indexMapper.put(IntegerLz4IndexOutputFormat.INTEGER_LZ4, new IndexStrategy(GenericJsonIntegerIndexMapper.class, IntegerLz4IndexOutputFormat.class, 64));
+        indexMapper.put(LongLz4IndexOutputFormat.LONG_LZ4, new IndexStrategy(GenericJsonLongIndexMapper.class, LongLz4IndexOutputFormat.class, 64));
+        indexMapper.put(FloatLz4IndexOutputFormat.FLOAT_LZ4, new IndexStrategy(GenericJsonFloatIndexMapper.class, FloatLz4IndexOutputFormat.class, 64));
+        indexMapper.put(DoubleLz4IndexOutputFormat.DOUBLE_LZ4, new IndexStrategy(GenericJsonDoubleIndexMapper.class, DoubleLz4IndexOutputFormat.class, 64));
+        indexMapper.put(GeohashLz4IndexOutputFormat.GEOHASH_LZ4, new IndexStrategy(GenericJsonGeohashIndexMapper.class, GeohashLz4IndexOutputFormat.class, 64));
+        indexMapper.put(DateTimeLz4IndexOutputFormat.DATETIME_LZ4, new IndexStrategy(GenericJsonDateTimeIndexMapper.class, DateTimeLz4IndexOutputFormat.class, 64));
         return Collections.unmodifiableMap(indexMapper);
     }
 

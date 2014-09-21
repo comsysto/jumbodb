@@ -22,7 +22,7 @@ class JsonLz4LineBreakRetrieveDataSetsTaskSpec extends Specification {
     }
 
     def createTestFile() {
-        def tmpFile = File.createTempFile("data", "file")
+        def tmpFile = File.createTempFile("datalz4lb", "file")
         def data = createTestData()
         Lz4Util.copy(new ByteArrayInputStream(data), tmpFile, data.length, 2000l, 64 * 1024)
         tmpFile

@@ -1,15 +1,11 @@
+package org.jumbodb.data.common.lz4;
+
 import com.google.common.io.NullOutputStream;
-import net.jpountz.lz4.LZ4BlockInputStream;
-import net.jpountz.lz4.LZ4BlockOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.xerial.snappy.SnappyInputStream;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.BitSet;
-import java.util.Locale;
-import java.util.TimeZone;
 
 public class Benchmark {
     public static void main(String[] args) throws Exception {
@@ -59,7 +55,7 @@ public class Benchmark {
 
     private static void lz4decompress() throws IOException {
         long start = System.currentTimeMillis();
-        FileInputStream fis = new FileInputStream("c:/Development/lz4test");
+        FileInputStream fis = new FileInputStream("c:/Development/lz4neu");
         BufferedInputStream bis = new BufferedInputStream(fis);
         LZ4BlockInputStream lz4In = new LZ4BlockInputStream(bis);
         FileOutputStream fos = new FileOutputStream("c:/Development/lz4test.dec");

@@ -57,7 +57,6 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
             for (FileOffset offset : leftOffsets) {
                 long searchOffset = offset.getOffset();
                 // delete buffer when offset is not inside range and skip
-                // load when <= 5 because 4 byte for length and 1 starting for dataset
                 if (resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
                     long blockIndex = (searchOffset / blocks.getBlockSize());
                     long blockOffsetCompressed = calculateBlockOffsetCompressed(blockIndex, blocks.getBlocks());

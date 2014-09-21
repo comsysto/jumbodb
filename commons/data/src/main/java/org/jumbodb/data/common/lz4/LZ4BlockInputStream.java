@@ -135,6 +135,10 @@ public final class LZ4BlockInputStream extends FilterInputStream {
                         || (originalLen != 0 && compressedLen == 0)) {
             throw new IOException("Stream is corrupted");
         }
+        if (originalLen == 0 && compressedLen == 0) {
+            finished = true;
+            return;
+        }
         if (buffer.length < originalLen) {
             buffer = new byte[Math.max(originalLen, buffer.length * 3 / 2)];
         }

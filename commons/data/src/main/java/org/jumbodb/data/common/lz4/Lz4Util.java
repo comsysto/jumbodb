@@ -1,12 +1,8 @@
 package org.jumbodb.data.common.lz4;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.UnhandledException;
-import org.jumbodb.data.common.compression.Blocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xerial.snappy.Snappy;
-import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.*;
 import java.util.LinkedList;
@@ -17,6 +13,7 @@ import java.util.List;
  */
 public class Lz4Util {
     private static Logger log = LoggerFactory.getLogger(Lz4Util.class);
+
     /**
      * Copies stream to file
      *

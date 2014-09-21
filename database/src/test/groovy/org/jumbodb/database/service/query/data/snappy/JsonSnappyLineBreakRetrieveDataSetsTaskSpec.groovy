@@ -34,7 +34,7 @@ class JsonSnappyLineBreakRetrieveDataSetsTaskSpec extends Specification {
     }
 
     def cleanupTestFiles(file) {
-        new File(file.getAbsolutePath() + ".snappy.blocks").delete()
+        new File(file.getAbsolutePath() + ".blocks").delete()
         file.delete()
     }
 

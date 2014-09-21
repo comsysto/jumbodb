@@ -174,11 +174,11 @@ public class JsonLz4LineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSet
 
     @Override
     protected int getMagicHeaderSize() {
-        return 16;
+        return 0;
     }
 
     @Override
     protected int getBlockOverhead() {
-        return 4;
+        return 8;
     }
 }

@@ -19,7 +19,7 @@ public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
                                        QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
         List<Integer> value = queryValueRetriever.getValue();
         Integer from = value.get(0);
-        return super.findFirstMatchingChunk(fileDataRetriever, blocks, from);
+        return super.findFirstMatchingBlock(fileDataRetriever, blocks, from);
     }
 
     @Override

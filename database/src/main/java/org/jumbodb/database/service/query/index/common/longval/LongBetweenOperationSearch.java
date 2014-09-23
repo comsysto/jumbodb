@@ -19,7 +19,7 @@ public class LongBetweenOperationSearch extends LongEqOperationSearch {
                                        QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
         List<Long> value = queryValueRetriever.getValue();
         Long from = value.get(0);
-        return super.findFirstMatchingChunk(fileDataRetriever, blocks, from);
+        return super.findFirstMatchingBlock(fileDataRetriever, blocks, from);
     }
 
     @Override

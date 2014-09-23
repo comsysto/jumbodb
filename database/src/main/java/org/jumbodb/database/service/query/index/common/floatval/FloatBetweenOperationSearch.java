@@ -19,7 +19,7 @@ public class FloatBetweenOperationSearch extends FloatEqOperationSearch {
                                        QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
         List<Float> value = queryValueRetriever.getValue();
         Float from = value.get(0);
-        return super.findFirstMatchingChunk(fileDataRetriever, blocks, from);
+        return super.findFirstMatchingBlock(fileDataRetriever, blocks, from);
     }
 
     @Override

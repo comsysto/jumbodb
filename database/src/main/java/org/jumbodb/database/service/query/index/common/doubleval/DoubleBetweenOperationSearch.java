@@ -19,7 +19,7 @@ public class DoubleBetweenOperationSearch extends DoubleEqOperationSearch {
                                        QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
         List<Double> value = queryValueRetriever.getValue();
         Double from = value.get(0);
-        return super.findFirstMatchingChunk(fileDataRetriever, blocks, from);
+        return super.findFirstMatchingBlock(fileDataRetriever, blocks, from);
     }
 
     @Override

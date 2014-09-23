@@ -4,6 +4,7 @@ import org.jumbodb.common.geo.geohash.GeoHash
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
+import org.jumbodb.database.service.query.index.snappy.GeohashSnappyDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -36,9 +37,9 @@ class GeohashBoundaryBoxOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingChunk #searchValue with expected chunk #expectedChunk"() {
         setup:
-        def file = GeohashDataGeneration.createFile();
-        def snappyChunks = GeohashDataGeneration.createIndexFile(file)
-        def retriever = GeohashDataGeneration.createFileDataRetriever(file, snappyChunks)
+        def file = GeohashSnappyDataGeneration.createFile();
+        def snappyChunks = GeohashSnappyDataGeneration.createIndexFile(file)
+        def retriever = GeohashSnappyDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
         operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GEO_BOUNDARY_BOX, searchValue)), snappyChunks) == expectedChunk
         cleanup:

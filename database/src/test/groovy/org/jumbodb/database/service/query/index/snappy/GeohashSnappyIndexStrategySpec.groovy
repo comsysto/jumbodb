@@ -12,7 +12,6 @@ import org.jumbodb.database.service.query.index.common.geohash.GeohashWithinRang
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
-import org.jumbodb.database.service.query.index.common.geohash.GeohashDataGeneration
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -185,8 +184,8 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new GeohashSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = GeohashDataGeneration.createFile()
-        GeohashDataGeneration.createIndexFile(indexFile)
+        def indexFile = GeohashSnappyDataGeneration.createFile()
+        GeohashSnappyDataGeneration.createIndexFile(indexFile)
         def query1 = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
         def query2 = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
         def query3 = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 20.48], 1000])
@@ -203,8 +202,8 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new GeohashSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = GeohashDataGeneration.createFile()
-        def snappyChunks = GeohashDataGeneration.createIndexFile(indexFile)
+        def indexFile = GeohashSnappyDataGeneration.createFile()
+        def snappyChunks = GeohashSnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
@@ -266,8 +265,8 @@ class GeohashSnappyIndexStrategySpec extends Specification {
 
     def "createIndexFileDescription"() {
         setup:
-        def indexFile = GeohashDataGeneration.createFile()
-        def snappyChunks = GeohashDataGeneration.createIndexFile(indexFile)
+        def indexFile = GeohashSnappyDataGeneration.createFile()
+        def snappyChunks = GeohashSnappyDataGeneration.createIndexFile(indexFile)
         when:
         def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
         then:
@@ -336,7 +335,7 @@ class GeohashSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        GeohashDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        GeohashSnappyDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

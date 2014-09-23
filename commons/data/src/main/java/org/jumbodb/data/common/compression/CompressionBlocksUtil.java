@@ -24,8 +24,8 @@ public class CompressionBlocksUtil {
             long datasets = blocksDis.readLong();
             int compressionBlockSize = blocksDis.readInt();
             int numberOfBlocks = blocksDis.readInt();
-            List<Integer> snappyChunks = buildBlocks(blocksDis, numberOfBlocks);
-            return new Blocks(length, datasets, compressionBlockSize, numberOfBlocks, snappyChunks);
+            List<Integer> blocks = buildBlocks(blocksDis, numberOfBlocks);
+            return new Blocks(length, datasets, compressionBlockSize, numberOfBlocks, blocks);
 
         } catch (FileNotFoundException e) {
             throw new UnhandledException(e);

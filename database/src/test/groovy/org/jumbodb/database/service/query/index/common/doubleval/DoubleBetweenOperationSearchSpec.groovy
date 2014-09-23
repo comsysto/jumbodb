@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.common.doubleval
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
+import org.jumbodb.database.service.query.index.snappy.DoubleSnappyDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,9 +33,9 @@ class DoubleBetweenOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingChunk #searchValue with expected chunk #expectedChunk"() {
         setup:
-        def file = DoubleDataGeneration.createFile();
-        def snappyChunks = DoubleDataGeneration.createIndexFile(file)
-        def retriever = DoubleDataGeneration.createFileDataRetriever(file, snappyChunks)
+        def file = DoubleSnappyDataGeneration.createFile();
+        def snappyChunks = DoubleSnappyDataGeneration.createIndexFile(file)
+        def retriever = DoubleSnappyDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
         operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, [searchValue, 20000d])), snappyChunks) == expectedChunk
         cleanup:

@@ -11,7 +11,6 @@ import org.jumbodb.database.service.query.index.common.longval.LongEqOperationSe
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
-import org.jumbodb.database.service.query.index.common.longval.LongDataGeneration
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -175,8 +174,8 @@ class LongSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new LongSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = LongDataGeneration.createFile()
-        LongDataGeneration.createIndexFile(indexFile)
+        def indexFile = LongSnappyDataGeneration.createFile()
+        LongSnappyDataGeneration.createIndexFile(indexFile)
         def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000l)
         def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000l)
         def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 1003000l) // should not exist, so no result for it
@@ -194,8 +193,8 @@ class LongSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new LongSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = LongDataGeneration.createFile()
-        def snappyChunks = LongDataGeneration.createIndexFile(indexFile)
+        def indexFile = LongSnappyDataGeneration.createFile()
+        def snappyChunks = LongSnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def query = new IndexQuery("testIndex", QueryOperation.EQ, 3333l)
@@ -257,8 +256,8 @@ class LongSnappyIndexStrategySpec extends Specification {
 
     def "createIndexFileDescription"() {
         setup:
-        def indexFile = LongDataGeneration.createFile()
-        def snappyChunks = LongDataGeneration.createIndexFile(indexFile)
+        def indexFile = LongSnappyDataGeneration.createFile()
+        def snappyChunks = LongSnappyDataGeneration.createIndexFile(indexFile)
         when:
         def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
         then:
@@ -327,7 +326,7 @@ class LongSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        LongDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        LongSnappyDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

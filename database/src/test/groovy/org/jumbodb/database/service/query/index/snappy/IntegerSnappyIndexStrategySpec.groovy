@@ -11,7 +11,6 @@ import org.jumbodb.database.service.query.index.common.integer.IntegerEqOperatio
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
-import org.jumbodb.database.service.query.index.common.integer.IntegerDataGeneration
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -175,8 +174,8 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new IntegerSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = IntegerDataGeneration.createFile()
-        IntegerDataGeneration.createIndexFile(indexFile)
+        def indexFile = IntegerSnappyDataGeneration.createFile()
+        IntegerSnappyDataGeneration.createIndexFile(indexFile)
         def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000)
         def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000)
         def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 25000) // should not exist, so no result for it
@@ -194,8 +193,8 @@ class IntegerSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new IntegerSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = IntegerDataGeneration.createFile()
-        def snappyChunks = IntegerDataGeneration.createIndexFile(indexFile)
+        def indexFile = IntegerSnappyDataGeneration.createFile()
+        def snappyChunks = IntegerSnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3333)
@@ -257,8 +256,8 @@ class IntegerSnappyIndexStrategySpec extends Specification {
 
     def "createIndexFileDescription"() {
         setup:
-        def indexFile = IntegerDataGeneration.createFile()
-        def snappyChunks = IntegerDataGeneration.createIndexFile(indexFile)
+        def indexFile = IntegerSnappyDataGeneration.createFile()
+        def snappyChunks = IntegerSnappyDataGeneration.createIndexFile(indexFile)
         when:
         def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
         then:
@@ -327,7 +326,7 @@ class IntegerSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        IntegerDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        IntegerSnappyDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

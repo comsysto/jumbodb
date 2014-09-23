@@ -12,25 +12,24 @@ import java.io.IOException;
  */
 public abstract class NumberNeOperationSearch<T, IFV, IF extends NumberIndexFile<IFV>> implements IndexOperationSearch<T, IFV, IF> {
 
-    // CARSTEN move to NumberSnappyIndexFile and call by delegate
     @Override
     public long findFirstMatchingBlock(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, Blocks blocks) throws IOException {
         T searchValue = (T)queryClause.getValue();
-        int numberOfChunks = blocks.getNumberOfBlocks();
-        int fromChunk = 0;
-        int toChunk = numberOfChunks;
-        while(toChunk != 0) {
-            int currentChunk = (toChunk - fromChunk) / 2;
-            BlockRange<T> blockRange = fileDataRetriever.getBlockRange(currentChunk);
+        int numberOfBlocks = blocks.getNumberOfBlocks();
+        int fromBlock = 0;
+        int toBlock = numberOfBlocks;
+        while(toBlock != 0) {
+            int currentBlock = (toBlock - fromBlock) / 2;
+            BlockRange<T> blockRange = fileDataRetriever.getBlockRange(currentBlock);
             T firstInt = blockRange.getFirstValue();
             T lastInt = blockRange.getLastValue();
 
             // just going up
             //firstInt != searchValue || lastInt != searchValue
             if(ne(firstInt, searchValue) || ne(lastInt, searchValue)) {
-                toChunk = currentChunk;
+                toBlock = currentBlock;
             } else {
-                return currentChunk;
+                return currentBlock;
             }
 
         }

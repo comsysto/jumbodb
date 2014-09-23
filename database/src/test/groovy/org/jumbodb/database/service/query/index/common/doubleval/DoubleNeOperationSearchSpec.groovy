@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.common.doubleval
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
+import org.jumbodb.database.service.query.index.snappy.DoubleSnappyDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -28,9 +29,9 @@ class DoubleNeOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingChunk #searchDate with expected chunk #expectedChunk"() {
         setup:
-        def file = DoubleDataGeneration.createFile();
-        def snappyChunks = DoubleDataGeneration.createIndexFile(file)
-        def retriever = DoubleDataGeneration.createFileDataRetriever(file, snappyChunks)
+        def file = DoubleSnappyDataGeneration.createFile();
+        def snappyChunks = DoubleSnappyDataGeneration.createIndexFile(file)
+        def retriever = DoubleSnappyDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
         operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
         cleanup:

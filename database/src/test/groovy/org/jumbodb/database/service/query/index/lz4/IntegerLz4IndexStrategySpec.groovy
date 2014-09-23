@@ -9,10 +9,9 @@ import org.jumbodb.database.service.query.definition.IndexDefinition
 import org.jumbodb.database.service.query.index.IndexKey
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
-import org.jumbodb.database.service.query.index.common.integer.IntegerDataGeneration
 import org.jumbodb.database.service.query.index.common.integer.IntegerEqOperationSearch
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
-import org.jumbodb.database.service.query.index.snappy.IntegerSnappyIndexStrategy
+import org.jumbodb.database.service.query.index.snappy.IntegerSnappyDataGeneration
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -176,8 +175,8 @@ class IntegerLz4IndexStrategySpec extends Specification {
         setup:
         def strategy = new IntegerLz4IndexStrategy()
         setupCache(strategy)
-        def indexFile = IntegerDataGeneration.createFile()
-        IntegerDataGeneration.createIndexFile(indexFile)
+        def indexFile = IntegerSnappyDataGeneration.createFile()
+        IntegerLz4DataGeneration.createIndexFile(indexFile)
         def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000)
         def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000)
         def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 25000) // should not exist, so no result for it
@@ -195,8 +194,8 @@ class IntegerLz4IndexStrategySpec extends Specification {
         setup:
         def strategy = new IntegerLz4IndexStrategy()
         setupCache(strategy)
-        def indexFile = IntegerDataGeneration.createFile()
-        def lz4Blocks = IntegerDataGeneration.createIndexFile(indexFile)
+        def indexFile = IntegerLz4DataGeneration.createFile()
+        def lz4Blocks = IntegerLz4DataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3333)
@@ -258,8 +257,8 @@ class IntegerLz4IndexStrategySpec extends Specification {
 
     def "createIndexFileDescription"() {
         setup:
-        def indexFile = IntegerDataGeneration.createFile()
-        def lz4Blocks = IntegerDataGeneration.createIndexFile(indexFile)
+        def indexFile = IntegerLz4DataGeneration.createFile()
+        def lz4Blocks = IntegerLz4DataGeneration.createIndexFile(indexFile)
         when:
         def indexFileDescription = strategy.createIndexFileDescription(indexFile, lz4Blocks)
         then:
@@ -328,7 +327,7 @@ class IntegerLz4IndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        IntegerDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        IntegerLz4DataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 
@@ -345,7 +344,7 @@ class IntegerLz4IndexStrategySpec extends Specification {
         def numberLz4IndexFile = Mock(NumberIndexFile)
         def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 5)
         def valueRetriever = Mock(QueryValueRetriever)
-        def strategy = new IntegerLz4IndexStrategySpec()
+        def strategy = new IntegerLz4IndexStrategy()
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         when:
         def result = strategy.acceptIndexFile(indexQuery, numberLz4IndexFile)

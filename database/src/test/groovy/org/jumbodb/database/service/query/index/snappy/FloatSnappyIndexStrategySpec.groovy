@@ -7,7 +7,6 @@ import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
 import org.jumbodb.database.service.query.index.IndexKey
-import org.jumbodb.database.service.query.index.common.floatval.FloatDataGeneration
 import org.jumbodb.database.service.query.index.common.floatval.FloatEqOperationSearch
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
@@ -175,8 +174,8 @@ class FloatSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new FloatSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = FloatDataGeneration.createFile()
-        FloatDataGeneration.createIndexFile(indexFile)
+        def indexFile = FloatSnappyDataGeneration.createFile()
+        FloatSnappyDataGeneration.createIndexFile(indexFile)
         def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000f)
         def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000f)
         def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 3000.33f) // should not exist, so no result for it
@@ -194,8 +193,8 @@ class FloatSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new FloatSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = FloatDataGeneration.createFile()
-        def snappyChunks = FloatDataGeneration.createIndexFile(indexFile)
+        def indexFile = FloatSnappyDataGeneration.createFile()
+        def snappyChunks = FloatSnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3333f)
@@ -257,8 +256,8 @@ class FloatSnappyIndexStrategySpec extends Specification {
 
     def "createIndexFileDescription"() {
         setup:
-        def indexFile = FloatDataGeneration.createFile()
-        def snappyChunks = FloatDataGeneration.createIndexFile(indexFile)
+        def indexFile = FloatSnappyDataGeneration.createFile()
+        def snappyChunks = FloatSnappyDataGeneration.createIndexFile(indexFile)
         when:
         def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
         then:
@@ -327,7 +326,7 @@ class FloatSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        FloatDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        FloatSnappyDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

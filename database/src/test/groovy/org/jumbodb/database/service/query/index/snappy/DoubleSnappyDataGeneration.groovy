@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.common.integer
+package org.jumbodb.database.service.query.index.snappy
 
 import org.jumbodb.data.common.compression.CompressionBlocksUtil
 import org.jumbodb.data.common.compression.CompressionUtil
@@ -9,7 +9,7 @@ import org.jumbodb.database.service.query.index.common.numeric.FileDataRetriever
 /**
  * @author Carsten Hufe
  */
-class IntegerDataGeneration {
+class DoubleSnappyDataGeneration {
     def static createFile() {
         File.createTempFile("randomindex", "idx")
     }
@@ -22,10 +22,10 @@ class IntegerDataGeneration {
 
         def fileHash = 50000
         def offsetBase = 100000
-        def i = -2048
-        for(chunks in 1..11) {
-            for(datasetInChunk in 1..2048) {
-                dos.writeInt(i)
+        def i = -1600
+        for(blocks in 1..11) {
+            for(datasetInBlock in 1..1600) {
+                dos.writeDouble(i)
                 dos.writeInt(fileHash)
                 dos.writeLong(i + offsetBase)
                 i++
@@ -37,9 +37,9 @@ class IntegerDataGeneration {
     }
 
     def static createIndexFile(file) {
-        def chunkSize = 32768
-        def umcompressedFileLength = 16 * 11 * 2048 // index entry length * 12 blocks * datasets per chunk
-        SnappyUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, chunkSize)
+        def blockSize = 32000
+        def umcompressedFileLength = 20 * 11 * 1600 // index entry length * 11 blocks * datasets per chunk
+        SnappyUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, blockSize)
         CompressionBlocksUtil.getBlocksByFile(file)
     }
 
@@ -47,13 +47,13 @@ class IntegerDataGeneration {
         new FileDataRetriever() {
 
             @Override
-            BlockRange<Integer> getBlockRange(long searchChunk) throws IOException {
+            BlockRange<Double> getBlockRange(long searchChunk) throws IOException {
                 def ramFile = new RandomAccessFile(file, "r")
                 byte[] uncompressedBlock = SnappyUtil.getUncompressed(ramFile, snappyChunks, searchChunk)
-                Integer firstInt = CompressionUtil.readInt(uncompressedBlock, 0);
-                Integer lastInt = CompressionUtil.readInt(uncompressedBlock, uncompressedBlock.length - 16);
+                Double firstInt = CompressionUtil.readDouble(uncompressedBlock, 0);
+                Double lastInt = CompressionUtil.readDouble(uncompressedBlock, uncompressedBlock.length - 20);
                 ramFile.close()
-                return new BlockRange<Integer>(firstInt, lastInt);
+                return new BlockRange<Double>(firstInt, lastInt);
 
             }
         }

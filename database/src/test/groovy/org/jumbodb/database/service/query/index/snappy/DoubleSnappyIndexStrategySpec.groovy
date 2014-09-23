@@ -7,7 +7,6 @@ import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
 import org.jumbodb.database.service.query.index.IndexKey
-import org.jumbodb.database.service.query.index.common.doubleval.DoubleDataGeneration
 import org.jumbodb.database.service.query.index.common.doubleval.DoubleEqOperationSearch
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
@@ -177,8 +176,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new DoubleSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = DoubleDataGeneration.createFile()
-        DoubleDataGeneration.createIndexFile(indexFile)
+        def indexFile = DoubleSnappyDataGeneration.createFile()
+        DoubleSnappyDataGeneration.createIndexFile(indexFile)
         def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000d)
         def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000d)
         def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 3000.33d) // should not exist, so no result for it
@@ -196,8 +195,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new DoubleSnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = DoubleDataGeneration.createFile()
-        def snappyChunks = DoubleDataGeneration.createIndexFile(indexFile)
+        def indexFile = DoubleSnappyDataGeneration.createFile()
+        def snappyChunks = DoubleSnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3333d)
@@ -259,8 +258,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "createIndexFileDescription"() {
         setup:
-        def indexFile = DoubleDataGeneration.createFile()
-        def snappyChunks = DoubleDataGeneration.createIndexFile(indexFile)
+        def indexFile = DoubleSnappyDataGeneration.createFile()
+        def snappyChunks = DoubleSnappyDataGeneration.createIndexFile(indexFile)
         when:
         def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
         then:
@@ -329,7 +328,7 @@ class DoubleSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        DoubleDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        DoubleSnappyDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

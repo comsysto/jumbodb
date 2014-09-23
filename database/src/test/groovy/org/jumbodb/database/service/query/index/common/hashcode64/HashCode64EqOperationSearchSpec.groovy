@@ -4,6 +4,7 @@ import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
+import org.jumbodb.database.service.query.index.snappy.HashCode64SnappyDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -31,9 +32,9 @@ class HashCode64EqOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingChunk #hashCodeValue with expected chunk #expectedChunk"() {
         setup:
-        def file = HashCode64DataGeneration.createFile();
-        def snappyChunks = HashCode64DataGeneration.createIndexFile(file)
-        def retriever = HashCode64DataGeneration.createFileDataRetriever(file, snappyChunks)
+        def file = HashCode64SnappyDataGeneration.createFile();
+        def snappyChunks = HashCode64SnappyDataGeneration.createIndexFile(file)
+        def retriever = HashCode64SnappyDataGeneration.createFileDataRetriever(file, snappyChunks)
         def queryRetrieverMock = Mock(QueryValueRetriever)
         queryRetrieverMock.getValue() >> hashCodeValue
         expect:

@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.common.floatval
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
+import org.jumbodb.database.service.query.index.snappy.FloatSnappyDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -27,9 +28,9 @@ class FloatGtOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingChunk #searchValue with expected chunk #expectedChunk"() {
         setup:
-        def file = FloatDataGeneration.createFile();
-        def snappyChunks = FloatDataGeneration.createIndexFile(file)
-        def retriever = FloatDataGeneration.createFileDataRetriever(file, snappyChunks)
+        def file = FloatSnappyDataGeneration.createFile();
+        def snappyChunks = FloatSnappyDataGeneration.createIndexFile(file)
+        def retriever = FloatSnappyDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
         operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT, searchValue)), snappyChunks) == expectedChunk
         cleanup:

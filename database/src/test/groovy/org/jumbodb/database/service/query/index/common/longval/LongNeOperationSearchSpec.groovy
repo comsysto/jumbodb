@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.common.longval
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
+import org.jumbodb.database.service.query.index.snappy.LongSnappyDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -28,9 +29,9 @@ class LongNeOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingChunk #searchDate with expected chunk #expectedChunk"() {
         setup:
-        def file = LongDataGeneration.createFile();
-        def snappyChunks = LongDataGeneration.createIndexFile(file)
-        def retriever = LongDataGeneration.createFileDataRetriever(file, snappyChunks)
+        def file = LongSnappyDataGeneration.createFile();
+        def snappyChunks = LongSnappyDataGeneration.createIndexFile(file)
+        def retriever = LongSnappyDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
         operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
         cleanup:

@@ -11,7 +11,6 @@ import org.jumbodb.database.service.query.index.common.hashcode64.HashCode64EqOp
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
-import org.jumbodb.database.service.query.index.common.hashcode64.HashCode64DataGeneration
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -175,8 +174,8 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new HashCode64SnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = HashCode64DataGeneration.createFile()
-        HashCode64DataGeneration.createIndexFile(indexFile)
+        def indexFile = HashCode64SnappyDataGeneration.createFile()
+        HashCode64SnappyDataGeneration.createIndexFile(indexFile)
         def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000l)
         def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000l)
         def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 1003000l) // should not exist, so no result for it
@@ -194,8 +193,8 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
         setup:
         def strategy = new HashCode64SnappyIndexStrategy()
         setupCache(strategy)
-        def indexFile = HashCode64DataGeneration.createFile()
-        def snappyChunks = HashCode64DataGeneration.createIndexFile(indexFile)
+        def indexFile = HashCode64SnappyDataGeneration.createFile()
+        def snappyChunks = HashCode64SnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3333l)
@@ -257,8 +256,8 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
 
     def "createIndexFileDescription"() {
         setup:
-        def indexFile = HashCode64DataGeneration.createFile()
-        def snappyChunks = HashCode64DataGeneration.createIndexFile(indexFile)
+        def indexFile = HashCode64SnappyDataGeneration.createFile()
+        def snappyChunks = HashCode64SnappyDataGeneration.createIndexFile(indexFile)
         when:
         def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
         then:
@@ -327,7 +326,7 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        HashCode64DataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        HashCode64SnappyDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

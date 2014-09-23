@@ -86,7 +86,7 @@ public class LZ4BlockOutputStream extends FilterOutputStream {
    * @see StreamingXXHash32#asChecksum()
    */
   public LZ4BlockOutputStream(OutputStream out, int blockSize, LZ4Compressor compressor) {
-    this(out, blockSize, compressor, false);
+    this(out, blockSize, compressor, true);
   }
 
   /**

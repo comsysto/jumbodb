@@ -1,16 +1,17 @@
-package org.jumbodb.database.service.query.index.common.geohash
+package org.jumbodb.database.service.query.index.snappy
 
 import org.jumbodb.common.geo.geohash.GeoHash
 import org.jumbodb.data.common.compression.CompressionBlocksUtil
 import org.jumbodb.data.common.compression.CompressionUtil
 import org.jumbodb.data.common.snappy.SnappyUtil
 import org.jumbodb.database.service.query.index.common.BlockRange
+import org.jumbodb.database.service.query.index.common.geohash.GeohashCoords
 import org.jumbodb.database.service.query.index.common.numeric.FileDataRetriever
 
 /**
  * @author Carsten Hufe
  */
-class GeohashDataGeneration {
+class GeohashSnappyDataGeneration {
     def static createFile() {
         File.createTempFile("randomindex", "idx")
     }
@@ -25,10 +26,10 @@ class GeohashDataGeneration {
         def offsetBase = 100000
         def i = 0
         def result = []
-        for(chunks in 1..10) {
-            for(datasetInChunk in 1..2048) {
-                def lat = chunks.floatValue()
-                def lon = datasetInChunk.floatValue() / 100f
+        for(blocks in 1..10) {
+            for(datasetInBlock in 1..2048) {
+                def lat = blocks.floatValue()
+                def lon = datasetInBlock.floatValue() / 100f
                 def geohash =  GeoHash.withBitPrecision(lat, lon, 32).intValue();
                 def val = [geohash: geohash, lat: lat, lon: lon, i: i]
                 result.add(val)
@@ -51,9 +52,9 @@ class GeohashDataGeneration {
     }
 
     def static createIndexFile(file) {
-        def chunkSize = 24 * 2048
+        def blockSize = 24 * 2048
         def umcompressedFileLength = 24 * 10 * 2048 // index entry length * 10 blocks * datasets per chunk
-        SnappyUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, chunkSize)
+        SnappyUtil.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, blockSize)
         CompressionBlocksUtil.getBlocksByFile(file)
     }
 

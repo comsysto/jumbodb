@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.common.integer
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
+import org.jumbodb.database.service.query.index.snappy.IntegerSnappyDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -27,9 +28,9 @@ class IntegerGtOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingBlock #searchValue with expected chunk #expectedChunk"() {
         setup:
-        def file = IntegerDataGeneration.createFile();
-        def blocks = IntegerDataGeneration.createIndexFile(file)
-        def retriever = IntegerDataGeneration.createFileDataRetriever(file, blocks)
+        def file = IntegerSnappyDataGeneration.createFile();
+        def blocks = IntegerSnappyDataGeneration.createIndexFile(file)
+        def retriever = IntegerSnappyDataGeneration.createFileDataRetriever(file, blocks)
         expect:
         operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT, searchValue)), blocks) == expectedBlock
         cleanup:

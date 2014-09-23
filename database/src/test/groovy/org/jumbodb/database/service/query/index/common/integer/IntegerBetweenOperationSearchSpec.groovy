@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.common.integer
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
+import org.jumbodb.database.service.query.index.snappy.IntegerSnappyDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -31,9 +32,9 @@ class IntegerBetweenOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingChunk #searchValue with expected chunk #expectedChunk"() {
         setup:
-        def file = IntegerDataGeneration.createFile();
-        def snappyChunks = IntegerDataGeneration.createIndexFile(file)
-        def retriever = IntegerDataGeneration.createFileDataRetriever(file, snappyChunks)
+        def file = IntegerSnappyDataGeneration.createFile();
+        def snappyChunks = IntegerSnappyDataGeneration.createIndexFile(file)
+        def retriever = IntegerSnappyDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
         operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, [searchValue, 20000l])), snappyChunks) == expectedChunk
         cleanup:

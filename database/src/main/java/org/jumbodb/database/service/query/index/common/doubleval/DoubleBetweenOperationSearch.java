@@ -15,8 +15,8 @@ import java.util.List;
 public class DoubleBetweenOperationSearch extends DoubleEqOperationSearch {
 
     @Override
-    public long findFirstMatchingChunk(FileDataRetriever<Double> fileDataRetriever,
-      QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
+    public long findFirstMatchingBlock(FileDataRetriever<Double> fileDataRetriever,
+                                       QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
         List<Double> value = queryValueRetriever.getValue();
         Double from = value.get(0);
         return super.findFirstMatchingChunk(fileDataRetriever, blocks, from);

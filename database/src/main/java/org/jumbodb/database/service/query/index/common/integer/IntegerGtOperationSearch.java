@@ -9,9 +9,9 @@ import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile;
 public class IntegerGtOperationSearch extends IntegerEqOperationSearch {
 
     @Override
-    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberIndexFile<Integer> snappyIndexFile) {
+    public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever, NumberIndexFile<Integer> indexFile) {
         Integer searchValue = queryValueRetriever.getValue();
-        return searchValue < snappyIndexFile.getFrom() || searchValue < snappyIndexFile.getTo();
+        return searchValue < indexFile.getFrom() || searchValue < indexFile.getTo();
     }
 
     @Override

@@ -48,8 +48,7 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
             byte[] resultBuffer = EMPTY_BUFFER;
             long resultBufferStartOffset = 0l;
             long resultBufferEndOffset = 0l;
-            byte[] compressedLengthBuffer = new byte[4];
-            byte[] uncompressedLengthBuffer = new byte[4];
+            byte[] lengthsBuffer = new byte[8];
             long uncompressedFileStreamPosition = 0l;
             long compressedFileStreamPosition = 0l;
             LZ4Factory factory = LZ4Factory.fastestInstance();
@@ -79,11 +78,10 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
                 }
                 while ((datasetLength > (resultBuffer.length - datasetStartOffset))
                         && datasetLength != -1) {
-                    compressedFileStreamPosition += bis.read(compressedLengthBuffer);
-                    compressedFileStreamPosition += bis.read(uncompressedLengthBuffer);
+                    compressedFileStreamPosition += bis.read(lengthsBuffer);
 
-                    int compressedLength = Utils.readIntLE(compressedLengthBuffer, 0);
-                    int uncompressedLength = Utils.readIntLE(uncompressedLengthBuffer, 0);
+                    int compressedLength = Utils.readIntLE(lengthsBuffer, 0);
+                    int uncompressedLength = Utils.readIntLE(lengthsBuffer, 4);
 
 //                    byte[] readBufferCompressed = new byte[compressedLength];
 //                    byte[] readBufferUncompressed = new byte[uncompressedLength];

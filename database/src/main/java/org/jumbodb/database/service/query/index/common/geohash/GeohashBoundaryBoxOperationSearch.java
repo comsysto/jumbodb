@@ -12,7 +12,7 @@ public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<G
 
     @Override
     public boolean matching(GeohashCoords currentValue, QueryValueRetriever queryValueRetriever) {
-        if (matchingChunk(currentValue, queryValueRetriever)) {
+        if (matchingBlock(currentValue, queryValueRetriever)) {
             GeohashContainer container = queryValueRetriever.getValue();
             GeohashBoundaryBox searchValue = container.getAppropriateBoundaryBox(currentValue);
             return containsPoint(currentValue, searchValue, container);
@@ -21,7 +21,7 @@ public class GeohashBoundaryBoxOperationSearch extends NumberEqOperationSearch<G
     }
 
     @Override
-    public boolean matchingChunk(GeohashCoords currentValue, QueryValueRetriever queryValueRetriever) {
+    public boolean matchingBlock(GeohashCoords currentValue, QueryValueRetriever queryValueRetriever) {
         GeohashContainer container = queryValueRetriever.getValue();
         GeohashBoundaryBox searchValue = container.getAppropriateBoundaryBox(currentValue);
         int searchedGeohash = searchValue.getGeohashFirstMatchingBits();

@@ -37,7 +37,7 @@ class HashCode32EqOperationSearchSpec extends Specification {
         def queryRetrieverMock = Mock(QueryValueRetriever)
         queryRetrieverMock.getValue() >> hashCodeValue
         expect:
-        operation.findFirstMatchingChunk(retriever, queryRetrieverMock, snappyChunks) == expectedChunk
+        operation.findFirstMatchingBlock(retriever, queryRetrieverMock, snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:

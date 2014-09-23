@@ -40,7 +40,7 @@ class GeohashWithinRangeMeterBoxOperationSearchSpec extends Specification {
         def snappyChunks = GeohashDataGeneration.createIndexFile(file)
         def retriever = GeohashDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, searchValue)), snappyChunks) == expectedChunk
         cleanup:
         file.delete()
         where:

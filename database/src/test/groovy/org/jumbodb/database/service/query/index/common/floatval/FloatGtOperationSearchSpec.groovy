@@ -31,7 +31,7 @@ class FloatGtOperationSearchSpec extends Specification {
         def snappyChunks = FloatDataGeneration.createIndexFile(file)
         def retriever = FloatDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT, searchValue)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:

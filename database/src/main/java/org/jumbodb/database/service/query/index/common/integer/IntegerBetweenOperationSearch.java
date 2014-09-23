@@ -15,8 +15,8 @@ import java.util.List;
 public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
 
     @Override
-    public long findFirstMatchingChunk(FileDataRetriever<Integer> fileDataRetriever,
-      QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
+    public long findFirstMatchingBlock(FileDataRetriever<Integer> fileDataRetriever,
+                                       QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
         List<Integer> value = queryValueRetriever.getValue();
         Integer from = value.get(0);
         return super.findFirstMatchingChunk(fileDataRetriever, blocks, from);
@@ -32,17 +32,17 @@ public class IntegerBetweenOperationSearch extends IntegerEqOperationSearch {
 
     @Override
     public boolean acceptIndexFile(QueryValueRetriever queryValueRetriever,
-      NumberIndexFile<Integer> snappyIndexFile) {
+      NumberIndexFile<Integer> indexFile) {
         List<Integer> value = queryValueRetriever.getValue();
         Integer from = value.get(0);
         Integer to = value.get(1);
-        if (from >= snappyIndexFile.getFrom() && from <= snappyIndexFile.getTo()) {
+        if (from >= indexFile.getFrom() && from <= indexFile.getTo()) {
             return true;
         }
-        else if(to >= snappyIndexFile.getFrom() && to <= snappyIndexFile.getTo()) {
+        else if(to >= indexFile.getFrom() && to <= indexFile.getTo()) {
             return true;
         }
-        return from < snappyIndexFile.getFrom() && to > snappyIndexFile.getTo();
+        return from < indexFile.getFrom() && to > indexFile.getTo();
     }
 
     @Override

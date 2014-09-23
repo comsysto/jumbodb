@@ -15,8 +15,8 @@ import java.util.List;
 public class FloatBetweenOperationSearch extends FloatEqOperationSearch {
 
     @Override
-    public long findFirstMatchingChunk(FileDataRetriever<Float> fileDataRetriever,
-      QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
+    public long findFirstMatchingBlock(FileDataRetriever<Float> fileDataRetriever,
+                                       QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
         List<Float> value = queryValueRetriever.getValue();
         Float from = value.get(0);
         return super.findFirstMatchingChunk(fileDataRetriever, blocks, from);

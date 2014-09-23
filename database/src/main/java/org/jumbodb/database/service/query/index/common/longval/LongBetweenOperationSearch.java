@@ -15,8 +15,8 @@ import java.util.List;
 public class LongBetweenOperationSearch extends LongEqOperationSearch {
 
     @Override
-    public long findFirstMatchingChunk(FileDataRetriever<Long> fileDataRetriever,
-      QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
+    public long findFirstMatchingBlock(FileDataRetriever<Long> fileDataRetriever,
+                                       QueryValueRetriever queryValueRetriever, Blocks blocks) throws IOException {
         List<Long> value = queryValueRetriever.getValue();
         Long from = value.get(0);
         return super.findFirstMatchingChunk(fileDataRetriever, blocks, from);

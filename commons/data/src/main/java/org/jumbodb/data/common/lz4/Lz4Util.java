@@ -1,8 +1,13 @@
 package org.jumbodb.data.common.lz4;
 
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FastDecompressor;
+import net.jpountz.util.Utils;
 import org.apache.commons.io.IOUtils;
+import org.jumbodb.data.common.compression.Blocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xerial.snappy.Snappy;
 
 import java.io.*;
 import java.util.LinkedList;
@@ -11,8 +16,26 @@ import java.util.List;
 /**
  * Created by Carsten on 20.09.2014.
  */
+// CARSTEN unit test
 public class Lz4Util {
+    public static final int HEADER_SIZE = 0;
+    public static final int BLOCK_OVERHEAD = 8;
+
     private static Logger log = LoggerFactory.getLogger(Lz4Util.class);
+    private static LZ4Factory factory = LZ4Factory.fastestInstance();
+    private static LZ4FastDecompressor decompressor = factory.fastDecompressor();
+
+    public static byte[] getUncompressed(RandomAccessFile indexRaf, Blocks blocks, long blockIndex) throws IOException {
+        long offsetForChunk = blocks.getOffsetForBlock(blockIndex, HEADER_SIZE, BLOCK_OVERHEAD);
+        indexRaf.seek(offsetForChunk);
+        byte[] lengthsBuffer = new byte[8];
+        indexRaf.read(lengthsBuffer);
+        int compressedLength = Utils.readIntLE(lengthsBuffer, 0);
+        int uncompressedLength = Utils.readIntLE(lengthsBuffer, 4);
+        byte[] compressed = new byte[compressedLength];
+        indexRaf.read(compressed);
+        return decompressor.decompress(compressed, uncompressedLength);
+    }
 
     /**
      * Copies stream to file

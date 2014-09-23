@@ -1,26 +1,25 @@
-package org.jumbodb.database.service.query.index.snappy;
+package org.jumbodb.database.service.query.index.lz4;
 
 import com.google.common.collect.Maps;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FastDecompressor;
+import net.jpountz.util.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.data.common.compression.CompressionBlocksUtil;
-import org.jumbodb.data.common.snappy.SnappyUtil;
+import org.jumbodb.data.common.lz4.Lz4Util;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
 import org.jumbodb.database.service.query.definition.IndexDefinition;
 import org.jumbodb.database.service.query.index.IndexKey;
 import org.jumbodb.database.service.query.index.IndexStrategy;
-import org.jumbodb.data.common.compression.Blocks;
-import org.jumbodb.database.service.query.index.common.BlockRange;
-import org.jumbodb.database.service.query.index.common.CacheIndexClause;
-import org.jumbodb.database.service.query.index.common.ChunkRangeKey;
-import org.jumbodb.database.service.query.index.common.IndexOperationSearch;
-import org.jumbodb.database.service.query.index.common.QueryValueRetriever;
+import org.jumbodb.database.service.query.index.common.*;
 import org.jumbodb.database.service.query.index.common.numeric.FileDataRetriever;
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile;
 import org.slf4j.Logger;
@@ -29,7 +28,6 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.cache.Cache;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.xerial.snappy.Snappy;
 
 import java.io.*;
 import java.util.*;
@@ -40,9 +38,9 @@ import java.util.concurrent.Future;
 /**
  * @author Carsten Hufe
  */
-public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFile<IFV>> implements IndexStrategy {
+public abstract class NumberLz4IndexStrategy<T, IFV, IF extends NumberIndexFile<IFV>> implements IndexStrategy {
 
-    private Logger log = LoggerFactory.getLogger(NumberSnappyIndexStrategy.class);
+    private Logger log = LoggerFactory.getLogger(NumberLz4IndexStrategy.class);
 
     private ExecutorService indexFileExecutor;
     private CollectionDefinition collectionDefinition;
@@ -128,9 +126,9 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(indexFile, "r");
-            byte[] uncompressed = SnappyUtil.getUncompressed(raf, blocks, 0);
+            byte[] uncompressed = Lz4Util.getUncompressed(raf, blocks, 0);
             T from = readFirstValue(uncompressed);
-            uncompressed = SnappyUtil.getUncompressed(raf, blocks, blocks.getNumberOfBlocks() - 1);
+            uncompressed = Lz4Util.getUncompressed(raf, blocks, blocks.getNumberOfBlocks() - 1);
             T to = readLastValue(uncompressed);
             return createIndexFile(from, to, indexFile);
         } catch (FileNotFoundException e) {
@@ -149,7 +147,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
             List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
 
             for (Map.Entry<File, List<IndexQuery>> clausesPerIndexFile : groupedByIndexFile.entrySet()) {
-                tasks.add(indexFileExecutor.submit(new NumberSnappyIndexTask(this, clausesPerIndexFile.getKey(),
+                tasks.add(indexFileExecutor.submit(new NumberLz4IndexTask(this, clausesPerIndexFile.getKey(),
                         new HashSet<IndexQuery>(clausesPerIndexFile.getValue()), queryLimit, resultCacheEnabled)));
             }
             Set<FileOffset> result = new HashSet<FileOffset>();
@@ -213,7 +211,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
         FileDataRetriever fileDataRetriever = new FileDataRetriever() {
 
             public byte[] getUncompressedBlock(long searchChunk) throws IOException {
-                return SnappyUtil.getUncompressed(indexRaf, blocks, searchChunk);
+                return Lz4Util.getUncompressed(indexRaf, blocks, searchChunk);
             }
 
             @Override
@@ -224,9 +222,9 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
                     byte[] uncompressedBlock = getUncompressedBlock(searchChunk);
                     T firstInt = readFirstValue(uncompressedBlock);
                     T lastInt = readLastValue(uncompressedBlock);
-                    BlockRange<T> snappyChunkRange = new BlockRange<T>(firstInt, lastInt);
-                    indexBlockRangesCache.put(chunkRangeKey, snappyChunkRange);
-                    return snappyChunkRange;
+                    BlockRange<T> lz4BlockRange = new BlockRange<T>(firstInt, lastInt);
+                    indexBlockRangesCache.put(chunkRangeKey, lz4BlockRange);
+                    return lz4BlockRange;
                 }
                 else {
                     return (BlockRange<T>) valueWrapper.get();
@@ -234,13 +232,11 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
             }
         };
 //        long start = System.currentTimeMillis();
-        long currentChunk = integerOperationSearch.findFirstMatchingBlock(fileDataRetriever, queryValueRetriever, blocks);
-        long numberOfChunks = blocks.getNumberOfBlocks();
-//        log.trace("findFirstMatchingBlock currentChunk=" + currentChunk + "/" + numberOfChunks  + " took " + (System.currentTimeMillis() - start) + "ms");
-
-        int checkedChunks = 0;
-        int matchedChunks = 0;
-        if(currentChunk >= 0) {
+        long currentBlockIndex = integerOperationSearch.findFirstMatchingBlock(fileDataRetriever, queryValueRetriever, blocks);
+        long numberOfBlocks = blocks.getNumberOfBlocks();
+        int checkedBlocks = 0;
+        int matchedBlocks = 0;
+        if(currentBlockIndex >= 0) {
             FileInputStream fis = null;
             BufferedInputStream bis = null;
             DataInputStream dis = null;
@@ -248,25 +244,36 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
                 fis = new FileInputStream(indexFile);
                 bis = new BufferedInputStream(fis);
                 dis = new DataInputStream(bis);
-                dis.skip(blocks.getOffsetForBlock(currentChunk, SnappyUtil.HEADER_SIZE, SnappyUtil.BLOCK_OVERHEAD));
+                dis.skip(blocks.getOffsetForBlock(currentBlockIndex, Lz4Util.HEADER_SIZE, Lz4Util.BLOCK_OVERHEAD));
                 Set<FileOffset> result = new HashSet<FileOffset>();
-                while(currentChunk < numberOfChunks) {
-                    int compressedSize = dis.readInt();
-                    byte[] compressed = new byte[compressedSize];
-                    dis.read(compressed);
-                    byte[] uncompressed =  Snappy.uncompress(compressed);
-//                    byte[] uncompressed = SnappyUtil.getUncompressed(indexRaf, snappyChunks, currentChunk);
+                LZ4Factory factory = LZ4Factory.fastestInstance();
+                LZ4FastDecompressor decompressor = factory.fastDecompressor();
+                byte[] lengthsBuffer = new byte[8];
+                byte[] compressedBuffer = new byte[0];
+                byte[] uncompressedBuffer = new byte[0];
+                while(currentBlockIndex < numberOfBlocks) {
+                    dis.read(lengthsBuffer);
+                    int compressedLength = Utils.readIntLE(lengthsBuffer, 0);
+                    int uncompressedLength = Utils.readIntLE(lengthsBuffer, 4);
+                    if(compressedBuffer.length < compressedLength) {
+                        compressedBuffer = new byte[compressedLength];
+                    }
+                    if(uncompressedBuffer.length < uncompressedLength) {
+                        uncompressedBuffer = new byte[uncompressedLength];
+                    }
+                    dis.read(compressedBuffer);
+                    decompressor.decompress(compressedBuffer, 0, uncompressedBuffer, 0, uncompressedLength);
                     ByteArrayInputStream bais = null;
                     DataInputStream byteDis = null;
                     try {
-                        bais = new ByteArrayInputStream(uncompressed);
+                        bais = new ByteArrayInputStream(uncompressedBuffer, 0, uncompressedLength);
                         byteDis = new DataInputStream(bais);
                         while(bais.available() > 0) {
                             T currentValue = readValueFromDataInput(byteDis);
                             int fileNameHash = byteDis.readInt();
                             long offset = byteDis.readLong();
                             if(integerOperationSearch.matchingBlock(currentValue, queryValueRetriever)) {
-                                matchedChunks++;
+                                matchedBlocks++;
                             }
                             if(integerOperationSearch.matching(currentValue, queryValueRetriever)) {
                                 result.add(new FileOffset(fileNameHash, offset, indexQuery));
@@ -281,7 +288,7 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
                             }
                         }
                         // nothing found in second block, so there isn't anything
-                        if(checkedChunks > 1 && matchedChunks == 0) {
+                        if(checkedBlocks > 1 && matchedBlocks == 0) {
                         //    System.out.println("blub" + checkedChunks);
                             return result;
                         }
@@ -290,8 +297,8 @@ public abstract class NumberSnappyIndexStrategy<T, IFV, IF extends NumberIndexFi
                         IOUtils.closeQuietly(bais);
                     }
 
-                    currentChunk++;
-                    checkedChunks++;
+                    currentBlockIndex++;
+                    checkedBlocks++;
                 }
                 return result;
             } finally {

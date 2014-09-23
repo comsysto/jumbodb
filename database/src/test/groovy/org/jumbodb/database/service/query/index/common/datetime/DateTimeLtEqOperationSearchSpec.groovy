@@ -35,7 +35,7 @@ class DateTimeLtEqOperationSearchSpec extends Specification {
         def snappyChunks = DateTimeDataGeneration.createIndexFile(file)
         def retriever = DateTimeDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.LT_EQ, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.LT_EQ, searchDate)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:

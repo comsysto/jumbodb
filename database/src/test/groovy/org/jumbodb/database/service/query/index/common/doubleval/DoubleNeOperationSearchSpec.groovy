@@ -32,7 +32,7 @@ class DoubleNeOperationSearchSpec extends Specification {
         def snappyChunks = DoubleDataGeneration.createIndexFile(file)
         def retriever = DoubleDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:

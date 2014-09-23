@@ -31,7 +31,7 @@ class LongGtEqOperationSearchSpec extends Specification {
         def snappyChunks = LongDataGeneration.createIndexFile(file)
         def retriever = LongDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT_EQ, searchValue)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.GT_EQ, searchValue)), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:

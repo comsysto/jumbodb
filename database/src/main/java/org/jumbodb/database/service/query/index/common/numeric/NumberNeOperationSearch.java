@@ -14,12 +14,11 @@ public abstract class NumberNeOperationSearch<T, IFV, IF extends NumberIndexFile
 
     // CARSTEN move to NumberSnappyIndexFile and call by delegate
     @Override
-    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, Blocks blocks) throws IOException {
+    public long findFirstMatchingBlock(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, Blocks blocks) throws IOException {
         T searchValue = (T)queryClause.getValue();
         int numberOfChunks = blocks.getNumberOfBlocks();
         int fromChunk = 0;
         int toChunk = numberOfChunks;
-        // TODO verify snappy version
         while(toChunk != 0) {
             int currentChunk = (toChunk - fromChunk) / 2;
             BlockRange<T> blockRange = fileDataRetriever.getBlockRange(currentChunk);
@@ -39,7 +38,7 @@ public abstract class NumberNeOperationSearch<T, IFV, IF extends NumberIndexFile
     }
 
     @Override
-    public boolean matchingChunk(T currentValue, QueryValueRetriever queryValueRetriever) {
+    public boolean matchingBlock(T currentValue, QueryValueRetriever queryValueRetriever) {
         return matching(currentValue, queryValueRetriever);
     }
 

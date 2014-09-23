@@ -38,7 +38,7 @@ class DateTimeBetweenOperationSearchSpec extends Specification {
         def snappyChunks = DateTimeDataGeneration.createIndexFile(file)
         def retriever = DateTimeDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, [searchDate, "2013-01-01 12:00:00"])), snappyChunks) == expectedChunk
+        operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.BETWEEN, [searchDate, "2013-01-01 12:00:00"])), snappyChunks) == expectedChunk
         cleanup:
         file.delete();
         where:

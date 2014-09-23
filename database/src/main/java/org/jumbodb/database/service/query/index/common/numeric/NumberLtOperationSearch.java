@@ -13,13 +13,13 @@ public abstract class NumberLtOperationSearch<T, IFV, IF extends NumberIndexFile
 
     // CARSTEN move to NumberSnappyIndexFile and call by delegate
     @Override
-    public long findFirstMatchingChunk(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, Blocks blocks) throws IOException {
+    public long findFirstMatchingBlock(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, Blocks blocks) throws IOException {
         // wow that was easy .... file has already matched, everything from beginning must be smaller
         return 0;
     }
 
     @Override
-    public boolean matchingChunk(T currentValue, QueryValueRetriever queryValueRetriever) {
+    public boolean matchingBlock(T currentValue, QueryValueRetriever queryValueRetriever) {
         return matching(currentValue, queryValueRetriever);
     }
 

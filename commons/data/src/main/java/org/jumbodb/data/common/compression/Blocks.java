@@ -42,10 +42,10 @@ public class Blocks {
         return datasets;
     }
 
-    public long getOffsetForBlock(long numberChunk) {
-        long result = 16l; // snappy version
-        for(int i = 0; i < numberChunk; i++) {
-            result += blocks.get(i) + 4;
+    public long getOffsetForBlock(long blockIndex, long headerSize, long blockOverhead) {
+        long result = headerSize;
+        for(int i = 0; i < blockIndex; i++) {
+            result += blocks.get(i) + blockOverhead;
         }
         return result;
     }

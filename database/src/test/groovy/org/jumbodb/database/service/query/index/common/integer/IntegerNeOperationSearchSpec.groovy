@@ -2,8 +2,6 @@ package org.jumbodb.database.service.query.index.common.integer
 
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
-import org.jumbodb.database.service.query.index.common.integer.IntegerNeOperationSearch
-import org.jumbodb.database.service.query.index.common.integer.IntegerQueryValueRetriever
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -27,18 +25,18 @@ class IntegerNeOperationSearchSpec extends Specification {
     }
 
     @Unroll
-    def "findFirstMatchingChunk #searchDate with expected chunk #expectedChunk"() {
+    def "findFirstMatchingBlock #searchDate with expected chunk #expectedChunk"() {
         setup:
         def file = IntegerDataGeneration.createFile();
-        def snappyChunks = IntegerDataGeneration.createIndexFile(file)
-        def retriever = IntegerDataGeneration.createFileDataRetriever(file, snappyChunks)
+        def blocks = IntegerDataGeneration.createIndexFile(file)
+        def retriever = IntegerDataGeneration.createFileDataRetriever(file, blocks)
 
         expect:
-        operation.findFirstMatchingChunk(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.NE, searchDate)), snappyChunks) == expectedChunk
+        operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.NE, searchDate)), blocks) == expectedBlock
         cleanup:
         file.delete();
         where:
-        searchDate | expectedChunk
+        searchDate | expectedBlock
         -2050      | 0 // is outside of the generated range
         -2047      | 0
         -1         | 0

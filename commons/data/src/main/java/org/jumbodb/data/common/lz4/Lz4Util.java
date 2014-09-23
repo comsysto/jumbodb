@@ -86,7 +86,7 @@ public class Lz4Util {
                 }
             };
             IOUtils.copyLarge(inputStream, lz4os, 0l, fileLength);
-            lz4os.flush();
+            IOUtils.closeQuietly(lz4os);
             lz4BlockDos.writeLong(fileLength);
             lz4BlockDos.writeLong(datasets);
             lz4BlockDos.writeInt(blockSize);

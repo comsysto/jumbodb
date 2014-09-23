@@ -56,7 +56,7 @@ public class Blocks {
 
     @Override
     public String toString() {
-        return "SnappyChunks{" +
+        return "Blocks{" +
           "length=" + length +
           ", datasets=" + datasets +
           ", blockSize=" + blockSize +

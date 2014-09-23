@@ -24,6 +24,7 @@ import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class AbstractLz4IndexOutputFormat<T extends WritableComparable, OV> extends FileOutputFormat<T, OV> {
@@ -48,6 +49,7 @@ public abstract class AbstractLz4IndexOutputFormat<T extends WritableComparable,
         private final FSDataOutputStream fileOut;
         private long datasets = 0l;
 
+
         public BinaryIndexRecordWriter(TaskAttemptContext context)
                 throws IOException {
             Configuration conf = context.getConfiguration();
@@ -59,11 +61,15 @@ public abstract class AbstractLz4IndexOutputFormat<T extends WritableComparable,
             bufferedOutputStream = new BufferedOutputStream(digestStream) {
                 @Override
                 public synchronized void write(byte[] bytes, int i, int i2) throws IOException {
-                    blockSizes.add(i2);
                     super.write(bytes, i, i2);
                 }
             };
-            lz4BlockOutputStream = new LZ4BlockOutputStream(bufferedOutputStream, getLz4BlockSize());
+            lz4BlockOutputStream = new LZ4BlockOutputStream(bufferedOutputStream, getLz4BlockSize()) {
+                @Override
+                protected void onCompressedLength(int compressedLength) {
+                    blockSizes.add(compressedLength);
+                }
+            };
             countingOutputStream = new CountingOutputStream(lz4BlockOutputStream);
             dataOutputStream = new DataOutputStream(countingOutputStream);
         }

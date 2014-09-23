@@ -8,13 +8,25 @@
     "output": "file:///C:/Development/data/twitter/output/",
     "numberOfDataFiles": 16,
     "hadoop": [],
-    "checksum": "MD5",
+    "checksum": "NONE",
     "importCollection": [
         {
             "input": "file:///C:/Development/data/twitter/input_big/",
             "description": "Twitter data",
             "collectionName": "twitter_lz4",
-            "dataStrategy": "JSON_LZ4"
+            "dataStrategy": "JSON_LZ4",
+            "indexes": [
+                {
+                    "indexName": "followers_count_lz4",
+                    "fields": ["user.followers_count"],
+                    "indexStrategy": "INTEGER_LZ4"
+                },
+                {
+                    "indexName": "followers_count_snappy",
+                    "fields": ["user.followers_count"],
+                    "indexStrategy": "INTEGER_SNAPPY"
+                }
+            ]
         }
     ]
 }

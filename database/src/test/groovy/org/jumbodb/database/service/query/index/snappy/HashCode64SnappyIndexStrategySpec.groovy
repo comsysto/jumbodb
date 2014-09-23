@@ -42,11 +42,11 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
         strategyName == "HASHCODE64_SNAPPY"
     }
 
-    def "verify chunk size"() {
+    def "verify block size"() {
         when:
-        def snappyChunkSize = strategy.getCompressionBlockSize()
+        def blockSize = strategy.getCompressionBlockSize()
         then:
-        snappyChunkSize == 32640
+        blockSize == 32640
     }
 
     def "readValueFromDataInput"() {
@@ -194,16 +194,16 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
         def strategy = new HashCode64SnappyIndexStrategy()
         setupCache(strategy)
         def indexFile = HashCode64SnappyDataGeneration.createFile()
-        def snappyChunks = HashCode64SnappyDataGeneration.createIndexFile(indexFile)
+        def blocks = HashCode64SnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3333l)
-        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
+        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
         then:
         fileOffsets == ([new FileOffset(50000, 103333l, indexQuery)] as Set)
         when:
         indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 1003000l) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
+        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -257,9 +257,9 @@ class HashCode64SnappyIndexStrategySpec extends Specification {
     def "createIndexFileDescription"() {
         setup:
         def indexFile = HashCode64SnappyDataGeneration.createFile()
-        def snappyChunks = HashCode64SnappyDataGeneration.createIndexFile(indexFile)
+        def blocks = HashCode64SnappyDataGeneration.createIndexFile(indexFile)
         when:
-        def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
+        def indexFileDescription = strategy.createIndexFileDescription(indexFile, blocks)
         then:
         indexFileDescription.getIndexFile().getName() == indexFile.getName()
         indexFileDescription.getFrom() == -1600l

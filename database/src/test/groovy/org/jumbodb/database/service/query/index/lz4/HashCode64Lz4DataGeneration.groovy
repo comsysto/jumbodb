@@ -6,7 +6,7 @@ import org.jumbodb.data.common.lz4.Lz4Util
 /**
  * @author Carsten Hufe
  */
-class IntegerLz4DataGeneration {
+class HashCode64Lz4DataGeneration {
     def static createFile() {
         File.createTempFile("randomindex", "idx")
     }
@@ -19,10 +19,10 @@ class IntegerLz4DataGeneration {
 
         def fileHash = 50000
         def offsetBase = 100000
-        def i = -2048
+        def i = -1600
         for (blocks in 1..11) {
-            for (datasetInBlock in 1..2048) {
-                dos.writeInt(i)
+            for (datasetInBlock in 1..1600) {
+                dos.writeLong(i)
                 dos.writeInt(fileHash)
                 dos.writeLong(i + offsetBase)
                 i++
@@ -34,9 +34,9 @@ class IntegerLz4DataGeneration {
     }
 
     def static createIndexFile(file) {
-        def blockSize = 32768
-        def umcompressedFileLength = 16 * 11 * 2048 // index entry length * 12 blocks * datasets per chunk
-        Lz4Util.copy(new ByteArrayInputStream(createIndexContent()), file, umcompressedFileLength, 100l, blockSize)
+        def blockSize = 32000
+        def uncompressedFileLength = 20 * 11 * 1600 // index entry length * 11 blocks * datasets per chunk
+        Lz4Util.copy(new ByteArrayInputStream(createIndexContent()), file, uncompressedFileLength, 100l, blockSize)
         CompressionBlocksUtil.getBlocksByFile(file)
     }
 }

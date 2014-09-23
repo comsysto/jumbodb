@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.common.datetime
+package org.jumbodb.database.service.query.index.snappy
 
 import org.apache.commons.lang.time.DateUtils
 import org.jumbodb.data.common.compression.CompressionBlocksUtil
@@ -10,7 +10,7 @@ import org.jumbodb.database.service.query.index.common.numeric.FileDataRetriever
 /**
  * @author Carsten Hufe
  */
-class DateTimeDataGeneration {
+class DateTimeSnappyDataGeneration {
     def static createFile() {
         File.createTempFile("randomindex", "idx")
     }

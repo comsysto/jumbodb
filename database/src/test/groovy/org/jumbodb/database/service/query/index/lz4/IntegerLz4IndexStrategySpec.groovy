@@ -11,7 +11,6 @@ import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
 import org.jumbodb.database.service.query.index.common.integer.IntegerEqOperationSearch
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
-import org.jumbodb.database.service.query.index.snappy.IntegerSnappyDataGeneration
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -43,11 +42,11 @@ class IntegerLz4IndexStrategySpec extends Specification {
         strategyName == "INTEGER_LZ4"
     }
 
-    def "verify chunk size"() {
+    def "verify block size"() {
         when:
-        def snappyChunkSize = strategy.getCompressionBlockSize()
+        def blockSize = strategy.getCompressionBlockSize()
         then:
-        snappyChunkSize == 32768
+        blockSize == 32768
     }
 
     def "readValueFromDataInput"() {
@@ -175,7 +174,7 @@ class IntegerLz4IndexStrategySpec extends Specification {
         setup:
         def strategy = new IntegerLz4IndexStrategy()
         setupCache(strategy)
-        def indexFile = IntegerSnappyDataGeneration.createFile()
+        def indexFile = IntegerLz4DataGeneration.createFile()
         IntegerLz4DataGeneration.createIndexFile(indexFile)
         def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000)
         def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000)

@@ -179,7 +179,7 @@ class JsonLz4yLineBreakDataStrategySpec extends Specification {
         when:
         def sizes = strategy.getCollectionDataSize(folder)
         then:
-        sizes.getCompressedSize() == 52
+        sizes.getCompressedSize() == 56
         sizes.getUncompressedSize() == 11
         sizes.getDatasets() == 100
         cleanup:

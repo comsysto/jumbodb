@@ -7,7 +7,6 @@ import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
 import org.jumbodb.database.service.query.index.IndexKey
-import org.jumbodb.database.service.query.index.common.datetime.DateTimeDataGeneration
 import org.jumbodb.database.service.query.index.common.datetime.DateTimeEqOperationSearch
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
@@ -40,11 +39,11 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategyName == "DATETIME_SNAPPY"
     }
 
-    def "verify chunk size"() {
+    def "verify block size"() {
         when:
-        def snappyChunkSize = strategy.getCompressionBlockSize()
+        def blockSize = strategy.getCompressionBlockSize()
         then:
-        snappyChunkSize == 32640
+        blockSize == 32640
     }
 
     def "readValueFromDataInput"() {
@@ -178,8 +177,8 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new DateTimeSnappyIndexStrategy()
-        def indexFile = DateTimeDataGeneration.createFile()
-        DateTimeDataGeneration.createIndexFile(indexFile)
+        def indexFile = DateTimeSnappyDataGeneration.createFile()
+        DateTimeSnappyDataGeneration.createIndexFile(indexFile)
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
         strategy.setIndexCompressionBlocksCache(cacheMock)
@@ -202,8 +201,8 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         // no mocking here, instead a integrated test with equal
         setup:
         def strategy = new DateTimeSnappyIndexStrategy()
-        def indexFile = DateTimeDataGeneration.createFile()
-        def snappyChunks = DateTimeDataGeneration.createIndexFile(indexFile)
+        def indexFile = DateTimeSnappyDataGeneration.createFile()
+        def blocks = DateTimeSnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         def cacheMock = Mock(Cache)
         cacheMock.get(_) >> null
@@ -212,12 +211,12 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         strategy.setIndexQueryCache(cacheMock)
         when:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, "2012-01-01 12:00:00")
-        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
+        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
         then:
         fileOffsets == ([new FileOffset(50000, 1325415700000, indexQuery)] as Set)
         when:
         indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, "2012-01-01 12:00:01") // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
+        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -279,9 +278,9 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
         setup:
         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         def indexFile = File.createTempFile("part00001", "idx")
-        def snappyChunks = DateTimeDataGeneration.createIndexFile(indexFile)
+        def blocks = DateTimeSnappyDataGeneration.createIndexFile(indexFile)
         when:
-        def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
+        def indexFileDescription = strategy.createIndexFileDescription(indexFile, blocks)
         then:
         indexFileDescription.getIndexFile().getName() == indexFile.getName()
         sdf.format(new Date(indexFileDescription.getFrom())) == "2012-01-01 12:00:00"
@@ -357,7 +356,7 @@ class DateTimeSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        DateTimeDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        DateTimeSnappyDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 

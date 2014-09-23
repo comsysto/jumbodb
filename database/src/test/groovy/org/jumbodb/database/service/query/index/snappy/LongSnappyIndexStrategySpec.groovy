@@ -42,11 +42,11 @@ class LongSnappyIndexStrategySpec extends Specification {
         strategyName == "LONG_SNAPPY"
     }
 
-    def "verify chunk size"() {
+    def "verify block size"() {
         when:
-        def snappyChunkSize = strategy.getCompressionBlockSize()
+        def blockSize = strategy.getCompressionBlockSize()
         then:
-        snappyChunkSize == 32640
+        blockSize == 32640
     }
 
     def "readValueFromDataInput"() {
@@ -194,16 +194,16 @@ class LongSnappyIndexStrategySpec extends Specification {
         def strategy = new LongSnappyIndexStrategy()
         setupCache(strategy)
         def indexFile = LongSnappyDataGeneration.createFile()
-        def snappyChunks = LongSnappyDataGeneration.createIndexFile(indexFile)
+        def blocks = LongSnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def query = new IndexQuery("testIndex", QueryOperation.EQ, 3333l)
-        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, query, snappyChunks, 5, true)
+        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, query, blocks, 5, true)
         then:
         fileOffsets == ([new FileOffset(50000, 103333l, query)] as Set)
         when:
         query = new IndexQuery("testIndex", QueryOperation.EQ, 1003000l) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, query, snappyChunks, 5, true)
+        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, query, blocks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -257,9 +257,9 @@ class LongSnappyIndexStrategySpec extends Specification {
     def "createIndexFileDescription"() {
         setup:
         def indexFile = LongSnappyDataGeneration.createFile()
-        def snappyChunks = LongSnappyDataGeneration.createIndexFile(indexFile)
+        def blocks = LongSnappyDataGeneration.createIndexFile(indexFile)
         when:
-        def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
+        def indexFileDescription = strategy.createIndexFileDescription(indexFile, blocks)
         then:
         indexFileDescription.getIndexFile().getName() == indexFile.getName()
         indexFileDescription.getFrom() == -1600l

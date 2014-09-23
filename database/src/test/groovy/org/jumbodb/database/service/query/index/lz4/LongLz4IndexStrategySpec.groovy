@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.snappy
+package org.jumbodb.database.service.query.index.lz4
 
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
@@ -7,10 +7,10 @@ import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
 import org.jumbodb.database.service.query.index.IndexKey
-import org.jumbodb.database.service.query.index.common.doubleval.DoubleEqOperationSearch
-import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
+import org.jumbodb.database.service.query.index.common.longval.LongEqOperationSearch
+import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -20,9 +20,8 @@ import java.util.concurrent.Future
 /**
  * @author Carsten Hufe
  */
-class DoubleSnappyIndexStrategySpec extends Specification {
-    def strategy = new DoubleSnappyIndexStrategy()
-
+class LongLz4IndexStrategySpec extends Specification {
+    def strategy = new LongLz4IndexStrategy()
 
     def setup() {
         setupCache(strategy)
@@ -36,12 +35,11 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         strategy.setIndexQueryCache(cacheMock)
     }
 
-
     def "verify strategy name"() {
         when:
         def strategyName = strategy.getStrategyName()
         then:
-        strategyName == "DOUBLE_SNAPPY"
+        strategyName == "LONG_LZ4"
     }
 
     def "verify block size"() {
@@ -57,12 +55,12 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         when:
         def value = strategy.readValueFromDataInput(disMock)
         then:
-        1 * disMock.readDouble() >> 1009d
-        value == 1009d
+        1 * disMock.readLong() >> 1009l
+        value == 1009l
     }
 
     def writeIndexEntry(value, dos) {
-        dos.writeDouble(value)
+        dos.writeLong(value)
         dos.writeInt(123) // file hash
         dos.writeLong(567) // offset
     }
@@ -71,14 +69,14 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         setup:
         def byteArrayStream = new ByteArrayOutputStream()
         def dos = new DataOutputStream(byteArrayStream)
-        writeIndexEntry(11111d, dos)
-        writeIndexEntry(22222d, dos)
-        writeIndexEntry(33333d, dos)
-        writeIndexEntry(44444d, dos)
+        writeIndexEntry(11111l, dos)
+        writeIndexEntry(22222l, dos)
+        writeIndexEntry(33333l, dos)
+        writeIndexEntry(44444l, dos)
         when:
         def value = strategy.readLastValue(byteArrayStream.toByteArray())
         then:
-        value == 44444d
+        value == 44444l
         cleanup:
         dos.close()
         byteArrayStream.close()
@@ -88,14 +86,14 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         setup:
         def byteArrayStream = new ByteArrayOutputStream()
         def dos = new DataOutputStream(byteArrayStream)
-        writeIndexEntry(11111d, dos)
-        writeIndexEntry(22222d, dos)
-        writeIndexEntry(33333d, dos)
-        writeIndexEntry(44444d, dos)
+        writeIndexEntry(11111l, dos)
+        writeIndexEntry(22222l, dos)
+        writeIndexEntry(33333l, dos)
+        writeIndexEntry(44444l, dos)
         when:
         def value = strategy.readFirstValue(byteArrayStream.toByteArray())
         then:
-        value == 11111d
+        value == 11111l
         cleanup:
         dos.close()
         byteArrayStream.close()
@@ -105,23 +103,23 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         setup:
         def fileMock = Mock(File)
         when:
-        def indexFile = strategy.createIndexFile(123d, 456d, fileMock)
+        def indexFile = strategy.createIndexFile(123l, 456l, fileMock)
         then:
-        indexFile.getFrom() == 123d
-        indexFile.getTo() == 456d
+        indexFile.getFrom() == 123l
+        indexFile.getTo() == 456l
         indexFile.getIndexFile() == fileMock
     }
 
     def "groupByIndexFile"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(LongEqOperationSearch)
+        def strategy = new LongLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         setupCache(strategy)
         strategy.onInitialize(cd)
-        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345d)
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 11111l)
         when:
         def groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", "testIndex", [query])
         def keys = groupedByIndex.keySet()
@@ -142,17 +140,17 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "findFileOffsets"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
+        def operationMock = Mock(LongEqOperationSearch)
         def executorMock = Mock(ExecutorService)
         def futureMock = Mock(Future)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def strategy = new LongLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
-        setupCache(strategy)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         strategy.setIndexFileExecutor(executorMock)
+        setupCache(strategy)
         strategy.onInitialize(cd)
-        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345d)
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 11111l)
         def expectedOffsets = ([12345l, 67890l] as Set)
         when:
         def fileOffsets = strategy.findFileOffsets("testChunkKey", "testCollection", "testIndex", [query], 10, true)
@@ -174,14 +172,14 @@ class DoubleSnappyIndexStrategySpec extends Specification {
     def "searchOffsetsByIndexQueries"() {
         // no mocking here, instead a integrated test with equal
         setup:
-        def strategy = new DoubleSnappyIndexStrategy()
+        def strategy = new LongLz4IndexStrategy()
         setupCache(strategy)
-        def indexFile = DoubleSnappyDataGeneration.createFile()
-        DoubleSnappyDataGeneration.createIndexFile(indexFile)
-        def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000d)
-        def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000d)
-        def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 3000.33d) // should not exist, so no result for it
-        def query4 = new IndexQuery("testIndex", QueryOperation.EQ, 5000d)
+        def indexFile = LongLz4DataGeneration.createFile()
+        LongLz4DataGeneration.createIndexFile(indexFile)
+        def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000l)
+        def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000l)
+        def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 1003000l) // should not exist, so no result for it
+        def query4 = new IndexQuery("testIndex", QueryOperation.EQ, 5000l)
         when:
         def fileOffsets = strategy.searchOffsetsByIndexQueries(indexFile, ([query1, query2, query3, query4] as Set), 5, true)
         then:
@@ -193,19 +191,19 @@ class DoubleSnappyIndexStrategySpec extends Specification {
     def "findOffsetForIndexQuery"() {
         // no mocking here, instead a integrated test with equal
         setup:
-        def strategy = new DoubleSnappyIndexStrategy()
+        def strategy = new LongLz4IndexStrategy()
         setupCache(strategy)
-        def indexFile = DoubleSnappyDataGeneration.createFile()
-        def blocks = DoubleSnappyDataGeneration.createIndexFile(indexFile)
+        def indexFile = LongLz4DataGeneration.createFile()
+        def blocks = LongLz4DataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
-        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3333d)
-        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 3333l)
+        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, query, blocks, 5, true)
         then:
-        fileOffsets == ([new FileOffset(50000, 103333l, indexQuery)] as Set)
+        fileOffsets == ([new FileOffset(50000, 103333l, query)] as Set)
         when:
-        indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3.3d) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
+        query = new IndexQuery("testIndex", QueryOperation.EQ, 1003000l) // should not exist, so no result for it
+        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, query, blocks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -215,8 +213,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "isResponsibleFor"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(LongEqOperationSearch)
+        def strategy = new LongLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -236,12 +234,12 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "buildIndexRanges"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(LongEqOperationSearch)
+        def strategy = new LongLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
-        setupCache(strategy)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        setupCache(strategy)
         when:
         strategy.onInitialize(cd)
         def ranges = strategy.buildIndexRanges()
@@ -250,22 +248,22 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         ranges.size() == 1
         testIndexFiles.size() == 1
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
-        testIndexFiles[0].getFrom() == -1600d
-        testIndexFiles[0].getTo() == 15999d
+        testIndexFiles[0].getFrom() == -1600l
+        testIndexFiles[0].getTo() == 15999l
         cleanup:
         indexFolder.delete()
     }
 
     def "createIndexFileDescription"() {
         setup:
-        def indexFile = DoubleSnappyDataGeneration.createFile()
-        def blocks = DoubleSnappyDataGeneration.createIndexFile(indexFile)
+        def indexFile = LongLz4DataGeneration.createFile()
+        def lz4Blocks = LongLz4DataGeneration.createIndexFile(indexFile)
         when:
-        def indexFileDescription = strategy.createIndexFileDescription(indexFile, blocks)
+        def indexFileDescription = strategy.createIndexFileDescription(indexFile, lz4Blocks)
         then:
         indexFileDescription.getIndexFile().getName() == indexFile.getName()
-        indexFileDescription.getFrom() == -1600d
-        indexFileDescription.getTo() == 15999d
+        indexFileDescription.getFrom() == -1600l
+        indexFileDescription.getTo() == 15999l
         cleanup:
         indexFile.delete()
     }
@@ -278,16 +276,16 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         then:
         indexRange.size() == 1
         indexRange[0].getIndexFile().getName() == "part00001.idx"
-        indexRange[0].getFrom() == -1600d
-        indexRange[0].getTo() == 15999d
+        indexRange[0].getFrom() == -1600l
+        indexRange[0].getTo() == 15999l
         cleanup:
         indexFolder.delete()
     }
 
     def "onInitialize"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(LongEqOperationSearch)
+        def strategy = new LongLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -298,8 +296,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
-        testIndexFiles[0].getFrom() == -1600d
-        testIndexFiles[0].getTo() == 15999d
+        testIndexFiles[0].getFrom() == -1600l
+        testIndexFiles[0].getTo() == 15999l
         cleanup:
         indexFolder.delete()
     }
@@ -307,8 +305,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "onDataChanged"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(LongEqOperationSearch)
+        def strategy = new LongLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -319,8 +317,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
-        testIndexFiles[0].getFrom() == -1600d
-        testIndexFiles[0].getTo() == 15999d
+        testIndexFiles[0].getFrom() == -1600l
+        testIndexFiles[0].getTo() == 15999l
         cleanup:
         indexFolder.delete()
     }
@@ -328,50 +326,50 @@ class DoubleSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        DoubleSnappyDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        LongLz4DataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 
     def createCollectionDefinition(indexFolder) {
-        def index = new IndexDefinition("testIndex", indexFolder, "DOUBLE_SNAPPY")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [index], [:], "DOUBLE_SNAPPY")]]
+        def index = new IndexDefinition("testIndex", indexFolder, "LONG_LZ4")
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [index], [:], "LONG_LZ4")]]
         new CollectionDefinition(cdMap)
     }
 
 
     def "acceptIndexFile operation"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def numberSnappyIndexFile = Mock(NumberIndexFile)
-        def clause = new IndexQuery("testIndex", QueryOperation.EQ, 5d)
+        def operationMock = Mock(LongEqOperationSearch)
+        def numberLz4IndexFile = Mock(NumberIndexFile)
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 5l)
         def valueRetriever = Mock(QueryValueRetriever)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def strategy = new LongLz4IndexStrategy()
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         when:
-        def result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        def result = strategy.acceptIndexFile(query, numberLz4IndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
-        1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> true
+        1 * operationMock.getQueryValueRetriever(query) >> valueRetriever
+        1 * operationMock.acceptIndexFile(valueRetriever, numberLz4IndexFile) >> true
         result == true
         when:
-        result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        result = strategy.acceptIndexFile(query, numberLz4IndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
-        1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> false
+        1 * operationMock.getQueryValueRetriever(query) >> valueRetriever
+        1 * operationMock.acceptIndexFile(valueRetriever, numberLz4IndexFile) >> false
         result == false
     }
 
 
     def "acceptIndexFile exception"() {
         setup:
-        def strategy = new DoubleSnappyIndexStrategy() {
+        def strategy = new LongLz4IndexStrategy() {
             @Override
             Map<QueryOperation, IndexOperationSearch<Long, Long, NumberIndexFile<Long>>> getQueryOperationsStrategies() {
                 return [:]
             }
         }
         when:
-        strategy.acceptIndexFile(new IndexQuery("testIndex", QueryOperation.EQ, 5d), Mock(NumberIndexFile))
+        strategy.acceptIndexFile(new IndexQuery("testIndex", QueryOperation.EQ, 5l), Mock(NumberIndexFile))
         then:
         thrown UnsupportedOperationException
     }

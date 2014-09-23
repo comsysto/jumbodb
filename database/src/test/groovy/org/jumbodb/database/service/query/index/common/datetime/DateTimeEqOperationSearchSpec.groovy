@@ -3,6 +3,7 @@ package org.jumbodb.database.service.query.index.common.datetime
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
+import org.jumbodb.database.service.query.index.snappy.DateTimeSnappyDataGeneration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,9 +33,9 @@ class DateTimeEqOperationSearchSpec extends Specification {
     @Unroll
     def "findFirstMatchingChunk #searchDate with expected chunk #expectedChunk"() {
         setup:
-        def file = DateTimeDataGeneration.createFile();
-        def snappyChunks = DateTimeDataGeneration.createIndexFile(file)
-        def retriever = DateTimeDataGeneration.createFileDataRetriever(file, snappyChunks)
+        def file = DateTimeSnappyDataGeneration.createFile();
+        def snappyChunks = DateTimeSnappyDataGeneration.createIndexFile(file)
+        def retriever = DateTimeSnappyDataGeneration.createFileDataRetriever(file, snappyChunks)
         expect:
         operation.findFirstMatchingBlock(retriever, operation.getQueryValueRetriever(new IndexQuery("testIndex", QueryOperation.EQ, searchDate)), snappyChunks) == expectedChunk
         cleanup:

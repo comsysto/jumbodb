@@ -17,12 +17,12 @@ import java.util.List;
  */
 public class SnappyUtil {
     private static Logger log = LoggerFactory.getLogger(SnappyUtil.class);
-    public static final int HEADER_SIZE = 8;
+    public static final int HEADER_SIZE = 16;
     public static final int BLOCK_OVERHEAD = 4;
 
     public static byte[] getUncompressed(RandomAccessFile indexRaf, Blocks blocks, long blockIndex) throws IOException {
-        long offsetForChunk = blocks.getOffsetForBlock(blockIndex, HEADER_SIZE, BLOCK_OVERHEAD);
-        indexRaf.seek(offsetForChunk);
+        long offsetForBlock = blocks.getOffsetForBlock(blockIndex, HEADER_SIZE, BLOCK_OVERHEAD);
+        indexRaf.seek(offsetForBlock);
         int snappyBlockLength = indexRaf.readInt();
         byte[] compressed = new byte[snappyBlockLength];
         indexRaf.read(compressed);

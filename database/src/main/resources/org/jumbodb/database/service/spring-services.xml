@@ -61,6 +61,14 @@
                 <bean class="org.jumbodb.database.service.query.index.snappy.LongSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
                 <bean class="org.jumbodb.database.service.query.index.snappy.DateTimeSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
                 <bean class="org.jumbodb.database.service.query.index.snappy.GeohashSnappyIndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.lz4.HashCode32Lz4IndexStrategy" parent="baseNumberIndexStrategy" />
+                <bean class="org.jumbodb.database.service.query.index.lz4.HashCode64Lz4IndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.lz4.IntegerLz4IndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.lz4.FloatLz4IndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.lz4.DoubleLz4IndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.lz4.LongLz4IndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.lz4.DateTimeLz4IndexStrategy" parent="baseNumberIndexStrategy"/>
+                <bean class="org.jumbodb.database.service.query.index.lz4.GeohashLz4IndexStrategy" parent="baseNumberIndexStrategy"/>
                 <bean class="org.jumbodb.database.service.query.index.notfound.NotFoundIndexStrategy"/>
             </list>
         </property>

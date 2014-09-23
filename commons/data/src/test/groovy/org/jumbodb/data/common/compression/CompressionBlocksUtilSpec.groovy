@@ -22,7 +22,7 @@ class CompressionBlocksUtilSpec extends Specification {
         blocks.getDatasets() == 100l
         blocks.getLength() == 128 * 1024
         blocks.getNumberOfBlocks() == 4
-        blocks.getOffsetForBlock(3) == blocks.getBlocks()[0] + 4 + blocks.getBlocks()[1] + 4 + blocks.getBlocks()[2] + 4 + 16
+        blocks.getOffsetForBlock(3, 16, 4) == blocks.getBlocks()[0] + 4 + blocks.getBlocks()[1] + 4 + blocks.getBlocks()[2] + 4 + 16
         cleanup:
         tempFile.delete()
     }

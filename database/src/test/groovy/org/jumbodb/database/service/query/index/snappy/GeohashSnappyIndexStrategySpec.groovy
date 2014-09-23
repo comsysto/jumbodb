@@ -43,11 +43,11 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         strategyName == "GEOHASH_SNAPPY"
     }
 
-    def "verify chunk size"() {
+    def "verify block size"() {
         when:
-        def snappyChunkSize = strategy.getCompressionBlockSize()
+        def blockSize = strategy.getCompressionBlockSize()
         then:
-        snappyChunkSize == 48 * 1024
+        blockSize == 48 * 1024
     }
 
     def "readValueFromDataInput"() {
@@ -203,16 +203,16 @@ class GeohashSnappyIndexStrategySpec extends Specification {
         def strategy = new GeohashSnappyIndexStrategy()
         setupCache(strategy)
         def indexFile = GeohashSnappyDataGeneration.createFile()
-        def snappyChunks = GeohashSnappyDataGeneration.createIndexFile(indexFile)
+        def blocks = GeohashSnappyDataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
         def indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
-        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
+        def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
         then:
         fileOffsets == ([new FileOffset(50000, 100000l, indexQuery)] as Set)
         when:
         indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
-        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, snappyChunks, 5, true)
+        fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
         then:
         fileOffsets.size() == 0
         cleanup:
@@ -266,9 +266,9 @@ class GeohashSnappyIndexStrategySpec extends Specification {
     def "createIndexFileDescription"() {
         setup:
         def indexFile = GeohashSnappyDataGeneration.createFile()
-        def snappyChunks = GeohashSnappyDataGeneration.createIndexFile(indexFile)
+        def blocks = GeohashSnappyDataGeneration.createIndexFile(indexFile)
         when:
-        def indexFileDescription = strategy.createIndexFileDescription(indexFile, snappyChunks)
+        def indexFileDescription = strategy.createIndexFileDescription(indexFile, blocks)
         then:
         indexFileDescription.getIndexFile().getName() == indexFile.getName()
         indexFileDescription.getFrom() == -1073671086

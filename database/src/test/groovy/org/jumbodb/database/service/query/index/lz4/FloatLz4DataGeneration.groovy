@@ -6,7 +6,7 @@ import org.jumbodb.data.common.lz4.Lz4Util
 /**
  * @author Carsten Hufe
  */
-class IntegerLz4DataGeneration {
+class FloatLz4DataGeneration {
     def static createFile() {
         File.createTempFile("randomindex", "idx")
     }
@@ -22,7 +22,7 @@ class IntegerLz4DataGeneration {
         def i = -2048
         for (blocks in 1..11) {
             for (datasetInBlock in 1..2048) {
-                dos.writeInt(i)
+                dos.writeFloat(i)
                 dos.writeInt(fileHash)
                 dos.writeLong(i + offsetBase)
                 i++

@@ -261,7 +261,7 @@ public abstract class NumberLz4IndexStrategy<T, IFV, IF extends NumberIndexFile<
                     if(uncompressedBuffer.length < uncompressedLength) {
                         uncompressedBuffer = new byte[uncompressedLength];
                     }
-                    dis.read(compressedBuffer);
+                    dis.read(compressedBuffer, 0, compressedLength);
                     decompressor.decompress(compressedBuffer, 0, uncompressedBuffer, 0, uncompressedLength);
                     ByteArrayInputStream bais = null;
                     DataInputStream byteDis = null;

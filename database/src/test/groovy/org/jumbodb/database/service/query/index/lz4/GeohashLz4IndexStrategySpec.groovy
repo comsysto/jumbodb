@@ -1,4 +1,4 @@
-package org.jumbodb.database.service.query.index.snappy
+package org.jumbodb.database.service.query.index.lz4
 
 import org.jumbodb.common.query.IndexQuery
 import org.jumbodb.common.query.QueryOperation
@@ -7,10 +7,11 @@ import org.jumbodb.database.service.query.definition.CollectionDefinition
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition
 import org.jumbodb.database.service.query.definition.IndexDefinition
 import org.jumbodb.database.service.query.index.IndexKey
-import org.jumbodb.database.service.query.index.common.doubleval.DoubleEqOperationSearch
-import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.jumbodb.database.service.query.index.common.IndexOperationSearch
 import org.jumbodb.database.service.query.index.common.QueryValueRetriever
+import org.jumbodb.database.service.query.index.common.geohash.GeohashCoords
+import org.jumbodb.database.service.query.index.common.geohash.GeohashWithinRangeMeterBoxOperationSearch
+import org.jumbodb.database.service.query.index.common.numeric.NumberIndexFile
 import org.springframework.cache.Cache
 import spock.lang.Specification
 
@@ -20,9 +21,8 @@ import java.util.concurrent.Future
 /**
  * @author Carsten Hufe
  */
-class DoubleSnappyIndexStrategySpec extends Specification {
-    def strategy = new DoubleSnappyIndexStrategy()
-
+class GeohashLz4IndexStrategySpec extends Specification {
+    def strategy = new GeohashLz4IndexStrategy()
 
     def setup() {
         setupCache(strategy)
@@ -36,19 +36,18 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         strategy.setIndexQueryCache(cacheMock)
     }
 
-
     def "verify strategy name"() {
         when:
         def strategyName = strategy.getStrategyName()
         then:
-        strategyName == "DOUBLE_SNAPPY"
+        strategyName == "GEOHASH_LZ4"
     }
 
     def "verify block size"() {
         when:
         def blockSize = strategy.getCompressionBlockSize()
         then:
-        blockSize == 32640
+        blockSize == 48 * 1024
     }
 
     def "readValueFromDataInput"() {
@@ -57,12 +56,17 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         when:
         def value = strategy.readValueFromDataInput(disMock)
         then:
-        1 * disMock.readDouble() >> 1009d
-        value == 1009d
+        1 * disMock.readInt() >> 1009
+        2 * disMock.readFloat() >>> [12f, 23f]
+        value.getGeohash() == 1009
+        value.getLatitude() == 12f
+        value.getLongitude() == 23f
     }
 
-    def writeIndexEntry(value, dos) {
-        dos.writeDouble(value)
+    def writeIndexEntry(geohash, lat, lon, dos) {
+        dos.writeInt(geohash)
+        dos.writeFloat(lat)
+        dos.writeFloat(lon)
         dos.writeInt(123) // file hash
         dos.writeLong(567) // offset
     }
@@ -71,14 +75,16 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         setup:
         def byteArrayStream = new ByteArrayOutputStream()
         def dos = new DataOutputStream(byteArrayStream)
-        writeIndexEntry(11111d, dos)
-        writeIndexEntry(22222d, dos)
-        writeIndexEntry(33333d, dos)
-        writeIndexEntry(44444d, dos)
+        writeIndexEntry(11111, 1f, 11f, dos)
+        writeIndexEntry(22222, 2f, 22f, dos)
+        writeIndexEntry(33333, 3f, 33f, dos)
+        writeIndexEntry(44444, 4f, 44f, dos)
         when:
         def value = strategy.readLastValue(byteArrayStream.toByteArray())
         then:
-        value == 44444d
+        value.getGeohash() == 44444
+        value.getLatitude() == 4f
+        value.getLongitude() == 44f
         cleanup:
         dos.close()
         byteArrayStream.close()
@@ -88,14 +94,16 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         setup:
         def byteArrayStream = new ByteArrayOutputStream()
         def dos = new DataOutputStream(byteArrayStream)
-        writeIndexEntry(11111d, dos)
-        writeIndexEntry(22222d, dos)
-        writeIndexEntry(33333d, dos)
-        writeIndexEntry(44444d, dos)
+        writeIndexEntry(11111, 1f, 11f, dos)
+        writeIndexEntry(22222, 2f, 22f, dos)
+        writeIndexEntry(33333, 3f, 33f, dos)
+        writeIndexEntry(44444, 4f, 44f, dos)
         when:
         def value = strategy.readFirstValue(byteArrayStream.toByteArray())
         then:
-        value == 11111d
+        value.getGeohash() == 11111
+        value.getLatitude() == 1f
+        value.getLongitude() == 11f
         cleanup:
         dos.close()
         byteArrayStream.close()
@@ -105,23 +113,23 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         setup:
         def fileMock = Mock(File)
         when:
-        def indexFile = strategy.createIndexFile(123d, 456d, fileMock)
+        def indexFile = strategy.createIndexFile(new GeohashCoords(123, 12f, 23f), new GeohashCoords(456, 45f, 56f), fileMock)
         then:
-        indexFile.getFrom() == 123d
-        indexFile.getTo() == 456d
+        indexFile.getFrom() == 123
+        indexFile.getTo() == 456
         indexFile.getIndexFile() == fileMock
     }
 
     def "groupByIndexFile"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(GeohashWithinRangeMeterBoxOperationSearch)
+        def strategy = new GeohashLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         setupCache(strategy)
         strategy.onInitialize(cd)
-        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345d)
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345)
         when:
         def groupedByIndex = strategy.groupByIndexFile("testChunkKey", "testCollection", "testIndex", [query])
         def keys = groupedByIndex.keySet()
@@ -142,17 +150,17 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "findFileOffsets"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
+        def operationMock = Mock(GeohashWithinRangeMeterBoxOperationSearch)
         def executorMock = Mock(ExecutorService)
         def futureMock = Mock(Future)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def strategy = new GeohashLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
-        setupCache(strategy)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         strategy.setIndexFileExecutor(executorMock)
+        setupCache(strategy)
         strategy.onInitialize(cd)
-        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345d)
+        def query = new IndexQuery("testIndex", QueryOperation.EQ, 12345)
         def expectedOffsets = ([12345l, 67890l] as Set)
         when:
         def fileOffsets = strategy.findFileOffsets("testChunkKey", "testCollection", "testIndex", [query], 10, true)
@@ -174,18 +182,17 @@ class DoubleSnappyIndexStrategySpec extends Specification {
     def "searchOffsetsByIndexQueries"() {
         // no mocking here, instead a integrated test with equal
         setup:
-        def strategy = new DoubleSnappyIndexStrategy()
+        def strategy = new GeohashLz4IndexStrategy()
         setupCache(strategy)
-        def indexFile = DoubleSnappyDataGeneration.createFile()
-        DoubleSnappyDataGeneration.createIndexFile(indexFile)
-        def query1 = new IndexQuery("testIndex", QueryOperation.EQ, 1000d)
-        def query2 = new IndexQuery("testIndex", QueryOperation.EQ, 3000d)
-        def query3 = new IndexQuery("testIndex", QueryOperation.EQ, 3000.33d) // should not exist, so no result for it
-        def query4 = new IndexQuery("testIndex", QueryOperation.EQ, 5000d)
+        def indexFile = GeohashLz4DataGeneration.createFile()
+        GeohashLz4DataGeneration.createIndexFile(indexFile)
+        def query1 = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
+        def query2 = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
+        def query3 = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 20.48], 1000])
         when:
-        def fileOffsets = strategy.searchOffsetsByIndexQueries(indexFile, ([query1, query2, query3, query4] as Set), 5, true)
+        def fileOffsets = strategy.searchOffsetsByIndexQueries(indexFile, ([query1, query2, query3] as Set), 1000, true)
         then:
-        fileOffsets == ([new FileOffset(50000, 101000l, query1), new FileOffset(50000, 103000l, query2), new FileOffset(50000, 105000l, query4)] as Set)
+        fileOffsets == ([new FileOffset(50000, 102047l, query1), new FileOffset(50000, 100000, query3)] as Set)
         cleanup:
         indexFile.delete()
     }
@@ -193,18 +200,18 @@ class DoubleSnappyIndexStrategySpec extends Specification {
     def "findOffsetForIndexQuery"() {
         // no mocking here, instead a integrated test with equal
         setup:
-        def strategy = new DoubleSnappyIndexStrategy()
+        def strategy = new GeohashLz4IndexStrategy()
         setupCache(strategy)
-        def indexFile = DoubleSnappyDataGeneration.createFile()
-        def blocks = DoubleSnappyDataGeneration.createIndexFile(indexFile)
+        def indexFile = GeohashLz4DataGeneration.createFile()
+        def blocks = GeohashLz4DataGeneration.createIndexFile(indexFile)
         def ramFile = new RandomAccessFile(indexFile, "r")
         when:
-        def indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3333d)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1.0, 0.01], 1])
         def fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
         then:
-        fileOffsets == ([new FileOffset(50000, 103333l, indexQuery)] as Set)
+        fileOffsets == ([new FileOffset(50000, 100000l, indexQuery)] as Set)
         when:
-        indexQuery = new IndexQuery("testIndex", QueryOperation.EQ, 3.3d) // should not exist, so no result for it
+        indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[0.9, 0.01], 1]) // should not exist, so no result for it
         fileOffsets = strategy.findOffsetForIndexQuery(indexFile, ramFile, indexQuery, blocks, 5, true)
         then:
         fileOffsets.size() == 0
@@ -215,12 +222,12 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "isResponsibleFor"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(GeohashWithinRangeMeterBoxOperationSearch)
+        def strategy = new GeohashLz4IndexStrategy()
+        setupCache(strategy)
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
-        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
-        setupCache(strategy)
+        strategy.OPERATIONS.put(QueryOperation.GEO_WITHIN_RANGE_METER, operationMock)
         strategy.onInitialize(cd)
         when:
         def responsible = strategy.isResponsibleFor("testChunkKey", "testCollection", "testIndex")
@@ -236,12 +243,12 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "buildIndexRanges"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(GeohashWithinRangeMeterBoxOperationSearch)
+        def strategy = new GeohashLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
+        strategy.OPERATIONS.put(QueryOperation.GEO_WITHIN_RANGE_METER, operationMock)
         setupCache(strategy)
-        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
         when:
         strategy.onInitialize(cd)
         def ranges = strategy.buildIndexRanges()
@@ -250,22 +257,22 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         ranges.size() == 1
         testIndexFiles.size() == 1
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
-        testIndexFiles[0].getFrom() == -1600d
-        testIndexFiles[0].getTo() == 15999d
+        testIndexFiles[0].getFrom() == -1073671086
+        testIndexFiles[0].getTo() == -1057192128
         cleanup:
         indexFolder.delete()
     }
 
     def "createIndexFileDescription"() {
         setup:
-        def indexFile = DoubleSnappyDataGeneration.createFile()
-        def blocks = DoubleSnappyDataGeneration.createIndexFile(indexFile)
+        def indexFile = GeohashLz4DataGeneration.createFile()
+        def blocks = GeohashLz4DataGeneration.createIndexFile(indexFile)
         when:
         def indexFileDescription = strategy.createIndexFileDescription(indexFile, blocks)
         then:
         indexFileDescription.getIndexFile().getName() == indexFile.getName()
-        indexFileDescription.getFrom() == -1600d
-        indexFileDescription.getTo() == 15999d
+        indexFileDescription.getFrom() == -1073671086
+        indexFileDescription.getTo() == -1057192128
         cleanup:
         indexFile.delete()
     }
@@ -278,19 +285,19 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         then:
         indexRange.size() == 1
         indexRange[0].getIndexFile().getName() == "part00001.idx"
-        indexRange[0].getFrom() == -1600d
-        indexRange[0].getTo() == 15999d
+        indexRange[0].getFrom() == -1073671086
+        indexRange[0].getTo() == -1057192128
         cleanup:
         indexFolder.delete()
     }
 
     def "onInitialize"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(GeohashWithinRangeMeterBoxOperationSearch)
+        def strategy = new GeohashLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
-        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        strategy.OPERATIONS.put(QueryOperation.GEO_WITHIN_RANGE_METER, operationMock)
         setupCache(strategy)
         when:
         strategy.onDataChanged(cd)
@@ -298,8 +305,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
-        testIndexFiles[0].getFrom() == -1600d
-        testIndexFiles[0].getTo() == 15999d
+        testIndexFiles[0].getFrom() == -1073671086
+        testIndexFiles[0].getTo() == -1057192128
         cleanup:
         indexFolder.delete()
     }
@@ -307,8 +314,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
 
     def "onDataChanged"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def strategy = new DoubleSnappyIndexStrategy()
+        def operationMock = Mock(GeohashWithinRangeMeterBoxOperationSearch)
+        def strategy = new GeohashLz4IndexStrategy()
         def indexFolder = createIndexFolder()
         def cd = createCollectionDefinition(indexFolder)
         strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
@@ -319,8 +326,8 @@ class DoubleSnappyIndexStrategySpec extends Specification {
         then:
         strategy.getCollectionDefinition() == cd
         testIndexFiles[0].getIndexFile().getName() == "part00001.idx"
-        testIndexFiles[0].getFrom() == -1600d
-        testIndexFiles[0].getTo() == 15999d
+        testIndexFiles[0].getFrom() == -1073671086
+        testIndexFiles[0].getTo() == -1057192128
         cleanup:
         indexFolder.delete()
     }
@@ -328,50 +335,50 @@ class DoubleSnappyIndexStrategySpec extends Specification {
     def createIndexFolder() {
         def indexFolder = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + "/")
         indexFolder.mkdirs()
-        DoubleSnappyDataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
+        GeohashLz4DataGeneration.createIndexFile(new File(indexFolder.getAbsolutePath() + "/part00001.idx"))
         indexFolder
     }
 
     def createCollectionDefinition(indexFolder) {
-        def index = new IndexDefinition("testIndex", indexFolder, "DOUBLE_SNAPPY")
-        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [index], [:], "DOUBLE_SNAPPY")]]
+        def index = new IndexDefinition("testIndex", indexFolder, "GEOHASH_LZ4")
+        def cdMap = [testCollection: [new DeliveryChunkDefinition("testChunkKey", "testCollection", "yyyy-MM-dd", [index], [:], "GEOHASH_LZ4")]]
         new CollectionDefinition(cdMap)
     }
 
 
     def "acceptIndexFile operation"() {
         setup:
-        def operationMock = Mock(DoubleEqOperationSearch)
-        def numberSnappyIndexFile = Mock(NumberIndexFile)
-        def clause = new IndexQuery("testIndex", QueryOperation.EQ, 5d)
+        def operationMock = Mock(GeohashWithinRangeMeterBoxOperationSearch)
+        def numberLz4IndexFile = Mock(NumberIndexFile)
+        def indexQuery = new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, [[1f, 2f], 5])
         def valueRetriever = Mock(QueryValueRetriever)
-        def strategy = new DoubleSnappyIndexStrategy()
-        strategy.OPERATIONS.put(QueryOperation.EQ, operationMock)
+        def strategy = new GeohashLz4IndexStrategy()
+        strategy.OPERATIONS.put(QueryOperation.GEO_WITHIN_RANGE_METER, operationMock)
         when:
-        def result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        def result = strategy.acceptIndexFile(indexQuery, numberLz4IndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
-        1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> true
+        1 * operationMock.getQueryValueRetriever(indexQuery) >> valueRetriever
+        1 * operationMock.acceptIndexFile(valueRetriever, numberLz4IndexFile) >> true
         result == true
         when:
-        result = strategy.acceptIndexFile(clause, numberSnappyIndexFile)
+        result = strategy.acceptIndexFile(indexQuery, numberLz4IndexFile)
         then:
-        1 * operationMock.getQueryValueRetriever(clause) >> valueRetriever
-        1 * operationMock.acceptIndexFile(valueRetriever, numberSnappyIndexFile) >> false
+        1 * operationMock.getQueryValueRetriever(indexQuery) >> valueRetriever
+        1 * operationMock.acceptIndexFile(valueRetriever, numberLz4IndexFile) >> false
         result == false
     }
 
 
     def "acceptIndexFile exception"() {
         setup:
-        def strategy = new DoubleSnappyIndexStrategy() {
+        def strategy = new GeohashLz4IndexStrategy() {
             @Override
             Map<QueryOperation, IndexOperationSearch<Long, Long, NumberIndexFile<Long>>> getQueryOperationsStrategies() {
                 return [:]
             }
         }
         when:
-        strategy.acceptIndexFile(new IndexQuery("testIndex", QueryOperation.EQ, 5d), Mock(NumberIndexFile))
+        strategy.acceptIndexFile(new IndexQuery("testIndex", QueryOperation.GEO_WITHIN_RANGE_METER, 5), Mock(NumberIndexFile))
         then:
         thrown UnsupportedOperationException
     }

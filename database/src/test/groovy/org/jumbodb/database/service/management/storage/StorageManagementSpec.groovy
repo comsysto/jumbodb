@@ -389,7 +389,7 @@ class StorageManagementSpec extends Specification {
         indexInfos[0].getDeliveryKey() == "test_delivery3"
         indexInfos[0].getDeliveryVersion() == "version4"
         indexInfos[0].getIndexName() == "test_index1"
-        indexInfos[0].getFileLength() == 155
+        indexInfos[0].getFileLength() > 0
         indexInfos[0].getFileName() == "index.properties"
         indexInfos[0].getChecksumType() == ChecksumType.NONE
         then:
@@ -411,7 +411,7 @@ class StorageManagementSpec extends Specification {
         indexInfos[3].getDeliveryKey() == "test_delivery3"
         indexInfos[3].getDeliveryVersion() == "version4"
         indexInfos[3].getIndexName() == "test_index2"
-        indexInfos[3].getFileLength() == 155
+        indexInfos[3].getFileLength() > 0
         indexInfos[3].getFileName() == "index.properties"
         indexInfos[3].getChecksumType() == ChecksumType.NONE
         cleanup:
@@ -444,7 +444,7 @@ class StorageManagementSpec extends Specification {
         dataInfos[0].getCollection() == "test_collection3"
         dataInfos[0].getDeliveryKey() == "test_delivery3"
         dataInfos[0].getDeliveryVersion() == "version4"
-        dataInfos[0].getFileLength() == 166l
+        dataInfos[0].getFileLength() > 0
         dataInfos[0].getChecksumType() == ChecksumType.NONE
         when:
         def fileNames = (dataInfos.collect{ it.getFileName() } as Set)

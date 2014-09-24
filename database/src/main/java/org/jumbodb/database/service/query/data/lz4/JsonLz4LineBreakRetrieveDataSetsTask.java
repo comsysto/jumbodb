@@ -90,9 +90,8 @@ public class JsonLz4LineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSet
                 }
 
                 int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
-                byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset,
-                        datasetLength);
-                Map<String, Object> parsedJson = jsonParser.readValue(dataSetFromOffsetsGroup, Map.class);
+     //           byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
+                Map<String, Object> parsedJson = jsonParser.readValue(resultBuffer, datasetStartOffset, datasetLength, Map.class);
 
                 if (resultCacheEnabled) {
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);

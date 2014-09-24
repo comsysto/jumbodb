@@ -215,12 +215,12 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
         queriedValuesCache.put(fieldName, lastObj);
         return lastObj;
     }
-
+/*
     protected byte[] getDataSetFromOffsetsGroup(byte[] buffer, int fromOffset, int datasetLength) {
         byte[] jsonDataset = new byte[datasetLength];
         System.arraycopy(buffer, fromOffset, jsonDataset, 0, datasetLength);
         return jsonDataset;
-    }
+    } */
 
     protected Blocks getCompressionBlocksByFile() {
         Cache.ValueWrapper valueWrapper = dataCompressionBlocksCache.get(file);

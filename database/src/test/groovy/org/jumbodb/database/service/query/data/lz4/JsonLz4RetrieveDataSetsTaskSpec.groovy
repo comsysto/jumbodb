@@ -265,17 +265,4 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         0 * dataStrategy.matches(_, _, _) >> false
     }
 
-    @Unroll
-    def "getDataSetFromOffsetsGroup fromOffset=#fromOffset datasetLength=#datasetLength == '#expected'"() {
-        setup:
-        def task = createDefaultTask()
-        def buffer = "This is a test a test buffer"
-        expect:
-        new String(task.getDataSetFromOffsetsGroup(buffer.getBytes("UTF-8"), fromOffset, datasetLength), "UTF-8") == expected
-        where:
-        fromOffset | datasetLength | expected
-        5          | 2             | "is"
-        10         | 4             | "test"
-        10         | 11            | "test a test"
-    }
 }

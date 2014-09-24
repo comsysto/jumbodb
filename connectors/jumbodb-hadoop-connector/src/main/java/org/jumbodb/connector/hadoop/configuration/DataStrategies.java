@@ -1,14 +1,8 @@
 package org.jumbodb.connector.hadoop.configuration;
 
 import org.apache.hadoop.io.Text;
-import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4DataInputFormat;
-import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4DataOutputFormat;
-import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4LineBreakDataInputFormat;
-import org.jumbodb.connector.hadoop.data.output.lz4.JsonLz4LineBreakDataOutputFormat;
-import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyDataInputFormat;
-import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyDataOutputFormat;
-import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyLineBreakDataInputFormat;
-import org.jumbodb.connector.hadoop.data.output.snappy.JsonSnappyLineBreakDataOutputFormat;
+import org.jumbodb.connector.hadoop.data.output.lz4.*;
+import org.jumbodb.connector.hadoop.data.output.snappy.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,12 +25,20 @@ public class DataStrategies {
                 new JsonDataStrategy(JsonSnappyDataInputFormat.class, JsonSnappyDataOutputFormat.class, Text.class)
         );
         indexMapper.put(
+                MsgPackSnappyDataOutputFormat.STRATEGY_KEY,
+                new JsonDataStrategy(MsgPackSnappyDataInputFormat.class, MsgPackSnappyDataOutputFormat.class, Text.class)
+        );
+        indexMapper.put(
                 JsonLz4DataOutputFormat.STRATEGY_KEY,
                 new JsonDataStrategy(JsonLz4DataInputFormat.class, JsonLz4DataOutputFormat.class, Text.class)
         );
         indexMapper.put(
                 JsonLz4LineBreakDataOutputFormat.STRATEGY_KEY,
                 new JsonDataStrategy(JsonLz4LineBreakDataInputFormat.class, JsonLz4LineBreakDataOutputFormat.class, Text.class)
+        );
+        indexMapper.put(
+                MsgPackLz4DataOutputFormat.STRATEGY_KEY,
+                new JsonDataStrategy(MsgPackLz4DataInputFormat.class, MsgPackLz4DataOutputFormat.class, Text.class)
         );
         return Collections.unmodifiableMap(indexMapper);
     }

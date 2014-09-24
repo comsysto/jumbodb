@@ -42,7 +42,8 @@ dependencies {
         exclude group: 'org.mortbay.jetty'
         exclude group: 'tomcat'
     }
-        compile 'commons-io:commons-io:2.3'
+    compile 'commons-io:commons-io:2.3'
+    compile 'org.msgpack:msgpack:0.6.11'
     compile "org.xerial.snappy:snappy-java:$snappyVersion"
     compile 'net.jpountz.lz4:lz4:1.2.0'
     testCompile "junit:junit:4.10"

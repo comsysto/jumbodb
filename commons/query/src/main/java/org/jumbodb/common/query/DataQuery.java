@@ -3,8 +3,6 @@ package org.jumbodb.common.query;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -132,14 +130,14 @@ public class DataQuery {
     @Override
     public String toString() {
         return "DataQuery{" +
-          "left='" + left + '\'' +
-          ", leftType=" + leftType +
-          ", queryOperation=" + queryOperation +
-          ", right='" + right + '\'' +
-          ", rightType=" + rightType +
-          ", and=" + and +
-          ", ors=" + ors +
-          '}';
+                "left='" + left + '\'' +
+                ", leftType=" + leftType +
+                ", queryOperation=" + queryOperation +
+                ", right='" + right + '\'' +
+                ", rightType=" + rightType +
+                ", and=" + and +
+                ", ors=" + ors +
+                '}';
     }
 }
 

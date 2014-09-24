@@ -75,6 +75,7 @@ dependencies {
     compile 'ch.qos.logback:logback-classic:1.0.13'
     compile 'javax.servlet:jstl:1.2'
     compile 'commons-fileupload:commons-fileupload:1.2.2'
+    compile 'org.msgpack:msgpack:0.6.11'
     compile project(':commons:data')
     compile project(':commons:query')
     compile project(':commons:geo')

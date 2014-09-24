@@ -1,21 +1,21 @@
-package org.jumbodb.database.service.query.data.lz4;
+package org.jumbodb.database.service.query.data.snappy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FastDecompressor;
-import net.jpountz.util.Utils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.UnhandledException;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.data.common.compression.Blocks;
 import org.jumbodb.data.common.compression.CompressionUtil;
-import org.jumbodb.data.common.lz4.LZ4BlockInputStream;
 import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.common.DefaultRetrieveDataSetsTask;
-import org.jumbodb.database.service.query.data.snappy.CacheFileOffset;
+import org.msgpack.MessagePack;
+import org.msgpack.type.MapValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.xerial.snappy.Snappy;
 
@@ -25,12 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class JsonLz4LineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
-    private ObjectMapper jsonParser = new ObjectMapper();
+public class MsgPackSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
+    private static Logger log = LoggerFactory.getLogger(MsgPackSnappyRetrieveDataSetsTask.class);
 
-    public JsonLz4LineBreakRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
-                                                ResultCallback resultCallback, DataStrategy strategy, Cache datasetsByOffsetsCache,
-                                                Cache dataCompressionBlocksCache, String dateFormat, boolean scannedSearch) {
+
+    private MessagePack messagePack = new MessagePack();
+
+    public MsgPackSnappyRetrieveDataSetsTask(File file, Set<FileOffset> offsets, JumboQuery searchQuery,
+                                             ResultCallback resultCallback, DataStrategy strategy, Cache datasetsByOffsetsCache,
+                                             Cache dataCompressionBlocksCache, String dateFormat, boolean scannedSearch) {
         super(datasetsByOffsetsCache, dataCompressionBlocksCache, resultCallback, strategy, dateFormat, offsets, searchQuery, file, scannedSearch);
     }
 
@@ -48,14 +51,13 @@ public class JsonLz4LineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSet
             byte[] resultBuffer = EMPTY_BUFFER;
             long resultBufferStartOffset = 0l;
             long resultBufferEndOffset = 0l;
-            byte[] lengthsBuffer = new byte[8];
+            byte[] compressedLengthBuffer = new byte[4];
             long uncompressedFileStreamPosition = 0l;
             long compressedFileStreamPosition = 0l;
-            LZ4Factory factory = LZ4Factory.fastestInstance();
-            LZ4FastDecompressor decompressor = factory.fastDecompressor();
             for (FileOffset offset : leftOffsets) {
                 long searchOffset = offset.getOffset();
                 // delete buffer when offset is not inside range and skip
+                // load when <= 5 because 4 byte for length and 1 starting for dataset
                 if (resultBuffer.length == 0 || (resultBufferStartOffset < searchOffset && searchOffset > resultBufferEndOffset)) {
                     long chunkIndex = (searchOffset / blocks.getBlockSize());
                     long chunkOffsetCompressed = calculateBlockOffsetCompressed(chunkIndex, blocks.getBlocks());
@@ -70,28 +72,37 @@ public class JsonLz4LineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSet
                     resultBufferEndOffset = uncompressedFileStreamPosition;
                 }
 
-                // load to result buffer till line break
                 int datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
-                int lineBreakOffset = resultBuffer.length == 0 ? -1 : findDatasetLengthByLineBreak(resultBuffer,
-                        datasetStartOffset);
-                while ((resultBuffer.length == 0 || lineBreakOffset == -1) && fileLength > compressedFileStreamPosition) {
-                    compressedFileStreamPosition += bis.read(lengthsBuffer);
-                    int compressedLength = Utils.readIntLE(lengthsBuffer, 0);
-                    int uncompressedLength = Utils.readIntLE(lengthsBuffer, 4);
-                    compressedFileStreamPosition += bis.read(readBufferCompressed, 0, compressedLength);
-                    decompressor.decompress(readBufferCompressed, 0, readBufferUncompressed, 0, uncompressedLength);
-                    uncompressedFileStreamPosition += uncompressedLength;
+                int datasetLength = Integer.MAX_VALUE;
+                if ((resultBuffer.length - datasetStartOffset) >= 4) {
+                    datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
+                    datasetStartOffset += 4; // int length
+                }
+                while ((datasetLength > (resultBuffer.length - datasetStartOffset))
+                        && datasetLength != -1) {
+                    compressedFileStreamPosition += bis.read(compressedLengthBuffer);
+                    int compressedLength = CompressionUtil.readInt(compressedLengthBuffer, 0);
+                    int read = bis.read(readBufferCompressed, 0, compressedLength);
+                    compressedFileStreamPosition += read;
+                    int uncompressLength = Snappy
+                            .uncompress(readBufferCompressed, 0, compressedLength, readBufferUncompressed, 0);
+                    uncompressedFileStreamPosition += uncompressLength;
                     datasetStartOffset = (int) (searchOffset - resultBufferStartOffset);
-                    resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressedLength);
-                    resultBufferEndOffset = uncompressedFileStreamPosition - 1;
+                    resultBuffer = concat(datasetStartOffset, readBufferUncompressed, resultBuffer, uncompressLength);
+                    resultBufferEndOffset = uncompressedFileStreamPosition; // warum war hier + 1?
                     resultBufferStartOffset = uncompressedFileStreamPosition - resultBuffer.length; // check right position
                     datasetStartOffset = 0;
-                    lineBreakOffset = findDatasetLengthByLineBreak(resultBuffer, datasetStartOffset);
+                    if (resultBuffer.length >= 4) {
+                        datasetLength = CompressionUtil.readInt(resultBuffer, datasetStartOffset);
+                        datasetStartOffset += 4; // int length
+                    }
                 }
+                // end load result buffer til line break
 
-                int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
-//                byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset, datasetLength);
-                Map<String, Object> parsedJson = jsonParser.readValue(resultBuffer, datasetStartOffset, datasetLength, Map.class);
+//                int datasetLength = lineBreakOffset != -1 ? lineBreakOffset : (resultBuffer.length - 1 - datasetStartOffset);
+                byte[] dataSetFromOffsetsGroup = getDataSetFromOffsetsGroup(resultBuffer, datasetStartOffset,
+                        datasetLength);
+                MapValue parsedJson = messagePack.read(dataSetFromOffsetsGroup).asMapValue();
 
                 if (resultCacheEnabled) {
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);
@@ -106,10 +117,16 @@ public class JsonLz4LineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSet
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            log.error("Error", e);
+            throw new UnhandledException(e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
+            log.error("Error", e);
+            throw new UnhandledException(e);
+        } catch (RuntimeException e) {
+            log.error("Error", e);
+            throw new UnhandledException(e);
+        }
+        finally {
             IOUtils.closeQuietly(fis);
             IOUtils.closeQuietly(bis);
         }
@@ -119,18 +136,23 @@ public class JsonLz4LineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSet
     protected void fullScanData() {
         FileInputStream fis = null;
         BufferedInputStream bis = null;
-        LZ4BlockInputStream lz4Is = null;
-        BufferedReader br = null;
+        ChunkSkipableSnappyInputStream sis = null;
+        DataInputStream dis = null;
         try {
             fis = new FileInputStream(file);
             bis = new BufferedInputStream(fis);
-            lz4Is = new LZ4BlockInputStream(bis);
-            br = new BufferedReader(new InputStreamReader(lz4Is, "UTF-8"));
+            sis = new ChunkSkipableSnappyInputStream(bis);
+            dis = new DataInputStream(sis);
             log.info("Full scan");
             long count = 0;
-            String line;
-            while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
-                Map<String, Object> parsedJson = jsonParser.readValue(line, Map.class);
+            int length;
+            byte[] data = new byte[0];
+            while ((length = dis.readInt()) != -1 && resultCallback.needsMore(searchQuery)) {
+                if (data.length < length) {
+                    data = new byte[length];
+                }
+                dis.readFully(data, 0, length);
+                Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.readValue(data, 0, length, Map.class);
                 if (matchingFilter(parsedJson, searchQuery.getDataQuery())) {
                     resultCallback.writeResult(parsedJson);
                     results++;
@@ -141,41 +163,26 @@ public class JsonLz4LineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSet
                 count++;
             }
         } catch (FileNotFoundException e) {
+            log.error("Error", e);
             throw new RuntimeException(e);
         } catch (IOException e) {
+            log.error("Error", e);
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(fis);
+            IOUtils.closeQuietly(dis);
             IOUtils.closeQuietly(bis);
-            IOUtils.closeQuietly(lz4Is);
-            IOUtils.closeQuietly(br);
+            IOUtils.closeQuietly(sis);
         }
-    }
-
-    private int findDatasetLengthByLineBreak(byte[] buffer, int fromOffset) {
-        int datasetLength = 0;
-        boolean found = false;
-        for (int i = fromOffset; i < buffer.length; i++) {
-            byte aByte = buffer[i];
-            if (aByte == 13 || aByte == 10) {
-                found = true;
-                break;
-            }
-            datasetLength++;
-        }
-        if (!found) {
-            return -1;
-        }
-        return datasetLength;
     }
 
     @Override
     protected int getMagicHeaderSize() {
-        return 0;
+        return 16;
     }
 
     @Override
     protected int getBlockOverhead() {
-        return 8;
+        return 4;
     }
 }

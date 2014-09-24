@@ -61,6 +61,8 @@ dependencies {
     bundle "org.xerial.snappy:snappy-java:$snappyVersion"
     bundle 'net.jpountz.lz4:lz4:1.2.0'
     bundle 'commons-io:commons-io:2.3'
+    bundle 'org.msgpack:msgpack:0.6.11'
+
     testCompile "org.codehaus.groovy:groovy-all:1.8.6"
     testCompile "org.spockframework:spock-core:0.6-groovy-1.8"
 }

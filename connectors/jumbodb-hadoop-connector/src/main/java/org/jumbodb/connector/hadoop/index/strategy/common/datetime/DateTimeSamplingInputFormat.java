@@ -15,6 +15,7 @@ import org.jumbodb.connector.hadoop.index.strategy.common.partition.AbstractJson
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 /**
  * Created by Carsten on 25.09.2014.
@@ -27,7 +28,7 @@ public class DateTimeSamplingInputFormat extends AbstractJsonFieldInputFormat<Lo
     public RecordReader<LongWritable, NullWritable> createRecordReader(InputSplit split, TaskAttemptContext context) {
         try {
             IndexField indexField = JumboConfigurationUtil.loadIndexJson(context.getConfiguration());
-            sdf = new SimpleDateFormat(indexField.getDatePattern());
+            sdf = new SimpleDateFormat(indexField.getDatePattern(), Locale.US);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

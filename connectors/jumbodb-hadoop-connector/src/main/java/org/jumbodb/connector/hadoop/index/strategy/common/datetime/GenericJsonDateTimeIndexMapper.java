@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * @author Carsten Hufe
@@ -25,7 +26,7 @@ public class GenericJsonDateTimeIndexMapper extends AbstractDateTimeIndexMapper<
         super.setup(context);
         Configuration configuration = context.getConfiguration();
         indexField = JumboConfigurationUtil.loadIndexJson(configuration);
-        sdf = new SimpleDateFormat(indexField.getDatePattern());
+        sdf = new SimpleDateFormat(indexField.getDatePattern(), Locale.US);
         if(indexField.getFields().size() != 1) {
             throw new RuntimeException("GenericJsonDateTimeIndexMapper indexField must exactly contain one value!");
         }

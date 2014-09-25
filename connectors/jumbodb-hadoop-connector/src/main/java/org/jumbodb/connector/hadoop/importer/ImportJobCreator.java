@@ -1,11 +1,5 @@
 package org.jumbodb.connector.hadoop.importer;
 
-import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
-import org.jumbodb.connector.hadoop.JumboConstants;
-import org.jumbodb.connector.hadoop.JumboJobCreator;
-import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
-import org.jumbodb.connector.hadoop.importer.map.JumboImportMapper;
-import org.jumbodb.connector.hadoop.importer.output.JumboOutputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -14,9 +8,13 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.jumbodb.connector.hadoop.JumboConstants;
 import org.jumbodb.connector.hadoop.configuration.BaseJumboImportJob;
 import org.jumbodb.connector.hadoop.configuration.ImportHost;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
+import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
+import org.jumbodb.connector.hadoop.importer.map.JumboImportMapper;
+import org.jumbodb.connector.hadoop.importer.output.JumboOutputFormat;
 
 import java.io.IOException;
 import java.util.ArrayList;

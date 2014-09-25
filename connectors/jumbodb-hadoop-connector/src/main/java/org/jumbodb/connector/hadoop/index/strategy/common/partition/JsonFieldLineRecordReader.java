@@ -18,6 +18,8 @@
 
 package org.jumbodb.connector.hadoop.index.strategy.common.partition;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
@@ -79,6 +81,8 @@ public abstract class JsonFieldLineRecordReader<K> extends RecordReader<K, NullW
 
     public void initialize(InputSplit genericSplit,
                            TaskAttemptContext context) throws IOException {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         Configuration configuration = context.getConfiguration();
         indexField = JumboConfigurationUtil.loadIndexJson(configuration);
         FileSplit split = (FileSplit) genericSplit;

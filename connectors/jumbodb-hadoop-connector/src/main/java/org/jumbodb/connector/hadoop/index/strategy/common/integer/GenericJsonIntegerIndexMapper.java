@@ -1,8 +1,8 @@
 package org.jumbodb.connector.hadoop.index.strategy.common.integer;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.codehaus.jackson.JsonNode;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 
@@ -27,9 +27,9 @@ public class GenericJsonIntegerIndexMapper extends AbstractIntegerIndexMapper<Js
 
     @Override
     public Integer getIndexableValue(JsonNode input) {
-        JsonNode valueFor = getValueFor(indexField.getFields().get(0), input);
-        if(valueFor != null) {
-            return valueFor.getIntValue();
+        JsonNode valueFor = getNodeFor(indexField.getFields().get(0), input);
+        if(!valueFor.isMissingNode()) {
+            return valueFor.intValue();
         }
         return null;
     }

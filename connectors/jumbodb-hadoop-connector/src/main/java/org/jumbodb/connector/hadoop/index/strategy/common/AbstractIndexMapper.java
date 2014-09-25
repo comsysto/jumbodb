@@ -1,5 +1,10 @@
 package org.jumbodb.connector.hadoop.index.strategy.common;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -8,11 +13,6 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
     protected void setup(Context context) throws IOException, InterruptedException {
         super.setup(context);
         jsonMapper = new ObjectMapper();
-        jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         jsonMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
 
     }
@@ -55,22 +55,15 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
         }
     }
 
-    public JsonNode getValueFor(String key, JsonNode jsonNode) {
+    public JsonNode getNodeFor(String key, JsonNode jsonNode) {
         String[] split = StringUtils.split(key, ".");
         for (String s : split) {
-            if(jsonNode == null) {
-                break;
-            }
+//            if(jsonNode == null) {
+//                break;
+//            }
             jsonNode = jsonNode.path(s);
         }
         return jsonNode;
-
-//        if(jsonNode.isValueNode()) {
-//            return jsonNode;
-//            String s = jsonNode.getValueAsText();
-//            return s;
-//        }
-//        return null;
     }
 
     public List<String> getIndexSourceFields() {

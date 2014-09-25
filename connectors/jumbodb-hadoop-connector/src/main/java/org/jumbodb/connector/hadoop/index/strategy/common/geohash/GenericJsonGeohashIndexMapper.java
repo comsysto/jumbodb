@@ -1,7 +1,7 @@
 package org.jumbodb.connector.hadoop.index.strategy.common.geohash;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.hadoop.conf.Configuration;
-import org.codehaus.jackson.JsonNode;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 
@@ -28,12 +28,12 @@ public class GenericJsonGeohashIndexMapper extends AbstractGeohashIndexMapper<Js
 
     @Override
     public List<Double> getIndexableValue(JsonNode input) {
-        JsonNode valueFor = getValueFor(indexField.getFields().get(0), input);
-        if(valueFor != null) {
+        JsonNode valueFor = getNodeFor(indexField.getFields().get(0), input);
+        if(!valueFor.isMissingNode()) {
 //            Iterator<JsonNode> elements = valueFor.getElements();
             List<Double> result = new ArrayList<Double>(2);
             for (JsonNode jsonNode : valueFor) {
-                result.add(jsonNode.getDoubleValue());
+                result.add(jsonNode.doubleValue());
             }
             return result;
         }

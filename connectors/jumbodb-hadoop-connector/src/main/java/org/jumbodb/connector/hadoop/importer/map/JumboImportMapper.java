@@ -1,25 +1,27 @@
 package org.jumbodb.connector.hadoop.importer.map;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.UnhandledException;
-import org.jumbodb.common.query.ChecksumType;
-import org.jumbodb.connector.exception.JumboFileChecksumException;
-import org.jumbodb.connector.hadoop.JumboConstants;
-import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.jumbodb.connector.importer.*;
+import org.jumbodb.common.query.ChecksumType;
+import org.jumbodb.connector.exception.JumboFileChecksumException;
+import org.jumbodb.connector.hadoop.JumboConstants;
+import org.jumbodb.connector.hadoop.importer.input.JumboInputFormat;
+import org.jumbodb.connector.importer.DataInfo;
+import org.jumbodb.connector.importer.IndexInfo;
+import org.jumbodb.connector.importer.JumboImportConnection;
+import org.jumbodb.connector.importer.OnCopyCallback;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 /**
  * User: carsten
@@ -59,21 +61,20 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             FileSystem fs = FileSystem.get(new URI(path.toString()), context.getConfiguration());
             fis = fs.open(path);
             long fileLength = fs.getFileStatus(path).getLen();
-            if(JumboConstants.DATA_TYPE_INDEX.equals(type)) {
+            if (JumboConstants.DATA_TYPE_INDEX.equals(type)) {
                 String fileName = path.getName();
                 ChecksumType checksumType = resolveChecksumType(fs, path);
                 String checksum = resolveChecksum(fs, checksumType, path);
                 IndexInfo indexInfo = new IndexInfo(deliveryKey, deliveryVersion, collection, indexName, fileName, fileLength,
-                  checksumType, checksum);
+                        checksumType, checksum);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
                 jumboImportConnection.importIndexFile(indexInfo, copyDataCallback);
-            }
-            else if(JumboConstants.DATA_TYPE_DATA.equals(type)) {
+            } else if (JumboConstants.DATA_TYPE_DATA.equals(type)) {
                 String fileName = path.getName();
                 ChecksumType checksumType = resolveChecksumType(fs, path);
                 String checksum = resolveChecksum(fs, checksumType, path);
                 DataInfo dataInfo = new DataInfo(deliveryKey, deliveryVersion, collection, fileName, fileLength,
-                  checksumType, checksum);
+                        checksumType, checksum);
                 CopyDataCallback copyDataCallback = new CopyDataCallback(fis, fileLength, context, fileName, collection);
                 jumboImportConnection.importDataFile(dataInfo, copyDataCallback);
             } else {
@@ -93,7 +94,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
     }
 
     private String resolveChecksum(FileSystem fs, ChecksumType checksumType, Path indexFile) throws IOException {
-        if(checksumType == ChecksumType.NONE) {
+        if (checksumType == ChecksumType.NONE) {
             return null;
         }
         Path checksumFile = indexFile.suffix(checksumType.getFileSuffix());
@@ -109,13 +110,13 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
     }
 
     private ChecksumType resolveChecksumType(FileSystem fs, Path file) throws IOException {
-        if(file.getName().startsWith(".") || file.getName().startsWith("_")) {
+        if (file.getName().startsWith(".") || file.getName().startsWith("_")) {
             return ChecksumType.NONE;
         }
         ChecksumType[] values = ChecksumType.values();
         for (ChecksumType checksum : values) {
             Path checksumFile = file.suffix(checksum.getFileSuffix());
-            if(fs.exists(checksumFile)) {
+            if (fs.exists(checksumFile)) {
                 return checksum;
             }
         }
@@ -166,8 +167,8 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
             }
         }
 
-        public void copyBytes(InputStream in, OutputStream out, int buffSize, long fileSize, Context context, String filename, String collection)  throws IOException {
-            PrintStream ps = (out instanceof PrintStream) ? (PrintStream)out : null;
+        public void copyBytes(InputStream in, OutputStream out, int buffSize, long fileSize, Context context, String filename, String collection) throws IOException {
+            PrintStream ps = (out instanceof PrintStream) ? (PrintStream) out : null;
             byte[] buf = new byte[buffSize];
             int bytesRead = in.read(buf);
             long currentFileBytes = 0;
@@ -196,7 +197,7 @@ public class JumboImportMapper extends Mapper<FileStatus, NullWritable, Text, Nu
         }
 
         public void copyBytes(InputStream in, OutputStream out, long fileSize, Context context, String filename, String collection)
-                throws IOException  {
+                throws IOException {
             copyBytes(in, out, context.getConfiguration().getInt("io.file.buffer.size", JumboConstants.BUFFER_SIZE), false, fileSize, context, filename, collection);
         }
     }

@@ -1,13 +1,14 @@
 package org.jumbodb.connector.hadoop.data.map;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 
 import java.io.IOException;
@@ -29,7 +30,8 @@ public class GenericJsonDoubleSortMapper extends Mapper<LongWritable, Text, Doub
     protected void setup(Context context) throws IOException, InterruptedException {
         super.setup(context);
         jsonMapper = new ObjectMapper();
-        jsonMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jsonMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         sortFields = JumboConfigurationUtil.loadSortConfig(context.getConfiguration());
         if(sortFields.size() != 1) {
             throw new IllegalArgumentException("Sort fields must be exactly one!");
@@ -53,7 +55,7 @@ public class GenericJsonDoubleSortMapper extends Mapper<LongWritable, Text, Doub
             jsonNode = jsonNode.path(s);
         }
         if(jsonNode.isValueNode()) {
-            Double s = jsonNode.getDoubleValue();
+            Double s = jsonNode.doubleValue();
             return s;
         }
         return 0d;

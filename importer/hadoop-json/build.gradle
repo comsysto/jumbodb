@@ -61,13 +61,15 @@ dependencies {
     bundle "org.xerial.snappy:snappy-java:$snappyVersion"
     bundle 'net.jpountz.lz4:lz4:1.2.0'
     bundle 'commons-io:commons-io:2.3'
+    bundle 'com.fasterxml.jackson.core:jackson-databind:2.4.2'
+
     testCompile "org.codehaus.groovy:groovy-all:1.8.6"
     testCompile "org.spockframework:spock-core:0.6-groovy-1.8"
 }
 
 
 mainClassName = "org.jumbodb.importer.hadoop.json.JsonImporterJob"
-applicationDefaultJvmArgs = ["-Xmx2G"]
+applicationDefaultJvmArgs = ["-Xmx4G"]
 applicationName = "jumboimport"
 
 jar {

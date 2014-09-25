@@ -1,8 +1,8 @@
 package org.jumbodb.connector.hadoop.index.strategy.common.datetime;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.codehaus.jackson.JsonNode;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 
@@ -32,9 +32,9 @@ public class GenericJsonDateTimeIndexMapper extends AbstractDateTimeIndexMapper<
 
     @Override
     public Date getIndexableValue(JsonNode input) {
-        JsonNode valueFor = getValueFor(indexField.getFields().get(0), input);
-        if(valueFor != null) {
-            String valueAsText = valueFor.getTextValue();
+        JsonNode valueFor = getNodeFor(indexField.getFields().get(0), input);
+        if(!valueFor.isMissingNode()) {
+            String valueAsText = valueFor.textValue();
             if(StringUtils.isNotBlank(valueAsText)) {
                 try {
                     return sdf.parse(valueAsText);

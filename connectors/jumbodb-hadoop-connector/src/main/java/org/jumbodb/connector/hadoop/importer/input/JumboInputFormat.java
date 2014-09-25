@@ -1,7 +1,5 @@
 package org.jumbodb.connector.hadoop.importer.input;
 
-import org.jumbodb.common.query.ChecksumType;
-import org.jumbodb.connector.hadoop.JumboConstants;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -10,7 +8,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.*;
-import org.jumbodb.connector.hadoop.configuration.IndexField;
+import org.jumbodb.common.query.ChecksumType;
+import org.jumbodb.connector.hadoop.JumboConstants;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -28,7 +27,7 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
 
 
     public static void setChecksumType(Job conf, ChecksumType checksumType) throws IOException {
-        if(checksumType == null) {
+        if (checksumType == null) {
             return;
         }
         conf.getConfiguration().set(JumboConstants.JUMBO_CHECKSUM_TYPE, checksumType.toString());
@@ -36,7 +35,7 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
 
     public static ChecksumType getChecksumType(Configuration conf) {
         String checksum = conf.get(JumboConstants.JUMBO_CHECKSUM_TYPE);
-        if(checksum == null) {
+        if (checksum == null) {
             return ChecksumType.NONE;
         }
         return ChecksumType.valueOf(checksum);
@@ -73,22 +72,22 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
         String inputPath = configuration.get(JumboConstants.IMPORT_PATH);
         String dataType = configuration.get(JumboConstants.DATA_TYPE);
         List<FileStatus> files = new LinkedList<FileStatus>();
-        if(JumboConstants.DATA_TYPE_DATA.equals(dataType)) {
+        if (JumboConstants.DATA_TYPE_DATA.equals(dataType)) {
             FileSystem fileSystem = FileSystem.get(URI.create(inputPath), configuration);
             FileStatus[] fileStatuses = fileSystem.listStatus(new Path(inputPath));
             for (FileStatus fileStatuse : fileStatuses) {
-                if(!fileStatuse.isDirectory()) {
+                if (!fileStatuse.isDirectory()) {
                     files.add(fileStatuse);
                 }
             }
-        } else if(JumboConstants.DATA_TYPE_INDEX.equals(dataType)) {
+        } else if (JumboConstants.DATA_TYPE_INDEX.equals(dataType)) {
             FileSystem fileSystem = FileSystem.get(URI.create(inputPath), configuration);
             FileStatus[] indexNameFolders = fileSystem.listStatus(new Path(inputPath));
             for (FileStatus indexNameFolder : indexNameFolders) {
                 Path path = indexNameFolder.getPath();
                 FileStatus[] fileStatuses = fileSystem.listStatus(path);
                 for (FileStatus fileStatuse : fileStatuses) {
-                    if(!fileStatuse.isDirectory()) {
+                    if (!fileStatuse.isDirectory()) {
                         files.add(fileStatuse);
                     }
                 }
@@ -117,7 +116,7 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
 
         @Override
         public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-            this.inputSplit = (JumboInputSplit)inputSplit;
+            this.inputSplit = (JumboInputSplit) inputSplit;
             this.currentIndex = 0;
         }
 
@@ -139,7 +138,7 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
 
         @Override
         public float getProgress() throws IOException, InterruptedException {
-            return (float)(inputSplit.getCurrentlyCopied() / (double)inputSplit.getLength());
+            return (float) (inputSplit.getCurrentlyCopied() / (double) inputSplit.getLength());
         }
 
         @Override
@@ -199,7 +198,7 @@ public class JumboInputFormat extends InputFormat<FileStatus, NullWritable> {
             int count = dataInput.readInt();
             length = dataInput.readLong();
             fileStatuses = new LinkedList<FileStatus>();
-            for(int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 FileStatus status = new FileStatus();
                 status.readFields(dataInput);
                 fileStatuses.add(status);

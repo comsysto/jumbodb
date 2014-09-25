@@ -1,8 +1,8 @@
 package org.jumbodb.connector.hadoop.index.strategy.common.hashcode32;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.codehaus.jackson.JsonNode;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 
@@ -45,9 +45,9 @@ public class GenericJsonHashCode32IndexMapper extends AbstractHashCode32IndexMap
     private String getIndexKey(JsonNode jsonNode) {
         List<String> keys = new LinkedList<String>();
         for (String indexField : this.indexField.getFields()) {
-            JsonNode valueFor = getValueFor(indexField, jsonNode);
-            if(valueFor != null) {
-                keys.add(valueFor.getValueAsText());
+            JsonNode valueFor = getNodeFor(indexField, jsonNode);
+            if(!valueFor.isMissingNode()) {
+                keys.add(valueFor.textValue());
             }
         }
 

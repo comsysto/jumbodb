@@ -93,7 +93,7 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
             if (valueWrapper != null) {
                 Map<String, Object> dataSetFromOffsetsGroup = (Map<String, Object>) valueWrapper.get();
                 IndexQuery indexQuery = offset.getIndexQuery();
-                if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getAndJson())) {
+                if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getAndData())) {
                     if (!resultCallback.needsMore(searchQuery)) {
                         return Collections.emptyList(); // return empty list enough found!
                     }

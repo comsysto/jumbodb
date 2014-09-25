@@ -37,15 +37,17 @@ public class TestenODB3 {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
         JumboQuery query = new JumboQuery();
 //        query.addIndexQuery(new IndexQuery("screen_name", QueryOperation.EQ, "EsAdolescencia"));
-        query.addIndexQuery(new IndexQuery("followers_count_lz4", QueryOperation.GT, 10000));
+//        query.addIndexQuery(new IndexQuery("followers_count_lz4", QueryOperation.EQ, 0));
         query.setCollection("twitter_lz4");
+        query.setLimit(1);
         query.setResultCacheEnabled(false);
         long start = System.currentTimeMillis();
 //        for(int i = 0; i < 30; i++) {
-            List<Map> daily = jumboDriver.find(Map.class, query);
+//            List<Map> daily = jumboDriver.find(Map.class, query);
 //        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM twitter_lz4 where user.screen_name = 'EsAdolescencia'");
 //        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM twitter_snappy where user.followers_count > 100000");
-//        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM twitter_lz4 where user.followers_count > 100000");
+//        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM twitter_lz4 where user.followers_count <= 5");
+        List<Map> daily = jumboDriver.find(Map.class, "SELECT * FROM twitter_lz4 where user.friends_count > 1000 and user.friends_count = user.followers_count");
 //        System.out.println(daily);
             System.out.println("Size " + daily.size() + " Time: " + (System.currentTimeMillis() - start));
 //        }

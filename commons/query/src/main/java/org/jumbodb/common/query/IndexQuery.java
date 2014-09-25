@@ -9,7 +9,7 @@ public class IndexQuery {
     private String name;
     private QueryOperation queryOperation;
     private Object value;
-    private DataQuery andJson;
+    private DataQuery andData;
     private IndexQuery andIndex;
 
     public IndexQuery() {
@@ -45,12 +45,12 @@ public class IndexQuery {
         this.value = value;
     }
 
-    public DataQuery getAndJson() {
-        return andJson;
+    public DataQuery getAndData() {
+        return andData;
     }
 
-    public void setAndJson(DataQuery andJson) {
-        this.andJson = andJson;
+    public void setAndData(DataQuery andData) {
+        this.andData = andData;
     }
 
     public IndexQuery getAndIndex() {
@@ -69,7 +69,7 @@ public class IndexQuery {
         IndexQuery that = (IndexQuery) o;
 
         if (andIndex != null ? !andIndex.equals(that.andIndex) : that.andIndex != null) return false;
-        if (andJson != null ? !andJson.equals(that.andJson) : that.andJson != null) return false;
+        if (andData != null ? !andData.equals(that.andData) : that.andData != null) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (queryOperation != that.queryOperation) return false;
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
@@ -82,7 +82,7 @@ public class IndexQuery {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (queryOperation != null ? queryOperation.hashCode() : 0);
         result = 31 * result + (value != null ? value.hashCode() : 0);
-        result = 31 * result + (andJson != null ? andJson.hashCode() : 0);
+        result = 31 * result + (andData != null ? andData.hashCode() : 0);
         result = 31 * result + (andIndex != null ? andIndex.hashCode() : 0);
         return result;
     }
@@ -93,7 +93,7 @@ public class IndexQuery {
                 "name='" + name + '\'' +
                 ", queryOperation=" + queryOperation +
                 ", value=" + value +
-                ", andJson=" + andJson +
+                ", andJson=" + andData +
                 ", andIndex=" + andIndex +
                 '}';
     }

@@ -13,10 +13,10 @@ import java.util.List;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DataQuery {
     private Object left;
-    private FieldType leftType;
+    private FieldType leftType = FieldType.NOT_SET;
     private QueryOperation queryOperation;
     private Object right;
-    private FieldType rightType;
+    private FieldType rightType = FieldType.NOT_SET;
     private HintType hintType;
     private DataQuery and;
     private List<DataQuery> ors = new LinkedList<DataQuery>();
@@ -27,6 +27,12 @@ public class DataQuery {
     public DataQuery(List<DataQuery> ors) {
         queryOperation = QueryOperation.OR;
         this.ors = ors;
+    }
+
+    public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation) {
+        this.left = left;
+        this.leftType = leftType;
+        this.queryOperation = queryOperation;
     }
 
     public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation, Object right, FieldType rightType) {

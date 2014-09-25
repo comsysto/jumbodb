@@ -8,16 +8,13 @@ import org.apache.commons.io.IOUtils;
 import org.jumbodb.common.query.IndexQuery;
 import org.jumbodb.common.query.JumboQuery;
 import org.jumbodb.data.common.compression.Blocks;
-import org.jumbodb.data.common.compression.CompressionUtil;
 import org.jumbodb.data.common.lz4.LZ4BlockInputStream;
-import org.jumbodb.data.common.snappy.ChunkSkipableSnappyInputStream;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
 import org.jumbodb.database.service.query.data.common.DefaultRetrieveDataSetsTask;
 import org.jumbodb.database.service.query.data.snappy.CacheFileOffset;
 import org.springframework.cache.Cache;
-import org.xerial.snappy.Snappy;
 
 import java.io.*;
 import java.util.Collections;
@@ -97,7 +94,7 @@ public class JsonLz4LineBreakRetrieveDataSetsTask extends DefaultRetrieveDataSet
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);
                 }
                 IndexQuery indexQuery = offset.getIndexQuery();
-                if (matchingFilter(parsedJson, indexQuery.getAndJson())) {
+                if (matchingFilter(parsedJson, indexQuery.getAndData())) {
                     if (!resultCallback.needsMore(searchQuery)) {
                         return;
                     }

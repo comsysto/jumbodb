@@ -6,10 +6,7 @@ import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import org.jumbodb.common.query.DataQuery;
-import org.jumbodb.common.query.FieldType;
-import org.jumbodb.common.query.HintType;
-import org.jumbodb.common.query.QueryOperation;
+import org.jumbodb.common.query.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,28 +18,49 @@ import java.util.List;
  */
 public class WhereVisitor extends ExpressionVisitorAdapter {
     private List<Object> expressions = new ArrayList<Object>();
-    private List<DataQuery> ors = new LinkedList<DataQuery>();
-    private List<DataQuery> ands = new LinkedList<DataQuery>();
-    private DataQuery current;
+    private List<DataQuery> dataOrs = new LinkedList<DataQuery>();
+    private List<DataQuery> dataAnds = new LinkedList<DataQuery>();
+    private List<IndexQuery> indexOrs = new LinkedList<IndexQuery>();
+    private List<IndexQuery> indexAnds = new LinkedList<IndexQuery>();
+    private DataQuery currentData;
+    private IndexQuery currentIndex;
+    private boolean index = false;
     private HintType hintType = HintType.NONE;
 
+    public List<IndexQuery> getIndexOrs() {
+        if(currentIndex != null)  {
+            return Arrays.asList(currentIndex);
+        } else if(!indexAnds.isEmpty()) {
+            IndexQuery last = null;
+            for (IndexQuery and : indexAnds) {
+                if (last != null) {
+                    and.setAndIndex(last);
+                }
+                last = and;
+            }
+            if (last != null) {
+                indexOrs.add(last);
+            }
+        }
+        return indexOrs;
+    }
 
-    public List<DataQuery> getOrs() {
-        if(current != null)  {
-            return Arrays.asList(current);
-        } else if(!ands.isEmpty()) {
+    public List<DataQuery> getDataOrs() {
+        if(currentData != null)  {
+            return Arrays.asList(currentData);
+        } else if(!dataAnds.isEmpty()) {
             DataQuery last = null;
-            for (DataQuery and : ands) {
+            for (DataQuery and : dataAnds) {
                 if (last != null) {
                     and.setAnd(last);
                 }
                 last = and;
             }
             if (last != null) {
-                ors.add(last);
+                dataOrs.add(last);
             }
         }
-        return ors;
+        return dataOrs;
     }
 
     @Override
@@ -51,21 +69,21 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         expr.getLeftExpression().accept(leftWhereVisitor);
         WhereVisitor rightWhereVisitor = new WhereVisitor();
         expr.getRightExpression().accept(rightWhereVisitor);
-        if (rightWhereVisitor.current != null) {
-            ands.add(rightWhereVisitor.current);
+        if (rightWhereVisitor.currentData != null) {
+            dataAnds.add(rightWhereVisitor.currentData);
         }
-        if (leftWhereVisitor.current != null) {
-            ands.add(leftWhereVisitor.current);
+        if (leftWhereVisitor.currentData != null) {
+            dataAnds.add(leftWhereVisitor.currentData);
         }
 
-        if (!leftWhereVisitor.ors.isEmpty()) {
-            ands.add(new DataQuery(leftWhereVisitor.ors));
+        if (!leftWhereVisitor.dataOrs.isEmpty()) {
+            dataAnds.add(new DataQuery(leftWhereVisitor.dataOrs));
         }
-        if (!rightWhereVisitor.ors.isEmpty()) {
-            ands.add(new DataQuery(rightWhereVisitor.ors));
+        if (!rightWhereVisitor.dataOrs.isEmpty()) {
+            dataAnds.add(new DataQuery(rightWhereVisitor.dataOrs));
         }
-        ands.addAll(leftWhereVisitor.ands);
-        ands.addAll(rightWhereVisitor.ands);
+        dataAnds.addAll(leftWhereVisitor.dataAnds);
+        dataAnds.addAll(rightWhereVisitor.dataAnds);
     }
 
     @Override
@@ -74,31 +92,31 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         expr.getLeftExpression().accept(leftWhereVisitor);
         WhereVisitor rightWhereVisitor = new WhereVisitor();
         expr.getRightExpression().accept(rightWhereVisitor);
-        List<DataQuery> leftJsonQueries = leftWhereVisitor.ors;
-        List<DataQuery> rightJsonQueries = rightWhereVisitor.ors;
-        ors.addAll(leftJsonQueries);
-        ors.addAll(rightJsonQueries);
-        if (leftWhereVisitor.current != null) {
-            ors.add(leftWhereVisitor.current);
+        List<DataQuery> leftJsonQueries = leftWhereVisitor.dataOrs;
+        List<DataQuery> rightJsonQueries = rightWhereVisitor.dataOrs;
+        dataOrs.addAll(leftJsonQueries);
+        dataOrs.addAll(rightJsonQueries);
+        if (leftWhereVisitor.currentData != null) {
+            dataOrs.add(leftWhereVisitor.currentData);
         }
-        if (rightWhereVisitor.current != null) {
-            ors.add(rightWhereVisitor.current);
+        if (rightWhereVisitor.currentData != null) {
+            dataOrs.add(rightWhereVisitor.currentData);
         }
         concatAnd(leftWhereVisitor);
         concatAnd(rightWhereVisitor);
     }
 
     private void concatAnd(WhereVisitor leftWhereVisitor) {
-        if (!leftWhereVisitor.ands.isEmpty()) {
+        if (!leftWhereVisitor.dataAnds.isEmpty()) {
             DataQuery last = null;
-            for (DataQuery and : leftWhereVisitor.ands) {
+            for (DataQuery and : leftWhereVisitor.dataAnds) {
                 if (last != null) {
                     and.setAnd(last);
                 }
                 last = and;
             }
             if (last != null) {
-                ors.add(last);
+                dataOrs.add(last);
             }
         }
     }
@@ -111,10 +129,57 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     private void boolEvaluation(QueryOperation eq) {
         if(expressions.size() == 2) {
-            current = createDataQuery(eq);
+            if(index) {
+                currentIndex = createIndexQuery(eq);
+            } else {
+                currentData = createDataQuery(eq);
+            }
         }
         else {
             throw new IllegalArgumentException("minimum one field is required for query criteria");
+        }
+    }
+
+    private IndexQuery createIndexQuery(QueryOperation eq) {
+        validNotTwoFieldsForIndex();
+        boolean isFieldRight = getFieldTypeRight() == FieldType.FIELD;
+        QueryOperation op = eq;
+        String columnName;
+        Object value;
+        if(isFieldRight) {
+            columnName = getColumnRight();
+            value = getValueLeft();
+            switch(eq) {
+                case GT:
+                    op = QueryOperation.LT;
+                    break;
+                case GT_EQ:
+                    op = QueryOperation.LT_EQ;
+                    break;
+                case LT:
+                    op = QueryOperation.GT;
+                    break;
+                case LT_EQ:
+                    op = QueryOperation.GT_EQ;
+                    break;
+            }
+        }
+        else {
+            columnName = getColumnLeft();
+            value = getValueRight();
+        }
+        return new IndexQuery(columnName, op, value);
+    }
+
+    private void validNotTwoFieldsForIndex() {
+        int fields = 0;
+        for (Object expression : expressions) {
+            if(expression instanceof Column) {
+                fields++;
+            }
+        }
+        if(fields > 1) {
+            throw new IllegalArgumentException("Indexes cannot be compared with other fields.");
         }
     }
 
@@ -128,6 +193,13 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     private String getColumnRight() {
         return ((Column)expressions.get(1)).getFullyQualifiedName();
+    }
+
+    private String getLeftColumnOrColumnAsValue() {
+        if(getFieldTypeLeft() == FieldType.FIELD) {
+            return getColumnLeft();
+        }
+        return getValueLeft().toString();
     }
 
     private String getColumnLeft() {
@@ -258,11 +330,17 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         boolEvaluation(QueryOperation.LT_EQ);
     }
 
+
+    @Override
+    public void visit(ExpressionList expressionList) {
+        super.visit(expressionList);
+    }
+
     @Override
     public void visit(ExistsExpression expr) {
-        // CARSTEN implement later
         super.visit(expr);
-        throw new IllegalArgumentException("not supported");
+        Object left = getLeftColumnOrColumnAsValue();
+        currentData = new DataQuery(left, FieldType.FIELD, expr.isNot() ? QueryOperation.NOT_EXISTS : QueryOperation.EXISTS);
     }
 
     @Override
@@ -279,13 +357,37 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(Function function) {
+        super.visit(function);
+        if(function.getName().equalsIgnoreCase("idx")) {
+            handleIdxFunction(function);
+        } else {
+            throw new IllegalArgumentException("The function '" + function.getName().toUpperCase() + "' is not supported");
+        }
         // CARSTEN function to_date
         // CARSTEN implement geo spatial functions
         // CARSTEN implement idx functions idx('fieldName') or idx(fieldName)
         // CARSTEN implement restriced names functions field('delete') or field(delete)
         // CARSTEN implement dateField('fieldName', 'date format') or dateField('fieldName') using the default, for date itself use {ts ...}
-        System.out.println("function name " + function.getName());
-        System.out.println("function params 1 " + function.getParameters().getExpressions().get(0));
-        System.out.println("function params 2 " + function.getParameters().getExpressions().get(1));
+//        System.out.println("function name " + function.getName());
+//        System.out.println("function params 1 " + function.getParameters().getExpressions().get(0));
+//        System.out.println("function params 2 " + function.getParameters().getExpressions().get(1));
+    }
+
+    private void handleIdxFunction(Function function) {
+        ExpressionList parameters = function.getParameters();
+        if(parameters.getExpressions().size() != 1) {
+            throw new IllegalArgumentException("IDX function requires exactly one parameter.");
+        }
+        index = true;
+        Expression expression = parameters.getExpressions().get(0);
+        Column column = getColumn(expression);
+        expressions.add(column);
+    }
+
+    private Column getColumn(Expression expression) {
+        if(expression instanceof Column) {
+            return ((Column)expression);
+        }
+        return new Column(expression.toString());
     }
 }

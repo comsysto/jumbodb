@@ -105,7 +105,7 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);
                 }
                 IndexQuery indexQuery = offset.getIndexQuery();
-                if (matchingFilter(parsedJson, indexQuery.getAndJson())) {
+                if (matchingFilter(parsedJson, indexQuery.getAndData())) {
                     if (!resultCallback.needsMore(searchQuery)) {
                         return;
                     }

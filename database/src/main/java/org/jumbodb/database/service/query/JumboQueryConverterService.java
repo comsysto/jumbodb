@@ -46,7 +46,8 @@ public class JumboQueryConverterService {
         Expression where = selectBody.getWhere();
         if(where != null) {
             where.accept(expressionVisitor);
-            jumboQuery.setDataQuery(expressionVisitor.getOrs());
+            jumboQuery.setDataQuery(expressionVisitor.getDataOrs());
+            jumboQuery.setIndexQuery(expressionVisitor.getIndexOrs());
         }
         return jumboQuery;
     }
@@ -105,7 +106,7 @@ public class JumboQueryConverterService {
 //        System.out.println("from item alias  " + selectBody.getFromItem().getAlias().getName()); // wenn kein alias getAlias == null
         WhereVisitor expressionVisitor = new WhereVisitor();
         selectBody.getWhere().accept(expressionVisitor);
-        List<DataQuery> jsonQueries = expressionVisitor.getOrs();
+        List<DataQuery> jsonQueries = expressionVisitor.getDataOrs();
         System.out.println(jsonQueries);
         System.out.println("time " + ( System.currentTimeMillis() - start));
     }

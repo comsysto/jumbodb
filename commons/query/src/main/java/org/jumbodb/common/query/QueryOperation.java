@@ -4,6 +4,8 @@ public enum QueryOperation {
 
 
     OR("OR"),
+    EXISTS("EXISTS"),
+    NOT_EXISTS("EXISTS"),
     EQ("=="),
     NE("!="),
     LT("<"),
@@ -14,7 +16,7 @@ public enum QueryOperation {
     GEO_BOUNDARY_BOX("geoFindInBoundaryBox(...)"),
     GEO_WITHIN_RANGE_METER("geoWithinRangeInMeter(...)");
     // CARSTEN implement these types:
-    // CARSTEN LIKE, IS NULL, IS NOT NULL, EXISTS, NOT EXISTS, IN
+    // CARSTEN LIKE, IS NULL, IS NOT NULL, IN
 
     // CARSTEN IN muste be implemented for all strategies
 

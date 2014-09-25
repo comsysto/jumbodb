@@ -1,10 +1,9 @@
 package org.jumbodb.connector.hadoop.index.strategy.common.doubleval;
 
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
-import org.jumbodb.connector.hadoop.index.strategy.PartitionUtil;
+import org.jumbodb.connector.hadoop.index.strategy.common.partition.PartitionUtil;
 
 /**
  * User: carsten

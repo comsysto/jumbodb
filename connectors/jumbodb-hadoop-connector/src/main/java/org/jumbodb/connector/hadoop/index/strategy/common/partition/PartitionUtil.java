@@ -1,4 +1,4 @@
-package org.jumbodb.connector.hadoop.index.strategy;
+package org.jumbodb.connector.hadoop.index.strategy.common.partition;
 
 /**
  * @author Carsten Hufe

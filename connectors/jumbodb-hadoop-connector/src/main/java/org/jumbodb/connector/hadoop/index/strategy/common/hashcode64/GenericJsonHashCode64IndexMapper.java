@@ -17,7 +17,6 @@ import java.util.List;
 public class GenericJsonHashCode64IndexMapper extends AbstractHashCode64IndexMapper<JsonNode> {
 
     private IndexField indexField;
-    private SimpleDateFormat sdf;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {

@@ -339,6 +339,9 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(ExistsExpression expr) {
         super.visit(expr);
+        if(index) {
+            throw new IllegalArgumentException("EXISTS is not allowed with indexes");
+        }
         Object left = getLeftColumnOrColumnAsValue();
         currentData = new DataQuery(left, FieldType.FIELD, expr.isNot() ? QueryOperation.NOT_EXISTS : QueryOperation.EXISTS);
     }
@@ -388,6 +391,9 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         if(expression instanceof Column) {
             return ((Column)expression);
         }
-        return new Column(expression.toString());
+        else if(expression instanceof StringValue) {
+            return new Column(((StringValue)expression).getValue());
+        }
+        throw new IllegalArgumentException("Column names must be defined as string with quotes or without.");
     }
 }

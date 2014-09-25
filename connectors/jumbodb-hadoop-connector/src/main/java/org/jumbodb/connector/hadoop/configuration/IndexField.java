@@ -11,8 +11,9 @@ public class IndexField {
     private String indexName;
     private List<String> fields;
     private String indexStrategy;
-    private int numberOfOutputFiles = 64;
+    private int numberOfOutputFiles = 32;
     private String datePattern;
+    private boolean useSampling = true;
 
     public IndexField() {
     }
@@ -72,13 +73,23 @@ public class IndexField {
         this.numberOfOutputFiles = numberOfOutputFiles;
     }
 
+    public boolean isUseSampling() {
+        return useSampling;
+    }
+
+    public void setUseSampling(boolean useSampling) {
+        this.useSampling = useSampling;
+    }
+
     @Override
     public String toString() {
         return "IndexField{" +
                 "indexName='" + indexName + '\'' +
                 ", fields=" + fields +
                 ", indexStrategy='" + indexStrategy + '\'' +
+                ", numberOfOutputFiles=" + numberOfOutputFiles +
                 ", datePattern='" + datePattern + '\'' +
+                ", useSampling=" + useSampling +
                 '}';
     }
 }

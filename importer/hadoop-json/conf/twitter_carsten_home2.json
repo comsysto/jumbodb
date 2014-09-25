@@ -20,11 +20,6 @@
                     "indexName": "followers_count_lz4",
                     "fields": ["user.followers_count"],
                     "indexStrategy": "INTEGER_LZ4"
-                },
-                {
-                    "indexName": "followers_count_snappy",
-                    "fields": ["user.followers_count"],
-                    "indexStrategy": "INTEGER_SNAPPY"
                 }
             ]
         }

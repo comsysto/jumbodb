@@ -10,20 +10,10 @@ import org.jumbodb.connector.hadoop.index.strategy.common.AbstractIndexMapper;
 public class IndexStrategy {
     private Class<? extends AbstractIndexMapper> mapperClass;
     private Class<? extends OutputFormat> outputFormatClass;
-    private Class<? extends InputFormat> inputSamplingMapper;
-    private int numberOfOutputFiles;
 
-    public IndexStrategy(Class<? extends AbstractIndexMapper> mapperClass, Class<? extends OutputFormat> outputFormatClass, Class<? extends InputFormat> inputSamplingMapper, int numberOfOutputFiles) {
+    public IndexStrategy(Class<? extends AbstractIndexMapper> mapperClass, Class<? extends OutputFormat> outputFormatClass) {
         this.mapperClass = mapperClass;
         this.outputFormatClass = outputFormatClass;
-        this.inputSamplingMapper = inputSamplingMapper;
-        this.numberOfOutputFiles = numberOfOutputFiles;
-    }
-
-    public IndexStrategy(Class<? extends AbstractIndexMapper> mapperClass, Class<? extends OutputFormat> outputFormatClass, int numberOfOutputFiles) {
-        this.mapperClass = mapperClass;
-        this.outputFormatClass = outputFormatClass;
-        this.numberOfOutputFiles = numberOfOutputFiles;
     }
 
     public Class<? extends AbstractIndexMapper> getMapperClass() {
@@ -34,21 +24,11 @@ public class IndexStrategy {
         return outputFormatClass;
     }
 
-    public int getNumberOfOutputFiles() {
-        return numberOfOutputFiles;
-    }
-
-    public Class<? extends InputFormat> getInputSamplingMapper() {
-        return inputSamplingMapper;
-    }
-
     @Override
     public String toString() {
         return "IndexStrategy{" +
                 "mapperClass=" + mapperClass +
                 ", outputFormatClass=" + outputFormatClass +
-                ", inputSamplingMapper=" + inputSamplingMapper +
-                ", numberOfOutputFiles=" + numberOfOutputFiles +
                 '}';
     }
 }

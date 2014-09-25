@@ -3,6 +3,7 @@ package org.jumbodb.connector.hadoop.index.strategy.common.integer;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.jumbodb.connector.hadoop.index.data.FileOffsetWritable;
 import org.jumbodb.connector.hadoop.index.strategy.common.AbstractIndexMapper;
@@ -32,6 +33,11 @@ public abstract class AbstractIntegerIndexMapper<T> extends AbstractIndexMapper<
     @Override
     public Class<? extends Partitioner> getPartitioner() {
         return IntegerRangePartitioner.class;
+    }
+
+    @Override
+    public Class<? extends InputFormat> getPartitionerSamplingInputClass() {
+        return IntegerSamplingInputFormat.class;
     }
 
     @Override

@@ -77,7 +77,7 @@ public class JumboJobCreator {
             if (conf.getBoolean(JumboConstants.EXPORT_ENABLED, true)) {
 
 
-                IndexField indexInformation = IndexJobCreator.getIndexInformation(customIndexJob.getMapper(), customIndexJob.getStrategy());
+                IndexField indexInformation = IndexJobCreator.getIndexInformation(customIndexJob.getMapper(), customIndexJob.getStrategy(), 32);
                 List<ControlledJob> indexImportJob = ImportJobCreator.createIndexImportJobs(conf, jumboCustomImportJob, indexInformation);
                 for (ControlledJob controlledJob : indexImportJob) {
                     controlledJob.addDependingJob(controlledIndexJob);

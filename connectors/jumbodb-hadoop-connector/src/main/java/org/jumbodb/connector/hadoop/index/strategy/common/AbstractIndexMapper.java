@@ -4,8 +4,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.codehaus.jackson.JsonNode;
@@ -81,16 +81,16 @@ public abstract class AbstractIndexMapper<T> extends Mapper<LongWritable, Text, 
         return FileOffsetWritable.class;
     }
 
+    public Class<? extends InputFormat> getPartitionerSamplingInputClass() {
+        return null;
+    }
+
     public abstract Class<? extends Partitioner> getPartitioner();
     public abstract Class<? extends WritableComparable> getOutputKeyClass();
 
     public abstract void onDataset(LongWritable offset, int fileNameHashCode, T input, Context context) throws IOException, InterruptedException;
     public abstract String getIndexName();
     public abstract Class<T> getJsonClass();
-
-    public int getNumberOfOutputFiles() {
-        return 64;
-    }
 
     public boolean throwErrorOnInvalidDataset() {
         return true;

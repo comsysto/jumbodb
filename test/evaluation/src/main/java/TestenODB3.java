@@ -37,7 +37,7 @@ public class TestenODB3 {
         JumboQueryConnection jumboDriver = new JumboQueryConnection("localhost", 12002);
         JumboQuery query = new JumboQuery();
 //        query.addIndexQuery(new IndexQuery("screen_name", QueryOperation.EQ, "EsAdolescencia"));
-        query.addIndexQuery(new IndexQuery("followers_count_snappy", QueryOperation.GT, 10000));
+        query.addIndexQuery(new IndexQuery("followers_count_lz4", QueryOperation.GT, 10000));
         query.setCollection("twitter_lz4");
         query.setResultCacheEnabled(false);
         long start = System.currentTimeMillis();

@@ -2,6 +2,7 @@ package org.jumbodb.connector.hadoop.index.strategy.common.integer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
@@ -32,6 +33,11 @@ public class GenericJsonIntegerIndexMapper extends AbstractIntegerIndexMapper<Js
             return valueFor.intValue();
         }
         return null;
+    }
+
+    @Override
+    public Class<? extends InputFormat> getPartitionerSamplingInputClass() {
+        return IntegerSamplingInputFormat.class;
     }
 
     @Override

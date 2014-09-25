@@ -36,11 +36,6 @@ public abstract class AbstractIntegerIndexMapper<T> extends AbstractIndexMapper<
     }
 
     @Override
-    public Class<? extends InputFormat> getPartitionerSamplingInputClass() {
-        return IntegerSamplingInputFormat.class;
-    }
-
-    @Override
     public Class<? extends WritableComparable> getOutputKeyClass() {
         return IntWritable.class;
     }

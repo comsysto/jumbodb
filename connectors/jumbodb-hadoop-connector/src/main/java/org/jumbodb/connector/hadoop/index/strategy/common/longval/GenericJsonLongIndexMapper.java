@@ -2,6 +2,7 @@ package org.jumbodb.connector.hadoop.index.strategy.common.longval;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 
@@ -31,6 +32,11 @@ public class GenericJsonLongIndexMapper extends AbstractLongIndexMapper<JsonNode
             return valueFor.longValue();
         }
         return null;
+    }
+
+    @Override
+    public Class<? extends InputFormat> getPartitionerSamplingInputClass() {
+        return LongSamplingInputFormat.class;
     }
 
     @Override

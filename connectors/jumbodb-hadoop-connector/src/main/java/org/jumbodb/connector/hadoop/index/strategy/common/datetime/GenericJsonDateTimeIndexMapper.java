@@ -3,6 +3,7 @@ package org.jumbodb.connector.hadoop.index.strategy.common.datetime;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 
@@ -31,6 +32,11 @@ public class GenericJsonDateTimeIndexMapper extends AbstractDateTimeIndexMapper<
     }
 
     @Override
+    public Class<? extends InputFormat> getPartitionerSamplingInputClass() {
+        return DateTimeSamplingInputFormat.class;
+    }
+
+    @Override
     public Date getIndexableValue(JsonNode input) {
         JsonNode valueFor = getNodeFor(indexField.getFields().get(0), input);
         if(!valueFor.isMissingNode()) {
@@ -39,7 +45,7 @@ public class GenericJsonDateTimeIndexMapper extends AbstractDateTimeIndexMapper<
                 try {
                     return sdf.parse(valueAsText);
                 } catch (ParseException e) {
-                    return new Date(0);
+                    return null;
                 }
             }
         }

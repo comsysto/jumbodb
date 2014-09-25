@@ -2,6 +2,7 @@ package org.jumbodb.connector.hadoop.index.strategy.common.doubleval;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 
@@ -22,6 +23,11 @@ public class GenericJsonDoubleIndexMapper extends AbstractDoubleIndexMapper<Json
         if(indexField.getFields().size() != 1) {
             throw new RuntimeException("GenericJsonDoubleIndexMapper indexField must exactly contain one value!");
         }
+    }
+
+    @Override
+    public Class<? extends InputFormat> getPartitionerSamplingInputClass() {
+        return DoubleSamplingInputFormat.class;
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.jumbodb.connector.hadoop.index.strategy.common.hashcode64;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.jumbodb.connector.hadoop.JumboConfigurationUtil;
 import org.jumbodb.connector.hadoop.configuration.IndexField;
 
@@ -27,6 +28,11 @@ public class GenericJsonHashCode64IndexMapper extends AbstractHashCode64IndexMap
     @Override
     public String getIndexableValue(JsonNode input) {
         return getIndexKey(input);
+    }
+
+    @Override
+    public Class<? extends InputFormat> getPartitionerSamplingInputClass() {
+        return HashCode64SamplingInputFormat.class;
     }
 
     private String getIndexKey(JsonNode jsonNode) {

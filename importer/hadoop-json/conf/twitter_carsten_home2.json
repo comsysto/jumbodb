@@ -11,15 +11,31 @@
     "checksum": "NONE",
     "importCollection": [
         {
-            "input": "file:///C:/Development/data/twitter/input/",
+            "input": "file:///C:/Development/data/twitter/input_big/",
             "description": "Twitter data",
             "collectionName": "twitter_lz4",
             "dataStrategy": "JSON_LZ4",
             "indexes": [
                 {
+                    "useSampling": false,
+                    "indexName": "screen_name_nosampling",
+                    "fields": ["user.screen_name"],
+                    "indexStrategy": "HASHCODE64_SNAPPY"
+                },
+                {
+                    "indexName": "screen_name",
+                    "fields": ["user.screen_name"],
+                    "indexStrategy": "HASHCODE64_SNAPPY"
+                },
+                {
                     "indexName": "followers_count_lz4",
                     "fields": ["user.followers_count"],
                     "indexStrategy": "INTEGER_LZ4"
+                },
+                {
+                    "indexName": "created_at",
+                    "fields": ["created_at"],
+                    "indexStrategy": "DATETIME_SNAPPY"
                 }
             ]
         }

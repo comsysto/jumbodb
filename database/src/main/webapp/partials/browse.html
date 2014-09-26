@@ -49,7 +49,7 @@
                             <div class="controls">
                                 <p><b>Data strategy: </b> {{currentCollection.dataStrategy}}</p>
 
-                                <p><b>Supported data queries: </b> {{currentCollection.supportedOperations}}</p>
+                                <p><b>Supported data queries: </b> {{currentCollection.supportedOperationsFormatted}}</p>
                                 <table class="table table-bordered">
                                     <thead>
                                     <tr>
@@ -62,7 +62,7 @@
                                     <tr ng-repeat="index in currentCollection.indexes">
                                         <td>{{index.name}}</td>
                                         <td>{{index.strategy}}</td>
-                                        <td>{{index.supportedOperations}}</td>
+                                        <td>{{index.supportedOperationsFormatted}}</td>
                                     </tr>
                                     </tbody>
                                 </table>

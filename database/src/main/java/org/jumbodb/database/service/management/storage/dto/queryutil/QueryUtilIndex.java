@@ -1,7 +1,9 @@
 package org.jumbodb.database.service.management.storage.dto.queryutil;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.QueryOperation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,6 +31,14 @@ public class QueryUtilIndex implements Comparable<QueryUtilIndex> {
 
     public List<QueryOperation> getSupportedOperations() {
         return supportedOperations;
+    }
+
+    public String getSupportedOperationsFormatted() {
+        List<String> ops = new ArrayList<String>();
+        for (QueryOperation supportedOperation : supportedOperations) {
+            ops.add(supportedOperation.getOperation());
+        }
+        return StringUtils.join(ops, ", ");
     }
 
     @Override

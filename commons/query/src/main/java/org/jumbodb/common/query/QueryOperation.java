@@ -5,7 +5,7 @@ public enum QueryOperation {
 
     OR("OR"),
     EXISTS("EXISTS"),
-    NOT_EXISTS("EXISTS"),
+    NOT_EXISTS("NOT EXISTS"),
     EQ("=="),
     NE("!="),
     LT("<"),

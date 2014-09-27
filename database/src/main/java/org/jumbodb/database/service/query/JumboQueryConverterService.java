@@ -30,7 +30,7 @@ public class JumboQueryConverterService {
                 verifySelectFunctionsAndGroupBy(jumboQuery);
                 return jumboQuery;
             }
-            throw new JumboCommonException("Only plain select statements are allowed!");
+            throw new SQLParseException("Only plain SELECT statements are allowed!");
         } catch (JSQLParserException e) {
             throw new JumboCommonException(e.getCause().getMessage());
         }
@@ -43,7 +43,7 @@ public class JumboQueryConverterService {
             Set<String> plainFields = findSelectFieldsWithoutFunction(jumboQuery);
             plainFields.removeAll(groupByFields);
             if(plainFields.size() > 0) {
-                throw new SQLParseException("The selected fields " + plainFields + " require a group by, if you want to collect alll values use COLLECT or COLLECT(DISTINCT ...).");
+                throw new SQLParseException("The selected fields " + plainFields + " require a group by, if you want to collect all values use COLLECT or COLLECT(DISTINCT ...).");
             }
         }
     }
@@ -172,51 +172,10 @@ public class JumboQueryConverterService {
             throw new SQLParseException("TOP is not supported.");
         }
         else if(selectBody.getInto() != null) {
-            throw new SQLParseException("INTO is not supported.");
+            throw new SQLParseException("INTO is not supported, remember it's a read-only database!");
         }
         else if(selectBody.getFromItem().getAlias() != null) {
             throw new SQLParseException("Table aliases are currently not supported.");
         }
-    }
-
-    public static void main(String[] args) throws JSQLParserException {
-        // CARSTEN diese queries nicht suporten:
-//  diese query wird nicht supported, da index embedded und full scan außen
-//  "select * from test a where ((idx(aaaa, ddd) = 'aaa' OR bb = 'bb') AND user.cc = 'bb') limit 10"
-
-
-        // no cache hint ans ende
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where ((a = 'b' or z = 'z') and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'");
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'");
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h') and (g = 'g' or y = 'y' or o = 'o')) or x = 'x'");
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where exists(aaaa)");
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test where field in (aaaa, 'bbb', 'ccc')");
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test where field = {ts '2012-12-12 12:12:12'}");
-        Select stmt = (Select) CCJSqlParserUtil.parse("select aaa, bbb, * from test");
-        long start = System.currentTimeMillis();
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where aaa = 'bb'");
-
-
-
-//        Select stmt = (Select)CCJSqlParserUtil.parse("select * from test a where user.cc = 'bb' limit 10");
-//        Select stmt = (Select)CCJSqlParserUtil.parse("select * from test a where ((idx(aaaa, ddd) = 'aaa' AND bb = 'bb') OR user.cc = 'bb') limit 10");
-        System.out.println();
-        PlainSelect selectBody = (PlainSelect) stmt.getSelectBody(); // nur plain select
-//        TablesNamesFinder selectVisitor = new TablesNamesFinder();
-//        System.out.println("tables " + selectVisitor.getTableList(stmt));
-        System.out.println("joins " + selectBody.getJoins()); // wenn != null error joins are not supported
-        System.out.println("distinct " + selectBody.getDistinct()); // wenn != null, denn nicht supported
-//        System.out.println("offset " + selectBody.getLimit().getOffset()); // offset kann nur 0 sein da parallel
-//        System.out.println("row count " + selectBody.getLimit().getRowCount());
-        System.out.println("group " + selectBody.getGroupByColumnReferences()); // muss null, wird supported
-        System.out.println("having " + selectBody.getHaving()); // muss null, da nicht supported
-        System.out.println("selected items " + selectBody.getSelectItems());
-        System.out.println("from item " + getCollection(selectBody)); // muss null kein alias support
-//        System.out.println("from item alias  " + selectBody.getFromItem().getAlias().getName()); // wenn kein alias getAlias == null
-        WhereVisitor expressionVisitor = new WhereVisitor();
-        selectBody.getWhere().accept(expressionVisitor);
-        List<DataQuery> jsonQueries = expressionVisitor.getDataOrs();
-        System.out.println(jsonQueries);
-        System.out.println("time " + ( System.currentTimeMillis() - start));
     }
 }

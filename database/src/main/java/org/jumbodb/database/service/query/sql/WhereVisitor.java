@@ -136,7 +136,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
             }
         }
         else {
-            throw new IllegalArgumentException("minimum one field is required for query criteria");
+            throw new SQLParseException("Minimum one field is required for query criteria.");
         }
     }
 
@@ -340,7 +340,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     public void visit(ExistsExpression expr) {
         super.visit(expr);
         if(index) {
-            throw new IllegalArgumentException("EXISTS is not allowed with indexes");
+            throw new SQLParseException("EXISTS is not allowed with indexes.");
         }
         Object left = getLeftColumnOrColumnAsValue();
         currentData = new DataQuery(left, FieldType.FIELD, expr.isNot() ? QueryOperation.NOT_EXISTS : QueryOperation.EXISTS);
@@ -361,15 +361,14 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(Function function) {
         super.visit(function);
-        if(function.getName().equalsIgnoreCase("idx")) {
+        if("IDX".equalsIgnoreCase(function.getName())) {
             handleIdxFunction(function);
         } else {
-            throw new IllegalArgumentException("The function '" + function.getName().toUpperCase() + "' is not supported");
+            throw new SQLParseException("The function '" + function.getName().toUpperCase() + "' is not supported.");
         }
         // CARSTEN function to_date
         // CARSTEN implement geo spatial functions
         // CARSTEN implement idx functions idx('fieldName') or idx(fieldName)
-        // CARSTEN implement restriced names functions field('delete') or field(delete)
         // CARSTEN implement dateField('fieldName', 'date format') or dateField('fieldName') using the default, for date itself use {ts ...}
 //        System.out.println("function name " + function.getName());
 //        System.out.println("function params 1 " + function.getParameters().getExpressions().get(0));
@@ -379,7 +378,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     private void handleIdxFunction(Function function) {
         ExpressionList parameters = function.getParameters();
         if(parameters.getExpressions().size() != 1) {
-            throw new IllegalArgumentException("IDX function requires exactly one parameter.");
+            throw new SQLParseException("IDX function requires exactly one parameter.");
         }
         index = true;
         Expression expression = parameters.getExpressions().get(0);
@@ -394,6 +393,6 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         else if(expression instanceof StringValue) {
             return new Column(((StringValue)expression).getValue());
         }
-        throw new IllegalArgumentException("Column names must be defined as string with quotes or without.");
+        throw new SQLParseException("Column names must be defined as string with quotes or without.");
     }
 }

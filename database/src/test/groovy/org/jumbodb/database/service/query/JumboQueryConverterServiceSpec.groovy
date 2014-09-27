@@ -5,6 +5,7 @@ import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.common.query.SelectFieldFunction
 import org.jumbodb.database.service.query.sql.SQLParseException
 import spock.lang.Specification
+import spock.lang.Unroll
 
 /**
  * @author Carsten Hufe
@@ -14,24 +15,154 @@ class JumboQueryConverterServiceSpec extends Specification {
     def service = new JumboQueryConverterService()
 
     def "SQL conversion AND OR logic Case 1"() {
-
-        //select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h') and (g = 'g' or y = 'y' or o = 'o')) or x = 'x'
-
+        when:
+        def stmt = "select * from test where (a = 'b' and z = p and (c = 'd' or c = 'f' or g = 'h') and (g = 'g' or y = 'y' or o = 'o')) or x = 'x'"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def dataQuery = query.getDataQuery()
+        def indexQuery = query.getIndexQuery()
+        then:
+        dataQuery.size() == 2
+        indexQuery.size() == 0
+        def where1 = query.getDataQuery().get(0)
+        where1.queryOperation == QueryOperation.EQ
+        where1.left == 'x'
+        where1.leftType == FieldType.FIELD
+        where1.right == 'x'
+        where1.rightType == FieldType.VALUE
+        def where2 = query.getDataQuery().get(1)
+        where2.queryOperation == QueryOperation.EQ
+        where2.left == 'a'
+        where2.leftType == FieldType.FIELD
+        where2.right == 'b'
+        where2.rightType == FieldType.VALUE
+        where2.getOrs().size() == 0
+        def subAnd = where2.getAnd()
+        subAnd.queryOperation == QueryOperation.EQ
+        subAnd.left == 'z'
+        subAnd.leftType == FieldType.FIELD
+        subAnd.right == 'p'
+        subAnd.rightType == FieldType.FIELD
+        subAnd.getOrs().size() == 0
+        def subAnd2 = subAnd.getAnd()
+        subAnd2.queryOperation == QueryOperation.OR
+        subAnd2.leftType == FieldType.NOT_SET
+        subAnd2.rightType == FieldType.NOT_SET
+        subAnd2.getOrs().size() == 3
+        def subOrs3 = subAnd2.getOrs()
+        subOrs3.get(0).left == 'c'
+        subOrs3.get(0).queryOperation == QueryOperation.EQ
+        subOrs3.get(0).right == 'd'
+        subOrs3.get(1).left == 'c'
+        subOrs3.get(1).queryOperation == QueryOperation.EQ
+        subOrs3.get(1).right == 'f'
+        subOrs3.get(2).left == 'g'
+        subOrs3.get(2).queryOperation == QueryOperation.EQ
+        subOrs3.get(2).right == 'h'
+        def subAnd3 = subAnd2.getAnd()
+        subAnd3.queryOperation == QueryOperation.OR
+        subAnd3.leftType == FieldType.NOT_SET
+        subAnd3.rightType == FieldType.NOT_SET
+        subAnd3.getOrs().size() == 3
+        def subOrs4 = subAnd3.getOrs()
+        subOrs4.get(0).left == 'g'
+        subOrs4.get(0).queryOperation == QueryOperation.EQ
+        subOrs4.get(0).right == 'g'
+        subOrs4.get(1).left == 'y'
+        subOrs4.get(1).queryOperation == QueryOperation.EQ
+        subOrs4.get(1).right == 'y'
+        subOrs4.get(2).left == 'o'
+        subOrs4.get(2).queryOperation == QueryOperation.EQ
+        subOrs4.get(2).right == 'o'
     }
 
     def "SQL conversion AND OR logic Case 2"() {
-//        select * from test a where ((idx(aaaa, ddd) = 'aaa' AND bb = 'bb') OR user.cc = 'bb') limit 10
+        when:
+        def stmt = "select * from test where ((a = 'b' or z = 'z') and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def dataQuery = query.getDataQuery()
+        def indexQuery = query.getIndexQuery()
+        then:
+        dataQuery.size() == 2
+        indexQuery.size() == 0
+        def where1 = query.getDataQuery().get(0)
+        where1.queryOperation == QueryOperation.EQ
+        where1.left == 'x'
+        where1.leftType == FieldType.FIELD
+        where1.right == 'x'
+        where1.rightType == FieldType.VALUE
+        def where2 = query.getDataQuery().get(1)
+        where2.queryOperation == QueryOperation.OR
+        where2.leftType == FieldType.NOT_SET
+        where2.rightType == FieldType.NOT_SET
+        where2.getOrs().size() == 3
+        def where2Ors = where2.getOrs();
+        where2Ors.get(0).left == 'c'
+        where2Ors.get(0).queryOperation == QueryOperation.EQ
+        where2Ors.get(0).right == 'd'
+        where2Ors.get(1).left == 'c'
+        where2Ors.get(1).queryOperation == QueryOperation.EQ
+        where2Ors.get(1).right == 'f'
+        where2Ors.get(2).left == 'g'
+        where2Ors.get(2).queryOperation == QueryOperation.EQ
+        where2Ors.get(2).right == 'h'
+        def subAnd = where2.getAnd()
+        subAnd.queryOperation == QueryOperation.OR
+        subAnd.leftType == FieldType.NOT_SET
+        subAnd.rightType == FieldType.NOT_SET
+        subAnd.getOrs().size() == 2
+        def subAndOrs = subAnd.getOrs();
+        subAndOrs.get(0).left == 'a'
+        subAndOrs.get(0).queryOperation == QueryOperation.EQ
+        subAndOrs.get(0).right == 'b'
+        subAndOrs.get(1).left == 'z'
+        subAndOrs.get(1).queryOperation == QueryOperation.EQ
+        subAndOrs.get(1).right == 'z'
     }
 
     def "SQL conversion AND OR logic Case 3"() {
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where ((a = 'b' or z = 'z') and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'");
-    }
-
-    def "SQL conversion AND OR logic Case 4"() {
-//        Select stmt = (Select) CCJSqlParserUtil.parse("select * from test a where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'");
-    }
-
-    def "SQL conversion 4"() {
+        when:
+        def stmt = "select * from test where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def dataQuery = query.getDataQuery()
+        def indexQuery = query.getIndexQuery()
+        then:
+        dataQuery.size() == 2
+        indexQuery.size() == 0
+        def where1 = query.getDataQuery().get(0)
+        where1.queryOperation == QueryOperation.EQ
+        where1.left == 'x'
+        where1.leftType == FieldType.FIELD
+        where1.right == 'x'
+        where1.rightType == FieldType.VALUE
+        def where2 = query.getDataQuery().get(1)
+        where2.queryOperation == QueryOperation.EQ
+        where2.left == 'a'
+        where2.leftType == FieldType.FIELD
+        where2.right == 'b'
+        where2.rightType == FieldType.VALUE
+        where2.getOrs().size() == 0
+        def subAnd1 = where2.getAnd();
+        subAnd1.queryOperation == QueryOperation.EQ
+        subAnd1.left == 'z'
+        subAnd1.leftType == FieldType.FIELD
+        subAnd1.right == 'z'
+        subAnd1.rightType == FieldType.VALUE
+        subAnd1.getOrs().size() == 0
+        def subAnd2 = subAnd1.getAnd();
+        subAnd2.queryOperation == QueryOperation.OR
+        subAnd2.leftType == FieldType.NOT_SET
+        subAnd2.rightType == FieldType.NOT_SET
+        subAnd2.getOrs().size() == 3
+        def subAnd2Ors = subAnd2.getOrs()
+        subAnd2Ors.get(0).left == 'c'
+        subAnd2Ors.get(0).queryOperation == QueryOperation.EQ
+        subAnd2Ors.get(0).right == 'd'
+        subAnd2Ors.get(1).left == 'c'
+        subAnd2Ors.get(1).queryOperation == QueryOperation.EQ
+        subAnd2Ors.get(1).right == 'f'
+        subAnd2Ors.get(2).left == 'g'
+        subAnd2Ors.get(2).queryOperation == QueryOperation.EQ
+        subAnd2Ors.get(2).right == 'h'
 
     }
 
@@ -111,15 +242,25 @@ class JumboQueryConverterServiceSpec extends Specification {
     }
 
     def "verify IDX function embedded in and condition"() {
+        //  diese query wird nicht supported, da index embedded und full scan außen
+        //        select * from test a where ((idx(aaaa, ddd) = 'aaa' AND bb = 'bb') OR user.cc = 'bb') limit 10
         // CARSTEN this is not allowed
     }
 
     def "verify LIMIT clause with value"() {
-        // CARSTEN
+        when:
+        def stmt = "select * from my_table limit 1000"
+        def query = service.convertSqlToJumboQuery(stmt)
+        then:
+        query.getLimit() == 1000
     }
 
     def "verify LIMIT clause without value"() {
-        // CARSTEN
+        when:
+        def stmt = "select * from my_table"
+        def query = service.convertSqlToJumboQuery(stmt)
+        then:
+        query.getLimit() == -1
     }
 
     def "verify selected field *"() {
@@ -327,7 +468,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         service.convertSqlToJumboQuery(stmt)
         then:
         def ex = thrown SQLParseException
-        ex.message == "The selected fields [key_field] require a group by, if you want to collect alll values use COLLECT or COLLECT(DISTINCT ...)."
+        ex.message == "The selected fields [key_field] require a group by, if you want to collect all values use COLLECT or COLLECT(DISTINCT ...)."
     }
 
 
@@ -403,12 +544,109 @@ class JumboQueryConverterServiceSpec extends Specification {
         fields.get(0).alias == "SUM(FIELD('my_field'))"
     }
 
-    def "verify supported SQL features"() {
-
+    @Unroll
+    def "verify where #operation condition"() {
+        expect:
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery().get(0);
+        where.queryOperation == operation
+        where.left == 'my_field'
+        where.leftType == FieldType.FIELD
+        where.right == 9
+        where.rightType == FieldType.VALUE
+        where:
+        stmt                                         | operation
+        "select * from my_table where my_field > 9"  | QueryOperation.GT
+        "select * from my_table where my_field >= 9" | QueryOperation.GT_EQ
+        "select * from my_table where my_field < 9"  | QueryOperation.LT
+        "select * from my_table where my_field <= 9" | QueryOperation.LT_EQ
+        "select * from my_table where my_field = 9"  | QueryOperation.EQ
+        "select * from my_table where my_field != 9" | QueryOperation.NE
     }
 
-
-    def "verify unsupported SQL features"() {
-
+    def "verify timestamp query"() {
+        when:
+        def stmt = "select * from my_table where my_date_field < {ts '2012-12-12 12:12:12'}"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery().get(0);
+        then:
+        where.queryOperation == QueryOperation.LT
+        where.left == 'my_date_field'
+        where.leftType == FieldType.FIELD
+        where.right == 1355310732000
+        where.rightType == FieldType.VALUE
     }
+
+    def "verify unsupported SQL feature: JOINS"() {
+        when:
+        def stmt = "select * from my_table, other_table"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "JOINS are currently not supported."
+    }
+
+    def "verify unsupported SQL feature: HAVING"() {
+        when:
+        def stmt = "select * from my_table where x = 1 group by x having a = 3"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "HAVING is not supported."
+    }
+
+    def "verify unsupported SQL feature: TOP"() {
+        when:
+        def stmt = "select TOP 3 * from my_table"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "TOP is not supported."
+    }
+
+    def "verify unsupported SQL feature: table aliases"() {
+        when:
+        def stmt = "select * from my_table e where e.aaa = 4"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "Table aliases are currently not supported."
+    }
+
+    def "verify unsupported SQL feature: SUBSELECT"() {
+        when:
+        def stmt = "select * from my_table where my_field = (Select id from other_tables)"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "SUBSELECTS are currently not supported."
+    }
+
+    def "verify unsupported SQL feature: unsupported function"() {
+        when:
+        def stmt = "select * from my_table where my_field = function_does_not_exist(other_field)"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "The function 'FUNCTION_DOES_NOT_EXIST' is not supported."
+    }
+
+    def "verify unsupported SQL feature: EXISTS on index"() {
+        when:
+        def stmt = "select * from my_table where exists IDX(my_field)"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "EXISTS is not allowed with indexes."
+    }
+
+    def "verify unsupported SQL feature: DELETE"() {
+        when:
+        def stmt = "DELETE FROM my_collection"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "Only plain SELECT statements are allowed!"
+    }
+
 }

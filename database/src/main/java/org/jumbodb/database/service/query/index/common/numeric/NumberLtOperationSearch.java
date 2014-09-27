@@ -11,7 +11,6 @@ import java.io.IOException;
  */
 public abstract class NumberLtOperationSearch<T, IFV, IF extends NumberIndexFile<IFV>> implements IndexOperationSearch<T, IFV, IF> {
 
-    // CARSTEN move to NumberSnappyIndexFile and call by delegate
     @Override
     public long findFirstMatchingBlock(FileDataRetriever<T> fileDataRetriever, QueryValueRetriever queryClause, Blocks blocks) throws IOException {
         // wow that was easy .... file has already matched, everything from beginning must be smaller

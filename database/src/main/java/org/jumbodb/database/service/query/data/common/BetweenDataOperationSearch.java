@@ -8,7 +8,6 @@ import java.util.List;
 public class BetweenDataOperationSearch implements DataOperationSearch {
     @Override
     public boolean matches(Object leftValue, Object rightValue) {
-        // CARSTEN left value is the one to check, verify when building query
         if (isNotNumber(leftValue)) {
             return false;
         }

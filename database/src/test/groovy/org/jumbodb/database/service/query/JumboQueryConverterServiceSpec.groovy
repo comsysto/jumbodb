@@ -784,7 +784,7 @@ class JumboQueryConverterServiceSpec extends Specification {
 
     def "verify GEO_BOUNDARY_BOX function"() {
         when:
-        def stmt = "select * from my_table where GEO_BOUNDARY_BOX('my_point', 22.22, 33.33, 44.44, 55.55)"
+        def stmt = "select * from my_table where my_point = GEO_BOUNDARY_BOX(22.22, 33.33, 44.44, 55.55)"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getDataQuery().get(0);
         then:
@@ -797,7 +797,7 @@ class JumboQueryConverterServiceSpec extends Specification {
 
     def "verify GEO_WITHIN_RANGE_METER function"() {
         when:
-        def stmt = "select * from my_table where GEO_WITHIN_RANGE_METER(my_point, 22.22, 33.33, 1000)"
+        def stmt = "select * from my_table where my_point = GEO_WITHIN_RANGE_METER(22.22, 33.33, 1000)"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getDataQuery().get(0);
         then:
@@ -806,6 +806,28 @@ class JumboQueryConverterServiceSpec extends Specification {
         where.leftType == FieldType.FIELD
         where.right == [[22.22, 33.33], 1000]
         where.rightType == FieldType.VALUE
+    }
+
+    def "verify GEO_BOUNDARY_BOX function with IDX"() {
+        when:
+        def stmt = "select * from my_table where IDX(my_point) = GEO_BOUNDARY_BOX(22.22, 33.33, 44.44, 55.55)"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getIndexQuery().get(0);
+        then:
+        where.queryOperation == QueryOperation.GEO_BOUNDARY_BOX
+        where.name == 'my_point'
+        where.value == [[22.22, 33.33], [44.44, 55.55]]
+    }
+
+    def "verify GEO_WITHIN_RANGE_METER function with IDX"() {
+        when:
+        def stmt = "select * from my_table where IDX(my_point) = GEO_WITHIN_RANGE_METER(22.22, 33.33, 1000)"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getIndexQuery().get(0);
+        then:
+        where.queryOperation == QueryOperation.GEO_WITHIN_RANGE_METER
+        where.name == 'my_point'
+        where.value == [[22.22, 33.33], 1000]
     }
 
     def "verify where BETWEEN clause"() {

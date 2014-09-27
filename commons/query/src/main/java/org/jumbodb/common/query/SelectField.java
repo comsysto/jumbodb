@@ -5,7 +5,7 @@ package org.jumbodb.common.query;
  */
 public class SelectField {
     public static final String ALL = "*";
-    private String name;
+    private String columnName;
     private String alias;
     private SelectFieldFunction function;
     private boolean distinct;
@@ -13,12 +13,12 @@ public class SelectField {
     public SelectField() {
     }
 
-    public SelectField(String name, String alias) {
-        this(name, alias, SelectFieldFunction.NONE, false);
+    public SelectField(String columnName, String alias) {
+        this(columnName, alias, SelectFieldFunction.NONE, false);
     }
 
-    public SelectField(String name, String alias, SelectFieldFunction function, boolean distinct) {
-        this.name = name;
+    public SelectField(String columnName, String alias, SelectFieldFunction function, boolean distinct) {
+        this.columnName = columnName;
         this.alias = alias;
         this.function = function;
         this.distinct = distinct;
@@ -32,12 +32,12 @@ public class SelectField {
         return alias;
     }
 
-    public String getName() {
-        return name;
+    public String getColumnName() {
+        return columnName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 
     public SelectFieldFunction getFunction() {
@@ -59,7 +59,7 @@ public class SelectField {
     @Override
     public String toString() {
         return "SelectField{" +
-                "name='" + name + '\'' +
+                "name='" + columnName + '\'' +
                 ", function=" + function +
                 ", distinct=" + distinct +
                 '}';

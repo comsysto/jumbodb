@@ -22,7 +22,7 @@ public class JumboQuery {
     private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
     private List<DataQuery> dataQuery = new LinkedList<DataQuery>();
     private List<String> groupByFields = new LinkedList<String>();
-    private List<String> orderBy = new LinkedList<String>();
+    private List<OrderField> orderBy = new LinkedList<OrderField>();
     private int limit = -1;
     private boolean resultCacheEnabled = true;
 
@@ -42,11 +42,11 @@ public class JumboQuery {
         this.groupByFields = groupByFields;
     }
 
-    public List<String> getOrderBy() {
+    public List<OrderField> getOrderBy() {
         return orderBy;
     }
 
-    public void setOrderBy(List<String> orderBy) {
+    public void setOrderBy(List<OrderField> orderBy) {
         this.orderBy = orderBy;
     }
 

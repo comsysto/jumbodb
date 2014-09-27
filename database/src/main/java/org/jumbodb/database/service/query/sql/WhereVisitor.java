@@ -355,7 +355,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(SubSelect subSelect) {
         super.visit(subSelect);
-        throw new IllegalArgumentException("not supported");
+        throw new SQLParseException("SUBSELECTS are currently not supported.");
     }
 
     @Override

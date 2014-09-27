@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query
 
 import org.jumbodb.common.query.FieldType
+import org.jumbodb.common.query.HintType
 import org.jumbodb.common.query.QueryOperation
 import org.jumbodb.common.query.SelectFieldFunction
 import org.jumbodb.database.service.query.sql.SQLParseException
@@ -10,7 +11,6 @@ import spock.lang.Unroll
 /**
  * @author Carsten Hufe
  */
-// CARSTEN implement tests
 class JumboQueryConverterServiceSpec extends Specification {
     def service = new JumboQueryConverterService()
 
@@ -213,38 +213,214 @@ class JumboQueryConverterServiceSpec extends Specification {
     }
 
     def "verify IDX function with more than one parameter"() {
-        // CARSTEN is not supported
+        when:
+        def stmt = "select * from my_table where 5 < IDX(my_field, second_field)"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def ex = thrown SQLParseException
+        ex.getMessage() == "IDX function requires exactly one parameter."
     }
 
     def "verify simple IDX function with other value, idx with other value"() {
-        // CARSTEN is not supported
+        when:
+        def stmt = "select * from my_table where IDX('other_value') < IDX(my_field)"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def ex = thrown SQLParseException
+        ex.getMessage() == "Indexes cannot be compared with other fields."
+    }
+
+    def "verify simple IDX function with other value with other field"() {
+        when:
+        def stmt = "select * from my_table where IDX('other_value') < my_field"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def ex = thrown SQLParseException
+        ex.getMessage() == "Indexes cannot be compared with other fields."
     }
 
     def "verify IDX function with OR to another IDX"() {
-        // CARSTEN should be possible
+        when:
+        def stmt = "select * from my_table where IDX('my_index') = 5 OR IDX('another_index') = 6"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexQuery()
+        then:
+        query.getDataQuery().size() == 0
+        indexQuery.size() == 2
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 5
+        indexQuery.get(1).getName() == 'another_index'
+        indexQuery.get(1).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(1).getValue() == 6
     }
 
+    def "verify IDX function with IN"() {
+        when:
+        def stmt = "select * from my_table where IDX('my_index') IN (1,2,3)"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexQuery()
+        then:
+        query.getDataQuery().size() == 0
+        indexQuery.size() == 3
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 1
+        indexQuery.get(1).getName() == 'my_index'
+        indexQuery.get(1).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(1).getValue() == 2
+        indexQuery.get(2).getName() == 'my_index'
+        indexQuery.get(2).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(2).getValue() == 3
+    }
+
+
     def "verify IDX function with AND to another IDX"() {
-        // CARSTEN should be possible
+        when:
+        def stmt = "select * from my_table where IDX('my_index') = 5 AND IDX('another_index') = 6"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexQuery()
+        then:
+        query.getDataQuery().size() == 0
+        indexQuery.size() == 1
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 5
+        def andIndex = indexQuery.get(0).getAndIndex()
+        andIndex.getName() == 'another_index'
+        andIndex.getQueryOperation() == QueryOperation.EQ
+        andIndex.getValue() == 6
     }
 
     def "verify IDX function with OR to data field"() {
-        // CARSTEN this is not allowed
+        when:
+        def stmt = "select * from my_table where IDX('my_index') or my_field = 3"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def ex = thrown SQLParseException
+        ex.getMessage() == "It is not allowed to combine a query on an index with OR to a field, because it results in a full scan and index resolution is not required and inperformant. Rebuild your query by not using indexes."
     }
 
 
     def "verify IDX function with AND to data field"() {
-        // CARSTEN this is allowed
+        when:
+        def stmt = "select * from my_table where IDX('my_index') = 5 AND my_field = 6"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexQuery()
+        then:
+        query.getDataQuery().size() == 0
+        indexQuery.size() == 1
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 5
+        def andData = indexQuery.get(0).getAndData()
+        andData.getQueryOperation() == QueryOperation.EQ
+        andData.getLeft() == 'my_field'
+        andData.getLeftType() == FieldType.FIELD
+        andData.getRight() == 6
+        andData.getRightType() == FieldType.VALUE
     }
 
-    def "verify IDX function with AND to data field and IDX function is written on the right"() {
-        // CARSTEN this is allowed
+    def "verify IDX function with AND to data field, data field is left and should be optimized as subAnd of the index"() {
+        when:
+        def stmt = "select * from my_table where my_field = 6 and IDX('my_index') = 5"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexQuery()
+        then:
+        query.getDataQuery().size() == 0
+        indexQuery.size() == 1
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 5
+        def andData = indexQuery.get(0).getAndData()
+        andData.getQueryOperation() == QueryOperation.EQ
+        andData.getLeft() == 'my_field'
+        andData.getLeftType() == FieldType.FIELD
+        andData.getRight() == 6
+        andData.getRightType() == FieldType.VALUE
     }
 
     def "verify IDX function embedded in and condition"() {
-        //  diese query wird nicht supported, da index embedded und full scan außen
-        //        select * from test a where ((idx(aaaa, ddd) = 'aaa' AND bb = 'bb') OR user.cc = 'bb') limit 10
-        // CARSTEN this is not allowed
+        when:
+        def stmt = "select * from test a where ((idx(aaaa, ddd) = 'aaa' AND bb = 'bb') OR user.cc = 'bb')"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def ex = thrown SQLParseException
+        ex.getMessage() == "Embedded indexes are not alloed, because it results in a full scan. Rebuild your query without indexes."
+    }
+
+    def "verify IDX function with IN and data and condition"() {
+        when:
+        def stmt = "select * from my_table where my_field = 6 and IDX('my_index') IN (5, 6, 7)"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexQuery()
+        then:
+        query.getDataQuery().size() == 0
+        indexQuery.size() == 3
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 1
+        def andData1 = indexQuery.get(0).getAndData()
+        andData1.getQueryOperation() == QueryOperation.EQ
+        andData1.getLeft() == 'my_field'
+        andData1.getLeftType() == FieldType.FIELD
+        andData1.getRight() == 6
+        andData1.getRightType() == FieldType.VALUE
+        indexQuery.get(1).getName() == 'my_index'
+        indexQuery.get(1).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(1).getValue() == 2
+        def andData2 = indexQuery.get(1).getAndData()
+        andData2.getQueryOperation() == QueryOperation.EQ
+        andData2.getLeft() == 'my_field'
+        andData2.getLeftType() == FieldType.FIELD
+        andData2.getRight() == 6
+        andData2.getRightType() == FieldType.VALUE
+        indexQuery.get(2).getName() == 'my_index'
+        indexQuery.get(2).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(2).getValue() == 3
+        def andData3 = indexQuery.get(1).getAndData()
+        andData3.getQueryOperation() == QueryOperation.EQ
+        andData3.getLeft() == 'my_field'
+        andData3.getLeftType() == FieldType.FIELD
+        andData3.getRight() == 6
+        andData3.getRightType() == FieldType.VALUE
+    }
+
+    def "verify IDX function with OR and data AND condition"() {
+        when:
+        def stmt = "select * from my_table where my_field = 6 and (IDX('my_index') = 5 OR IDX('my_index') = 6 OR IDX('my_index') = 7)"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexQuery()
+        then:
+        query.getDataQuery().size() == 0
+        indexQuery.size() == 3
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 1
+        def andData1 = indexQuery.get(0).getAndData()
+        andData1.getQueryOperation() == QueryOperation.EQ
+        andData1.getLeft() == 'my_field'
+        andData1.getLeftType() == FieldType.FIELD
+        andData1.getRight() == 6
+        andData1.getRightType() == FieldType.VALUE
+        indexQuery.get(1).getName() == 'my_index'
+        indexQuery.get(1).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(1).getValue() == 2
+        def andData2 = indexQuery.get(1).getAndData()
+        andData2.getQueryOperation() == QueryOperation.EQ
+        andData2.getLeft() == 'my_field'
+        andData2.getLeftType() == FieldType.FIELD
+        andData2.getRight() == 6
+        andData2.getRightType() == FieldType.VALUE
+        indexQuery.get(2).getName() == 'my_index'
+        indexQuery.get(2).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(2).getValue() == 3
+        def andData3 = indexQuery.get(1).getAndData()
+        andData3.getQueryOperation() == QueryOperation.EQ
+        andData3.getLeft() == 'my_field'
+        andData3.getLeftType() == FieldType.FIELD
+        andData3.getRight() == 6
+        andData3.getRightType() == FieldType.VALUE
     }
 
     def "verify LIMIT clause with value"() {
@@ -573,9 +749,181 @@ class JumboQueryConverterServiceSpec extends Specification {
         where.queryOperation == QueryOperation.LT
         where.left == 'my_date_field'
         where.leftType == FieldType.FIELD
+        where.hintType == HintType.DATE
         where.right == 1355310732000
         where.rightType == FieldType.VALUE
     }
+
+    def "verify to_date function"() {
+        when:
+        def stmt = "select * from my_table where my_date_field < to_date('2012-12-12 12:12:12', 'yyyy-MM-dd HH:mm:ss')"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery().get(0);
+        then:
+        where.queryOperation == QueryOperation.LT
+        where.left == 'my_date_field'
+        where.leftType == FieldType.FIELD
+        where.hintType == HintType.DATE
+        where.right == 1355310732000
+        where.rightType == FieldType.VALUE
+    }
+
+    def "verify date_field function"() {
+        when:
+        def stmt = "select * from my_table where date_field('my_date_field') < date_field('another_field')"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery().get(0);
+        then:
+        where.queryOperation == QueryOperation.LT
+        where.left == 'my_date_field'
+        where.leftType == FieldType.FIELD
+        where.hintType == HintType.DATE
+        where.right == 'another_field'
+        where.rightType == FieldType.FIELD
+    }
+
+    def "verify GEO_BOUNDARY_BOX function"() {
+        when:
+        def stmt = "select * from my_table where GEO_BOUNDARY_BOX('my_point', 22.22, 33.33, 44.44, 55.55)"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery().get(0);
+        then:
+        where.queryOperation == QueryOperation.GEO_BOUNDARY_BOX
+        where.left == 'my_point'
+        where.leftType == FieldType.FIELD
+        where.right == [[22.22, 33.33], [44.44, 55.55]]
+        where.rightType == FieldType.VALUE
+    }
+
+    def "verify GEO_WITHIN_RANGE_METER function"() {
+        when:
+        def stmt = "select * from my_table where GEO_WITHIN_RANGE_METER(my_point, 22.22, 33.33, 1000)"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery().get(0);
+        then:
+        where.queryOperation == QueryOperation.GEO_WITHIN_RANGE_METER
+        where.left == 'my_point'
+        where.leftType == FieldType.FIELD
+        where.right == [[22.22, 33.33], 1000]
+        where.rightType == FieldType.VALUE
+    }
+
+    def "verify where BETWEEN clause"() {
+        when:
+        def stmt = "select * from my_table where my_field BETWEEN 4 AND 9"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery().get(0);
+        then:
+        where.queryOperation == QueryOperation.LT
+        where.left == 'my_field'
+        where.leftType == FieldType.FIELD
+        where.right == [4, 9]
+        where.rightType == FieldType.VALUE
+    }
+
+    def "verify where IN clause"() {
+        when:
+        def stmt = "select * from my_table where my_field IN (5, 9, 11)"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery()
+        then:
+        where.size() == 3
+        where.get(0).queryOperation == QueryOperation.EQ
+        where.get(0).left == 'my_field'
+        where.get(0).leftType == FieldType.FIELD
+        where.get(0).right == 5
+        where.get(0).rightType == FieldType.VALUE
+        where.get(1).queryOperation == QueryOperation.EQ
+        where.get(1).left == 'my_field'
+        where.get(1).leftType == FieldType.FIELD
+        where.get(1).right == 9
+        where.get(1).rightType == FieldType.VALUE
+        where.get(2).queryOperation == QueryOperation.EQ
+        where.get(2).left == 'my_field'
+        where.get(2).leftType == FieldType.FIELD
+        where.get(2).right == 11
+        where.get(2).rightType == FieldType.VALUE
+    }
+
+    def "verify where LIKE clause"() {
+        when:
+        def stmt = "select * from my_table where my_field LIKE '%xxx%'"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery()
+        then:
+        where.size() == 1
+        where.get(0).queryOperation == QueryOperation.LIKE
+        where.get(0).left == 'my_field'
+        where.get(0).leftType == FieldType.FIELD
+        where.get(0).right == 5
+        where.get(0).rightType == FieldType.VALUE
+    }
+
+    def "verify where NOT LIKE clause"() {
+        when:
+        def stmt = 'select * from my_table where my_field LIKE "%xxx%"'
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery()
+        then:
+        where.size() == 1
+        where.get(0).queryOperation == QueryOperation.LIKE
+        where.get(0).left == 'my_field'
+        where.get(0).leftType == FieldType.FIELD
+        where.get(0).right == 5
+        where.get(0).rightType == FieldType.VALUE
+    }
+
+
+    def "verify where IS NULL clause"() {
+        when:
+        def stmt = "select * from my_table where my_field IS NULL"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery()
+        then:
+        where.size() == 1
+        where.get(0).queryOperation == QueryOperation.IS_NULL
+        where.get(0).left == 'my_field'
+        where.get(0).leftType == FieldType.FIELD
+        where.get(0).rightType == FieldType.NOT_SET
+    }
+
+    def "verify where IS NOT NULL clause"() {
+        when:
+        def stmt = "select * from my_table where my_field IS NOT NULL"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getDataQuery()
+        then:
+        where.size() == 1
+        where.get(0).queryOperation == QueryOperation.IS_NOT_NULL
+        where.get(0).left == 'my_field'
+        where.get(0).leftType == FieldType.FIELD
+        where.get(0).rightType == FieldType.NOT_SET
+    }
+
+    def "verify CACHE hint"() {
+        when:
+        def stmt = "select * from my_table CACHE"
+        def query = service.convertSqlToJumboQuery(stmt)
+        then:
+        query.isResultCacheEnabled() == true
+    }
+
+    def "verify NOCACHE hint"() {
+        when:
+        def stmt = "select * from my_table NOCACHE"
+        def query = service.convertSqlToJumboQuery(stmt)
+        then:
+        query.isResultCacheEnabled() == false
+    }
+
+    def "verify CACHE enabled by default"() {
+        when:
+        def stmt = "select * from my_table"
+        def query = service.convertSqlToJumboQuery(stmt)
+        then:
+        query.isResultCacheEnabled() == true
+    }
+
 
     def "verify unsupported SQL feature: JOINS"() {
         when:
@@ -647,6 +995,24 @@ class JumboQueryConverterServiceSpec extends Specification {
         then:
         def e = thrown SQLParseException
         e.getMessage() == "Only plain SELECT statements are allowed!"
+    }
+
+    def "verify unsupported SQL feature: ANY clause"() {
+        when:
+        def stmt = "select * from my_table where my_field = ANY (select x from col)"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "ANY is not supported."
+    }
+
+    def "verify unsupported SQL feature: ALL clause"() {
+        when:
+        def stmt = "select * from my_table where my_field = ALL (select x from col)"
+        service.convertSqlToJumboQuery(stmt)
+        then:
+        def e = thrown SQLParseException
+        e.getMessage() == "ALL is not supported."
     }
 
 }

@@ -1,6 +1,7 @@
 package org.jumbodb.database.service.query.sql;
 
 import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
@@ -179,7 +180,7 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
             }
         }
         if(fields > 1) {
-            throw new IllegalArgumentException("Indexes cannot be compared with other fields.");
+            throw new SQLParseException("Indexes cannot be compared with other fields.");
         }
     }
 
@@ -241,11 +242,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         }
     }
 
-    // CARSTEN implement ALL and ANY and SOME in where clause, SOME and ANY do the same http://www.oracle-base.com/articles/misc/all-any-some-comparison-conditions-in-sql.php
-
     @Override
     public void visit(LikeExpression expr) {
-        // CARSTEN implement with contains
 //        operation = QueryOperation.EQ;
 //        super.visit(expr);
 //        current = new JsonQuery(column.getFullyQualifiedName(), operation, value);
@@ -299,7 +297,6 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(InExpression expr) {
-        // CARSTEN implement later
         expr.getLeftExpression().accept(this);
 //        expr.getLeftItemsList().accept(this); // causes null
         expr.getRightItemsList().accept(this);
@@ -308,6 +305,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(Between expr) {
+        super.visit(expr);
+
         // CARSTEN implement later
         throw new IllegalArgumentException("not supported");
     }
@@ -328,12 +327,6 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     public void visit(MinorThanEquals expr) {
         super.visit(expr);
         boolEvaluation(QueryOperation.LT_EQ);
-    }
-
-
-    @Override
-    public void visit(ExpressionList expressionList) {
-        super.visit(expressionList);
     }
 
     @Override
@@ -359,6 +352,35 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     }
 
     @Override
+    public void visit(TimeValue value) {
+        super.visit(value);
+    }
+
+    @Override
+    public void visit(AnyComparisonExpression expr) {
+        super.visit(expr);
+        throw new SQLParseException("ANY is not supported.");
+    }
+
+    @Override
+    public void visit(AllComparisonExpression expr) {
+        super.visit(expr);
+        throw new SQLParseException("ALL is not supported.");
+    }
+
+    @Override
+    public void visit(Concat expr) {
+        super.visit(expr);
+        throw new SQLParseException("CONCAT is not supported.");
+    }
+
+    @Override
+    public void visit(Matches expr) {
+        super.visit(expr);
+        throw new SQLParseException("MATCHES is not supported.");
+    }
+
+    @Override
     public void visit(Function function) {
         super.visit(function);
         if("IDX".equalsIgnoreCase(function.getName())) {
@@ -366,13 +388,6 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         } else {
             throw new SQLParseException("The function '" + function.getName().toUpperCase() + "' is not supported.");
         }
-        // CARSTEN function to_date
-        // CARSTEN implement geo spatial functions
-        // CARSTEN implement idx functions idx('fieldName') or idx(fieldName)
-        // CARSTEN implement dateField('fieldName', 'date format') or dateField('fieldName') using the default, for date itself use {ts ...}
-//        System.out.println("function name " + function.getName());
-//        System.out.println("function params 1 " + function.getParameters().getExpressions().get(0));
-//        System.out.println("function params 2 " + function.getParameters().getExpressions().get(1));
     }
 
     private void handleIdxFunction(Function function) {

@@ -1,8 +1,6 @@
 package org.jumbodb.common.query;
 
 public enum QueryOperation {
-
-
     OR("OR"),
     EXISTS("EXISTS"),
     NOT_EXISTS("NOT EXISTS"),
@@ -13,12 +11,12 @@ public enum QueryOperation {
     GT(">"),
     GT_EQ(">="),
     BETWEEN("BETWEEN ... AND ..."),
-    GEO_BOUNDARY_BOX("geoFindInBoundaryBox(...)"),
-    GEO_WITHIN_RANGE_METER("geoWithinRangeInMeter(...)");
-    // CARSTEN implement these types:
-    // CARSTEN LIKE, IS NULL, IS NOT NULL, IN
-
-    // CARSTEN IN muste be implemented for all strategies
+    GEO_BOUNDARY_BOX("GEO_BOUNDARY_BOX(...)"),
+    GEO_WITHIN_RANGE_METER("GEO_WITHIN_RANGE_METER(...)"),
+    LIKE("LIKE"),
+    NOT_LIKE("NOT LIKE"),
+    IS_NULL("IS NULL"),
+    IS_NOT_NULL("IS NOT NULL");
 
     private String operation;
 

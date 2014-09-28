@@ -754,9 +754,9 @@ class JumboQueryConverterServiceSpec extends Specification {
         where.rightType == FieldType.VALUE
     }
 
-    def "verify to_date function"() {
+    def "verify TO_DATE function"() {
         when:
-        def stmt = "select * from my_table where my_date_field < to_date('2012-12-12 12:12:12', 'yyyy-MM-dd HH:mm:ss')"
+        def stmt = "select * from my_table where my_date_field < TO_DATE('2012-12-12 12:12:12', 'yyyy-MM-dd HH:mm:ss')"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getDataQuery().get(0);
         then:
@@ -768,9 +768,9 @@ class JumboQueryConverterServiceSpec extends Specification {
         where.rightType == FieldType.VALUE
     }
 
-    def "verify date_field function"() {
+    def "verify DATE_FIELD function"() {
         when:
-        def stmt = "select * from my_table where date_field('my_date_field') < date_field('another_field')"
+        def stmt = "select * from my_table where DATE_FIELD('my_date_field') < DATE_FIELD('another_field')"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getDataQuery().get(0);
         then:

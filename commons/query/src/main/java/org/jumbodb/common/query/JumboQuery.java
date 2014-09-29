@@ -19,8 +19,8 @@ public class JumboQuery {
     private String collection;
 
     private List<SelectField> selectedFields = new LinkedList<SelectField>();
-    private List<IndexQuery> indexQuery = new LinkedList<IndexQuery>();
-    private List<DataQuery> dataQuery = new LinkedList<DataQuery>();
+    private List<IndexQuery> indexOrs = new LinkedList<IndexQuery>();
+    private List<DataQuery> dataOrs = new LinkedList<DataQuery>();
     private List<String> groupByFields = new LinkedList<String>();
     private List<OrderField> orderBy = new LinkedList<OrderField>();
     private int limit = -1;
@@ -75,34 +75,34 @@ public class JumboQuery {
     }
 
     public boolean addIndexQuery(IndexQuery indexComparision) {
-        return this.indexQuery.add(indexComparision);
+        return this.indexOrs.add(indexComparision);
     }
 
     public boolean addDataQuery(DataQuery dataQuery) {
-        return this.dataQuery.add(dataQuery);
+        return this.dataOrs.add(dataQuery);
     }
 
-    public List<IndexQuery> getIndexQuery() {
-        return indexQuery;
+    public List<IndexQuery> getIndexOrs() {
+        return indexOrs;
     }
 
-    public void setIndexQuery(List<IndexQuery> indexQuery) {
-        this.indexQuery = indexQuery;
+    public void setIndexOrs(List<IndexQuery> indexOrs) {
+        this.indexOrs = indexOrs;
     }
 
-    public List<DataQuery> getDataQuery() {
-        return dataQuery;
+    public List<DataQuery> getDataOrs() {
+        return dataOrs;
     }
 
-    public void setDataQuery(List<DataQuery> dataQuery) {
-        this.dataQuery = dataQuery;
+    public void setDataOrs(List<DataQuery> dataOrs) {
+        this.dataOrs = dataOrs;
     }
 
     @Override
     public String toString() {
         return "JumboQuery{" +
-                "indexQuery=" + indexQuery +
-                ", jsonQuery=" + dataQuery +
+                "indexQuery=" + indexOrs +
+                ", jsonQuery=" + dataOrs +
                 ", limit=" + limit +
                 ", resultCacheEnabled=" + resultCacheEnabled +
                 '}';

@@ -94,8 +94,13 @@ public class JumboQueryConverterService {
         Expression where = selectBody.getWhere();
         if(where != null) {
             where.accept(expressionVisitor);
-            jumboQuery.setDataQuery(expressionVisitor.getDataOrs());
-            jumboQuery.setIndexQuery(expressionVisitor.getIndexOrs());
+            List<DataQuery> dataOrs = expressionVisitor.getDataOrs();
+            jumboQuery.setDataOrs(dataOrs);
+            List<IndexQuery> indexOrs = expressionVisitor.getIndexOrs();
+            jumboQuery.setIndexOrs(indexOrs);
+            if(!dataOrs.isEmpty() && !indexOrs.isEmpty()) {
+                throw new SQLParseException("It is not allowed to combine a query on an index with OR to a field, because it results in a full scan and index resolution is not required and inperformant. Rebuild your query by not using indexes.");
+            }
         }
         return jumboQuery;
     }

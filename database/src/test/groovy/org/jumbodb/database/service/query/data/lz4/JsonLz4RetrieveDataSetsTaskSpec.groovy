@@ -218,7 +218,7 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         def task = new JsonLz4RetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", true)
         then: "should always be true and no match call because no criteria is given"
         0 * dataStrategy.matches(_, _, _)
-        task.matchingFilter([sample: "json"], jumboQuery.getDataQuery())
+        task.matchingFilter([sample: "json"], jumboQuery.getDataOrs())
 
         when:
         jumboQuery = new JumboQuery()
@@ -226,7 +226,7 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         def andQuery = new DataQuery("otherfield", FieldType.FIELD, QueryOperation.EQ, "othervalue", FieldType.VALUE)
         jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'json', FieldType.VALUE, andQuery))
         task = new JsonLz4RetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", true)
-        def matching = task.matchingFilter([sample: "json", "otherfield": "othervalue"], jumboQuery.getDataQuery())
+        def matching = task.matchingFilter([sample: "json", "otherfield": "othervalue"], jumboQuery.getDataOrs())
         then: "if both criterias matches matching must be true"
         matching
         1 * dataStrategy.matches(QueryOperation.EQ, 'json', 'json') >> true
@@ -237,7 +237,7 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         andQuery = new DataQuery("otherfield", FieldType.FIELD, QueryOperation.EQ, "othervalue", FieldType.VALUE)
         jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'json', FieldType.VALUE, andQuery))
         task = new JsonLz4RetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", true)
-        def notMatching = !task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getDataQuery())
+        def notMatching = !task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getDataOrs())
         then: "if one criteria does not match matching must be false"
         notMatching
         1 * dataStrategy.matches(QueryOperation.EQ, 'json', 'json') >> true
@@ -248,7 +248,7 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'json', FieldType.VALUE))
         jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'jsonother', FieldType.VALUE))
         task = new JsonLz4RetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", true)
-        matching = task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getDataQuery())
+        matching = task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getDataOrs())
         then: "if one criteria in the same clause matches it must be true"
         matching
         1 * dataStrategy.matches(QueryOperation.EQ, 'json', 'json') >> true
@@ -258,7 +258,7 @@ class JsonLz4RetrieveDataSetsTaskSpec extends Specification {
         jumboQuery = new JumboQuery()
         jumboQuery.addDataQuery(new DataQuery("sample", FieldType.FIELD, QueryOperation.EQ, 'jsonother', FieldType.VALUE))
         task = new JsonLz4RetrieveDataSetsTask(file, [] as Set, jumboQuery, resultCallback, dataStrategy, cacheMock, cacheMock, "yyyy-MM-dd", true)
-        notMatching = !task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getDataQuery())
+        notMatching = !task.matchingFilter([sample: "json", "otherfield": "otherNEvalue"], jumboQuery.getDataOrs())
         then: "if no criteria matches it must be false"
         notMatching
         1 * dataStrategy.matches(QueryOperation.EQ, 'json', 'jsonother') >> false

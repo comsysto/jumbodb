@@ -91,7 +91,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends DefaultRetrieveData
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);
                 }
                 IndexQuery indexQuery = offset.getIndexQuery();
-                if (matchingFilter(parsedJson, indexQuery.getAndData())) {
+                if (matchingFilter(parsedJson, indexQuery.getDataAnd())) {
                     if (!resultCallback.needsMore(searchQuery)) {
                         return;
                     }
@@ -125,7 +125,7 @@ public class JsonSnappyLineBreakRetrieveDataSetsTask extends DefaultRetrieveData
             String line;
             while ((line = br.readLine()) != null && resultCallback.needsMore(searchQuery)) {
                 Map<String, Object> parsedJson = jsonParser.readValue(line, Map.class);
-                if (matchingFilter(parsedJson, searchQuery.getDataQuery())) {
+                if (matchingFilter(parsedJson, searchQuery.getDataOrs())) {
                     resultCallback.writeResult(parsedJson);
                     results++;
                 }

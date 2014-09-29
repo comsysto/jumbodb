@@ -18,37 +18,37 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from test where (a = 'b' and z = p and (c = 'd' or c = 'f' or g = 'h') and (g = 'g' or y = 'y' or o = 'o')) or x = 'x'"
         def query = service.convertSqlToJumboQuery(stmt)
-        def dataQuery = query.getDataQuery()
-        def indexQuery = query.getIndexQuery()
+        def dataQuery = query.getDataOrs()
+        def indexQuery = query.getIndexOrs()
         then:
         dataQuery.size() == 2
         indexQuery.size() == 0
-        def where1 = query.getDataQuery().get(0)
+        def where1 = query.getDataOrs().get(0)
         where1.queryOperation == QueryOperation.EQ
         where1.left == 'x'
         where1.leftType == FieldType.FIELD
         where1.right == 'x'
         where1.rightType == FieldType.VALUE
-        def where2 = query.getDataQuery().get(1)
+        def where2 = query.getDataOrs().get(1)
         where2.queryOperation == QueryOperation.EQ
         where2.left == 'a'
         where2.leftType == FieldType.FIELD
         where2.right == 'b'
         where2.rightType == FieldType.VALUE
-        where2.getOrs().size() == 0
-        def subAnd = where2.getAnd()
+        where2.getDataOrs().size() == 0
+        def subAnd = where2.getDataAnd()
         subAnd.queryOperation == QueryOperation.EQ
         subAnd.left == 'z'
         subAnd.leftType == FieldType.FIELD
         subAnd.right == 'p'
         subAnd.rightType == FieldType.FIELD
-        subAnd.getOrs().size() == 0
-        def subAnd2 = subAnd.getAnd()
+        subAnd.getDataOrs().size() == 0
+        def subAnd2 = subAnd.getDataAnd()
         subAnd2.queryOperation == QueryOperation.OR
         subAnd2.leftType == FieldType.NOT_SET
         subAnd2.rightType == FieldType.NOT_SET
-        subAnd2.getOrs().size() == 3
-        def subOrs3 = subAnd2.getOrs()
+        subAnd2.getDataOrs().size() == 3
+        def subOrs3 = subAnd2.getDataOrs()
         subOrs3.get(0).left == 'c'
         subOrs3.get(0).queryOperation == QueryOperation.EQ
         subOrs3.get(0).right == 'd'
@@ -58,12 +58,12 @@ class JumboQueryConverterServiceSpec extends Specification {
         subOrs3.get(2).left == 'g'
         subOrs3.get(2).queryOperation == QueryOperation.EQ
         subOrs3.get(2).right == 'h'
-        def subAnd3 = subAnd2.getAnd()
+        def subAnd3 = subAnd2.getDataAnd()
         subAnd3.queryOperation == QueryOperation.OR
         subAnd3.leftType == FieldType.NOT_SET
         subAnd3.rightType == FieldType.NOT_SET
-        subAnd3.getOrs().size() == 3
-        def subOrs4 = subAnd3.getOrs()
+        subAnd3.getDataOrs().size() == 3
+        def subOrs4 = subAnd3.getDataOrs()
         subOrs4.get(0).left == 'g'
         subOrs4.get(0).queryOperation == QueryOperation.EQ
         subOrs4.get(0).right == 'g'
@@ -79,23 +79,23 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from test where ((a = 'b' or z = 'z') and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'"
         def query = service.convertSqlToJumboQuery(stmt)
-        def dataQuery = query.getDataQuery()
-        def indexQuery = query.getIndexQuery()
+        def dataQuery = query.getDataOrs()
+        def indexQuery = query.getIndexOrs()
         then:
         dataQuery.size() == 2
         indexQuery.size() == 0
-        def where1 = query.getDataQuery().get(0)
+        def where1 = query.getDataOrs().get(0)
         where1.queryOperation == QueryOperation.EQ
         where1.left == 'x'
         where1.leftType == FieldType.FIELD
         where1.right == 'x'
         where1.rightType == FieldType.VALUE
-        def where2 = query.getDataQuery().get(1)
+        def where2 = query.getDataOrs().get(1)
         where2.queryOperation == QueryOperation.OR
         where2.leftType == FieldType.NOT_SET
         where2.rightType == FieldType.NOT_SET
-        where2.getOrs().size() == 3
-        def where2Ors = where2.getOrs();
+        where2.getDataOrs().size() == 3
+        def where2Ors = where2.getDataOrs();
         where2Ors.get(0).left == 'c'
         where2Ors.get(0).queryOperation == QueryOperation.EQ
         where2Ors.get(0).right == 'd'
@@ -105,12 +105,12 @@ class JumboQueryConverterServiceSpec extends Specification {
         where2Ors.get(2).left == 'g'
         where2Ors.get(2).queryOperation == QueryOperation.EQ
         where2Ors.get(2).right == 'h'
-        def subAnd = where2.getAnd()
+        def subAnd = where2.getDataAnd()
         subAnd.queryOperation == QueryOperation.OR
         subAnd.leftType == FieldType.NOT_SET
         subAnd.rightType == FieldType.NOT_SET
-        subAnd.getOrs().size() == 2
-        def subAndOrs = subAnd.getOrs();
+        subAnd.getDataOrs().size() == 2
+        def subAndOrs = subAnd.getDataOrs();
         subAndOrs.get(0).left == 'a'
         subAndOrs.get(0).queryOperation == QueryOperation.EQ
         subAndOrs.get(0).right == 'b'
@@ -123,37 +123,37 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from test where (a = 'b' and z = 'z' and (c = 'd' or c = 'f' or g = 'h')) or x = 'x'"
         def query = service.convertSqlToJumboQuery(stmt)
-        def dataQuery = query.getDataQuery()
-        def indexQuery = query.getIndexQuery()
+        def dataQuery = query.getDataOrs()
+        def indexQuery = query.getIndexOrs()
         then:
         dataQuery.size() == 2
         indexQuery.size() == 0
-        def where1 = query.getDataQuery().get(0)
+        def where1 = query.getDataOrs().get(0)
         where1.queryOperation == QueryOperation.EQ
         where1.left == 'x'
         where1.leftType == FieldType.FIELD
         where1.right == 'x'
         where1.rightType == FieldType.VALUE
-        def where2 = query.getDataQuery().get(1)
+        def where2 = query.getDataOrs().get(1)
         where2.queryOperation == QueryOperation.EQ
         where2.left == 'a'
         where2.leftType == FieldType.FIELD
         where2.right == 'b'
         where2.rightType == FieldType.VALUE
-        where2.getOrs().size() == 0
-        def subAnd1 = where2.getAnd();
+        where2.getDataOrs().size() == 0
+        def subAnd1 = where2.getDataAnd();
         subAnd1.queryOperation == QueryOperation.EQ
         subAnd1.left == 'z'
         subAnd1.leftType == FieldType.FIELD
         subAnd1.right == 'z'
         subAnd1.rightType == FieldType.VALUE
-        subAnd1.getOrs().size() == 0
-        def subAnd2 = subAnd1.getAnd();
+        subAnd1.getDataOrs().size() == 0
+        def subAnd2 = subAnd1.getDataAnd();
         subAnd2.queryOperation == QueryOperation.OR
         subAnd2.leftType == FieldType.NOT_SET
         subAnd2.rightType == FieldType.NOT_SET
-        subAnd2.getOrs().size() == 3
-        def subAnd2Ors = subAnd2.getOrs()
+        subAnd2.getDataOrs().size() == 3
+        def subAnd2Ors = subAnd2.getDataOrs()
         subAnd2Ors.get(0).left == 'c'
         subAnd2Ors.get(0).queryOperation == QueryOperation.EQ
         subAnd2Ors.get(0).right == 'd'
@@ -171,7 +171,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         def stmt = "select * from my_table where EXISTS(my_field)"
         def query = service.convertSqlToJumboQuery(stmt)
         then:
-        def where = query.getDataQuery().get(0)
+        def where = query.getDataOrs().get(0)
         where.queryOperation == QueryOperation.EXISTS
         where.left == 'my_field'
         where.leftType == FieldType.FIELD
@@ -182,7 +182,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         def stmt = "select * from my_table where NOT EXISTS(my_field)"
         def query = service.convertSqlToJumboQuery(stmt)
         then:
-        def where = query.getDataQuery().get(0)
+        def where = query.getDataOrs().get(0)
         where.queryOperation == QueryOperation.NOT_EXISTS
         where.left == 'my_field'
         where.leftType == FieldType.FIELD
@@ -193,8 +193,8 @@ class JumboQueryConverterServiceSpec extends Specification {
         def stmt = "select * from my_table where IDX(my_field) > 5"
         def query = service.convertSqlToJumboQuery(stmt)
         then:
-        def where = query.getIndexQuery().get(0)
-        query.getDataQuery().size() == 0
+        def where = query.getIndexOrs().get(0)
+        query.getDataOrs().size() == 0
         where.queryOperation == QueryOperation.GT
         where.name == 'my_field'
         where.value == 5
@@ -205,8 +205,8 @@ class JumboQueryConverterServiceSpec extends Specification {
         def stmt = "select * from my_table where 5 < IDX(my_field)"
         def query = service.convertSqlToJumboQuery(stmt)
         then:
-        def where = query.getIndexQuery().get(0)
-        query.getDataQuery().size() == 0
+        def where = query.getIndexOrs().get(0)
+        query.getDataOrs().size() == 0
         where.queryOperation == QueryOperation.GT
         where.name == 'my_field'
         where.value == 5
@@ -243,9 +243,9 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where IDX('my_index') = 5 OR IDX('another_index') = 6"
         def query = service.convertSqlToJumboQuery(stmt)
-        def indexQuery = query.getIndexQuery()
+        def indexQuery = query.getIndexOrs()
         then:
-        query.getDataQuery().size() == 0
+        query.getDataOrs().size() == 0
         indexQuery.size() == 2
         indexQuery.get(0).getName() == 'my_index'
         indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
@@ -259,9 +259,9 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where IDX('my_index') IN (1,2,3)"
         def query = service.convertSqlToJumboQuery(stmt)
-        def indexQuery = query.getIndexQuery()
+        def indexQuery = query.getIndexOrs()
         then:
-        query.getDataQuery().size() == 0
+        query.getDataOrs().size() == 0
         indexQuery.size() == 3
         indexQuery.get(0).getName() == 'my_index'
         indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
@@ -279,14 +279,14 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where IDX('my_index') = 5 AND IDX('another_index') = 6"
         def query = service.convertSqlToJumboQuery(stmt)
-        def indexQuery = query.getIndexQuery()
+        def indexQuery = query.getIndexOrs()
         then:
-        query.getDataQuery().size() == 0
+        query.getDataOrs().size() == 0
         indexQuery.size() == 1
         indexQuery.get(0).getName() == 'my_index'
         indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
         indexQuery.get(0).getValue() == 5
-        def andIndex = indexQuery.get(0).getAndIndex()
+        def andIndex = indexQuery.get(0).getIndexAnd()
         andIndex.getName() == 'another_index'
         andIndex.getQueryOperation() == QueryOperation.EQ
         andIndex.getValue() == 6
@@ -306,14 +306,14 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where IDX('my_index') = 5 AND my_field = 6"
         def query = service.convertSqlToJumboQuery(stmt)
-        def indexQuery = query.getIndexQuery()
+        def indexQuery = query.getIndexOrs()
         then:
-        query.getDataQuery().size() == 0
+        query.getDataOrs().size() == 0
         indexQuery.size() == 1
         indexQuery.get(0).getName() == 'my_index'
         indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
         indexQuery.get(0).getValue() == 5
-        def andData = indexQuery.get(0).getAndData()
+        def andData = indexQuery.get(0).getDataAnd()
         andData.getQueryOperation() == QueryOperation.EQ
         andData.getLeft() == 'my_field'
         andData.getLeftType() == FieldType.FIELD
@@ -325,14 +325,14 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_field = 6 and IDX('my_index') = 5"
         def query = service.convertSqlToJumboQuery(stmt)
-        def indexQuery = query.getIndexQuery()
+        def indexQuery = query.getIndexOrs()
         then:
-        query.getDataQuery().size() == 0
+        query.getDataOrs().size() == 0
         indexQuery.size() == 1
         indexQuery.get(0).getName() == 'my_index'
         indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
         indexQuery.get(0).getValue() == 5
-        def andData = indexQuery.get(0).getAndData()
+        def andData = indexQuery.get(0).getDataAnd()
         andData.getQueryOperation() == QueryOperation.EQ
         andData.getLeft() == 'my_field'
         andData.getLeftType() == FieldType.FIELD
@@ -342,25 +342,25 @@ class JumboQueryConverterServiceSpec extends Specification {
 
     def "verify IDX function embedded in and condition"() {
         when:
-        def stmt = "select * from test a where ((idx(aaaa, ddd) = 'aaa' AND bb = 'bb') OR user.cc = 'bb')"
+        def stmt = "select * from test where ((idx(aaaa) = 'aaa' AND bb = 'bb') OR user.cc = 'bb')"
         service.convertSqlToJumboQuery(stmt)
         then:
         def ex = thrown SQLParseException
-        ex.getMessage() == "Embedded indexes are not alloed, because it results in a full scan. Rebuild your query without indexes."
+        ex.getMessage() == "Embedded indexes are not allowed, because it results in a full scan. Rebuild your query without indexes."
     }
 
     def "verify IDX function with IN and data and condition"() {
         when:
         def stmt = "select * from my_table where my_field = 6 and IDX('my_index') IN (5, 6, 7)"
         def query = service.convertSqlToJumboQuery(stmt)
-        def indexQuery = query.getIndexQuery()
+        def indexQuery = query.getIndexOrs()
         then:
-        query.getDataQuery().size() == 0
+        query.getDataOrs().size() == 0
         indexQuery.size() == 3
         indexQuery.get(0).getName() == 'my_index'
         indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
         indexQuery.get(0).getValue() == 1
-        def andData1 = indexQuery.get(0).getAndData()
+        def andData1 = indexQuery.get(0).getDataAnd()
         andData1.getQueryOperation() == QueryOperation.EQ
         andData1.getLeft() == 'my_field'
         andData1.getLeftType() == FieldType.FIELD
@@ -369,7 +369,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         indexQuery.get(1).getName() == 'my_index'
         indexQuery.get(1).getQueryOperation() == QueryOperation.EQ
         indexQuery.get(1).getValue() == 2
-        def andData2 = indexQuery.get(1).getAndData()
+        def andData2 = indexQuery.get(1).getDataAnd()
         andData2.getQueryOperation() == QueryOperation.EQ
         andData2.getLeft() == 'my_field'
         andData2.getLeftType() == FieldType.FIELD
@@ -378,7 +378,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         indexQuery.get(2).getName() == 'my_index'
         indexQuery.get(2).getQueryOperation() == QueryOperation.EQ
         indexQuery.get(2).getValue() == 3
-        def andData3 = indexQuery.get(1).getAndData()
+        def andData3 = indexQuery.get(1).getDataAnd()
         andData3.getQueryOperation() == QueryOperation.EQ
         andData3.getLeft() == 'my_field'
         andData3.getLeftType() == FieldType.FIELD
@@ -390,14 +390,14 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_field = 6 and (IDX('my_index') = 5 OR IDX('my_index') = 6 OR IDX('my_index') = 7)"
         def query = service.convertSqlToJumboQuery(stmt)
-        def indexQuery = query.getIndexQuery()
+        def indexQuery = query.getIndexOrs()
         then:
-        query.getDataQuery().size() == 0
+        query.getDataOrs().size() == 0
         indexQuery.size() == 3
         indexQuery.get(0).getName() == 'my_index'
         indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
         indexQuery.get(0).getValue() == 1
-        def andData1 = indexQuery.get(0).getAndData()
+        def andData1 = indexQuery.get(0).getDataAnd()
         andData1.getQueryOperation() == QueryOperation.EQ
         andData1.getLeft() == 'my_field'
         andData1.getLeftType() == FieldType.FIELD
@@ -406,7 +406,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         indexQuery.get(1).getName() == 'my_index'
         indexQuery.get(1).getQueryOperation() == QueryOperation.EQ
         indexQuery.get(1).getValue() == 2
-        def andData2 = indexQuery.get(1).getAndData()
+        def andData2 = indexQuery.get(1).getDataAnd()
         andData2.getQueryOperation() == QueryOperation.EQ
         andData2.getLeft() == 'my_field'
         andData2.getLeftType() == FieldType.FIELD
@@ -415,7 +415,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         indexQuery.get(2).getName() == 'my_index'
         indexQuery.get(2).getQueryOperation() == QueryOperation.EQ
         indexQuery.get(2).getValue() == 3
-        def andData3 = indexQuery.get(1).getAndData()
+        def andData3 = indexQuery.get(1).getDataAnd()
         andData3.getQueryOperation() == QueryOperation.EQ
         andData3.getLeft() == 'my_field'
         andData3.getLeftType() == FieldType.FIELD
@@ -724,7 +724,7 @@ class JumboQueryConverterServiceSpec extends Specification {
     def "verify where #operation condition"() {
         expect:
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery().get(0);
+        def where = query.getDataOrs().get(0);
         where.queryOperation == operation
         where.left == 'my_field'
         where.leftType == FieldType.FIELD
@@ -744,7 +744,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_date_field < {ts '2012-12-12 12:12:12'}"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery().get(0);
+        def where = query.getDataOrs().get(0);
         then:
         where.queryOperation == QueryOperation.LT
         where.left == 'my_date_field'
@@ -758,7 +758,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_date_field < TO_DATE('2012-12-12 12:12:12', 'yyyy-MM-dd HH:mm:ss')"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery().get(0);
+        def where = query.getDataOrs().get(0);
         then:
         where.queryOperation == QueryOperation.LT
         where.left == 'my_date_field'
@@ -772,7 +772,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where DATE_FIELD('my_date_field') < DATE_FIELD('another_field')"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery().get(0);
+        def where = query.getDataOrs().get(0);
         then:
         where.queryOperation == QueryOperation.LT
         where.left == 'my_date_field'
@@ -786,7 +786,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where GEO_BOUNDARY_BOX(my_point, 22.22, 33.33, 44.44, 55.55)"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery().get(0);
+        def where = query.getDataOrs().get(0);
         then:
         where.queryOperation == QueryOperation.GEO_BOUNDARY_BOX
         where.left == 'my_point'
@@ -799,7 +799,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where GEO_WITHIN_RANGE_METER(my_point, 22.22, 33.33, 1000)"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery().get(0);
+        def where = query.getDataOrs().get(0);
         then:
         where.queryOperation == QueryOperation.GEO_WITHIN_RANGE_METER
         where.left == 'my_point'
@@ -812,7 +812,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where GEO_BOUNDARY_BOX(IDX(my_point), 22.22, 33.33, 44.44, 55.55)"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getIndexQuery().get(0);
+        def where = query.getIndexOrs().get(0);
         then:
         where.queryOperation == QueryOperation.GEO_BOUNDARY_BOX
         where.name == 'my_point'
@@ -823,7 +823,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where GEO_WITHIN_RANGE_METER(IDX(my_point), 22.22, 33.33, 1000)"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getIndexQuery().get(0);
+        def where = query.getIndexOrs().get(0);
         then:
         where.queryOperation == QueryOperation.GEO_WITHIN_RANGE_METER
         where.name == 'my_point'
@@ -834,7 +834,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_field BETWEEN 4 AND 9"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery().get(0);
+        def where = query.getDataOrs().get(0);
         then:
         where.queryOperation == QueryOperation.BETWEEN
         where.left == 'my_field'
@@ -846,7 +846,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where IDX(my_field) BETWEEN 4 AND 9"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getIndexQuery().get(0);
+        def where = query.getIndexOrs().get(0);
         then:
         where.queryOperation == QueryOperation.BETWEEN
         where.name == 'my_field'
@@ -857,7 +857,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where IDX(my_field) IN (5, 9, 11)"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getIndexQuery()
+        def where = query.getIndexOrs()
         then:
         where.size() == 3
         where.get(0).queryOperation == QueryOperation.EQ
@@ -876,7 +876,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_field IN (5, 9, 11)"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery()
+        def where = query.getDataOrs()
         then:
         where.size() == 3
         where.get(0).queryOperation == QueryOperation.EQ
@@ -900,7 +900,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_field LIKE '%xxx%'"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery()
+        def where = query.getDataOrs()
         then:
         where.size() == 1
         where.get(0).queryOperation == QueryOperation.LIKE
@@ -914,7 +914,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where IDX(my_field) LIKE '%xxx%'"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getIndexQuery()
+        def where = query.getIndexOrs()
         then:
         where.size() == 1
         where.get(0).queryOperation == QueryOperation.LIKE
@@ -926,7 +926,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_field NOT LIKE '%xxx%'"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery()
+        def where = query.getDataOrs()
         then:
         where.size() == 1
         where.get(0).queryOperation == QueryOperation.NOT_LIKE
@@ -941,7 +941,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_field IS NULL"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery()
+        def where = query.getDataOrs()
         then:
         where.size() == 1
         where.get(0).queryOperation == QueryOperation.IS_NULL
@@ -954,7 +954,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         when:
         def stmt = "select * from my_table where my_field IS NOT NULL"
         def query = service.convertSqlToJumboQuery(stmt)
-        def where = query.getDataQuery()
+        def where = query.getDataOrs()
         then:
         where.size() == 1
         where.get(0).queryOperation == QueryOperation.IS_NOT_NULL

@@ -105,7 +105,7 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);
                 }
                 IndexQuery indexQuery = offset.getIndexQuery();
-                if (matchingFilter(parsedJson, indexQuery.getAndData())) {
+                if (matchingFilter(parsedJson, indexQuery.getDataAnd())) {
                     if (!resultCallback.needsMore(searchQuery)) {
                         return;
                     }
@@ -150,7 +150,7 @@ public class JsonSnappyRetrieveDataSetsTask extends DefaultRetrieveDataSetsTask 
                 }
                 dis.readFully(data, 0, length);
                 Map<String, Object> parsedJson = (Map<String, Object>) jsonParser.readValue(data, 0, length, Map.class);
-                if (matchingFilter(parsedJson, searchQuery.getDataQuery())) {
+                if (matchingFilter(parsedJson, searchQuery.getDataOrs())) {
                     resultCallback.writeResult(parsedJson);
                     results++;
                 }

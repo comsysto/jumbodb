@@ -3,8 +3,6 @@ package org.jumbodb.common.query;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,15 +16,15 @@ public class DataQuery {
     private Object right;
     private FieldType rightType = FieldType.NOT_SET;
     private HintType hintType;
-    private DataQuery and;
-    private List<DataQuery> ors = new LinkedList<DataQuery>();
+    private DataQuery dataAnd;
+    private List<DataQuery> dataOrs = new LinkedList<DataQuery>();
 
     public DataQuery() {
     }
 
-    public DataQuery(List<DataQuery> ors) {
+    public DataQuery(List<DataQuery> dataOrs) {
         queryOperation = QueryOperation.OR;
-        this.ors = ors;
+        this.dataOrs = dataOrs;
     }
 
     public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation) {
@@ -43,13 +41,13 @@ public class DataQuery {
         this.rightType = rightType;
     }
 
-    public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation, Object right, FieldType rightType, DataQuery and) {
+    public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation, Object right, FieldType rightType, DataQuery dataAnd) {
         this.left = left;
         this.leftType = leftType;
         this.queryOperation = queryOperation;
         this.right = right;
         this.rightType = rightType;
-        this.and = and;
+        this.dataAnd = dataAnd;
     }
 
     public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation, Object right, FieldType rightType, HintType hintType) {
@@ -61,14 +59,14 @@ public class DataQuery {
         this.hintType = hintType;
     }
 
-    public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation, Object right, FieldType rightType, HintType hintType, DataQuery and) {
+    public DataQuery(Object left, FieldType leftType, QueryOperation queryOperation, Object right, FieldType rightType, HintType hintType, DataQuery dataAnd) {
         this.left = left;
         this.leftType = leftType;
         this.queryOperation = queryOperation;
         this.right = right;
         this.rightType = rightType;
         this.hintType = hintType;
-        this.and = and;
+        this.dataAnd = dataAnd;
     }
 
     public void setHintType(HintType hintType) {
@@ -119,33 +117,34 @@ public class DataQuery {
         this.rightType = rightType;
     }
 
-    public DataQuery getAnd() {
-        return and;
+    public DataQuery getDataAnd() {
+        return dataAnd;
     }
 
-    public void setAnd(DataQuery and) {
-        this.and = and;
+    public void setDataAnd(DataQuery dataAnd) {
+        this.dataAnd = dataAnd;
     }
 
-    public List<DataQuery> getOrs() {
-        return ors;
+    public List<DataQuery> getDataOrs() {
+        return dataOrs;
     }
 
-    public void setOrs(List<DataQuery> ors) {
-        this.ors = ors;
+    public void setDataOrs(List<DataQuery> dataOrs) {
+        this.dataOrs = dataOrs;
     }
 
     @Override
     public String toString() {
         return "DataQuery{" +
-          "left='" + left + '\'' +
-          ", leftType=" + leftType +
-          ", queryOperation=" + queryOperation +
-          ", right='" + right + '\'' +
-          ", rightType=" + rightType +
-          ", and=" + and +
-          ", ors=" + ors +
-          '}';
+                "left=" + left +
+                ", leftType=" + leftType +
+                ", queryOperation=" + queryOperation +
+                ", right=" + right +
+                ", rightType=" + rightType +
+                ", hintType=" + hintType +
+                ", dataAnd=" + dataAnd +
+                ", dataOrs=" + dataOrs +
+                '}';
     }
 }
 

@@ -93,7 +93,7 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
             if (valueWrapper != null) {
                 Map<String, Object> dataSetFromOffsetsGroup = (Map<String, Object>) valueWrapper.get();
                 IndexQuery indexQuery = offset.getIndexQuery();
-                if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getAndData())) {
+                if (matchingFilter(dataSetFromOffsetsGroup, indexQuery.getDataAnd())) {
                     if (!resultCallback.needsMore(searchQuery)) {
                         return Collections.emptyList(); // return empty list enough found!
                     }
@@ -165,10 +165,10 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
 
             // CARSTEN handle EXISTS QueryOperation at this position
             if (strategy.matches(jsonQuery.getQueryOperation(), leftValue, rightValue)) {
-                if (jsonQuery.getAnd() != null) {
-                    return matchingFilter(parsedJson, queriedValuesCache, Arrays.asList(jsonQuery.getAnd()));
+                if (jsonQuery.getDataAnd() != null) {
+                    return matchingFilter(parsedJson, queriedValuesCache, Arrays.asList(jsonQuery.getDataAnd()));
                 }
-                return matchingFilter(parsedJson, queriedValuesCache, jsonQuery.getOrs());
+                return matchingFilter(parsedJson, queriedValuesCache, jsonQuery.getDataOrs());
             }
         }
         return false;

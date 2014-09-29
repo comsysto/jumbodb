@@ -3,14 +3,17 @@ package org.jumbodb.common.query;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class IndexQuery {
     private String name;
     private QueryOperation queryOperation;
     private Object value;
-    private DataQuery andData;
-    private IndexQuery andIndex;
+    private DataQuery dataAnd;
+    private IndexQuery indexAnd;
 
     public IndexQuery() {
     }
@@ -45,20 +48,20 @@ public class IndexQuery {
         this.value = value;
     }
 
-    public DataQuery getAndData() {
-        return andData;
+    public DataQuery getDataAnd() {
+        return dataAnd;
     }
 
-    public void setAndData(DataQuery andData) {
-        this.andData = andData;
+    public void setDataAnd(DataQuery dataAnd) {
+        this.dataAnd = dataAnd;
     }
 
-    public IndexQuery getAndIndex() {
-        return andIndex;
+    public IndexQuery getIndexAnd() {
+        return indexAnd;
     }
 
-    public void setAndIndex(IndexQuery andIndex) {
-        this.andIndex = andIndex;
+    public void setIndexAnd(IndexQuery indexAnd) {
+        this.indexAnd = indexAnd;
     }
 
     @Override
@@ -68,8 +71,8 @@ public class IndexQuery {
 
         IndexQuery that = (IndexQuery) o;
 
-        if (andIndex != null ? !andIndex.equals(that.andIndex) : that.andIndex != null) return false;
-        if (andData != null ? !andData.equals(that.andData) : that.andData != null) return false;
+        if (dataAnd != null ? !dataAnd.equals(that.dataAnd) : that.dataAnd != null) return false;
+        if (indexAnd != null ? !indexAnd.equals(that.indexAnd) : that.indexAnd != null) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (queryOperation != that.queryOperation) return false;
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
@@ -82,8 +85,8 @@ public class IndexQuery {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (queryOperation != null ? queryOperation.hashCode() : 0);
         result = 31 * result + (value != null ? value.hashCode() : 0);
-        result = 31 * result + (andData != null ? andData.hashCode() : 0);
-        result = 31 * result + (andIndex != null ? andIndex.hashCode() : 0);
+        result = 31 * result + (dataAnd != null ? dataAnd.hashCode() : 0);
+        result = 31 * result + (indexAnd != null ? indexAnd.hashCode() : 0);
         return result;
     }
 
@@ -93,8 +96,8 @@ public class IndexQuery {
                 "name='" + name + '\'' +
                 ", queryOperation=" + queryOperation +
                 ", value=" + value +
-                ", andJson=" + andData +
-                ", andIndex=" + andIndex +
+                ", dataAnd=" + dataAnd +
+                ", indexAnd=" + indexAnd +
                 '}';
     }
 }

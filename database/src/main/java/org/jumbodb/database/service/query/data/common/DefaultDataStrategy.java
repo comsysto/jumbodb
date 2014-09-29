@@ -6,7 +6,6 @@ import org.jumbodb.common.query.QueryOperation;
 import org.jumbodb.database.service.query.FileOffset;
 import org.jumbodb.database.service.query.ResultCallback;
 import org.jumbodb.database.service.query.data.DataStrategy;
-import org.jumbodb.database.service.query.data.common.*;
 import org.jumbodb.database.service.query.data.snappy.JsonSnappyLineBreakDataStrategy;
 import org.jumbodb.database.service.query.definition.CollectionDefinition;
 import org.jumbodb.database.service.query.definition.DeliveryChunkDefinition;
@@ -57,8 +56,8 @@ public abstract class DefaultDataStrategy implements DataStrategy {
         long startTime = System.currentTimeMillis();
         Map<Integer, Set<FileOffset>> fileOffsetsMap = buildFileOffsetsMap(fileOffsets);
         List<Future<Integer>> tasks = new LinkedList<Future<Integer>>();
-        boolean dataQueriesAvailable = !searchQuery.getDataQuery().isEmpty();
-        boolean indexQueriesAvailable = !searchQuery.getIndexQuery().isEmpty();
+        boolean dataQueriesAvailable = !searchQuery.getDataOrs().isEmpty();
+        boolean indexQueriesAvailable = !searchQuery.getIndexOrs().isEmpty();
         if(dataQueriesAvailable && indexQueriesAvailable) {
             throw new IllegalArgumentException("Top level data queries with combined OR top level index queries are not allowed! It's to inefficient, it results in a full scan, so just use data queries!");
         }

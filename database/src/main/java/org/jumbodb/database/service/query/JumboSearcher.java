@@ -97,7 +97,7 @@ public class JumboSearcher {
 
     private Collection<FileOffset> findFileOffsets(DeliveryChunkDefinition deliveryChunkDefinition,
                                                    JumboQuery searchQuery, ResultCallback resultCallback) {
-        if (searchQuery.getIndexQuery().size() == 0) {
+        if (searchQuery.getIndexOrs().size() == 0) {
             return Collections.emptyList();
         }
         List<Future<Set<FileOffset>>> tasks = new LinkedList<Future<Set<FileOffset>>>();
@@ -139,7 +139,7 @@ public class JumboSearcher {
         Collection<FileOffset> result = new HashSet<FileOffset>();
         Map<IndexQuery, List<FileOffset>> groupByIndexQuery = groupByIndexQuery(fileOffsets);
 
-        for (IndexQuery indexQuery : searchQuery.getIndexQuery()) {
+        for (IndexQuery indexQuery : searchQuery.getIndexOrs()) {
             result.addAll(getIndexesApplyAndLogic(indexQuery, groupByIndexQuery));
         }
         return result;
@@ -147,7 +147,7 @@ public class JumboSearcher {
 
     private Set<FileOffset> getIndexesApplyAndLogic(IndexQuery indexQuery, Map<IndexQuery, List<FileOffset>> groupByIndexQuery) {
         Set<FileOffset> result = new HashSet<FileOffset>();
-        IndexQuery andIndex = indexQuery.getAndIndex();
+        IndexQuery andIndex = indexQuery.getIndexAnd();
         List<FileOffset> fileOffset = groupByIndexQuery.get(indexQuery);
         if(fileOffset != null) {
             result.addAll(fileOffset);
@@ -175,7 +175,7 @@ public class JumboSearcher {
     // CARSTEN unit test
     private Map<String, List<IndexQuery>> groupByIndexName(JumboQuery searchQuery) {
         Map<String, List<IndexQuery>> result = new HashMap<String, List<IndexQuery>>();
-        List<IndexQuery> allIndexQueries = getAllIndexQueries(searchQuery.getIndexQuery());
+        List<IndexQuery> allIndexQueries = getAllIndexQueries(searchQuery.getIndexOrs());
         for (IndexQuery indexQuery : allIndexQueries) {
             List<IndexQuery> indexQueries = result.get(indexQuery.getName());
             if (indexQueries == null) {
@@ -198,7 +198,7 @@ public class JumboSearcher {
     private List<IndexQuery> getAllIndexQueries(IndexQuery query) {
         List<IndexQuery> result = new LinkedList<IndexQuery>();
         result.add(query);
-        IndexQuery andIndex = query.getAndIndex();
+        IndexQuery andIndex = query.getIndexAnd();
         if (andIndex != null) {
             result.addAll(getAllIndexQueries(andIndex));
         }

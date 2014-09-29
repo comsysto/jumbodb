@@ -784,7 +784,7 @@ class JumboQueryConverterServiceSpec extends Specification {
 
     def "verify GEO_BOUNDARY_BOX function"() {
         when:
-        def stmt = "select * from my_table where my_point = GEO_BOUNDARY_BOX(22.22, 33.33, 44.44, 55.55)"
+        def stmt = "select * from my_table where GEO_BOUNDARY_BOX(my_point, 22.22, 33.33, 44.44, 55.55)"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getDataQuery().get(0);
         then:
@@ -797,7 +797,7 @@ class JumboQueryConverterServiceSpec extends Specification {
 
     def "verify GEO_WITHIN_RANGE_METER function"() {
         when:
-        def stmt = "select * from my_table where my_point = GEO_WITHIN_RANGE_METER(22.22, 33.33, 1000)"
+        def stmt = "select * from my_table where GEO_WITHIN_RANGE_METER(my_point, 22.22, 33.33, 1000)"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getDataQuery().get(0);
         then:
@@ -810,7 +810,7 @@ class JumboQueryConverterServiceSpec extends Specification {
 
     def "verify GEO_BOUNDARY_BOX function with IDX"() {
         when:
-        def stmt = "select * from my_table where IDX(my_point) = GEO_BOUNDARY_BOX(22.22, 33.33, 44.44, 55.55)"
+        def stmt = "select * from my_table where GEO_BOUNDARY_BOX(IDX(my_point), 22.22, 33.33, 44.44, 55.55)"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getIndexQuery().get(0);
         then:
@@ -821,7 +821,7 @@ class JumboQueryConverterServiceSpec extends Specification {
 
     def "verify GEO_WITHIN_RANGE_METER function with IDX"() {
         when:
-        def stmt = "select * from my_table where IDX(my_point) = GEO_WITHIN_RANGE_METER(22.22, 33.33, 1000)"
+        def stmt = "select * from my_table where GEO_WITHIN_RANGE_METER(IDX(my_point), 22.22, 33.33, 1000)"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getIndexQuery().get(0);
         then:
@@ -836,12 +836,41 @@ class JumboQueryConverterServiceSpec extends Specification {
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getDataQuery().get(0);
         then:
-        where.queryOperation == QueryOperation.LT
+        where.queryOperation == QueryOperation.BETWEEN
         where.left == 'my_field'
         where.leftType == FieldType.FIELD
         where.right == [4, 9]
         where.rightType == FieldType.VALUE
     }
+    def "verify where BETWEEN clause with IDX"() {
+        when:
+        def stmt = "select * from my_table where IDX(my_field) BETWEEN 4 AND 9"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getIndexQuery().get(0);
+        then:
+        where.queryOperation == QueryOperation.BETWEEN
+        where.name == 'my_field'
+        where.value == [4, 9]
+    }
+
+    def "verify where IN clause with IDX"() {
+        when:
+        def stmt = "select * from my_table where IDX(my_field) IN (5, 9, 11)"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getIndexQuery()
+        then:
+        where.size() == 3
+        where.get(0).queryOperation == QueryOperation.EQ
+        where.get(0).name == 'my_field'
+        where.get(0).value == 5
+        where.get(1).queryOperation == QueryOperation.EQ
+        where.get(1).name == 'my_field'
+        where.get(1).value == 9
+        where.get(2).queryOperation == QueryOperation.EQ
+        where.get(2).name == 'my_field'
+        where.get(2).value == 11
+    }
+
 
     def "verify where IN clause"() {
         when:
@@ -877,21 +906,33 @@ class JumboQueryConverterServiceSpec extends Specification {
         where.get(0).queryOperation == QueryOperation.LIKE
         where.get(0).left == 'my_field'
         where.get(0).leftType == FieldType.FIELD
-        where.get(0).right == 5
+        where.get(0).right == '%xxx%'
         where.get(0).rightType == FieldType.VALUE
+    }
+
+    def "verify where LIKE clause with IDX"() {
+        when:
+        def stmt = "select * from my_table where IDX(my_field) LIKE '%xxx%'"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def where = query.getIndexQuery()
+        then:
+        where.size() == 1
+        where.get(0).queryOperation == QueryOperation.LIKE
+        where.get(0).name == 'my_field'
+        where.get(0).value == '%xxx%'
     }
 
     def "verify where NOT LIKE clause"() {
         when:
-        def stmt = 'select * from my_table where my_field LIKE "%xxx%"'
+        def stmt = "select * from my_table where my_field NOT LIKE '%xxx%'"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getDataQuery()
         then:
         where.size() == 1
-        where.get(0).queryOperation == QueryOperation.LIKE
+        where.get(0).queryOperation == QueryOperation.NOT_LIKE
         where.get(0).left == 'my_field'
         where.get(0).leftType == FieldType.FIELD
-        where.get(0).right == 5
+        where.get(0).right == '%xxx%'
         where.get(0).rightType == FieldType.VALUE
     }
 

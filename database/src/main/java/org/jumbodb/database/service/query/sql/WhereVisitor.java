@@ -9,6 +9,8 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import org.jumbodb.common.query.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -128,6 +130,23 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         boolEvaluation(QueryOperation.EQ);
     }
 
+    private void singleEvaluation(QueryOperation operation) {
+        if(expressions.size() == 1) {
+            if(index) {
+                throw new SQLParseException(operation.getOperation() + " is not allowed for indexes.");
+            } else {
+                FieldType leftType = getFieldTypeLeft();
+                if(leftType != FieldType.FIELD) {
+                    throw new SQLParseException(operation.getOperation() + " is only allowed on fields.");
+                }
+                currentData = new DataQuery(getColumnLeft(), leftType, operation, null, FieldType.NOT_SET, hintType);
+            }
+        }
+        else {
+            throw new SQLParseException("Minimum one field is required for query criteria.");
+        }
+    }
+
     private void boolEvaluation(QueryOperation eq) {
         if(expressions.size() == 2) {
             if(index) {
@@ -216,11 +235,19 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     }
 
     private Object getValueRight() {
-        return expressions.get(1);
+        return getValueAtIndex(1);
+    }
+
+    private Object getValueAtIndex(final int index) {
+        Object o = expressions.get(index);
+        if(o instanceof StringValue) {
+            return ((StringValue)o).getValue();
+        }
+        return o;
     }
 
     private Object getValueLeft() {
-        return expressions.get(0);
+        return getValueAtIndex(0);
     }
 
     private boolean hasColumnRight() {
@@ -244,9 +271,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(LikeExpression expr) {
-//        operation = QueryOperation.EQ;
-//        super.visit(expr);
-//        current = new JsonQuery(column.getFullyQualifiedName(), operation, value);
+        super.visit(expr);
+        boolEvaluation(expr.isNot() ? QueryOperation.NOT_LIKE : QueryOperation.LIKE);
     }
 
     @Override
@@ -276,8 +302,6 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         expressions.add(value.getValue());
     }
 
-
-
     @Override
     public void visit(DateValue value) {
         hintType = HintType.DATE;
@@ -286,7 +310,8 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(IsNullExpression expr) {
-        throw new IllegalArgumentException("not supported");
+        super.visit(expr);
+        singleEvaluation(expr.isNot() ? QueryOperation.IS_NOT_NULL : QueryOperation.IS_NULL);
     }
 
     @Override
@@ -300,21 +325,27 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         expr.getLeftExpression().accept(this);
 //        expr.getLeftItemsList().accept(this); // causes null
         expr.getRightItemsList().accept(this);
-        throw new IllegalArgumentException("not supported");
+        String columnLeft = getColumnLeft();
+        for(int i = 1; i < expressions.size(); i++) {
+            if(index) {
+                indexOrs.add(new IndexQuery(columnLeft, QueryOperation.EQ, getValueAtIndex(i)));
+            } else {
+                dataOrs.add(new DataQuery(columnLeft, FieldType.FIELD, QueryOperation.EQ, getValueAtIndex(i), FieldType.VALUE));
+            }
+        }
     }
 
     @Override
     public void visit(Between expr) {
         super.visit(expr);
-
-        // CARSTEN implement later
-        throw new IllegalArgumentException("not supported");
-    }
-
-    @Override
-    public void visit(NullValue value) {
-        super.visit(value);
-        throw new IllegalArgumentException("not supported");
+        String columnLeft = getColumnLeft();
+        Object val1 = getValueAtIndex(1);
+        Object val2 = getValueAtIndex(2);
+        if(index) {
+            currentIndex = new IndexQuery(columnLeft, QueryOperation.BETWEEN, Arrays.asList(val1, val2));
+        } else {
+            currentData = new DataQuery(columnLeft, FieldType.FIELD, QueryOperation.BETWEEN, Arrays.asList(val1, val2), FieldType.VALUE);
+        }
     }
 
     @Override
@@ -383,10 +414,56 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
     @Override
     public void visit(Function function) {
         super.visit(function);
-        if("IDX".equalsIgnoreCase(function.getName())) {
+        String name = function.getName();
+        if("IDX".equalsIgnoreCase(name)) {
             handleIdxFunction(function);
+        } else if("TO_DATE".equalsIgnoreCase(name)) {
+            handleToDateFunction(function);
+        } else if("DATE_FIELD".equalsIgnoreCase(name)) {
+            handleDateFieldFunction(function);
+        } else if("GEO_BOUNDARY_BOX".equalsIgnoreCase(name)) {
+            handleGeoBoundaryBoxFunction(function);
+        } else if("GEO_WITHIN_RANGE_METER".equalsIgnoreCase(name)) {
+            handleGeoWithinRangeMeterFunction(function);
         } else {
             throw new SQLParseException("The function '" + function.getName().toUpperCase() + "' is not supported.");
+        }
+    }
+
+    private void handleGeoWithinRangeMeterFunction(Function function) {
+        // CARSTEN implement me
+
+    }
+
+    private void handleGeoBoundaryBoxFunction(Function function) {
+        // CARSTEN implement me
+
+    }
+
+    private void handleDateFieldFunction(Function function) {
+        ExpressionList parameters = function.getParameters();
+        if(parameters.getExpressions().size() != 1) {
+            throw new SQLParseException("DATE_FIELD function requires exactly one parameter, the field name.");
+        }
+        hintType = HintType.DATE;
+        Expression expression = parameters.getExpressions().get(0);
+        Column column = getColumn(expression);
+        expressions.add(column);
+    }
+
+    private void handleToDateFunction(Function function) {
+        ExpressionList parameters = function.getParameters();
+        if(parameters.getExpressions().size() != 2) {
+            throw new SQLParseException("TO_DATE function requires exactly two parameter, the date and the date format.");
+        }
+        hintType = HintType.DATE;
+        String date = ((StringValue)parameters.getExpressions().get(0)).getValue();
+        String pattern = ((StringValue)parameters.getExpressions().get(1)).getValue();
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+        try {
+            expressions.add(sdf.parse(date).getTime());
+        } catch (ParseException e) {
+            throw new SQLParseException("Cannot parse date in TO_DATE function: " + e.getMessage());
         }
     }
 

@@ -7,6 +7,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
+import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.*;
 import org.jumbodb.database.service.query.sql.SQLParseException;
 import org.jumbodb.database.service.query.sql.SelectedItemsVisitor;
@@ -21,12 +22,20 @@ public class JumboQueryConverterService {
 
     public JumboQuery convertSqlToJumboQuery(String sql) {
         try {
-            Statement stmt = CCJSqlParserUtil.parse(sql);
+            String trimmedSql = StringUtils.trim(sql);
+            boolean resultCacheEnabled = true;
+            if(StringUtils.endsWithIgnoreCase(trimmedSql, " NOCACHE")) {
+                resultCacheEnabled = false;
+            }
+            String plainSql = StringUtils.removeEndIgnoreCase(trimmedSql, " NOCACHE");
+            plainSql = StringUtils.removeEndIgnoreCase(plainSql, " CACHE");
+            Statement stmt = CCJSqlParserUtil.parse(plainSql);
             if(stmt instanceof Select) {
                 Select select = (Select)stmt;
                 PlainSelect selectBody = (PlainSelect) select.getSelectBody(); // nur plain select
                 assertSqlFeatures(selectBody);
                 JumboQuery jumboQuery = buildJumboQuery(selectBody);
+                jumboQuery.setResultCacheEnabled(resultCacheEnabled);
                 verifySelectFunctionsAndGroupBy(jumboQuery);
                 return jumboQuery;
             }

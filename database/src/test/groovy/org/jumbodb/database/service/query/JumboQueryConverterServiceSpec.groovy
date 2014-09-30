@@ -292,6 +292,29 @@ class JumboQueryConverterServiceSpec extends Specification {
         andIndex.getValue() == 6
     }
 
+    def "verify IDX function with AND to another IDX and field assertion"() {
+        when:
+        def stmt = "select * from my_table where IDX('my_index') = 5 AND IDX('another_index') = 6 AND my_field = 7"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexOrs()
+        then:
+        query.getDataOrs().size() == 0
+        indexQuery.size() == 1
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 5
+        def andIndex = indexQuery.get(0).getIndexAnd()
+        andIndex.getName() == 'another_index'
+        andIndex.getQueryOperation() == QueryOperation.EQ
+        andIndex.getValue() == 6
+        def andData = andIndex.getDataAnd()
+        andData.getLeft() == 'my_field'
+        andData.getLeftType() == FieldType.FIELD
+        andData.getQueryOperation() == QueryOperation.EQ
+        andData.getRight() == 7
+        andData.getRightType() == FieldType.VALUE
+    }
+
     def "verify IDX function with OR to data field"() {
         when:
         def stmt = "select * from my_table where IDX('my_index') = 5 or my_field = 3"

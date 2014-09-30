@@ -108,7 +108,7 @@ public class JsonLz4RetrieveDataSetsTask extends DefaultRetrieveDataSetsTask {
                     datasetsByOffsetsCache.put(new CacheFileOffset(file, offset.getOffset()), parsedJson);
                 }
                 IndexQuery indexQuery = offset.getIndexQuery();
-                if (matchingFilter(parsedJson, indexQuery.getDataAnd())) {
+                if (matchingFilter(parsedJson, indexQuery)) {
                     if (!resultCallback.needsMore(searchQuery)) {
                         return;
                     }

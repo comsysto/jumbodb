@@ -141,6 +141,21 @@ public abstract class DefaultRetrieveDataSetsTask implements Callable<Integer> {
         return tmp;
     }
 
+    // CARSTEN unit test
+    protected boolean matchingFilter(Map<String, Object> parsedJson, IndexQuery indexQuery) throws IOException {
+        if (indexQuery.getIndexAnd() == null && indexQuery.getDataAnd() == null) {
+            return true;
+        }
+        IndexQuery currentIndex = indexQuery;
+        while(currentIndex != null) {
+            if(!matchingFilter(parsedJson, currentIndex.getDataAnd())) {
+                return false;
+            }
+            currentIndex = currentIndex.getIndexAnd();
+        }
+        return true;
+    }
+
     protected boolean matchingFilter(Map<String, Object> parsedJson, DataQuery jsonQuery) throws IOException {
         if (jsonQuery == null) {
             return true;

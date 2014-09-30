@@ -126,6 +126,10 @@ public class JumboSearcher {
                 }
             }
             return filterOffsets(result, searchQuery);
+            // CARSTEN hier müsste eigentlich pro fileoffset die indexqueries gruppiert werden da sonst filter verloren gehen könnten
+            // CARSTEN außerdem werdem doppelte offsets reingegeben..., das darf nicht sein
+            // CARSTEN hier dürfte es noch doppelte offsets geben....
+            // CARSTEN hier conversion  FileOffsetWithIndexQueries
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
@@ -138,7 +142,6 @@ public class JumboSearcher {
     private Collection<FileOffset> filterOffsets(Collection<FileOffset> fileOffsets, JumboQuery searchQuery) {
         Collection<FileOffset> result = new HashSet<FileOffset>();
         Map<IndexQuery, List<FileOffset>> groupByIndexQuery = groupByIndexQuery(fileOffsets);
-
         for (IndexQuery indexQuery : searchQuery.getIndexOrs()) {
             result.addAll(getIndexesApplyAndLogic(indexQuery, groupByIndexQuery));
         }

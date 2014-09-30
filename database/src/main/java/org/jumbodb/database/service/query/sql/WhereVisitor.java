@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,6 +54,17 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
             if (lastIndex != null) {
                 indexOrs.add(lastIndex);
             }
+        } else if (!dataAnds.isEmpty()) {
+            DataQuery lastData = null;
+            for (DataQuery and : dataAnds) {
+                if (lastData != null) {
+                    and.setDataAnd(lastData);
+                }
+                lastData = and;
+            }
+            for (IndexQuery ors : indexOrs) {
+                ors.setDataAnd(lastData);
+            }
         }
         return indexOrs;
     }
@@ -61,6 +73,9 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         if (currentData != null) {
             return Arrays.asList(currentData);
         } else if (!dataAnds.isEmpty() && indexAnds.isEmpty()) {
+            if(!indexOrs.isEmpty()) {
+                return Collections.emptyList();
+            }
             DataQuery last = null;
             for (DataQuery and : dataAnds) {
                 if (last != null) {
@@ -101,19 +116,27 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
         if (!rightWhereVisitor.dataOrs.isEmpty()) {
             dataAnds.add(new DataQuery(rightWhereVisitor.dataOrs));
         }
-        if (!leftWhereVisitor.indexOrs.isEmpty()) {
-           throw new SQLParseException("not supported!");
-//            dataAnds.add(new DataQuery(leftWhereVisitor.dataOrs));
-        }
-        if (!rightWhereVisitor.indexOrs.isEmpty()) {
-            throw new SQLParseException("not supported!");
-
-//            dataAnds.add(new DataQuery(rightWhereVisitor.dataOrs));
-        }
+//        if (!leftWhereVisitor.indexOrs.isEmpty()) {
+//           throw new SQLParseException("not supported!");
+////            dataAnds.add(new DataQuery(leftWhereVisitor.dataOrs));
+//        }
+//        if (!rightWhereVisitor.indexOrs.isEmpty()) {
+//            if(!dataAnds.isEmpty()) {
+//
+//            }
+//            else {
+//                throw new SQLParseException("You hit an unsupported query.");
+//            }
+//
+////            dataAnds.add(new DataQuery(rightWhereVisitor.dataOrs));
+//        }
         dataAnds.addAll(leftWhereVisitor.dataAnds);
         dataAnds.addAll(rightWhereVisitor.dataAnds);
         indexAnds.addAll(leftWhereVisitor.indexAnds);
         indexAnds.addAll(rightWhereVisitor.indexAnds);
+        indexOrs.addAll(leftWhereVisitor.indexOrs);
+        indexOrs.addAll(rightWhereVisitor.indexOrs);
+
     }
 
     @Override

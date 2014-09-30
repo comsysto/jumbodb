@@ -294,7 +294,7 @@ class JumboQueryConverterServiceSpec extends Specification {
 
     def "verify IDX function with OR to data field"() {
         when:
-        def stmt = "select * from my_table where IDX('my_index') or my_field = 3"
+        def stmt = "select * from my_table where IDX('my_index') = 5 or my_field = 3"
         service.convertSqlToJumboQuery(stmt)
         then:
         def ex = thrown SQLParseException
@@ -340,13 +340,30 @@ class JumboQueryConverterServiceSpec extends Specification {
         andData.getRightType() == FieldType.VALUE
     }
 
+    def "verify IDX function with AND on two indexes"() {
+        when:
+        def stmt = "select * from my_table where IDX('my_index') = 6 and IDX('another_index') = 5"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexOrs()
+        then:
+        query.getDataOrs().size() == 0
+        indexQuery.size() == 1
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 6
+        def andIndex = indexQuery.get(0).getIndexAnd()
+        andIndex.getQueryOperation() == QueryOperation.EQ
+        andIndex.getName() == 'another_index'
+        andIndex.getValue() == 5
+    }
+
     def "verify IDX function embedded in and condition"() {
         when:
         def stmt = "select * from test where ((idx(aaaa) = 'aaa' AND bb = 'bb') OR user.cc = 'bb')"
         service.convertSqlToJumboQuery(stmt)
         then:
         def ex = thrown SQLParseException
-        ex.getMessage() == "Embedded indexes are not allowed, because it results in a full scan. Rebuild your query without indexes."
+        ex.getMessage() == "It is not allowed to combine a query on an index with OR to a field, because it results in a full scan and index resolution is not required and inperformant. Rebuild your query by not using indexes."
     }
 
     def "verify IDX function with IN and data and condition"() {
@@ -359,7 +376,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         indexQuery.size() == 3
         indexQuery.get(0).getName() == 'my_index'
         indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
-        indexQuery.get(0).getValue() == 1
+        indexQuery.get(0).getValue() == 5
         def andData1 = indexQuery.get(0).getDataAnd()
         andData1.getQueryOperation() == QueryOperation.EQ
         andData1.getLeft() == 'my_field'
@@ -368,7 +385,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         andData1.getRightType() == FieldType.VALUE
         indexQuery.get(1).getName() == 'my_index'
         indexQuery.get(1).getQueryOperation() == QueryOperation.EQ
-        indexQuery.get(1).getValue() == 2
+        indexQuery.get(1).getValue() == 6
         def andData2 = indexQuery.get(1).getDataAnd()
         andData2.getQueryOperation() == QueryOperation.EQ
         andData2.getLeft() == 'my_field'
@@ -377,7 +394,7 @@ class JumboQueryConverterServiceSpec extends Specification {
         andData2.getRightType() == FieldType.VALUE
         indexQuery.get(2).getName() == 'my_index'
         indexQuery.get(2).getQueryOperation() == QueryOperation.EQ
-        indexQuery.get(2).getValue() == 3
+        indexQuery.get(2).getValue() == 7
         def andData3 = indexQuery.get(1).getDataAnd()
         andData3.getQueryOperation() == QueryOperation.EQ
         andData3.getLeft() == 'my_field'
@@ -388,7 +405,7 @@ class JumboQueryConverterServiceSpec extends Specification {
 
     def "verify IDX function with OR and data AND condition"() {
         when:
-        def stmt = "select * from my_table where my_field = 6 and (IDX('my_index') = 5 OR IDX('my_index') = 6 OR IDX('my_index') = 7)"
+        def stmt = "select * from my_table where my_field = 4 and (IDX('my_index') = 5 OR IDX('my_index') = 6 OR IDX('my_index') = 7)"
         def query = service.convertSqlToJumboQuery(stmt)
         def indexQuery = query.getIndexOrs()
         then:
@@ -396,30 +413,30 @@ class JumboQueryConverterServiceSpec extends Specification {
         indexQuery.size() == 3
         indexQuery.get(0).getName() == 'my_index'
         indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
-        indexQuery.get(0).getValue() == 1
+        indexQuery.get(0).getValue() == 5
         def andData1 = indexQuery.get(0).getDataAnd()
         andData1.getQueryOperation() == QueryOperation.EQ
         andData1.getLeft() == 'my_field'
         andData1.getLeftType() == FieldType.FIELD
-        andData1.getRight() == 6
+        andData1.getRight() == 4
         andData1.getRightType() == FieldType.VALUE
         indexQuery.get(1).getName() == 'my_index'
         indexQuery.get(1).getQueryOperation() == QueryOperation.EQ
-        indexQuery.get(1).getValue() == 2
+        indexQuery.get(1).getValue() == 6
         def andData2 = indexQuery.get(1).getDataAnd()
         andData2.getQueryOperation() == QueryOperation.EQ
         andData2.getLeft() == 'my_field'
         andData2.getLeftType() == FieldType.FIELD
-        andData2.getRight() == 6
+        andData2.getRight() == 4
         andData2.getRightType() == FieldType.VALUE
         indexQuery.get(2).getName() == 'my_index'
         indexQuery.get(2).getQueryOperation() == QueryOperation.EQ
-        indexQuery.get(2).getValue() == 3
+        indexQuery.get(2).getValue() == 7
         def andData3 = indexQuery.get(1).getDataAnd()
         andData3.getQueryOperation() == QueryOperation.EQ
         andData3.getLeft() == 'my_field'
         andData3.getLeftType() == FieldType.FIELD
-        andData3.getRight() == 6
+        andData3.getRight() == 4
         andData3.getRightType() == FieldType.VALUE
     }
 

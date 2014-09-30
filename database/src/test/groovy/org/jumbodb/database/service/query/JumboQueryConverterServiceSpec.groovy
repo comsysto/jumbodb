@@ -321,6 +321,31 @@ class JumboQueryConverterServiceSpec extends Specification {
         andData.getRightType() == FieldType.VALUE
     }
 
+    def "verify IDX function with AND two data fields"() {
+        when:
+        def stmt = "select * from my_table where IDX('my_index') = 5 AND my_field = 6 and second_field = 7"
+        def query = service.convertSqlToJumboQuery(stmt)
+        def indexQuery = query.getIndexOrs()
+        then:
+        query.getDataOrs().size() == 0
+        indexQuery.size() == 1
+        indexQuery.get(0).getName() == 'my_index'
+        indexQuery.get(0).getQueryOperation() == QueryOperation.EQ
+        indexQuery.get(0).getValue() == 5
+        def andData = indexQuery.get(0).getDataAnd()
+        andData.getQueryOperation() == QueryOperation.EQ
+        andData.getLeft() == 'my_field'
+        andData.getLeftType() == FieldType.FIELD
+        andData.getRight() == 6
+        andData.getRightType() == FieldType.VALUE
+        def andData2 = andData.getDataAnd()
+        andData2.getQueryOperation() == QueryOperation.EQ
+        andData2.getLeft() == 'second_field'
+        andData2.getLeftType() == FieldType.FIELD
+        andData2.getRight() == 7
+        andData2.getRightType() == FieldType.VALUE
+    }
+
     def "verify IDX function with AND to data field, data field is left and should be optimized as subAnd of the index"() {
         when:
         def stmt = "select * from my_table where my_field = 6 and IDX('my_index') = 5"

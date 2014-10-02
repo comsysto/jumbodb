@@ -873,9 +873,9 @@ class JumboQueryConverterServiceSpec extends Specification {
         where.rightType == FieldType.VALUE
     }
 
-    def "verify GEO_BOUNDARY_BOX function with IDX"() {
+    def "verify GEO_BOUNDARY_BOX_IDX function"() {
         when:
-        def stmt = "select * from my_table where GEO_BOUNDARY_BOX(IDX(my_point), 22.22, 33.33, 44.44, 55.55)"
+        def stmt = "select * from my_table where GEO_BOUNDARY_BOX_IDX(my_point, 22.22, 33.33, 44.44, 55.55)"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getIndexOrs().get(0);
         then:
@@ -884,9 +884,9 @@ class JumboQueryConverterServiceSpec extends Specification {
         where.value == [[22.22, 33.33], [44.44, 55.55]]
     }
 
-    def "verify GEO_WITHIN_RANGE_METER function with IDX"() {
+    def "verify GEO_WITHIN_RANGE_METER_IDX function"() {
         when:
-        def stmt = "select * from my_table where GEO_WITHIN_RANGE_METER(IDX(my_point), 22.22, 33.33, 1000)"
+        def stmt = "select * from my_table where GEO_WITHIN_RANGE_METER_IDX(my_point, 22.22, 33.33, 1000)"
         def query = service.convertSqlToJumboQuery(stmt)
         def where = query.getIndexOrs().get(0);
         then:

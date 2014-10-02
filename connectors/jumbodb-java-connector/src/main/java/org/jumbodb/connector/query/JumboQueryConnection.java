@@ -131,7 +131,6 @@ public class JumboQueryConnection {
         return result;
     }
 
-    // CARSTEN unit test
     public <T> List<T> find(Class<T> jsonClazz, String sql) {
         try {
             final List<T> result = new LinkedList<T>();

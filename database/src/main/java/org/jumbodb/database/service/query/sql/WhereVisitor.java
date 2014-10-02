@@ -7,6 +7,7 @@ import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import org.apache.commons.lang.StringUtils;
 import org.jumbodb.common.query.*;
 
 import java.text.ParseException;
@@ -327,7 +328,10 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
 
     private Object getValueAtIndex(final int index) {
         Object o = expressions.get(index);
-        if (o instanceof StringValue) {
+        if (o instanceof Column) {
+            return ((Column) o).getFullyQualifiedName();
+        }
+        else if (o instanceof StringValue) {
             return ((StringValue) o).getValue();
         }
         return o;
@@ -508,23 +512,64 @@ public class WhereVisitor extends ExpressionVisitorAdapter {
             handleToDateFunction(function);
         } else if ("DATE_FIELD".equalsIgnoreCase(name)) {
             handleDateFieldFunction(function);
-        } else if ("GEO_BOUNDARY_BOX".equalsIgnoreCase(name)) {
-            handleGeoBoundaryBoxFunction(function);
-        } else if ("GEO_WITHIN_RANGE_METER".equalsIgnoreCase(name)) {
-            handleGeoWithinRangeMeterFunction(function);
+        } else if ("GEO_BOUNDARY_BOX".equalsIgnoreCase(name) || "GEO_BOUNDARY_BOX_IDX".equalsIgnoreCase(name)) {
+            handleGeoBoundaryBoxFunction(function, "GEO_BOUNDARY_BOX_IDX".equalsIgnoreCase(name));
+        } else if ("GEO_WITHIN_RANGE_METER".equalsIgnoreCase(name) || "GEO_WITHIN_RANGE_METER_IDX".equalsIgnoreCase(name)) {
+            handleGeoWithinRangeMeterFunction(function, "GEO_WITHIN_RANGE_METER_IDX".equalsIgnoreCase(name));
         } else {
             throw new SQLParseException("The function '" + function.getName().toUpperCase() + "' is not supported.");
         }
     }
 
-    private void handleGeoWithinRangeMeterFunction(Function function) {
-        // CARSTEN implement me
-
+    private void handleGeoWithinRangeMeterFunction(Function function, boolean index) {
+        ExpressionList parameters = function.getParameters();
+        List<Expression> params = parameters.getExpressions();
+        if(params.size() != 4) {
+            throw new SQLParseException("GEO_WITHIN_RANGE_METER requires exactly 4 arguments!");
+        }
+        WhereVisitor v = new WhereVisitor();
+        v.visit(parameters);
+        List<Number> coords = new ArrayList<Number>();
+        coords.add((Number) v.getValueAtIndex(1));
+        coords.add((Number) v.getValueAtIndex(2));
+        List<Object> values = new ArrayList<Object>();
+        values.add(coords);
+        values.add(v.getValueAtIndex(3));
+        Object field = v.getValueAtIndex(0);
+        if(index) {
+            currentIndex = new IndexQuery(field.toString(), QueryOperation.GEO_WITHIN_RANGE_METER, values);
+        }
+        else {
+            currentData = new DataQuery(field, FieldType.FIELD, QueryOperation.GEO_WITHIN_RANGE_METER,
+              values, FieldType.VALUE);
+        }
     }
 
-    private void handleGeoBoundaryBoxFunction(Function function) {
-        // CARSTEN implement me
-
+    private void handleGeoBoundaryBoxFunction(Function function, boolean index) {
+        ExpressionList parameters = function.getParameters();
+        List<Expression> params = parameters.getExpressions();
+        if(params.size() != 5) {
+            throw new SQLParseException("GEO_BOUNDARY_BOX requires exactly 5 arguments!");
+        }
+        WhereVisitor v = new WhereVisitor();
+        v.visit(parameters);
+        List<Number> coords1 = new ArrayList<Number>();
+        coords1.add((Number) v.getValueAtIndex(1));
+        coords1.add((Number) v.getValueAtIndex(2));
+        List<Number> coords2 = new ArrayList<Number>();
+        coords2.add((Number) v.getValueAtIndex(3));
+        coords2.add((Number) v.getValueAtIndex(4));
+        List<Object> values = new ArrayList<Object>();
+        values.add(coords1);
+        values.add(coords2);
+        Object field = v.getValueAtIndex(0);
+        if(index) {
+            currentIndex = new IndexQuery(field.toString(), QueryOperation.GEO_BOUNDARY_BOX, values);
+        }
+        else {
+            currentData = new DataQuery(field, FieldType.FIELD, QueryOperation.GEO_BOUNDARY_BOX,
+              values, FieldType.VALUE);
+        }
     }
 
     private void handleDateFieldFunction(Function function) {

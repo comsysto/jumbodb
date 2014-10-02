@@ -13,12 +13,13 @@ import spock.lang.Specification
 /**
  * @author Carsten Hufe
  */
-// CARSTEN test sql query
 class JumboQueryConnectionSpec extends Specification {
-    public static final int LENGTH = 210
-    public static final String EXPECTED_QUERY = """
-                {"collection":"my_collection","selectedFields":[],"indexQuery":[{"name":"my_index","queryOperation":"EQ","value":"my_value"}],"dataQuery":[],"groupByFields":[],"orderBy":[],"limit":-1,"resultCacheEnabled":true}
+    public static final String EXPECTED_JSON_QUERY = """
+                {"collection":"my_collection","selectedFields":[],"indexOrs":[{"name":"my_index","queryOperation":"EQ","value":"my_value"}],"dataOrs":[],"groupByFields":[],"orderBy":[],"limit":-1,"resultCacheEnabled":true}
             """
+    public static final int JSON_LENGTH = 206
+    public static final int SQL_LENGTH = 22
+    public static final String EXPECTED_SQL_QUERY = "SELECT * FROM whatever"
     JumboQueryConnection jqc
     ServerSocket serverSocket
     Socket clientSocket
@@ -56,15 +57,15 @@ class JumboQueryConnectionSpec extends Specification {
         dos = new DataOutputStream(sos);
     }
 
-    def "find with result"() {
+    def "find with result json"() {
         expect:
         Thread.start {
             initiateConnection()
             assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:query:json"
-            assert dis.readInt() == LENGTH
-            def bytes = IOUtils.toByteArray(dis, LENGTH)
-            assert IOUtils.toString(bytes, "UTF-8") == EXPECTED_QUERY.trim()
+            assert dis.readInt() == JSON_LENGTH
+            def bytes = IOUtils.toByteArray(dis, JSON_LENGTH)
+            assert IOUtils.toString(bytes, "UTF-8") == EXPECTED_JSON_QUERY.trim()
             def result = """
                 {"json_key": "json_value"}
             """.trim().getBytes("UTF-8")
@@ -79,15 +80,15 @@ class JumboQueryConnectionSpec extends Specification {
         result.get(0).get("json_key") == "json_value"
     }
 
-    def "findWithStreamedResult"() {
+    def "findWithStreamedResult json"() {
         expect:
         Thread.start {
             initiateConnection()
             assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:query:json"
-            assert dis.readInt() == LENGTH
-            def bytes = IOUtils.toByteArray(dis, LENGTH)
-            def expectedQuery = EXPECTED_QUERY
+            assert dis.readInt() == JSON_LENGTH
+            def bytes = IOUtils.toByteArray(dis, JSON_LENGTH)
+            def expectedQuery = EXPECTED_JSON_QUERY
             assert IOUtils.toString(bytes, "UTF-8") == expectedQuery.trim()
             def result = """
                 {"json_key": "json_value"}
@@ -106,6 +107,57 @@ class JumboQueryConnectionSpec extends Specification {
         !it.hasNext()
     }
 
+    def "find with result sql"() {
+        expect:
+        Thread.start {
+            initiateConnection()
+            assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
+            assert dis.readUTF() == ":cmd:query:sql"
+            assert dis.readInt() == SQL_LENGTH
+            def bytes = IOUtils.toByteArray(dis, SQL_LENGTH)
+            assert IOUtils.toString(bytes, "UTF-8") == EXPECTED_SQL_QUERY.trim()
+            def result = """
+                {"json_key": "json_value"}
+            """.trim().getBytes("UTF-8")
+            dos.writeInt(result.length)
+            dos.write(result)
+            dos.writeInt(-1)
+            dos.writeUTF(":result:end")
+            dos.flush()
+        }
+        def result = jqc.find(Map.class, EXPECTED_SQL_QUERY)
+        result.size() == 1
+        result.get(0).get("json_key") == "json_value"
+    }
+
+    def "findWithStreamedResult sql"() {
+        expect:
+        Thread.start {
+            initiateConnection()
+            assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
+            assert dis.readUTF() == ":cmd:query:sql"
+            assert dis.readInt() == SQL_LENGTH
+            def bytes = IOUtils.toByteArray(dis, SQL_LENGTH)
+            def expectedQuery = EXPECTED_SQL_QUERY
+            assert IOUtils.toString(bytes, "UTF-8") == expectedQuery.trim()
+            def result = """
+                {"json_key": "json_value"}
+            """.trim().getBytes("UTF-8")
+            dos.writeInt(result.length)
+            dos.write(result)
+            dos.writeInt(-1)
+            dos.writeUTF(":result:end")
+            dos.flush()
+        }
+
+        def result = jqc.findWithStreamedResult(Map.class, EXPECTED_SQL_QUERY)
+        def it = result.iterator()
+        it.hasNext()
+        it.next().get("json_key") == "json_value"
+        !it.hasNext()
+    }
+
+
     def "find unknown error"() {
         when:
         Thread.start {
@@ -121,8 +173,8 @@ class JumboQueryConnectionSpec extends Specification {
         initiateConnection()
         assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
         assert dis.readUTF() == ":cmd:query:json"
-        assert dis.readInt() == LENGTH
-        IOUtils.toByteArray(dis, LENGTH)
+        assert dis.readInt() == JSON_LENGTH
+        IOUtils.toByteArray(dis, JSON_LENGTH)
         dos.writeInt(-1)
         dos.writeUTF(error)
         dos.writeUTF(message)
@@ -189,8 +241,8 @@ class JumboQueryConnectionSpec extends Specification {
             initiateConnection()
             assert dis.readInt() == JumboConstants.QUERY_PROTOCOL_VERSION
             assert dis.readUTF() == ":cmd:query:json"
-            assert dis.readInt() == LENGTH
-            IOUtils.toByteArray(dis, LENGTH)
+            assert dis.readInt() == JSON_LENGTH
+            IOUtils.toByteArray(dis, JSON_LENGTH)
             dos.writeInt(-1)
             dos.writeUTF("invalid command")
             dos.flush()
